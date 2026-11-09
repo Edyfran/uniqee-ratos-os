@@ -9,8 +9,9 @@ vídeo da formanda com uma mensagem pra professora.
 aparece falando com ela. O instante em que o vídeo começa a tocar em cima do azulejo é o que
 segura quem está assistindo.
 
-Em todo o vídeo: só mãos, bancada, prensa e peças. A formanda que aparece no vídeo do azulejo
-precisa ter autorizado o uso no Instagram; se não tiver, gravar com uma modelo.
+Em todo o vídeo: só mãos, bancada, prensa e peças. O vídeo da formanda que aparece no azulejo é
+criado por IA, com uma pessoa fictícia (sem parecer com nenhuma aluna ou professora de verdade).
+Ao postar, ligar o rótulo de IA nas configurações avançadas do Instagram.
 
 ---
 
