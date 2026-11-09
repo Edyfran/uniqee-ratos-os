@@ -1,12 +1,13 @@
 # Reels · Azulejo com realidade aumentada · Semana do formando
 
-Linha tradicional · Instagram · Reels de 20 a 25 segundos.
-Produto: azulejo personalizado que, ao receber a câmera do celular num ponto marcado, mostra um
-vídeo da formanda com uma mensagem pra professora.
+Linha tradicional · Instagram · Reels de uns 25 segundos.
+Produto: azulejo personalizado que vem com uma tag de QR code. Primeiro a pessoa escaneia o QR code
+da tag; depois aponta a câmera pro azulejo, e aparece um vídeo da formanda com uma mensagem pra
+professora.
 
 **Objetivo:** alcance e compartilhamento (quem assiste manda pra amiga que vai se formar)
-**Ideia:** o vídeo segue o momento em que a professora aponta o celular pro azulejo e a formanda
-aparece falando com ela. O instante em que o vídeo começa a tocar em cima do azulejo é o que
+**Ideia:** o vídeo segue a professora fazendo os dois passos, a tag e o azulejo, até a formanda
+aparecer falando com ela. O instante em que o vídeo começa a tocar em cima do azulejo é o que
 segura quem está assistindo.
 
 Em todo o vídeo: só mãos, bancada, prensa e peças. O vídeo da formanda que aparece no azulejo é
@@ -29,17 +30,18 @@ Três opções de texto na tela pra abrir. Recomendo a primeira.
 
 | tempo | o que aparece | texto na tela |
 |---|---|---|
-| 0–2s | azulejo parado na bancada, bem iluminado, mostrando a arte e o ponto marcado | "Esse azulejo tem uma mensagem escondida" |
-| 2–5s | mão segurando o celular entra no quadro e aponta a câmera pro ponto do azulejo (filmar por trás do ombro, mostrando a tela) | "Pra professora que marcou a formatura dela" |
-| 5–12s | na tela do celular, o vídeo da formanda começa a tocar em cima do azulejo; ouve-se a voz dela | (sem texto: deixar a voz da formanda falar) |
-| 12–16s | corte pra bancada: mãos tirando o azulejo da prensa, revelando a arte | "Arte, foto e um vídeo só de vocês" |
-| 16–20s | azulejo pronto num suporte, ao lado de um cartão escrito à mão "Obrigada, prô" | "Um presente que fala com quem recebe" |
-| 20–23s | azulejo parado, com o celular apontado mais uma vez e o vídeo tocando | "Encomende o seu · link na bio" |
+| 0–2s | azulejo no cavalete, com a tag em pé ao lado | "Esse azulejo tem uma mensagem escondida" |
+| 2–5s | mão com o celular escaneia o QR code da tag | "Primeiro, o QR code da tag" |
+| 5–8s | o celular sobe e aponta pro azulejo (filmado por trás do ombro, mostrando a tela) | "Depois, a câmera no azulejo" |
+| 8–15s | na tela do celular, o vídeo da formanda toca em cima do azulejo, com a voz dela | (sem texto: deixar a voz da formanda falar) |
+| 15–19s | mãos tirando o azulejo da prensa, revelando a arte | "Arte, foto e um vídeo só de vocês" |
+| 19–22s | mão coloca a tag ao lado do azulejo pronto | "Um presente que fala com quem recebe" |
+| 22–25s | azulejo e tag lado a lado, com o celular apontado e o vídeo tocando | "Encomende o seu · link na bio" |
 
 **Áudio:** a voz da formanda é o centro do vídeo. Trilha suave bem baixa por baixo, que some
 enquanto ela fala. Sem narração.
 
-**Sugestão de fala da formanda** (de 5 a 7 segundos, pra caber no trecho):
+**Fala da formanda** (de 5 a 7 segundos):
 
 ```
 Prô, a senhora acreditou em mim quando nem eu acreditava. Essa formatura também é sua. Obrigada por tudo.
@@ -49,8 +51,8 @@ Prô, a senhora acreditou em mim quando nem eu acreditava. Essa formatura també
 
 ## Capa
 
-Foto do azulejo com o celular apontado e o vídeo aparecendo na tela.
-Texto: **"O azulejo que fala"**, em Radio Canada Big, sobre o fundo creme da marca.
+Azulejo com a tag ao lado e o celular apontado, com o vídeo aparecendo na tela.
+Texto: **"O azulejo que fala"**, em Radio Canada Big.
 
 ---
 
@@ -58,33 +60,25 @@ Texto: **"O azulejo que fala"**, em Radio Canada Big, sobre o fundo creme da mar
 
 Tem obrigado que não cabe num cartão. 🎓
 
-Esse azulejo foi feito pra uma professora. Quando ela aponta a câmera do celular pro ponto marcado, aparece um vídeo da formanda com uma mensagem só pra ela.
+Esse azulejo foi feito pra uma professora. Ela escaneia o QR code da tag que acompanha o presente, aponta a câmera do celular pro azulejo e aparece um vídeo da formanda com uma mensagem só pra ela.
 
 Aqui na Uniqee, a gente une a arte personalizada com a realidade aumentada pra transformar o agradecimento em lembrança que fica na estante e pode ser vista de novo sempre que der saudade.
 
 Vai se formar e quer homenagear quem esteve do seu lado? Chame a gente no WhatsApp pelo link da bio e encomende com antecedência.
 
+Vídeo ilustrativo. No seu azulejo, a mensagem é gravada por você.
+
 #presentedeformatura #formatura2026 #formandos2026 #presenteparaprofessora #azulejopersonalizado #realidadeaumentada #presentepersonalizado #uniqeepersonalizados
 
 ---
 
-## Pra gravar bem
-
-- **Teste antes de gravar:** aponte o celular várias vezes e veja se o vídeo abre rápido e firme
-  em cima do azulejo. Se demorar, corte a espera na edição.
-- **Luz:** luz de janela ou ring light de lado. Reflexo forte no azulejo atrapalha a câmera a
-  reconhecer o ponto e também aparece feio no vídeo.
-- **Dois celulares:** um aponta pro azulejo; o outro filma por trás do ombro. Se preferir, grave
-  a tela do celular que aponta e junte com a cena da bancada na edição.
-- **Ponto marcado:** se o azulejo tiver um ícone ou texto do tipo "aponte aqui", deixe ele visível
-  logo no primeiro segundo. É o que faz a pessoa entender o produto sem explicação.
-
 ## Observações
 
 - Pode sair como **Reels de teste** (Trial Reels), como os outros da semana.
-- A legenda não diz se precisa baixar aplicativo nem por quanto tempo o vídeo fica disponível.
-  Vale responder isso no direct, ou me dizer como funciona que eu acrescento.
 - Sem preço, como o resto da semana. Se quiser divulgar um valor, me passe qual.
+- O QR code que a IA desenha na tag é de enfeite e não abre nada. Se alguém tentar escanear pelo
+  vídeo, não funciona. Se preferir um que funcione (levando pro WhatsApp, por exemplo), coloque o
+  QR code real na tag antes de gerar a imagem base.
 
 ---
 
@@ -95,53 +89,56 @@ Os textos da tela entram depois, na edição (CapCut), e não no prompt: a IA er
 
 **Ordem de trabalho**
 
-1. Gerar a **imagem base** do azulejo e usar ela como imagem inicial nas cenas 1, 2 e 5, pra o
-   azulejo ser o mesmo em todas.
-2. Gerar a **cena 3** (a formanda) e a **cena 2** primeiro: são as que mais importam, e o plano do
+1. Gerar a **imagem base** com o mockup do azulejo e a tag. Ela vai anexada nas cenas 1, 2, 3 e 6,
+   pra o azulejo e a tag serem os mesmos em todas.
+2. Gerar a **cena 4** (a formanda) e a **cena 3** primeiro: são as que mais importam, e o plano do
    Gemini limita quantos vídeos saem por dia.
-3. Na cena 2, a tela do celular sai com um retângulo verde. No CapCut, a cena 3 vai por cima dele
-   com o recurso "Remover fundo › Chroma key". Assim o efeito da realidade aumentada fica
-   controlado, sem depender da IA acertar um vídeo dentro do outro.
-4. A cena final (20–23s) reaproveita o fim da cena 2.
+3. Na cena 3, a tela do celular sai com um retângulo verde em cima do azulejo. No CapCut, a cena 4
+   vai por cima dele com "Remover fundo › Chroma key".
+4. A cena final (22–25s) reaproveita o fim da cena 3, mais aberta, mostrando a tag.
 
 Se o vídeo sair deitado (16:9), pedir de novo reforçando "vertical 9:16", ou cortar no CapCut.
 
-### Imagem base (azulejo)
-
-Melhor ainda: anexar a arte real de um azulejo da Uniqee e pedir "coloque esta arte no azulejo".
+### Imagem base · anexar a tag (imagem 1) e o mockup do azulejo (imagem 2)
 
 ```
-Fotografia realista de um azulejo branco quadrado de 20 x 20 cm, em pé num pequeno suporte de madeira, sobre uma bancada de madeira clara. O azulejo tem uma arte de formatura delicada em aquarela, com capelo e diploma, a frase "Obrigada por tudo, prô" em letra manuscrita e, no canto inferior direito, um pequeno círculo com um ícone de câmera e as palavras "aponte aqui". Fundo creme suave e desfocado, luz natural de janela vinda da esquerda, sem reflexo forte no azulejo. Formato vertical 9:16.
+Use as duas imagens anexadas. Mantenha a segunda imagem do jeito que está: o azulejo com a arte "Prof, gratidão por tudo" no cavalete de madeira, sobre a bancada, com o ateliê desfocado ao fundo. Acrescente, em pé sobre a bancada, apoiada do lado direito do cavalete, a tag da primeira imagem impressa em papel cartão fosco, no formato vertical e bem menor que o azulejo, do tamanho de um cartão. Não mude nenhuma letra, cor ou desenho da tag nem do azulejo. No quadrado branco da tag, coloque um QR code preto simples. A tag recebe a mesma luz de janela da cena, com uma sombra suave na bancada. Fotografia realista, formato vertical 9:16, com espaço livre na bancada à frente das peças.
 ```
 
-### Cena 1 · azulejo parado (0–2s) · com a imagem base anexada
+### Cena 1 · azulejo e tag (0–2s) · anexar a imagem base
 
 ```
-Vídeo vertical 9:16, realista, a partir desta imagem. A câmera se aproxima bem devagar do azulejo no suporte sobre a bancada de madeira. Luz natural de janela, clima acolhedor de ateliê. Sem pessoas, sem texto novo na tela, sem música. Som ambiente baixo de um ateliê silencioso.
+Vídeo vertical 9:16, realista, a partir desta imagem. A câmera se aproxima bem devagar do azulejo no cavalete e da tag ao lado, sobre a bancada de madeira. Luz natural de janela, clima acolhedor de ateliê. Sem pessoas, sem texto novo na tela, sem música. Som ambiente baixo de um ateliê silencioso.
 ```
 
-### Cena 2 · celular apontado (2–5s e 20–23s) · com a imagem base anexada
+### Cena 2 · escaneando o QR code da tag (2–5s) · anexar a imagem base
 
 ```
-Vídeo vertical 9:16, realista, filmado por trás do ombro de uma mulher de uns 50 anos, sem mostrar o rosto dela. A mão dela, com uma aliança, segura um celular e aponta a câmera traseira para o azulejo no suporte sobre a bancada. A tela do celular mostra o azulejo e, por cima dele, um retângulo verde liso e uniforme, sem nada escrito. A mão fica firme, com um leve movimento natural. Luz de janela suave. Sem música, sem texto na tela.
+Vídeo vertical 9:16, realista, a partir desta imagem, filmado por trás do ombro de uma mulher de uns 50 anos, sem mostrar o rosto dela. A mão dela, com uma aliança, entra no quadro segurando um celular e aproxima a câmera traseira da tag em pé ao lado do azulejo, apontando para o QR code. A tela do celular mostra o QR code em foco, com um quadrado de leitura em volta dele, e um leve toque de confirmação. A mão fica firme, com um movimento natural. Luz de janela suave. Sem música, sem texto novo na tela.
 ```
 
-### Cena 3 · a formanda falando (5–12s)
+### Cena 3 · celular apontado pro azulejo (5–8s e 22–25s) · anexar a imagem base
+
+```
+Vídeo vertical 9:16, realista, a partir desta imagem, filmado por trás do ombro de uma mulher de uns 50 anos, sem mostrar o rosto dela. A mão dela, com uma aliança, segura um celular, sai da tag ao lado e sobe devagar até apontar a câmera traseira para o azulejo no cavalete. Na tela do celular aparece o azulejo e, por cima dele, um retângulo verde liso e uniforme, sem nada escrito. A mão para firme, com um leve movimento natural. Luz de janela suave. Sem música, sem texto na tela.
+```
+
+### Cena 4 · a formanda falando (8–15s)
 
 ```
 Vídeo vertical 9:16, realista, com cara de vídeo gravado na câmera frontal do celular. Uma jovem brasileira de uns 23 anos, de beca preta de formatura, segurando o capelo nas mãos, olha direto para a câmera, sorrindo e emocionada, com os olhos marejados. Fundo desfocado de um salão de formatura com luzes quentes. Ela fala em português do Brasil, com voz suave e sotaque do Nordeste: "Prô, a senhora acreditou em mim quando nem eu acreditava. Essa formatura também é sua. Obrigada por tudo." Sem música, sem legendas, sem texto na tela.
 ```
 
-### Cena 4 · saindo da prensa (12–16s)
+### Cena 5 · saindo da prensa (15–19s) · anexar o mockup do azulejo
+
+Essa dá pra filmar de verdade, na sua prensa, só com as mãos.
 
 ```
-Vídeo vertical 9:16, realista, close nas mãos, sem mostrar rosto. Numa bancada de ateliê, mãos com luvas térmicas abrem uma prensa térmica plana e retiram um azulejo branco quadrado. Em seguida puxam devagar a folha de papel de sublimação de cima dele, revelando uma arte colorida de formatura impressa no azulejo. Um vapor leve sobe. Luz natural, clima de feito à mão. Som do clique da prensa e do papel sendo puxado. Sem música, sem texto na tela.
+Vídeo vertical 9:16, realista, close nas mãos, sem mostrar rosto. Numa bancada de ateliê, mãos com luvas térmicas abrem uma prensa térmica plana e retiram um azulejo branco quadrado. Em seguida puxam devagar a folha de papel de sublimação de cima dele, revelando a arte da imagem anexada impressa no azulejo. Um vapor leve sobe. Luz natural, clima de feito à mão. Som do clique da prensa e do papel sendo puxado. Sem música, sem texto novo na tela.
 ```
 
-### Cena 5 · azulejo e cartão (16–20s) · com a imagem base anexada
-
-Se a IA errar a letra do cartão, pedir o cartão em branco e escrever "Obrigada, prô" na edição.
+### Cena 6 · a tag ao lado do azulejo (19–22s) · anexar o mockup do azulejo e a tag
 
 ```
-Vídeo vertical 9:16, realista, a partir desta imagem. Uma mão feminina coloca, ao lado do azulejo no suporte, um pequeno cartão de papel kraft dobrado em pé, com "Obrigada, prô" escrito à mão com caneta preta. A câmera faz um movimento lento de lado. Luz de janela suave, fundo creme desfocado. Sem rosto, sem música, som baixo do papel.
+Vídeo vertical 9:16, realista. O azulejo da segunda imagem está no cavalete de madeira sobre a bancada. Uma mão feminina, sem mostrar o rosto, coloca em pé ao lado dele a tag da primeira imagem, impressa em papel cartão, com um QR code preto no quadrado branco. Não mude as letras nem os desenhos da tag e do azulejo. A câmera faz um movimento lento de lado. Luz de janela suave, ateliê desfocado ao fundo. Sem música, som baixo do papel.
 ```
