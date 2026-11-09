@@ -23,7 +23,8 @@
 | Google Calendar | agenda | MCP (conector do claude.ai) | ligada, uso no negócio não confirmado | 2026-11-08 |
 | ChatGPT | gerar a arte das peças | só você, na mão | não ligada | 2026-11-08 |
 | Corel | imprimir a arte (espelha na impressão) | só você, na mão | não ligada | 2026-11-08 |
-| Kittl | ampliar imagem pequena antes de imprimir (upscale; pode custar crédito) | MCP (conector do claude.ai) | ligada | 2026-11-08 |
+| Kittl | ampliar imagem pequena antes de imprimir (upscale; pode custar crédito). Não tem mockup de azulejo | MCP (conector do claude.ai) | ligada | 2026-11-09 |
+| Gemini (Veo e imagem) | vídeos e mockups de divulgação | só você, na mão | não ligada | 2026-11-09 |
 | Python + Pillow | script da /ajustar-arte | CLI (`python`) | ligada | 2026-11-08 |
 
 ## Os sete assuntos que todo negócio tem

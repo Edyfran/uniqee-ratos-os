@@ -26,6 +26,8 @@ atendimento e orçamentos no WhatsApp · desenvolvimento do PreçoArte
   Página em precoarte.com.br, checkout na Kiwify, licença vitalícia, teste de 7 dias. Planos Essencial
   e Completo. Versão pra celular com conta na nuvem em andamento (decidida em 04/11/2026). O código
   mora fora deste sistema, em `C:\Users\medei\OneDrive\Documentos\Edyfran\precificacao-desktop`.
+- **Azulejo com realidade aumentada** (desde 2026-11): acompanha uma tag com QR code; escaneia a tag,
+  aponta a câmera pro azulejo e toca um vídeo gravado pelo cliente.
 - Pedidos muitas vezes não entram no Brinderoz: esses ficam registrados na pasta `pedidos/`.
 - Condições de venda: 50% de entrada via Pix, prazo de até 5 dias úteis, entrega sem taxa ou
   retirada, a combinar. As artes nascem no ChatGPT e são impressas pelo Corel, que espelha na impressão.

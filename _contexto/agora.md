@@ -6,6 +6,8 @@
 > Pendência que sai desta lista sai com motivo (feito, virou projeto, mandaram soltar), nunca em silêncio.
 
 ## Onde paramos
+Reels do azulejo com realidade aumentada pronto pra gerar no Gemini e montar no CapCut:
+`conteudo/roteiros/2026-11-09-reels-azulejo-realidade-aumentada.md`.
 Plano de formatura da Uniqee (09 a 15/11/2026) pronto pra gravar e postar:
 `conteudo/roteiros/2026-11-09-uniqee-semana.md`. As skills /pedido, /divulgar-precoarte, /orcamento
 e /ajustar-arte estão prontas e ainda não foram usadas num caso real.
@@ -17,6 +19,8 @@ e /ajustar-arte estão prontas e ainda não foram usadas num caso real.
 - Escolher o visual dos carrosséis do PreçoArte na primeira vez que a /divulgar-precoarte rodar. (2026-11-08)
 - Clicar em "Salvar skill" na marketing-digital-uniqee melhorada, se ainda não fez. (2026-11-08)
 - Artes do carrossel e das capas dos Reels de formatura no Canva, ainda não feitas. (2026-11-08)
+- Confirmar o tamanho da tag do azulejo RA e se ela leva QR code real no Reels. (2026-11-09)
 
 ## Quente agora
 - Semana da formatura: Reels seg 09/11, carrossel qua 11/11, Stories qui 12/11, Reels sáb 14/11.
+- Reels do azulejo com realidade aumentada (dia de postar a definir).

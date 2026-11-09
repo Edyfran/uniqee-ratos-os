@@ -18,3 +18,5 @@ Também nada de travessão, entusiasmo de vendedor nem frase de efeito.
 Direto e claro, frases curtas, português do Brasil.
 
 ## Preferências adicionais
+
+- Mockup de peça: o Edyfran monta ele mesmo (no Gemini). O agente descreve como quer a imagem e escreve o prompt; não gera pelo Kittl sem ele pedir.
