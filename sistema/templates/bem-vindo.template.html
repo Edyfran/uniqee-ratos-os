@@ -1,0 +1,276 @@
+<!-- bem-vindo.html: a foto do dia do /setup, na identidade da Ratos de IA (quem fez o kit). NÃO é
+     referência de layout, cor nem fonte pra outras peças: a marca do negócio mora no guia de design
+     (linha "marca" do mapa do AGENTS.md), e cada peça decide a própria composição.
+     (Pro /setup: preencher os campos entre chaves duplas, manter este comentário. O resto do texto é
+     fixo: explica o sistema, não o negócio.) -->
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bem-vindo · {{NEGOCIO}}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,700;12..96,800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --preto:#17150F; --preto-2:#211E17; --creme:#FAF7F2; --osso:#F0EAE1;
+    --terra:#C96442; --terra-cl:#E8A88C; --coral:#FF7A5C;
+    --tinta:#1C1917; --mudo:#57534E; --mudo-dk:#A8A29E;
+    --linha-dk:rgba(250,247,242,.16); --linha:rgba(28,25,23,.14);
+    --f:'Bricolage Grotesque',system-ui,-apple-system,sans-serif;
+    --s:'Instrument Serif',Georgia,serif;
+    --m:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+    --max:1080px;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--preto);color:var(--creme);font-family:var(--f);font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .folha{max-width:var(--max);margin:0 auto;padding:0 24px}
+  code{font-family:var(--m);font-size:.84em;background:rgba(201,100,66,.13);color:#A8492A;padding:2px 7px;border-radius:6px;white-space:nowrap}
+  .dk code{background:rgba(232,168,140,.12);color:var(--terra-cl)}
+  .rotulo{font-family:var(--m);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--terra);font-weight:700;margin:0 0 18px}
+  .dk .rotulo{color:var(--coral)}
+  h2{font-weight:800;font-size:clamp(30px,4.4vw,50px);line-height:1.02;letter-spacing:-.03em;margin:0 0 16px;text-transform:lowercase;text-wrap:balance}
+  .apoio{font-size:18px;max-width:620px;margin:0 0 44px;text-wrap:pretty}
+  .dk .apoio{color:var(--mudo-dk)} .cl .apoio,.os .apoio{color:var(--mudo)}
+  section{padding:100px 0}
+  .dk{background:var(--preto);color:var(--creme)}
+  .cl{background:var(--creme);color:var(--tinta)}
+  .os{background:var(--osso);color:var(--tinta)}
+  .corte{border-top:2px solid var(--tinta)}
+
+  /* topo */
+  .topo{padding:36px 0 110px;position:relative;overflow:hidden}
+  .topo::before{content:"";position:absolute;inset:0;pointer-events:none;
+    background-image:radial-gradient(rgba(250,247,242,.08) 1px,transparent 1.3px);background-size:22px 22px;
+    -webkit-mask-image:linear-gradient(180deg,#000,transparent 80%);mask-image:linear-gradient(180deg,#000,transparent 80%)}
+  .topo::after{content:"";position:absolute;width:620px;height:620px;right:-160px;top:-120px;pointer-events:none;
+    background:radial-gradient(circle,rgba(201,100,66,.20),transparent 62%)}
+  .barra{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:76px;position:relative;z-index:1}
+  .barra .marca{font-family:var(--m);font-weight:700;font-size:14px}
+  .chip{font-family:var(--m);font-size:12px;color:var(--mudo-dk);border:1px dashed var(--linha-dk);border-radius:999px;padding:5px 12px}
+  .heroi{display:grid;grid-template-columns:1.2fr .8fr;gap:56px;align-items:center;position:relative;z-index:1}
+  .logo-os{display:block;width:min(330px,78%);height:auto;margin:0 0 36px;image-rendering:pixelated;filter:drop-shadow(0 6px 0 rgba(0,0,0,.4))}
+  h1{font-weight:800;font-size:clamp(42px,6.6vw,80px);line-height:.97;letter-spacing:-.04em;margin:0 0 26px;text-transform:lowercase;text-wrap:balance}
+  h1 .neg{color:var(--coral);text-transform:none;font-family:var(--s);font-style:italic;font-weight:400;letter-spacing:-.01em}
+  .resumo{font-size:20px;color:var(--mudo-dk);max-width:540px;margin:0;text-wrap:pretty}
+
+  .term{background:#0E0D0A;border:1px solid var(--linha-dk);border-radius:16px;box-shadow:0 40px 90px -30px rgba(201,100,66,.5),0 0 0 6px rgba(250,247,242,.03);overflow:hidden;transform:rotate(1.2deg)}
+  .term .tb{display:flex;align-items:center;gap:7px;padding:12px 16px;border-bottom:1px solid var(--linha-dk)}
+  .term .tb i{width:11px;height:11px;border-radius:50%;background:#3A352C}
+  .term .tb i:first-child{background:var(--terra)}
+  .term .tb span{margin-left:auto;font-family:var(--m);font-size:11px;color:#6B655C}
+  .term pre{margin:0;padding:20px 22px 24px;font-family:var(--m);font-size:13.5px;line-height:2;color:var(--mudo-dk);white-space:pre-wrap}
+  .term .l{display:block;opacity:0;transform:translateY(4px);animation:entra .45s ease forwards}
+  .term .ok{color:var(--coral)} .term .eu{color:var(--creme)}
+  .term .cur{display:inline-block;width:9px;height:17px;background:var(--coral);vertical-align:-3px;animation:pisca 1s steps(1) infinite}
+  @keyframes entra{to{opacity:1;transform:none}}
+  @keyframes pisca{50%{opacity:0}}
+
+  /* o que eu sei */
+  .saberes{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;counter-reset:s}
+  .saberes li{counter-increment:s;background:#fff;border:2px solid var(--tinta);border-radius:18px;padding:22px 22px 24px;font-size:17px;line-height:1.45;box-shadow:5px 5px 0 var(--tinta);transition:transform .15s ease,box-shadow .15s ease}
+  .saberes li:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--terra)}
+  .saberes li::before{content:"0" counter(s);display:block;font-family:var(--s);font-style:italic;font-size:36px;line-height:1;color:var(--terra);margin-bottom:12px}
+  .logo-cliente{display:inline-flex;align-items:center;background:#fff;border:2px solid var(--tinta);border-radius:14px;padding:10px 16px;margin:0 0 30px}
+  .logo-cliente img{max-height:44px;max-width:180px;display:block}
+
+  /* a casa */
+  .raiz{max-width:470px;margin:0 auto;text-align:center;background:var(--preto-2);border:2px solid var(--terra);border-radius:18px;padding:22px 26px}
+  .raiz b{font-family:var(--m);font-size:17px;color:var(--creme)}
+  .raiz p{margin:8px 0 0;color:var(--mudo-dk);font-size:15px}
+  .galho{height:34px;width:0;border-left:2px dashed rgba(232,168,140,.6);margin:0 auto}
+  .nos{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:14px;border-top:2px dashed rgba(232,168,140,.5);padding-top:22px}
+  .no{background:var(--preto-2);border:1.5px solid var(--linha-dk);border-radius:14px;padding:16px 16px 18px;position:relative}
+  .no b{display:block;font-family:var(--m);font-size:14.5px;color:var(--terra-cl);margin-bottom:6px}
+  .no p{margin:0;color:var(--mudo-dk);font-size:14px;line-height:1.5}
+  .no.meu{border-color:rgba(255,122,92,.6);background:linear-gradient(180deg,rgba(201,100,66,.20),rgba(201,100,66,.05))}
+  .no.meu b{color:var(--coral)}
+  .legenda{display:flex;gap:22px;flex-wrap:wrap;margin-top:24px;font-family:var(--m);font-size:12px;color:var(--mudo-dk)}
+  .legenda span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:8px;vertical-align:-1px;border:1.5px solid var(--linha-dk);background:var(--preto-2)}
+  .legenda span.meu::before{border-color:var(--coral);background:rgba(201,100,66,.35)}
+
+  /* gavetas */
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  .gaveta{background:#fff;border:2px solid var(--tinta);border-radius:22px;padding:30px 30px 24px;box-shadow:6px 6px 0 var(--tinta)}
+  .gaveta h3{margin:0 0 6px;font-family:var(--m);font-size:19px;color:var(--terra)}
+  .gaveta .sub{font-family:var(--s);font-style:italic;font-size:28px;line-height:1.1;margin:0 0 10px}
+  .gaveta > p{color:var(--mudo);margin:0 0 18px;font-size:16px}
+  .gaveta ul{list-style:none;margin:0;padding:0}
+  .gaveta li{display:flex;gap:12px;align-items:baseline;padding:10px 0;border-top:1px dashed var(--linha);font-size:15.5px}
+
+  /* ritmo */
+  .ritmo{border-top:2px solid var(--tinta)}
+  .passo-r{display:grid;grid-template-columns:190px 1fr;gap:28px;padding:26px 0;border-bottom:1px solid var(--linha)}
+  .passo-r .quando{font-family:var(--m);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--terra);font-weight:700;padding-top:7px}
+  .passo-r b{display:block;font-size:22px;letter-spacing:-.01em;margin-bottom:4px}
+  .passo-r p{margin:0;color:var(--mudo);max-width:640px}
+  .passo-r.forte{background:linear-gradient(90deg,rgba(201,100,66,.12),transparent 75%);margin:0 -24px;padding:26px 24px}
+  .frase{margin:44px 0 0;font-family:var(--s);font-size:clamp(28px,3.6vw,42px);line-height:1.1}
+  .frase em{color:var(--terra)}
+
+  /* próximos passos */
+  .passos-bloco{background:var(--terra);color:var(--creme);border-radius:28px;padding:56px 52px;border:2px solid var(--tinta);box-shadow:8px 8px 0 var(--tinta);position:relative;overflow:hidden}
+  .passos-bloco::after{content:"";position:absolute;right:-60px;bottom:-60px;width:260px;height:260px;pointer-events:none;
+    background-image:linear-gradient(rgba(23,21,15,.13) 2px,transparent 2px),linear-gradient(90deg,rgba(23,21,15,.13) 2px,transparent 2px);background-size:26px 26px;transform:rotate(12deg)}
+  .passos-bloco .rotulo{color:var(--creme);opacity:.85}
+  .passos-bloco h2{color:var(--creme);position:relative}
+  .passo{display:grid;grid-template-columns:72px 1fr;gap:20px;align-items:start;padding:22px 0;border-top:1px solid rgba(250,247,242,.3);position:relative}
+  .passo .n{font-family:var(--s);font-style:italic;font-size:60px;line-height:.85;color:var(--preto)}
+  .passo b{display:block;font-size:22px;margin-bottom:4px}
+  .passo p{margin:0;color:rgba(250,247,242,.9);max-width:620px}
+  .passo code{background:rgba(23,21,15,.22);color:var(--creme)}
+
+  /* rodapé */
+  .rodape{padding:72px 0 64px}
+  .rodape .folha{display:grid;grid-template-columns:auto 1fr;gap:36px;align-items:center}
+  .rodape img{width:190px;height:auto;display:block}
+  .rodape p{margin:0 0 10px;color:var(--mudo-dk);font-size:15px;max-width:560px}
+  .rodape .assina{font-family:var(--m);font-size:13px;color:var(--creme);margin:0}
+
+  @media (max-width:860px){
+    section{padding:76px 0}
+    .heroi{grid-template-columns:1fr;gap:44px}
+    .term{transform:none}
+    .duo{grid-template-columns:1fr}
+    .passo-r{grid-template-columns:1fr;gap:6px}
+    .passos-bloco{padding:42px 26px}
+    .rodape .folha{grid-template-columns:1fr}
+    .barra{margin-bottom:52px}
+  }
+  @media (max-width:560px){
+    .nos{border-top:0;padding-top:0}
+    .galho{display:none}
+    .raiz{margin-bottom:14px}
+    .passo{grid-template-columns:50px 1fr}
+    .passo .n{font-size:46px}
+    code{white-space:normal}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .term .l{animation:none;opacity:1;transform:none}
+    .term .cur{animation:none}
+  }
+</style>
+</head>
+<body>
+
+<header class="topo dk">
+  <div class="folha">
+    <div class="barra">
+      <div class="marca">🐀 RatosOS</div>
+      <div class="chip">instalado em {{DATA}}</div>
+    </div>
+    <div class="heroi">
+      <div>
+        <img class="logo-os" src="sistema/templates/bem-vindo/logo-ratos-os.webp" alt="Ratos OS">
+        <h1>pronto, {{NOME}}. agora eu conheço a <span class="neg">{{NEGOCIO}}</span>.</h1>
+        <p class="resumo">{{RESUMO}}</p>
+      </div>
+      <div class="term" aria-hidden="true">
+        <div class="tb"><i></i><i></i><i></i><span>~/{{NEGOCIO}}</span></div>
+<pre><span class="l eu" style="animation-delay:.15s">› /setup</span><span class="l" style="animation-delay:.55s"><span class="ok">✓</span> entrevista feita</span><span class="l" style="animation-delay:.85s"><span class="ok">✓</span> o seu negócio em _contexto/</span><span class="l" style="animation-delay:1.15s"><span class="ok">✓</span> _memoria/ pronta pra encher</span><span class="l" style="animation-delay:1.45s"><span class="ok">✓</span> marca e tom de voz</span><span class="l" style="animation-delay:1.75s"><span class="ok">✓</span> pastas de trabalho</span><span class="l" style="animation-delay:2.05s"><span class="ok">✓</span> regras no AGENTS.md</span><span class="l eu" style="animation-delay:2.5s">› próximo: /mapear <span class="cur"></span></span></pre>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="cl corte">
+  <div class="folha">
+    {{LOGO}}
+    <p class="rotulo">o que eu já sei de você</p>
+    <h2>isso aqui eu não esqueço mais.</h2>
+    <p class="apoio">Tudo o que você me contou ficou guardado em arquivos de texto, dentro desta pasta. Toda conversa nova começa sabendo disso.</p>
+    <ul class="saberes">{{SABERES}}</ul>
+  </div>
+</section>
+
+<section class="dk corte">
+  <div class="folha">
+    <p class="rotulo">a casa</p>
+    <h2>uma pasta. cada coisa no seu lugar.</h2>
+    <p class="apoio">É tudo arquivo na sua máquina: você abre no que quiser, corrige quando quiser e leva pra outro agente sem converter nada.</p>
+    <div class="raiz"><b>AGENTS.md</b><p>as regras e o mapa da casa. Eu leio no começo de toda conversa.</p></div>
+    <div class="galho"></div>
+    <div class="nos">
+      <div class="no"><b>_contexto/</b><p>o que eu sei do seu negócio</p></div>
+      <div class="no"><b>_memoria/</b><p>o que aconteceu, e por quê</p></div>
+      <div class="no"><b>.claude/</b><p>as habilidades (skills)</p></div>
+      <div class="no"><b>sistema/</b><p>o motor do kit. Você não precisa abrir</p></div>
+      {{PASTAS}}
+    </div>
+    <div class="legenda"><span>parte do sistema</span><span class="meu">suas pastas de trabalho</span></div>
+  </div>
+</section>
+
+<section class="os corte">
+  <div class="folha">
+    <p class="rotulo">as duas gavetas</p>
+    <h2>o que eu sei. o que aconteceu.</h2>
+    <p class="apoio">São elas que fazem o sistema lembrar. Se algo nelas estiver errado, eu erro junto: pode abrir e corrigir.</p>
+    <div class="duo">
+      <div class="gaveta">
+        <h3>_contexto/</h3>
+        <p class="sub">a minha cabeça sobre o seu negócio</p>
+        <p>Muda pouco e vale sempre.</p>
+        <ul>
+          <li><code>empresa.md</code> quem é você e o negócio</li>
+          <li><code>preferencias.md</code> como falar com você</li>
+          <li><code>agora.md</code> onde paramos, pendências</li>
+          <li><code>estrategia.md</code> o foco do momento</li>
+          <li><code>integracoes.md</code> o que eu alcanço</li>
+          <li><code>infra.md</code> onde as coisas estão hospedadas</li>
+          <li><code>marca/</code> como a sua marca parece e fala</li>
+        </ul>
+      </div>
+      <div class="gaveta">
+        <h3>_memoria/</h3>
+        <p class="sub">o histórico da casa</p>
+        <p>Eu consulto quando você pergunta do passado. Você quase nunca precisa abrir.</p>
+        <ul>
+          <li><code>diario/</code> um arquivo por dia de trabalho</li>
+          <li><code>decisoes.md</code> o que foi decidido, e por quê</li>
+          <li><code>recados/</code> avisos de automações e do time</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cl corte">
+  <div class="folha">
+    <p class="rotulo">o ritmo do dia a dia</p>
+    <h2>um comando importa. o resto ajuda.</h2>
+    <div class="ritmo">
+      <div class="passo-r forte"><div class="quando">toda sessão</div><div><b><code>/atualizar</code> antes de fechar</b><p>O mais importante. Salva o diário do dia, o "onde paramos" e as decisões. Sessão que rendeu e não passou por ele é memória perdida. Eu ofereço quando sentir que acabou.</p></div></div>
+      <div class="passo-r"><div class="quando">quando quiser</div><div><b><code>/iniciar</code> pra abrir</b><p>Opcional. Confere recados e diz onde você parou. Vale mais quando tem sócio ou automação escrevendo aqui também.</p></div></div>
+      <div class="passo-r"><div class="quando">quando chegar</div><div><b><code>/novo-projeto</code> pra cliente novo</b><p>Cria a pasta do projeto com contexto próprio. E <code>/compartilhar</code> quando ela precisar viajar pra alguém.</p></div></div>
+      <div class="passo-r"><div class="quando">uma vez por mês</div><div><b><code>/faxina</code> audita a casa</b><p>Aponta o que envelheceu, o que estourou o limite e o que ficou órfão. Só relata; quem decide é você.</p></div></div>
+      <div class="passo-r"><div class="quando">se quiser</div><div><b><code>/syncar</code> guarda uma cópia no GitHub</b><p>Opcional. Serve pra ter cópia na nuvem ou usar o sistema em mais de um computador. Se você nunca ligar, eu não toco no assunto.</p></div></div>
+    </div>
+    <p class="frase"><em>/iniciar</em> lê. <em>/atualizar</em> escreve.</p>
+  </div>
+</section>
+
+<section class="cl">
+  <div class="folha">
+    <div class="passos-bloco">
+      <p class="rotulo">daqui pra frente</p>
+      <h2>seus próximos três passos.</h2>
+      {{PASSOS}}
+    </div>
+  </div>
+</section>
+
+<footer class="rodape dk corte">
+  <div class="folha">
+    <img src="sistema/templates/bem-vindo/rato.webp" alt="">
+    <div>
+      <p>Esta página é a foto do dia em que você configurou o sistema. Ela não se atualiza: quem sabe onde você parou é o <code>agora.md</code> (e o <code>/iniciar</code> te conta).</p>
+      <p class="assina">RatosOS · feito pelos Ratos de IA</p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
