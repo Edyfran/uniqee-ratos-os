@@ -138,9 +138,9 @@ oferta. Não oferecer em sessão trivial.
 |---|---|---|
 | `/iniciar` | lê o sistema e devolve onde você parou | não escreve nada |
 | `/atualizar` | decide onde cada coisa mora e escreve | não manda nada pra fora |
+| `/syncar` | manda pro GitHub e diz o que subiu | não decide nada |
 
-<!-- O /syncar acrescenta aqui uma linha quando liga este sistema ao GitHub. Sem ela, o GitHub não
-     entra na conversa: nem oferta, nem lembrete. -->
+Este sistema está no GitHub: depois do `/atualizar`, oferecer o `/syncar` na mesma linha.
 
 ## 9. Mapa de pastas
 
