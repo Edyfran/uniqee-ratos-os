@@ -13,8 +13,12 @@ description: >
 # Pedido · registro e acompanhamento
 
 Muitos pedidos da Uniqee não entram no Brinderoz e, até agora, não ficavam anotados em lugar
-nenhum. Esta skill é esse caderno: cada pedido vira um arquivo na pasta `pedidos/`, e dá pra saber
-a qualquer hora o que está pendente, o que vence e quanto ainda falta receber.
+nenhum. Esta skill é esse caderno: cada pedido vira uma linha no banco **Pedidos Uniqee** do Notion
+(onde o Edyfran acompanha) e, como cópia, um arquivo na pasta `pedidos/`. Dá pra saber a qualquer
+hora o que está pendente, o que vence e quanto ainda falta receber.
+
+O endereço do banco está nas integrações (linha do Notion). O Notion é a fonte principal; o arquivo
+é a cópia. Os dois mudam juntos: registrou, atualizou ou arquivou num, faz no outro.
 
 A skill não precifica. O preço vem do PreçoArte; aqui só se registra o valor combinado.
 
@@ -84,12 +88,19 @@ Se não der pra saber, pergunta numa linha.
    em `aberto`. Observações recebe qualquer detalhe que não coube nos campos (cor da alça, embalagem
    de presente, retirada ou entrega).
 
-5. **Fechar** com uma linha dizendo onde salvou e quanto falta receber.
+5. **Cadastrar no Notion**, no banco Pedidos Uniqee: Cliente, Contato, Peça, Quantidade, Arte,
+   Valor, Pago, Prazo, Registrado e Situação `Aberto` (o "Falta receber" o próprio Notion calcula).
+   No corpo da página, as mesmas seções `## Histórico` e `## Observações` do arquivo. Se o Notion
+   falhar, o arquivo fica salvo do mesmo jeito: avisar e oferecer tentar de novo.
+
+6. **Fechar** com uma linha dizendo onde salvou (link do Notion e arquivo) e quanto falta receber.
 
 ## Listar
 
-Ler todos os arquivos `.md` de `pedidos/` (não entrar em `pedidos/entregues/`). Com base na data
-de hoje, mostrar:
+Consultar o banco Pedidos Uniqee no Notion (situação diferente de Entregue e Cancelado). Se o
+Notion não responder, ler os arquivos `.md` de `pedidos/` (sem entrar em `pedidos/entregues/`) e
+avisar que a lista veio da cópia. Se os dois divergirem, avisar qual pedido está diferente. Com base
+na data de hoje, mostrar:
 
 - **Atrasados:** prazo já passou e a situação não é `entregue`. Vêm primeiro, bem destacados.
 - **Vencem nos próximos 7 dias**
@@ -111,14 +122,18 @@ Sem nenhum pedido em aberto: dizer isso em uma linha.
    - **prazo** ou qualquer outro campo que mudou
 3. Acrescentar uma linha no **Histórico** com a data e o que mudou
    (`- 2026-11-12 · pagou R$ 45,00 · quitado`). O histórico só cresce: nunca reescrever linha antiga.
-4. Ao virar `entregue`, mover o arquivo pra `pedidos/entregues/` (criar a pasta se não existir).
-   Arquivar, nunca apagar. Se ainda falta receber, avisar: entregou, mas está devendo R$ X.
-5. Confirmar em uma linha o que mudou.
+4. Fazer a mesma mudança na página do pedido no Notion (propriedades e linha no Histórico). No
+   Notion, a situação usa as opções Aberto, Em produção, Pronto, Entregue e Cancelado.
+5. Ao virar `entregue`, mover o arquivo pra `pedidos/entregues/` (criar a pasta se não existir).
+   No Notion, só muda a situação pra Entregue. Arquivar, nunca apagar. Se ainda falta receber,
+   avisar: entregou, mas está devendo R$ X.
+6. Confirmar em uma linha o que mudou.
 
 ## Cuidados
 
 - Os arquivos têm nome e telefone de cliente. A pasta `pedidos/` fica fora do git (está no
-  `.gitignore`), e nada daqui vai pra post, página ou qualquer coisa que saia pra fora.
+  `.gitignore`), o banco do Notion fica privado, e nada daqui vai pra post, página ou qualquer
+  coisa que saia pra fora.
 - Nunca apagar arquivo de pedido. Pedido cancelado continua na pasta com `situacao: cancelado` e
   uma linha no histórico explicando; aparece na lista só se ele pedir.
 - Conta de dinheiro feita com cuidado: conferir a soma antes de mostrar.
