@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<!-- PROVA — forma de onda: "a voz é minha". 1080x1920, --alpha.
+     As barras nascem da esquerda pra direita e a agulha corre por cima;
+     o que já tocou fica azul. Com ?picos=0.2,0.8,… (sai do áudio real, ex.
+     ffmpeg astats) a forma é a da voz; sem, uma forma neutra de fala.
+     cortes= (o corte do bruto, Demo overdrive 12/10): os trechos que a edição tirou ficam vermelhos com o ✕ em cima, e em
+     `t_corta` somem um a um enquanto o resto da onda fecha o buraco; o tempo troca de `de` pra `para` e o `menos` carimba.
+     Sem a agulha. Sem cortes=, sai como antes.
+       cortes  "0.07-0.5;0.75-1" em fração da onda · t_corta · de (1:32) · para (0:19) · menos (−72 s)
+       ?rot=minha voz&hd=A voz é <b>minha</b>.&picos=…&pos=centro&t=0.2&dur=4
+       corte: ?rot=o bruto&cortes=0.07-0.5;0.57-0.58;0.58-0.67;0.75-1&t_corta=1.4&de=1:32&para=0:19&menos=−72 s&pos=centro&dur=3.4 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+.zona{position:absolute;left:56px;right:70px}
+.zona.topo{top:240px}
+.zona.centro{top:720px}
+.zona.base{top:1180px}
+.bx{display:flex;flex-direction:column;gap:22px;padding:28px 30px 34px;opacity:0}
+.cab{display:flex;align-items:center;gap:18px}
+.cab .rt{padding:12px 18px;font:700 30px/1 var(--fm);letter-spacing:.1em;text-transform:uppercase;border-radius:var(--raio-s)}
+.cab .tm{margin-left:auto;font:700 34px/1 var(--fm);color:var(--ink6)}
+.bx .hd{font-size:70px;margin:0}
+.bx .hd:empty{display:none}
+.ond{position:relative;height:230px;display:flex;align-items:center;gap:6px}
+.br{flex:1;height:100%;border-radius:4px;background:var(--ink2);transform-origin:50% 50%}
+/* no corte o vão é margem da barra, não gap: a barra que some leva o vão junto */
+.ond.corte{gap:0} .ond.corte .br{flex:1 1 0;min-width:0;margin:0 3px}
+.br.on{background:var(--ac)}
+.br.corta{background:var(--no)}
+.xc{position:absolute;top:50%;display:grid;place-items:center;width:64px;height:64px;margin:-32px 0 0 -32px;
+  font:700 40px/1 var(--fd);opacity:0}
+.me{position:absolute;right:30px;top:-40px;padding:12px 18px;font:700 44px/1 var(--fm);white-space:nowrap;opacity:0}
+.ag{position:absolute;top:-16px;bottom:-16px;left:0;width:6px;margin-left:-3px;background:var(--ink);opacity:0}
+.ag i{position:absolute;top:-14px;left:-10px;width:26px;height:26px;border-radius:50%;background:var(--mk);border:4px solid var(--ink)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="zona" id="z">
+    <div class="bx nb" id="bx">
+      <div class="cab"><span class="rt nb cor-ac" id="rt"></span><span class="tm" id="tm">00:00</span></div>
+      <div class="hd" id="h"></div>
+      <div class="ond" id="on"><span class="ag" id="ag"><i></i></span></div>
+      <span class="me nb cor-mk" id="me"></span>
+    </div>
+  </div>
+</div>
+<script>
+const dur = D.n('dur', '4'), t0 = D.n('t', '0.2');
+document.getElementById('z').classList.add(['topo', 'centro', 'base'].includes(D.q('pos')) ? D.q('pos') : 'centro');
+document.getElementById('rt').textContent = D.q('rot', 'minha voz');
+document.getElementById('h').innerHTML = D.q('hd', '');
+const N = 56;
+let picos = D.q('picos', '').split(',').map(Number).filter(n => !isNaN(n) && D.q('picos'));
+const onda = [];
+for (let i = 0; i < N; i++) {
+  let v;
+  if (picos.length) v = picos[Math.floor(i * picos.length / N)];
+  else v = .18 + .82 * Math.abs(Math.sin(i * .61) * Math.cos(i * .173) * (.6 + .4 * Math.sin(i * 1.7)));
+  onda.push(Math.max(.08, Math.min(1, v)));
+}
+const on = document.getElementById('on');
+onda.forEach((v, i) => on.insertAdjacentHTML('beforeend', `<span class="br" id="b${i}"></span>`));
+// os trechos cortados: a barra cujo meio cai dentro de um corte fica vermelha; um ✕ no meio de cada trecho
+const CORTES = D.q('cortes', '').split(';').filter(Boolean).map(s => s.split('-').map(Number));
+if (CORTES.length) on.classList.add('corte');
+const corta = i => CORTES.some(([a, b]) => (i + .5) / N >= a && (i + .5) / N < b);
+onda.forEach((v, i) => { if (corta(i)) document.getElementById('b' + i).classList.add('corta'); });
+CORTES.forEach(([a, b], k) => { if ((b - a) * N >= 1.5) on.insertAdjacentHTML('beforeend',
+  `<span class="xc nb cor-no" id="x${k}" style="left:${((a + b) / 2 * 100).toFixed(2)}%">✕</span>`); });
+
+D.monta(tl => {
+  D.cabe('.bx .hd', 40, '.bx');
+  D.pousa('#bx', t0, {rot: D.P.ROT * .5, s: 1.05, som: 'pop'});
+  if (D.q('hd')) D.titulo('#h', t0 + .15);
+  onda.forEach((v, i) => tl.fromTo('#b' + i, {scaleY: 0}, {scaleY: v, duration: .4, ease: 'back.out(2)'}, D.at(t0) + .2 + i * .012));
+  if (CORTES.length) {
+    // o corte: os ✕ batem, e em t_corta os trechos vermelhos somem e o resto da onda fecha o buraco
+    const tc = D.n('t_corta', '1.4'), tm = document.getElementById('tm'), me = document.getElementById('me');
+    tm.textContent = D.q('de', '1:32');
+    me.textContent = D.q('menos', '−72 s');
+    me.style.display = me.textContent ? '' : 'none';
+    const xs = [...on.querySelectorAll('.xc')];
+    xs.forEach((x, k) => { tl.fromTo(x, {opacity: 0, scale: 1.4, rotation: -12}, {opacity: 1, scale: 1, rotation: -4,
+      duration: .22, ease: D.P.POUSA}, D.at(t0) + .7 + k * .12); D.cue(D.at(t0) + .7 + k * .12, 'erro'); });
+    const vermelhas = [...on.querySelectorAll('.br.corta')];
+    tl.to(xs, {opacity: 0, scale: .6, duration: .15, ease: 'power2.in'}, tc - .15);
+    tl.to(vermelhas, {flexGrow: 0, marginLeft: 0, marginRight: 0, opacity: 0, duration: .45, ease: 'power3.inOut',
+      stagger: .25 / Math.max(1, vermelhas.length)}, tc);
+    D.cue(tc, 'whoosh');
+    // o tempo troca quando o buraco fecha (a cada quadro buscado, pra ir e voltar na timeline)
+    D.aoQuadro(() => { tm.textContent = D.tl.time() >= tc + .3 ? D.q('para', '0:19') : D.q('de', '1:32'); });
+    tl.fromTo(tm, {scale: 1}, {scale: 1.25, duration: .12, yoyo: true, repeat: 1, ease: 'power2.out'}, tc + .31);
+    if (me.textContent) D.carimbo('#me', tc + .5, 3);
+    D.sai('#bx', dur - .45);
+    return dur;
+  }
+  // a agulha corre do início ao fim; o que ela já passou fica azul
+  const bars = [...on.querySelectorAll('.br')], W = on.clientWidth, a0 = t0 + .9, a1 = dur - .6;
+  const o = {p: 0};
+  const pinta = () => {
+    document.getElementById('ag').style.left = (o.p * W) + 'px';
+    const k = Math.floor(o.p * N);
+    bars.forEach((b, i) => b.classList.toggle('on', i < k));
+    const s = Math.floor(o.p * (a1 - a0));
+    document.getElementById('tm').textContent = '00:' + String(s).padStart(2, '0');
+  };
+  pinta();
+  tl.fromTo('#ag', {opacity: 0}, {opacity: 1, duration: .2}, a0 - .1);
+  tl.fromTo(o, {p: 0}, {p: 1, duration: a1 - a0, ease: 'none', onUpdate: pinta}, a0);
+  D.sai('#bx', dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

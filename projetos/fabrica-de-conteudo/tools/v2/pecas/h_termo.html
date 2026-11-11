@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<!-- AULA — termo + definição (glossário). 1920x1080, --alpha. Canto superior direito.
+     O cartão entra pela direita, o termo sobe e é grifado, a classe aparece em
+     mono e a definição sobe por palavra, mais rápida (é leitura, não impacto).
+       ?termo=Webhook&tipo=substantivo · integração&def=Um endereço que fica esperando...
+        &kick=termo&t0=0.2&dur=5
+     ?k= encolhe o cartão a partir do canto de cima à direita, e ?dir= é a distância da borda direita
+     em px (120): com k=0.7&dir=25 ele cabe na coluna de papel da chapa, ao lado da janela. -->
+<html lang="pt-BR" class="h alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/direcao-h.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+#esc{position:absolute;inset:0;transform:scale(var(--k,1));transform-origin:calc(100% - var(--dir,120px)) 110px}
+.cd{position:absolute;right:var(--dir,120px);top:110px;width:660px;padding:30px 36px 34px;opacity:0}
+.cd .kick{font-size:20px;margin-bottom:22px}
+.tr{font:700 72px/1.04 var(--fd);letter-spacing:var(--ls);color:var(--ink);opacity:0}
+.tp{margin-top:14px;font:600 24px/1 var(--fm);color:var(--ink4);opacity:0}
+.tp:empty{display:none}
+.df{margin-top:24px;padding-top:22px;border-top:3px solid var(--ink);font:500 32px/1.35 var(--fd);color:var(--ink);opacity:0;text-wrap:pretty}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="esc"><div class="cd nb" id="cd"><div class="kick" id="k"></div><div class="tr" id="tr"></div><div class="tp" id="tp"></div><div class="df" id="df"></div></div></div>
+</div>
+<script>
+const dur = D.n('dur', '5'), t0 = D.n('t0', '0.2'), $ = id => document.getElementById(id);
+$('k').textContent = D.q('kick', 'termo');
+document.documentElement.style.setProperty('--dir', D.n('dir', 120) + 'px');
+$('tr').innerHTML = '<b class="mkr">' + D.logo(D.q('termo', 'Webhook')) + '</b>';
+$('tp').textContent = D.q('tipo', 'substantivo · integração');
+$('df').textContent = D.q('def', 'Um endereço que fica esperando. Quando algo acontece lá fora, ele recebe o aviso e dispara o fluxo.');
+
+D.monta(tl => {
+  D.cabe('#tr', 40, '.cd');
+  D.pousa('#cd', t0, {dx: 70, dy: 0, som: 'pop'});
+  D.carimbo('#k', t0 + .12, 0);
+  const ws = D.palavras('#tr', t0 + .16, .06);
+  D.marca('#tr b', D.at(t0 + .16) + ws.length * .06 + .25);
+  D.entra('#tp', t0 + .45, 12);
+  D.palavras('#df', t0 + .6, .028);
+  D.sai('#cd', dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

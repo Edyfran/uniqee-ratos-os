@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<!-- TIPO — painel de lista pro celular, v2. 1080x772 (a faixa de cima da cena 9:16, sem reduzir: 1 px = 1 px da tela).
+     Mesmo gesto do t_lista (itens caem na hora em que são ditos, o FOCO amarelo desliza), mas sem a coluna da direita:
+     o item é UMA linha, nome em negrito e detalhe depois, tudo a 58 px ou mais. Até 4 itens.
+     Cada item já tem o lugar marcado (moldura tracejada) antes de ser dito: o painel nunca fica meio vazio.
+     l2=1: nome e detalhe em duas linhas (pra 2 itens, em letra maior).
+       ?hd=Um ano e meio.&it=Infoprodutos|cursos@0.4;Serviços|projetos@1.2&dur=5 -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:772px}
+#stage{padding:34px 54px;justify-content:center}
+.kick{font-size:44px;padding:10px 18px}
+.hd{font-size:80px;margin:22px 0 26px}
+.itens{position:relative;display:flex;flex-direction:column;gap:18px}
+.slot{position:relative;z-index:1}
+.gh{position:absolute;inset:0;border:3px dashed var(--ink);border-radius:var(--raio);opacity:.28}
+.item{position:relative;padding:14px 24px}
+.l2 .item{padding:16px 28px}
+.l2 .item .tx b{display:block;font-size:72px}
+.l2 .item .tx span{display:block;font-size:62px;font-weight:600;color:var(--ink6)}
+.item .tx{font:600 62px/1.1 var(--fd);color:var(--ink);white-space:nowrap;letter-spacing:var(--ls)}
+.item .tx b{font-weight:800}
+.foco{position:absolute;z-index:0;left:0;top:0;opacity:0;background:var(--mk);
+  border:var(--bw) solid var(--ink);border-radius:var(--raio)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="kick" id="k"></div>
+  <div class="hd" id="h"></div>
+  <div class="itens" id="li"><div class="foco" id="fo"></div></div>
+</div>
+<script>
+const dur = D.n('dur', '5');
+document.getElementById('k').textContent = D.q('kick', '');
+document.getElementById('h').innerHTML = D.q('hd', '');
+const its = D.itens('it', 'Um|dois@0.4', ['nome', 'det']);
+const li = document.getElementById('li');
+const l2 = D.q('l2', '') === '1';
+if (l2) li.classList.add('l2');
+its.forEach((x, i) => {
+  const sl = document.createElement('div'); sl.className = 'slot';
+  const d = document.createElement('div');
+  d.className = 'nb item'; d.id = 'it' + i;
+  d.innerHTML = `<div class="tx"><b>${x.nome}</b>${x.det ? (l2 ? `<span>${x.det}</span>` : ' ' + x.det) : ''}</div>`;
+  sl.innerHTML = '<div class="gh"></div>'; sl.appendChild(d);
+  li.appendChild(sl);
+});
+
+D.monta(tl => {
+  D.cabe('.hd', 58);
+  if (l2) { D.cabe('.item .tx b', 58, '.item'); D.cabe('.item .tx span', 58, '.item'); }
+  else D.cabe('.item .tx', 58, '.item');
+  D.camera(dur, 1.0, 1.02);
+  D.carimbo('#k', .10);
+  D.titulo('#h', .22);
+  its.forEach((x, i) => D.pousa('#it' + i, x.t, {dx: -36, dr: 0}));
+  D.desliza('#fo', its.map((_, i) => '#it' + i), its.map(x => x.t));
+  D.sai(['#k', '#h', '.item', '.gh', '#fo'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<!-- GANCHO — o link que ele fala, como QR code na tela. 1920x1080, --alpha (1080x1920 pelo ?ar=).
+     Um cartão no terço do quadro (o mesmo lugar da carta citada: centro a 600 px do meio), com o rótulo
+     em cima, o QR grande no meio e o endereço curto embaixo. O QR nasce na própria peça
+     (nucleo/qrcode.js, MIT, sem rede): módulo em pixel inteiro, margem branca de 4 módulos, preto puro
+     sobre branco — lê de uma TV a 2 m. O resto do quadro fica livre: ele continua falando ao lado.
+       url     o endereço que vira QR, com a marcação do escaneio (utm_medium=tinteiro-qr), pra medir
+               separado do clique na descrição
+       texto   o endereço curto que se lê embaixo (padrão: o domínio da url, sem www)
+       rotulo  a frase curta em cima ("Como eu edito meus vídeos")
+       lugar   terco-dir · terco-esq · centro (o lugar do núcleo, D.desloc) — ou o antigo:
+       lado    dir (padrão) · esq · x  a distância do centro do cartão ao meio do quadro (600)
+       qr      o lado do QR em px, com a margem branca (400) · ecc  L · M (padrão) · Q · H
+       t0 · dur (6)
+     ?url=https://fabrica.ninjadasautomacoes.com.br/?utm_source=youtube%26utm_medium=tinteiro-qr%26utm_campaign=teste&rotulo=Como eu edito meus vídeos&lado=dir&tema=tinteiro&t0=0.2&dur=6 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/direcao-h.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<script src="../nucleo/qrcode.js"></script>
+<style>
+#stage{width:100vw;height:100vh;padding:0;display:block}
+#card{position:absolute;display:flex;flex-direction:column;align-items:center;gap:18px;padding:26px 28px 24px;opacity:0}
+#rot{font:700 34px/1.15 var(--fd);letter-spacing:var(--ls);color:var(--ink);text-align:center;text-wrap:balance}
+/* o QR: branco e preto puros, nada do tema entra aqui — é o que o celular lê */
+#qr{background:#fff;border-radius:var(--raio-s);display:block}
+#tx{font:600 28px/1 var(--fm);color:var(--ink);white-space:nowrap;text-align:center}
+#tx b{color:var(--mk);font-weight:700}
+</style>
+</head>
+<body>
+<div id="stage"><div id="card" class="nb"><div id="rot"></div><svg id="qr"></svg><div id="tx"></div></div></div>
+<script>
+const $ = id => document.getElementById(id);
+if (!D.q('ar', '1920x1080').startsWith('1080')) document.documentElement.classList.add('h');
+const url = D.q('url', 'https://fabrica.ninjadasautomacoes.com.br/?utm_source=youtube&utm_medium=tinteiro-qr&utm_campaign=teste');
+const t0 = D.n('t0', '0.2'), dur = D.n('dur', '6');
+let host = '';
+try { host = new URL(url).hostname.replace(/^www\./, ''); } catch (e) { host = url; }
+$('rot').textContent = D.q('rotulo', 'Como eu edito meus vídeos');
+$('tx').textContent = D.q('texto', host);
+
+// o QR em módulos de pixel inteiro: sem meio-pixel, sem borda borrada
+const q = qrcode(0, D.q('ecc', 'M'));
+q.addData(url, 'Byte'); q.make();
+const n = q.getModuleCount(), quiet = 4, cel = Math.floor(D.n('qr', '400') / (n + 2 * quiet)), lado = cel * (n + 2 * quiet);
+let d = '';
+for (let r = 0; r < n; r++) for (let c = 0; c < n; c++)
+  if (q.isDark(r, c)) d += `M${(c + quiet) * cel} ${(r + quiet) * cel}h${cel}v${cel}h-${cel}z`;
+const svg = $('qr');
+svg.setAttribute('width', lado); svg.setAttribute('height', lado); svg.setAttribute('viewBox', `0 0 ${lado} ${lado}`);
+svg.setAttribute('shape-rendering', 'crispEdges');
+svg.innerHTML = `<path fill="#000" d="${d}"/>`;
+window.__qr = {modulos: n, cel, lado, url};   // pra quem confere
+
+D.monta(tl => {
+  const W = innerWidth, H = innerHeight, vert = H > W, card = $('card');
+  card.style.width = lado + 56 + 'px';
+  // o endereço na maior letra que cabe na largura do QR, sem descer de 20 px
+  const tx = $('tx');
+  let px = 28;
+  while (px > 20 && tx.scrollWidth > lado) tx.style.fontSize = --px + 'px';
+  const cw = card.offsetWidth, ch = card.offsetHeight;
+  const x = vert ? (W - cw) / 2 : W / 2 + D.desloc(600) - cw / 2;
+  Object.assign(card.style, {left: Math.round(x) + 'px', top: Math.round((vert ? H * .32 : H / 2) - ch / 2) + 'px'});
+  D.pousa(card, t0, {som: 'whoosh'});
+  D.sai(card, dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<!-- PROVA — duas colunas, quem pede e quem faz. 1080x1920, --alpha.
+     Um painel de papel no alto da zona segura com dois títulos grandes lado a lado (EU | ELE) e, embaixo de cada um,
+     o verbo (pedindo | editando). Cada linha é um par: o pedido sobe num bloco azul na coluna da esquerda e, logo
+     depois, a resposta cai na da direita com o ✓ verde. Pedido vazio vira uma caixa tracejada: quem pede não faz nada
+     enquanto a outra coluna trabalha. Pensada pra Dividida (cabe acima da legenda, y 300 a 800).
+       e1 · e2     os dois títulos (EU · ELE) · v1 · v2  os verbos (pedindo · editando); vazio: sem verbo, o painel fica mais baixo
+       linhas      "pedido|resposta|t0|t1;…" — o pedido pousa em t0, a resposta (com ✓) em t1; sem pedido: tracejado
+       nota        a linha de baixo, em duas linhas se precisar (vazio: sem) · t_nota
+       topo        o y do painel (300) · t0  quando o painel pousa · dur
+     ?e1=EU&e2=ELE&v1=pedindo&v2=editando&linhas=corta as pausas|sem pausas|0.5|1.1;põe a legenda|legenda e grifo|1.6|2.2&nota=só pra demonstrar&t_nota=2.4&topo=300&t0=0.05&dur=4 -->
+<html lang="pt-BR" class="alfa" data-qa="entra-seco fica">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block;position:relative;overflow:hidden}
+.pn{position:absolute;left:65px;right:65px;padding:22px 24px 20px;opacity:0;display:flex;flex-direction:column;gap:12px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.th .e{font:800 84px/1 var(--fd);letter-spacing:var(--ls);color:var(--ink)}
+.th .v{font:700 58px/1.05 var(--fd);letter-spacing:var(--ls);color:var(--ink6)}
+.th.d .e{color:var(--ac)}
+.th.d .v{display:inline-block;background:var(--mk);color:var(--ink);padding:0 .2em;border:var(--bw) solid var(--ink);border-radius:var(--raio-s)}
+.ce{position:relative;display:flex;align-items:center;padding:8px 20px;opacity:0;
+  font:700 58px/1.05 var(--fd);letter-spacing:var(--ls);border:var(--bw) solid var(--ink);border-radius:var(--raio-s)}
+.ce.p{background:var(--ac);color:#fff}
+.ce.r{background:var(--sur);color:var(--ink);padding-right:78px}
+.ce.r i{position:absolute;right:14px;top:50%;margin-top:-26px;width:52px;height:52px;border:var(--bw) solid var(--ink);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font:800 34px/1 var(--fd);font-style:normal;color:#fff;background:var(--ok);transform:scale(0)}
+.ce.z{border-style:dashed;background:none;color:var(--ink4);justify-content:center}
+.nt{font:700 50px/1.08 var(--fd);letter-spacing:var(--ls);color:var(--ink);opacity:0;border-top:var(--bw) solid var(--ink);padding-top:10px}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+const stage = document.getElementById('stage'), dur = D.n('dur', '4');
+const esc = s => String(s).replace(/[&<>]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;'}[c]));
+const topo = D.n('topo', '300'), t0 = D.n('t0', '0.05'), tN = D.n('t_nota', '2.4');
+const nota = D.q('nota', 'só pra demonstrar'), V1 = D.q('v1', 'pedindo'), V2 = D.q('v2', 'editando');
+const L = D.q('linhas', 'corta as pausas|sem pausas|0.5|1.1;põe a legenda|legenda e grifo|1.6|2.2')
+  .split(';').filter(Boolean).map(s => { const [p, r, a, b] = s.split('|'); return {p, r, a: parseFloat(a), b: parseFloat(b)}; });
+let h = `<div class="pn nb" id="pn" style="top:${topo}px">
+  <div class="g2"><div class="th" id="t1"><div class="e">${esc(D.q('e1', 'EU'))}</div>${V1 ? `<div class="v">${esc(V1)}</div>` : ''}</div>
+  <div class="th d" id="t2"><div class="e">${esc(D.q('e2', 'ELE'))}</div>${V2 ? `<div class="v">${esc(V2)}</div>` : ''}</div></div>`;
+L.forEach((l, i) => { h += `<div class="g2" id="l${i}"><div class="ce ${l.p ? 'p' : 'z'}" id="p${i}">${l.p ? esc(l.p) : '…'}</div>` +
+  `<div class="ce r" id="r${i}">${esc(l.r)}<i id="k${i}">✓</i></div></div>`; });
+if (nota) h += `<div class="nt" id="nt">${esc(nota)}</div>`;
+stage.innerHTML = h + '</div>';
+
+D.monta(tl => {
+  D.pousa('#pn', t0, {rot: 0, som: 'pop'});
+  tl.fromTo('#t1', {opacity: 0, y: 10}, {opacity: 1, y: 0, duration: .22}, D.at(t0 + .08));
+  tl.fromTo('#t2', {opacity: 0, y: 10}, {opacity: 1, y: 0, duration: .22}, D.at(t0 + .2));
+  L.forEach((l, i) => {
+    tl.fromTo('#p' + i, {opacity: 0, x: -30}, {opacity: 1, x: 0, duration: .24, ease: 'power3.out'}, D.at(l.a));
+    D.cue(l.a, 'pop');
+    tl.fromTo('#r' + i, {opacity: 0, x: 30}, {opacity: 1, x: 0, duration: .24, ease: 'power3.out'}, D.at(l.b));
+    tl.fromTo('#k' + i, {scale: 0}, {scale: 1, duration: .28, ease: 'back.out(2.6)'}, D.at(l.b) + .12);
+    D.cue(l.b, 'certo');
+  });
+  if (nota) tl.fromTo('#nt', {opacity: 0, y: 8}, {opacity: 1, y: 0, duration: .25}, D.at(tN));
+  D.sai(['#pn'], dur - .35);
+  return dur;
+});
+</script>
+</body>
+</html>

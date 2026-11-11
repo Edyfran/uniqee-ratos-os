@@ -1,0 +1,68 @@
+/* O cartão de carrossel 1080x1350 (clonar-carrossel): a moldura comum e os adesivos. Só layout; cor, letra,
+   borda e sombra vêm do direcao-v2.css. O JS é o cartao.js. */
+html.cartao,html.cartao body,html.cartao #stage{width:1080px;height:1350px}
+html.cartao #stage{position:relative;overflow:hidden;display:block;padding:0}
+.cx{position:absolute}
+.cx-marca{left:40px;top:22px;height:74px;display:flex;align-items:center;gap:12px}
+.cx-marca svg{width:62px;height:62px;border:3px solid var(--ink);border-radius:var(--raio-s);background:var(--ac2);box-shadow:4px 4px 0 var(--ink);display:block}
+.cx-marca b{font:700 21px/1 var(--fd);letter-spacing:-.01em;color:var(--ink);text-transform:uppercase;white-space:pre-line}
+.cx-linha{left:0;top:1288px;width:1080px;height:10px;background:var(--ac);border-block:3px solid var(--ink)}
+.cx-pil{top:1262px;height:64px;display:flex;align-items:center;justify-content:center;gap:12px;background:var(--sur);
+  border:var(--bw) solid var(--ink);border-radius:32px;box-shadow:6px 6px 0 var(--ink);font:700 32px/1 var(--fd);color:var(--ink);white-space:nowrap}
+.cx-pil.mk{background:var(--mk)}
+.cx-pil svg{width:28px;height:28px;flex:none}
+.cx-ad{}
+/* ícone de cartão (ICO.ph): Phosphor duotone, azul --ac com borda e fundo amarelo --mk; --ico/--ico2 trocam as cores onde o fundo é azul */
+.ph{overflow:visible;filter:drop-shadow(2px 2px 0 var(--ink))}
+.ph .s1{fill:var(--ico,var(--ac));stroke:var(--ink);stroke-width:9;stroke-linejoin:round;paint-order:stroke}
+.ph .s2{fill:var(--ico2,var(--mk))}
+.cx-ad svg{width:100%;height:100%;overflow:visible;display:block}
+
+
+/* ?tema=capa: o cartão no visual da capa do Reel. Fundo (grade de ladrilhos), marca da Fábrica, título em faixa vermelha com letra pesada
+   branca, ícones como ladrilhos de app em 3D (azul e amarelo, alternados), blocos escuros com borda que brilha. */
+html.capa #stage{background:var(--pp)}
+.cx-parede{position:absolute;left:-270px;top:-790px;width:1620px;height:2140px;display:grid;grid-template-columns:repeat(12,1fr);gap:16px;
+  transform:perspective(1100px) rotateX(12deg);transform-origin:50% 100%;filter:blur(2.2px)}
+.cx-parede i{border-radius:22px;border:3px solid color-mix(in srgb,var(--ac) 50%,transparent);background:color-mix(in srgb,var(--ac) 12%,transparent)}
+.cx-parede i.acesa{background:color-mix(in srgb,var(--ac) 40%,transparent);box-shadow:0 0 34px color-mix(in srgb,var(--ac) 70%,transparent)}
+.cx-parede i.quente{border-color:color-mix(in srgb,var(--mk) 60%,transparent);background:color-mix(in srgb,var(--mk) 16%,transparent)}
+.cx-parede i.furo{background:radial-gradient(circle,color-mix(in srgb,var(--ac2) 50%,transparent) 0 18%,transparent 20%),color-mix(in srgb,var(--ac) 18%,transparent)}
+/* o escuro baixa a grade atrás do texto: o brilho fica no alto e no pé */
+.cx-escuro{position:absolute;inset:0;background:
+  radial-gradient(70% 12% at 50% 0,color-mix(in srgb,var(--ac) 45%,transparent),transparent 75%),
+  radial-gradient(80% 18% at 50% 100%,color-mix(in srgb,var(--ac) 55%,transparent),transparent 75%),
+  linear-gradient(180deg,rgba(5,10,36,.25) 0,rgba(5,10,36,.74) 22%,rgba(5,10,36,.74) 80%,rgba(5,10,36,.3) 100%)}
+html.capa .cx-marca{left:36px;top:16px;height:80px}
+html.capa .cx-marca img{height:68px;width:auto;display:block;filter:drop-shadow(0 6px 14px rgba(0,0,0,.6))}
+html.capa .cx-linha{background:var(--ac);border:0;height:6px;top:1291px;box-shadow:0 0 26px var(--ac)}
+html.capa .cx-pil{box-shadow:0 10px 24px -6px rgba(0,0,0,.7);border-color:var(--ink)}
+html.capa .pz{color:#FFD95A;text-shadow:0 4px 14px rgba(0,0,0,.7)}
+/* título: faixa vermelha da capa, letra branca pesada em caixa alta */
+html.capa .tb{background:#D03620;border:0;border-radius:20px;box-shadow:0 18px 40px -10px rgba(0,0,0,.7)}
+html.capa .tb span{font:900 62px/1 var(--ed-sans);letter-spacing:-.035em;text-transform:uppercase;border:0;padding:6px 10px 2px}
+/* blocos escuros com borda que brilha */
+html.capa .tm{background:#0A1033;border:3px solid var(--ac);box-shadow:0 0 30px color-mix(in srgb,var(--ac) 70%,transparent),0 18px 40px -10px rgba(0,0,0,.7)}
+html.capa .ch{background:#0A1033;border:3px solid var(--ac);box-shadow:0 0 22px color-mix(in srgb,var(--ac) 55%,transparent);padding-left:10px}
+/* o ícone vira ladrilho de app: canto redondo, brilho de cima, sombra macia; azul e amarelo alternados */
+html.capa .ch svg{box-sizing:content-box;width:42px;height:42px;padding:9px;border-radius:18px;filter:none;
+  background:linear-gradient(160deg,rgba(255,255,255,.3),transparent 50%) var(--ac);box-shadow:0 10px 18px -6px rgba(0,0,0,.75);--ico:#fff;--ico2:var(--mk)}
+html.capa .ch:nth-of-type(even) svg{background-color:var(--mk);--ico:var(--ink);--ico2:#fff}
+html.capa .li{color:#fff;text-shadow:0 3px 12px rgba(0,0,0,.8)}
+html.capa .li svg{box-sizing:content-box;width:34px;height:34px;padding:8px;border-radius:16px;filter:none;--ico:#fff;--ico2:var(--mk);
+  background:linear-gradient(160deg,rgba(255,255,255,.3),transparent 50%) var(--ac);box-shadow:0 8px 16px -6px rgba(0,0,0,.75)}
+html.capa .li.e svg{background-color:var(--no);--ico:#fff;--ico2:#fff}
+html.capa .li.s svg{background-color:var(--mk);--ico:var(--ink);--ico2:#fff}
+html.capa .fc{color:rgba(255,255,255,.85);text-shadow:0 3px 12px rgba(0,0,0,.8)}
+/* leitura a 720 px: texto escuro de peça (var(--ink), var(--ink6)) que cai direto na grade vira claro; sobre o vermelho, branco.
+   Texto sobre bloco claro (cartão, recibo, pílula) não entra aqui: segue em tinta. */
+html.capa .t1,html.capa .lb,html.capa .ps .t,html.capa .br span,html.capa .br .v{color:#fff;text-shadow:0 3px 12px rgba(0,0,0,.8)}
+html.capa .ps .t b{color:var(--mk)}
+html.capa .nt,html.capa .ms{color:#DCE4FF;text-shadow:0 3px 12px rgba(0,0,0,.8)}
+html.capa .tb .a,html.capa .tb .s{color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.35)}
+html.capa .ps .r{color:var(--mk)}
+html.capa .pd span{color:#fff;text-shadow:0 3px 12px rgba(0,0,0,.8)}
+html.capa .sb{color:#9DB8FF}
+html.capa .tb .p{color:#fff}
+html.capa .sg i{color:#5E5A50}
+html.capa .ln{color:#fff;text-shadow:0 3px 12px rgba(0,0,0,.8)}

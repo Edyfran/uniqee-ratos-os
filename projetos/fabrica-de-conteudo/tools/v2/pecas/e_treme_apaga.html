@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<!-- EFEITO — treme e apaga: o "modo de edição" do celular, na faixa de baixo (clone do "Jiggle delete"). 1080x1920, --alpha.
+     Um cartão de papel com cabeçalho (MODO DE EDIÇÃO à esquerda, "4 ferramentas" à direita) e 4 ícones de app desenhados
+     por nós (tesoura, linha do tempo, legenda, play: nenhuma marca de terceiro), cada um com o selo "−" no canto.
+     Os ícones entram em fila, TREMEM (giro de ±2°, balanço contínuo), os selos dos dois primeiros ficam vermelhos
+     (apertados), três somem encolhendo até zero quase juntos, o último some logo depois (o contador cai a 0) e o cartão
+     sai. Sem quique de entrada. Fica abaixo do painel lateral (topo y 1166).
+       ic     os ícones, separados por | (tesoura · timeline · legenda · play · imagem · brilho)
+       lb     os rótulos, na mesma ordem · kick  o cabeçalho da esquerda (modo de edição)
+       un     a palavra do contador (ferramentas) · n  é o número de ícones (o tamanho de ic)
+       x  y  w  o canto do cartão (60, 1166, 860) · t0 · dur  quanto dura (1.1); a pausa estica, o movimento não
+       ?ic=tesoura|timeline|legenda|play&lb=Cortar|Linha|Legenda|Exportar&kick=modo de edição&un=ferramentas&y=1166&dur=1.1 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+.cd{position:absolute;height:303px;border-radius:28px;background:var(--pp);--sh:8px;transform-origin:50% 100%}
+.cab{position:absolute;left:36px;right:36px;top:22px;display:flex;justify-content:space-between;font:600 23px/1 var(--fm);letter-spacing:.12em;text-transform:uppercase}
+.cab .a{color:var(--no)} .cab .b{color:var(--ink4);letter-spacing:.08em}
+.it{position:absolute;top:60px;width:150px;display:flex;flex-direction:column;align-items:center}
+.pl{position:relative;width:148px;height:148px}
+.fc{position:absolute;inset:0;border-radius:26%;border:4px solid var(--ink);background:var(--fc);box-shadow:5px 5px 0 var(--ink);display:flex;align-items:center;justify-content:center}
+.fc svg{width:58%;height:58%;overflow:visible;fill:none;stroke:var(--fg);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.fc .tx{font:800 46px/1 var(--fd);color:var(--fg)}
+.sl{position:absolute;left:-14px;top:-14px;width:42px;height:42px;border-radius:50%;background:var(--ink);border:3px solid var(--pp);
+  display:flex;align-items:center;justify-content:center}
+.sl:after{content:"";width:20px;height:5px;border-radius:3px;background:#fff}
+.lb{margin-top:12px;font:700 31px/1 var(--fd);letter-spacing:-.01em;color:var(--ink6);white-space:nowrap}
+</style>
+</head>
+<body>
+<div id="stage"><div class="cd nb" id="cd"><div class="cab"><span class="a" id="k"></span><span class="b" id="ct"></span></div><div id="fl"></div></div></div>
+<script>
+const ICONES = {
+  tesoura: '<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.12 15.88"/><path d="M14.47 14.48L20 20"/><path d="M8.12 8.12L12 12"/>',
+  timeline: '<rect x="3" y="5" width="9" height="3.4" rx="1"/><rect x="9" y="10.3" width="12" height="3.4" rx="1"/><rect x="5" y="15.6" width="8" height="3.4" rx="1"/>',
+  legenda: '<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M7 11h10M7 15h4M14 15h3"/>',
+  play: '<path d="M7 4.5l12 7.5-12 7.5z"/>',
+  imagem: '<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/>',
+  brilho: '<path d="M11 2.5c.6 5.2 2.4 7 7.5 7.5-5.1.6-6.9 2.4-7.5 7.5-.6-5.1-2.4-6.9-7.5-7.5 5.1-.5 6.9-2.3 7.5-7.5z"/>',
+};
+// o papel, o tinta, o marcador e o azul: um ícone de cada, como os quatro da referência (branco, preto, cor quente, azul-escuro)
+const FACES = [['#fff', 'var(--ink)'], ['var(--ink)', 'var(--mk)'], ['var(--mk)', 'var(--ink)'], ['var(--ac)', '#fff']];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const $ = id => document.getElementById(id);
+const dur = D.n('dur', '1.1'), t0 = D.n('t0', '0.05');
+const ics = D.q('ic', 'tesoura|timeline|legenda|play').split('|').filter(Boolean).slice(0, 4);
+const lbs = D.q('lb', 'Cortar|Linha|Legenda|Exportar').split('|');
+const un = D.q('un', 'ferramentas'), N = ics.length;
+$('k').textContent = D.q('kick', 'modo de edição');
+const cd = $('cd'); cd.style.left = D.n('x', '60') + 'px'; cd.style.top = D.n('y', '1166') + 'px'; cd.style.width = D.n('w', '860') + 'px';
+const W = D.n('w', '860'), pitch = 203, x0 = (W - (pitch * (N - 1) + 150)) / 2;   // passo de 203 px, centrado
+$('fl').innerHTML = ics.map((n, i) => {
+  const [fc, fg] = FACES[i % 4];
+  const dentro = ICONES[n] ? `<svg viewBox="0 0 24 24">${ICONES[n]}</svg>` : `<div class="tx">${esc(n)}</div>`;
+  return `<div class="it" style="left:${x0 + i * pitch}px"><div class="pl"><div class="fc" style="--fc:${fc};--fg:${fg}">${dentro}</div><div class="sl"></div></div><div class="lb">${esc(lbs[i] || '')}</div></div>`;
+}).join('');
+const cont = k => `${k} ${un}`;
+$('ct').textContent = cont(N);
+
+D.monta(tl => {
+  const its = [...document.querySelectorAll('.it')], pls = [...document.querySelectorAll('.pl')], sls = [...document.querySelectorAll('.sl')];
+  const a0 = D.at(t0) + .02;
+  // entra sem quique: o cartão aparece no lugar e os ícones vêm em fila, o último um pouco depois
+  // entrada seca: o cartão e os três primeiros ícones já estão lá no primeiro quadro; o último chega 3 quadros depois
+  tl.set(cd, {opacity: 1}, 0);
+  its.forEach((it, i) => { if (i === N - 1) { tl.set(it, {opacity: 0}, 0); tl.set(it, {opacity: 1}, a0 + .1); } });
+  D.cue(a0, 'pop');
+  // o tremor: começa em 0,125 s, cada ícone com a sua fase e o seu lado, até ser apagado
+  const tj = a0 + .13, ap = a0 + Math.max(.55, dur - .5);   // os selos ficam vermelhos em ap; os ícones somem logo depois
+  const apaga = its.map((_, i) => ap + .03 + (i < N - 1 ? i * .03 : .14));
+  pls.forEach((p, i) => {
+    const per = .075 + (i % 2) * .009, ang = i % 2 ? 2.2 : -2.2, ini = tj + i * .012;
+    const n = Math.max(1, Math.floor((apaga[i] - ini) / per));
+    tl.fromTo(p, {rotation: -ang}, {rotation: ang, duration: per, ease: 'sine.inOut', yoyo: true, repeat: n}, ini);
+    tl.to(p, {y: -2, duration: per * 1.3, ease: 'sine.inOut', yoyo: true, repeat: Math.floor(n / 1.3)}, ini);
+  });
+  // os selos já estão lá quando o tremor começa; os dois primeiros ficam vermelhos (apertados)
+  tl.fromTo(sls, {scale: 0}, {scale: 1, duration: .14, ease: 'power2.out', stagger: .02}, tj - .04);
+  tl.to(sls.slice(0, 2), {backgroundColor: '#E1432F', duration: .04, ease: 'none'}, ap);
+  D.cue(ap, 'click');
+  // apaga: encolhe até zero (pop), sem volta
+  its.forEach((it, i) => { tl.to(it, {scale: 0, opacity: 0, duration: .12, ease: 'power2.in', transformOrigin: '50% 50%'}, apaga[i]); });
+  D.cue(apaga[0], 'pop');
+  // o contador cai a 0 quando o último vai embora
+  tl.call(() => { $('ct').textContent = cont(0); }, null, apaga[N - 1] - .02);
+  tl.call(() => { $('ct').textContent = cont(N); }, null, 0);
+  // o cartão sai, achatado, no fim da janela
+  const s = apaga[N - 1] + .07;   // o cartão vazio dura pouco: o último ícone some e o cartão vai atrás
+  tl.to(cd, {scaleY: .8, opacity: 0, duration: .08, ease: 'power2.in'}, s);
+  return Math.max(dur, s + .1);
+});
+</script>
+</body>
+</html>

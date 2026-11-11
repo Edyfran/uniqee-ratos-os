@@ -1,0 +1,48 @@
+/* Luxo: sóbrio. Preto, creme e dourado, serifada clássica leve, filete dourado fino no lugar
+   da borda, canto reto e nenhuma sombra. O destaque é itálico dourado, e a etiqueta é texto
+   bem espaçado dentro de um filete.
+   Copie para marca/tema.css e troque as quatro cores (docs/guia-de-estilos.md).
+   As letras moram em tools/video-use/assets/fontes/: copie cada arquivo do url() pra
+   marca/fontes/, com o <Família>-OFL.txt do lado. O font-weight do @font-face prende a
+   Playfair no peso normal, mesmo quando a peça pede negrito. */
+
+@font-face{font-family:'Marca';font-weight:400;src:url(fontes/PlayfairDisplay-Variable.ttf) format('truetype')}
+@font-face{font-family:'MarcaItalico';font-style:italic;font-weight:400;src:url(fontes/PlayfairDisplay-Italic-Variable.ttf) format('truetype')}
+@font-face{font-family:'MarcaApoio';font-weight:300 500;src:url(fontes/Jost-Variable.ttf) format('truetype')}
+
+html.marca{
+  /* as quatro cores: chão (escuro), letra (creme), bloco, marcador (o dourado) */
+  --pp:#0D0C0A; --ink:#F1E9DA; --ac:#8F7342; --mk:#D9C089;
+  /* o cartão é o chão um tom acima; a letra que senta no dourado é a do chão */
+  --sur:color-mix(in srgb,var(--pp) 92%,var(--mk)); --ink9:var(--pp);
+  --ink6:color-mix(in srgb,var(--ink) 66%,var(--pp)); --ink4:color-mix(in srgb,var(--ink) 45%,var(--pp));
+  --ink2:color-mix(in srgb,var(--ink) 16%,var(--pp));
+  --ac2:color-mix(in srgb,var(--ac) 30%,var(--pp)); --act:color-mix(in srgb,var(--ac) 40%,var(--pp));
+  --no2:color-mix(in srgb,var(--no) 25%,var(--pp));
+  --fd:'Marca',Georgia,serif; --fm:'MarcaApoio',system-ui,sans-serif; --ls:0em;
+
+  /* a forma: filete fino, sem sombra, canto reto, chão liso com uma luz no meio */
+  --bw:1.5px; --sh:0px; --sombra:transparent; --raio:0px; --raio-s:0px; --lado:var(--ink2);
+  --tex:radial-gradient(70% 45% at 50% 42%,color-mix(in srgb,var(--mk) 9%,transparent),transparent 72%);
+  font-synthesis:none;
+
+  /* o reel editorial e a capa: o painel também escurece */
+  --ed-sans:'Marca',Georgia,serif;
+  --ed-pp:var(--pp); --ed-pp-luz:color-mix(in srgb,var(--pp) 88%,var(--ac)); --ed-folha:transparent;
+  --ed-tx:var(--ink);
+  --ed-dg-apaga-tx:linear-gradient(180deg,#FFFFFF 0%,rgba(255,255,255,.82) 42%,rgba(255,255,255,.2) 95%);
+  --ed-dg-azul:linear-gradient(180deg,color-mix(in srgb,var(--ac) 40%,white) 0%,var(--ac) 70%);
+  --ed-dg-ouro:linear-gradient(180deg,color-mix(in srgb,var(--mk) 30%,white) 8%,var(--mk) 58%,color-mix(in srgb,var(--mk) 70%,black) 100%);
+  --ed-dg-some-azul:linear-gradient(180deg,var(--ac) 0%,color-mix(in srgb,var(--ac) 55%,transparent) 55%,color-mix(in srgb,var(--ac) 6%,transparent) 100%);
+  --ed-dg-some-ouro:linear-gradient(180deg,var(--mk) 0%,color-mix(in srgb,var(--mk) 55%,transparent) 55%,color-mix(in srgb,var(--mk) 6%,transparent) 100%);
+}
+html.marca body{color:var(--ink)}
+html.marca .nb{border-color:color-mix(in srgb,var(--mk) 75%,transparent);box-shadow:none}
+html.marca .nb.cor-ac{color:#fff;border-color:var(--mk)}
+html.marca .nb.cor-mk{color:var(--ink9)}
+html.marca .nb.cor-ink{background:var(--ink9);color:var(--ink)}
+html.marca .kick{background:none;color:var(--mk);border:1px solid var(--mk);box-shadow:none;font-weight:400;letter-spacing:.34em}
+html.marca .ic{background:none;color:var(--mk);border:1px solid var(--mk);font-weight:400}
+/* o destaque: itálico dourado, sem marca-texto */
+html.marca .hd b,html.marca .mkr{background-image:none;font-family:'MarcaItalico',Georgia,serif;font-style:italic;color:var(--mk)}
+html.marca .btn{box-shadow:none}

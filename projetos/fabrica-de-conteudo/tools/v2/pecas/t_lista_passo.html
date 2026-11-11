@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<!-- TIPO — painel de passo pro celular, na zona segura do anúncio. 1080x772 (a faixa de cima da cena 9:16, 1 px = 1 px da tela).
+     Cópia do t_lista_cel pro clone do De2SEI7JP8r (peça nova nº 1): o mesmo gesto (itens caem na hora em que são ditos, o FOCO amarelo
+     desliza), mas o texto só começa em y 270 e acaba antes de y 738: a interface do anúncio cobre o topo, e a zona segura é y 270-1250.
+     O que o t_lista_cel não tem: `kick` como selo do passo (o "01 DE 04" da lâmina do carrossel) e `risca`, a caneta vermelha que risca um item
+     (o "número quatro, tira"), que vive DENTRO da peça: a peça com alfa por cima do painel ficaria por baixo dele.
+     Letra: título 64 px, item 52 px (nome) e 46 px (detalhe); o piso de 44 px da tela de 1080 vale. Até 4 itens de uma linha, ou 2 de duas (l2=1).
+       kick   o selo do passo (PASSO 1 DE 4) · hd  o título · it  nome|detalhe@t;… (t em s, na hora em que o item é dito)
+       l2     1 = nome e detalhe em duas linhas · risca  N@t: o item N (1 a 4) é riscado em t e o risco fica até o fim · dur
+       ?kick=PASSO 1 DE 4&hd=Baixe a Fábrica&it=Baixe o ZIP|um arquivo só@0.4;Fábrica de Conteúdo|ensina o Claude a editar@1.2&l2=1&dur=5 -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:772px}
+#stage{padding:270px 65px 24px 76px;justify-content:flex-start}
+.kick{font-size:36px;padding:6px 16px}
+.hd{font-size:64px;margin:12px 0 14px}
+.itens{position:relative;display:flex;flex-direction:column;gap:12px}
+.slot{position:relative;z-index:1}
+.gh{position:absolute;inset:0;border:3px dashed var(--ink);border-radius:var(--raio);opacity:.28}
+.item{position:relative;padding:8px 22px}
+.l2 .item{padding:8px 24px}
+.l2 .item .tx b{display:block;font-size:52px}
+.l2 .item .tx span{display:block;font-size:46px;font-weight:600;color:var(--ink6)}
+.item .tx{font:600 52px/1.1 var(--fd);color:var(--ink);white-space:nowrap;letter-spacing:var(--ls)}
+.item .tx b{font-weight:800}
+.foco{position:absolute;z-index:0;left:0;top:0;opacity:0;background:var(--mk);
+  border:var(--bw) solid var(--ink);border-radius:var(--raio)}
+.risca{position:absolute;z-index:5;left:-8px;right:-8px;top:50%;height:18px;margin-top:-9px;background:var(--no);
+  border:3px solid var(--pp);border-radius:9px;opacity:0}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="kick" id="k"></div>
+  <div class="hd" id="h"></div>
+  <div class="itens" id="li"><div class="foco" id="fo"></div></div>
+</div>
+<script>
+const dur = D.n('dur', '5');
+document.getElementById('k').textContent = D.q('kick', '');
+document.getElementById('k').style.display = D.q('kick', '') ? '' : 'none';
+document.getElementById('h').innerHTML = D.q('hd', '');
+const its = D.itens('it', 'Um|dois@0.4', ['nome', 'det']);
+const li = document.getElementById('li');
+const l2 = D.q('l2', '') === '1';
+if (l2) li.classList.add('l2');
+its.forEach((x, i) => {
+  const sl = document.createElement('div'); sl.className = 'slot';
+  const d = document.createElement('div');
+  d.className = 'nb item'; d.id = 'it' + i;
+  d.innerHTML = `<div class="tx"><b>${x.nome}</b>${x.det ? (l2 ? `<span>${x.det}</span>` : ' ' + x.det) : ''}</div>`;
+  sl.innerHTML = '<div class="gh"></div>'; sl.appendChild(d);
+  li.appendChild(sl);
+});
+// a caneta vermelha: "N@t" riscando o item N; fica dentro do slot do item, por cima dele
+const rk = D.q('risca', '').split('@');
+const rIdx = rk[0] ? parseInt(rk[0], 10) - 1 : -1;
+const rT = rk[1] ? parseFloat(rk[1]) : 0;
+if (rIdx >= 0 && rIdx < its.length) {
+  const r = document.createElement('div'); r.className = 'risca'; r.id = 'rk';
+  li.children[rIdx + 1].appendChild(r);   // children[0] é o foco
+}
+
+D.monta(tl => {
+  D.cabe('.hd', 44);
+  if (l2) { D.cabe('.item .tx b', 44, '.item'); D.cabe('.item .tx span', 44, '.item'); }
+  else D.cabe('.item .tx', 44, '.item');
+  D.camera(dur, 1.0, 1.02);
+  if (D.q('kick', '')) D.carimbo('#k', .10);
+  D.titulo('#h', .22);
+  its.forEach((x, i) => D.pousa('#it' + i, x.t, {dx: -36, dr: 0}));
+  D.desliza('#fo', its.map((_, i) => '#it' + i), its.map(x => x.t));
+  if (rIdx >= 0 && rIdx < its.length) {
+    // o risco desenha da esquerda pra direita em 0,16 s, fica, e some junto com o resto na saída
+    tl.set('#rk', {opacity: 0, scaleX: 0, rotation: -1.4, transformOrigin: '0% 50%', immediateRender: true}, 0);
+    tl.set('#rk', {opacity: 1, immediateRender: false}, rT);
+    tl.to('#rk', {scaleX: 1, duration: 0.16, ease: 'power3.in', immediateRender: false}, rT);
+    tl.to('#rk', {opacity: 0, duration: 0.2, immediateRender: false}, Math.max(rT + 0.2, dur - .45));
+  }
+  D.sai(['#k', '#h', '.item', '.gh', '#fo'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

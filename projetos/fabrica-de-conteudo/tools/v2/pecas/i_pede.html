@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<!-- INTERFACE — pede e o vídeo aparece: em cima o pedido digitado no agente, embaixo o vídeo pronto. 1080x1920, --alpha.
+     As janelas são buracos: quem põe o terminal gravado e o vídeo pronto nelas é a composição (o pede.py
+     do vídeo), nos mesmos retângulos e tempos. A peça desenha a moldura, a etiqueta do pedido, a tampa
+     amarela que espera o vídeo, o carimbo PRONTO e a coluna do tipo. Cada pedido: de `a` a `b` a janela do
+     terminal é grande (`term`) e o pedido se digita; em `b` o Enter, o terminal encolhe pra linha do pedido
+     (`tc`) e a tampa treme; em `c` a tampa vira e o vídeo aparece na janela `r`, com a coluna `col` (tipo,
+     PRONTO, n/N) ao lado ou embaixo. Tipo começando com "!" é o pedido do próprio anúncio: a etiqueta vira
+     `v_chip` e a coluna diz `v_txt` com a marca. Em `v_t` a pergunta ocupa a tela (até o `a` seguinte), e
+     de `f_t` ao fim fica a frase do fecho com a marca.
+       itens   "tipo|tampa|a|b|c|fim|tc|r|col;…" (retângulos x,y,w,h; / quebra a tampa, *grifo*)
+       term    "x,y,w,h" a janela grande do terminal (os 44 px de cima são a barra dela, onde a etiqueta pousa)
+       pede (VOCÊ PEDE) · rot  o nome do programa na barra (Claude Code) · pronto (PRONTO)
+       virada  a pergunta (/ quebra, *grifo*) · v_t (-1: sem) · v_chip · v_txt (/ quebra, *grifo*) · logo
+       fecho   a frase do fim (/ quebra, *grifo*) · f_t (-1: sem) · dur
+     ?itens=REEL|sai um/*Reel*|0|1.4|1.9|4.2|66,300,948,234|90,548,390,692|520,590,430,650;AULA|sai uma/*aula*|4.2|5.6|6.1|8.6|66,300,948,178|85,506,880,494|65,1035,880,205&v_t=-1&f_t=-1&dur=8.6 -->
+<html lang="pt-BR" class="alfa" data-qa="entra-seco">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:100vh;background:transparent}
+#stage{width:1080px;height:100vh;background:none;padding:0;display:block;position:relative;overflow:hidden}
+.ab{position:absolute}
+.fr{border:var(--bw) solid var(--ink);border-radius:var(--raio-s);background:transparent;
+  box-shadow:var(--shx,var(--sh)) var(--shx,var(--sh)) 0 var(--ink);opacity:0}
+.rot{font:600 32px/44px var(--fm);color:var(--ink4);white-space:nowrap;text-align:right}
+.chip{padding:10px 18px 12px;font:700 44px/1 var(--fm);letter-spacing:.04em;white-space:nowrap;opacity:0}
+.lid{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;opacity:0;transform-origin:50% 0}
+.lid .tw{font:700 120px/1 var(--fd);letter-spacing:var(--ls);color:var(--ink);text-align:center}
+.lid .dt{font:700 72px/1 var(--fm);color:var(--ink);letter-spacing:.2em}
+.lid .dt span{opacity:.25}
+.col{display:flex;gap:30px;align-items:flex-start;justify-content:center;opacity:0}
+.col.lado{flex-direction:column}
+.col.baixo{flex-direction:row;align-items:center;justify-content:flex-start}
+.tp{padding:14px 26px 18px;font:700 96px/1 var(--fd);letter-spacing:var(--ls);white-space:nowrap}
+.ok{padding:12px 22px 14px;font:700 60px/1 var(--fd);letter-spacing:.02em;white-space:nowrap}
+.n{font:700 52px/1 var(--fm);color:var(--ink);white-space:nowrap}
+.vq{display:flex;align-items:center;justify-content:center;opacity:0}
+.vq .f{font:700 128px/1.04 var(--fd);letter-spacing:var(--ls);color:var(--ink);text-align:center}
+.vt{font:700 68px/1.08 var(--fd);letter-spacing:var(--ls);color:var(--ink)}
+.logo{width:100%;height:96px;object-fit:contain;object-position:left center}
+.fe{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:56px;opacity:0}
+.fe .f{font:700 112px/1.04 var(--fd);letter-spacing:var(--ls);color:var(--ink);text-align:center}
+.fe .logo{height:120px;object-position:center}
+b{font-weight:inherit;padding:0 .08em;margin:0 -.03em;background:linear-gradient(var(--mk),var(--mk)) no-repeat 0 62%/0% 86%;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone}
+.lid b{background:none;color:var(--ac)}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+const dur = D.n('dur', '8.6');
+const $ = id => document.getElementById(id);
+const S = $('stage');
+const rect = s => s.split(',').map(Number);
+const grifo = s => s.replace(/\*([^*]+)\*/g, '<b>$1</b>');
+const linhas = s => s.split('/').map(grifo).join('<br>');
+const box = (el, [x, y, w, h]) => Object.assign(el.style, {left: x + 'px', top: y + 'px', width: w + 'px', height: h + 'px'});
+const add = (html) => { S.insertAdjacentHTML('beforeend', html); return S.lastElementChild; };
+// a moldura fica do lado de fora do buraco: o vídeo ocupa o retângulo inteiro
+const fora = ([x, y, w, h]) => { const b = parseFloat(D.css('--bw')) || 4; return [x - b, y - b, w + 2 * b, h + 2 * b]; };
+
+const IT = D.q('itens', 'REEL|sai um/*Reel*|0|1.4|1.9|4.2|66,300,948,234|90,548,390,692|520,590,430,650;AULA|sai uma/*aula*|4.2|5.6|6.1|8.6|66,300,948,178|85,506,880,494|65,1035,880,205')
+  .split(';').filter(Boolean).map(s => { const [tipo, tampa, a, b, c, fim, tc, r, col] = s.split('|');
+    return {tipo: tipo.replace(/^!/, ''), meta: tipo.startsWith('!'), tampa, a: +a, b: +b, c: +c, fim: +fim, tc: rect(tc), r: rect(r), col: rect(col)}; });
+const N = IT.filter(o => !o.meta).length;
+const T = rect(D.q('term', '66,300,948,344'));
+const vT = D.n('v_t', '-1'), fT = D.n('f_t', '-1');
+const logo = D.q('logo', '') ? `<img class="logo" src="${D.q('logo')}" alt="">` : '';
+
+const tf = add('<div class="ab fr" id="tf"></div>');
+box(tf, fora(T));
+tf.style.opacity = 1;   // no quadro 0 por estilo, não por set: a render que busca o tempo 0 não aplica o set dele
+const pede = add(`<div class="ab chip nb cor-mk" id="pede" style="opacity:1">${D.q('pede', 'VOCÊ PEDE')}</div>`);
+Object.assign(pede.style, {left: (T[0] + 24) + 'px', top: (T[1] - 26) + 'px'});
+const pede2 = add(`<div class="ab chip nb cor-mk" id="pede2">${D.q('v_chip', 'O PEDIDO DESTE ANÚNCIO')}</div>`);
+Object.assign(pede2.style, {left: pede.style.left, top: pede.style.top});
+// o nome do programa no canto direito da barra, como na janela de verdade
+const rot = add(`<div class="ab rot" id="rot" style="opacity:1">${D.q('rot', 'Claude Code')}</div>`);
+box(rot, [T[0], T[1], T[2] - 24, 44]);
+// a tampa espera embaixo do terminal grande, na largura toda da zona (a letra fica fora da coluna de botões)
+const lidY = T[1] + T[3] + 44;
+IT.forEach((o, k) => {
+  box(add(`<div class="ab fr" id="rf${k}"></div>`), fora(o.r));
+  const lid = add(`<div class="ab lid nb cor-mk" id="tp${k}"><div class="tw">${linhas(o.tampa)}</div>` +
+    `<div class="dt"><span>•</span><span>•</span><span>•</span></div></div>`);
+  box(lid, [T[0], lidY, Math.min(T[2], 880), 1240 - lidY]);
+  if (o.a < .05) lid.style.opacity = 1;
+  const [cx, cy, cw, ch] = o.col;
+  const n = IT.slice(0, k + 1).filter(x => !x.meta).length;
+  const col = add(`<div class="ab col ${ch > cw * .8 ? 'lado' : 'baixo'}" id="col${k}">` + (o.meta
+    ? `<div class="vt">${linhas(D.q('v_txt', 'Esse anúncio/também saiu/da *Fábrica*.'))}</div>${logo}`
+    : `<span class="tp nb cor-ac">${o.tipo}</span>`) +
+    `<span class="ok nb cor-ok" id="ok${k}">✓ ${D.q('pronto', 'PRONTO')}</span>` + (o.meta ? '' : `<span class="n">${n}/${N}</span>`) + '</div>');
+  box(col, [cx, cy, cw, ch]);
+});
+if (vT >= 0) box(add(`<div class="ab vq" id="vq"><div class="f" id="vqf">${linhas(D.q('virada', 'E esse/*anúncio*?'))}</div></div>`), [65, 300, 880, 940]);
+if (fT >= 0) box(add(`<div class="ab fe" id="fe"><div class="f" id="frase">${linhas(D.q('fecho', 'Você pede./*O vídeo aparece.*'))}</div>${logo}</div>`), [65, 290, 880, 900]);
+
+D.monta(tl => {
+  D.cabe('.lid .tw', 72, ['.lid', .92]);
+  D.cabe('.vq .f', 80, ['.vq', 1]);
+  D.cabe('.fe .f', 72, ['.fe', 1]);
+  D.cabe('.vt', 48, ['.col', 1]);
+  D.cabe('.tp', 56, ['.col', 1]);
+  // o pedido já está na tela no quadro 0 (o gancho é ele sendo digitado): opacidade no estilo, lá em cima
+  IT.forEach((o, k) => {
+    const lid = '#tp' + k, prev = IT[k - 1];
+    // o terminal grande e a tampa esperando; o pedido do anúncio troca a etiqueta
+    if (k > 0) {
+      const volta = vT > prev.fim - .01 && vT < o.a;   // depois da pergunta, o terminal volta
+      if (volta) tl.set([tf, rot], {opacity: 1}, o.a);
+      tl.set(tf, {left: fora(T)[0], top: fora(T)[1], width: fora(T)[2], height: fora(T)[3]}, o.a);
+      if (o.meta !== prev.meta) {
+        tl.set(o.meta ? pede : pede2, {opacity: 0}, o.a);
+        tl.set(o.meta ? pede2 : pede, {opacity: 1}, o.a);
+      } else if (volta) tl.set(o.meta ? pede2 : pede, {opacity: 1}, o.a);
+      D.cue(o.a, 'swish');
+    }
+    if (o.a < .05) {   // o primeiro já está na tela no quadro 0, com o grifo varrendo
+      D.marca(lid + ' .tw b', .1);
+    } else {
+      tl.fromTo(lid, {opacity: 0, y: -16, '--shx': '0px'}, {opacity: 1, y: 0, '--shx': D.SH + 'px', duration: .22, ease: D.P.POUSA}, o.a);
+      D.palavras(lid + ' .tw', o.a + .05, .06);
+      D.marca(lid + ' .tw b', o.a + .3);
+    }
+    for (let t = o.a + .2; t < o.c - .3; t += .9)
+      tl.fromTo(lid + ' .dt span', {opacity: .25}, {opacity: 1, duration: .15, stagger: .15, yoyo: true, repeat: 1, ease: 'none', immediateRender: false}, t);
+    if (o.b - o.a > .5) D.cue(o.a + .02, 'type', {dur: +(o.b - o.a - .35).toFixed(3)});
+    // o Enter: o terminal encolhe pra linha do pedido e a tampa treme, esperando
+    D.cue(o.b, 'click');
+    const [x, y, w, h] = fora(o.tc);
+    tl.set(tf, {left: x, top: y, width: w, height: h}, o.b);
+    tl.fromTo(lid, {x: 0}, {x: 8, duration: .05, yoyo: true, repeat: 3, ease: 'none', immediateRender: false}, o.b + .05);
+    // o vídeo aparece: a tampa sobe e a janela fica
+    tl.to(lid, {scaleY: 0, duration: .16, ease: 'power3.in'}, o.c);
+    tl.set(lid, {opacity: 0}, o.c + .16);
+    D.cue(o.c, 'whoosh');
+    tl.set('#rf' + k, {opacity: 1}, o.c);
+    tl.fromTo('#rf' + k, {'--shx': '0px'}, {'--shx': D.SH + 'px', duration: .25, ease: D.P.POUSA}, o.c);
+    tl.fromTo('#col' + k, {opacity: 0}, {opacity: 1, duration: .01}, o.c + .1);
+    if (o.meta) {
+      D.palavras(`#col${k} .vt`, o.c + .15, .06);
+      D.marca(`#col${k} .vt b`, o.c + .6);
+      tl.fromTo(`#col${k} .logo`, {opacity: 0, y: 20}, {opacity: 1, y: 0, duration: .3, ease: D.P.POUSA}, o.c + .5);
+    } else {
+      tl.fromTo(`#col${k} .tp`, {opacity: 0, x: -30}, {opacity: 1, x: 0, duration: .25, ease: D.P.POUSA}, o.c + .1);
+      tl.fromTo(`#col${k} .n`, {opacity: 0}, {opacity: 1, duration: .2}, o.c + .6);
+    }
+    D.carimbo('#ok' + k, o.c + (o.meta ? .9 : .45), -3);
+    // sai pro próximo: corte seco, as janelas de baixo acabam no mesmo quadro
+    tl.set(['#rf' + k, '#col' + k], {opacity: 0}, o.fim);
+  });
+  if (vT >= 0) {
+    tl.set([tf, pede, pede2, rot], {opacity: 0}, vT);
+    D.cue(vT, 'whoosh-out');
+    tl.set('#vq', {opacity: 1}, vT + .05);
+    D.palavras('#vqf', vT + .1, .07);
+    D.marca('#vqf b', vT + .45);
+    D.cue(vT + .1, 'pop');
+    const prox = IT.find(o => o.a > vT);
+    if (prox) tl.set('#vq', {opacity: 0}, prox.a);
+  }
+  if (fT >= 0) {
+    tl.set([tf, pede, pede2, rot], {opacity: 0}, fT);
+    tl.set('#fe', {opacity: 1}, fT);
+    D.palavras('#frase', fT + .05, .07);
+    D.marca('#frase b', fT + .5);
+    tl.fromTo('#fe .logo', {opacity: 0, y: 24}, {opacity: 1, y: 0, duration: .3, ease: D.P.POUSA}, fT + .6);
+    D.cue(fT + .05, 'pop');
+  }
+  return dur;
+});
+</script>
+</body>
+</html>

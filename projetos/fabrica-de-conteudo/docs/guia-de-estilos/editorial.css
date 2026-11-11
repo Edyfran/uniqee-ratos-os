@@ -1,0 +1,44 @@
+/* Editorial: cara de revista. Papel liso, serifada leve nos títulos, nenhuma borda, nenhuma
+   sombra, só um filete fino em cima de cada cartão. A palavra de destaque vira itálico na cor
+   do bloco, e a etiqueta é texto espaçado, sem caixa.
+   Copie para marca/tema.css e troque as quatro cores (docs/guia-de-estilos.md).
+   As letras moram em tools/video-use/assets/fontes/: copie cada arquivo do url() pra
+   marca/fontes/, com o <Família>-OFL.txt do lado. O font-weight do @font-face prende a
+   Fraunces no peso leve, mesmo quando a peça pede negrito. */
+
+@font-face{font-family:'Marca';font-weight:340;src:url(fontes/Fraunces-Variable.ttf) format('truetype')}
+@font-face{font-family:'MarcaItalico';font-style:italic;src:url(fontes/InstrumentSerif-Italic.ttf) format('truetype')}
+@font-face{font-family:'MarcaApoio';font-weight:100 900;src:url(fontes/Inter-opsz-wght.ttf) format('truetype')}
+
+html.marca{
+  /* as quatro cores: chão, letra, bloco, marcador */
+  --pp:#F5F2EB; --ink:#1B1B1B; --ac:#7A2E2E; --mk:#E8DCC4;
+  --ink9:var(--ink); --sur:color-mix(in srgb,var(--pp) 40%,white);
+  --ink6:color-mix(in srgb,var(--ink) 68%,var(--pp)); --ink2:color-mix(in srgb,var(--ink) 16%,var(--pp));
+  --ac2:color-mix(in srgb,var(--ac) 12%,white); --act:color-mix(in srgb,var(--ac) 20%,white);
+  --fd:'Marca',Georgia,serif; --fm:'MarcaApoio',system-ui,sans-serif; --ls:-.02em;
+
+  /* a forma: sem borda, sem sombra, canto quase reto, papel liso */
+  --bw:0px; --sh:0px; --sombra:transparent; --raio:2px; --raio-s:2px;
+  --tex:none;
+  font-synthesis:none; font-variation-settings:'SOFT' 0,'WONK' 0;
+
+  /* o reel editorial e a capa */
+  --ed-sans:'MarcaApoio',system-ui,sans-serif;
+  --ed-pp:var(--pp); --ed-pp-luz:color-mix(in srgb,var(--pp) 40%,white); --ed-folha:transparent;
+  --ed-tx:var(--ink);
+  --ed-dg-azul:linear-gradient(180deg,var(--ac) 0%,var(--ac) 100%);
+  --ed-dg-ouro:linear-gradient(180deg,var(--ink) 0%,var(--ink) 100%);
+  --ed-dg-some-azul:linear-gradient(180deg,var(--ac) 0%,color-mix(in srgb,var(--ac) 55%,transparent) 55%,color-mix(in srgb,var(--ac) 6%,transparent) 100%);
+  --ed-dg-some-ouro:linear-gradient(180deg,var(--ink) 0%,color-mix(in srgb,var(--ink) 55%,transparent) 55%,color-mix(in srgb,var(--ink) 6%,transparent) 100%);
+}
+/* o cartão é papel sobre papel: um filete em cima, nada mais */
+html.marca .nb{border-top:2px solid var(--ink);box-shadow:none}
+html.marca .nb.cor-ac,html.marca .nb.cor-mk,html.marca .nb.cor-ink{border-top:0}
+/* a etiqueta é texto espaçado na cor do bloco, sem caixa */
+html.marca .kick{background:none;border:0;box-shadow:none;padding:0;color:var(--ac);font-weight:600;letter-spacing:.24em}
+/* o destaque é itálico, não marca-texto */
+html.marca .hd b,html.marca .mkr{background-image:none;font-family:'MarcaItalico',Georgia,serif;font-style:italic;
+  font-weight:400;color:var(--ac);letter-spacing:0}
+html.marca .ic{background:none;border:1px solid var(--ink);border-radius:50%;font-weight:400}
+html.marca .btn{box-shadow:none}

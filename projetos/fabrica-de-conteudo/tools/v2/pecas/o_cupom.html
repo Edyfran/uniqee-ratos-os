@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<!-- OFERTA — cupom. 1080x1920, --alpha. Percentual + código em tamanho de leitura.
+     O ticket cai, o percentual conta até o valor, e o código é DIGITADO na caixa
+     tracejada — quem assiste vê o que vai digitar. Depois repousa, sem contagem
+     regressiva e sem nada que sugira que o desconto está expirando.
+       ?pct=10&rot=de desconto&cod=PROMO10&dica=no pagamento&pos=base&t=0.3&t_cod=0.9&dur=6 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+.zona{position:absolute;left:56px;right:70px}
+.zona.topo{top:240px}
+.zona.centro{top:780px}
+.zona.base{top:1260px}
+.tk{display:flex;align-items:stretch;opacity:0;overflow:hidden}
+.pct{flex:none;width:330px;background:var(--mk);border-right:var(--bw) dashed var(--ink);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 12px}
+.pct b{font:700 140px/.9 var(--fd);letter-spacing:-.05em;color:var(--ink);display:inline-block}
+.pct span{font:700 28px/1.1 var(--fm);letter-spacing:.12em;text-transform:uppercase;margin-top:14px;text-align:center}
+.cod{flex:1;min-width:0;padding:30px 34px;display:flex;flex-direction:column;justify-content:center;gap:16px}
+.cod .rot{font:700 26px/1 var(--fm);letter-spacing:.14em;text-transform:uppercase;color:var(--ink6)}
+.cx{display:flex;align-items:center;border:var(--bw) dashed var(--ink);border-radius:var(--raio-s);
+  padding:18px 22px;background:#fff;min-height:128px}
+.cx .tx{font:700 var(--tc,84px)/1 var(--fm);letter-spacing:.03em;color:var(--ink);white-space:nowrap}
+.cx .car{flex:none;width:8px;height:.9em;font-size:var(--tc,84px);background:var(--ac);margin-left:6px}
+.cod .dica{font:600 34px/1.15 var(--fd);color:var(--ink6)}
+.cod .dica:empty{display:none}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="zona" id="z">
+    <div class="tk nb" id="tk">
+      <div class="pct"><b id="pn"></b><span id="pr"></span></div>
+      <div class="cod">
+        <div class="rot">cupom</div>
+        <div class="cx" id="cx"><span class="tx" id="ct"></span><span class="car" id="car"></span></div>
+        <div class="dica" id="di"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const dur = D.n('dur', '6'), t0 = D.n('t', '0.3'), tCod = D.n('t_cod', t0 + .6 + ''), pct = D.n('pct', '10');
+const cod = D.q('cod', 'PROMO10');   // repo: exemplo neutro no lugar do código do dono (o pacote vai pro aluno)
+document.getElementById('z').classList.add(['topo', 'centro', 'base'].includes(D.q('pos')) ? D.q('pos') : 'base');
+document.getElementById('pn').textContent = pct + '%';
+document.getElementById('pr').textContent = D.q('rot', 'de desconto');
+document.getElementById('ct').textContent = cod;
+document.getElementById('di').textContent = D.q('dica', '');
+
+D.monta(tl => {
+  // o código cabe inteiro na caixa: a fonte sai do número de letras
+  const cx = document.getElementById('cx');
+  const util = cx.clientWidth - 44 - 14;
+  document.documentElement.style.setProperty('--tc', Math.min(84, Math.floor(util / (cod.length * .64))) + 'px');
+  D.pousa('#tk', t0, {rot: D.P.ROT, s: 1.08, som: 'pop'});
+  D.conta('#pn', 0, pct, t0 + .2, .6, n => Math.round(n) + '%');
+  const fim = D.digita('#ct', tCod, .075);
+  // cursor pisca até a última letra, e some depois
+  for (let t = t0; t < fim; t += .5) tl.to('#car', {opacity: 0, duration: .01}, t + .25).to('#car', {opacity: 1, duration: .01}, t + .5);
+  tl.to('#car', {opacity: 0, duration: .15}, fim + .1);
+  tl.to('#cx', {scale: 1.05, duration: .14, ease: 'power2.out', yoyo: true, repeat: 1, transformOrigin: 'left center'}, fim + .05);
+  tl.to('#cx', {backgroundColor: D.css('--mk'), duration: .25}, fim + .05);
+  D.cue(fim + .05, 'ding');
+  D.flutua('#tk', fim + .5, dur - .5, .8);
+  D.sai('#tk', dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

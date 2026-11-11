@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<!-- INTERFACE (visual do Instagram escuro) — campo de comentário digitando: a pílula aparece (fade), ganha foco, a palavra é digitada letra a letra, o botão
+     acende; ao enviar o campo esvazia e o comentário sobe como balão, depois "..." e o cartão da resposta pousa. Sai por corte.
+     Clone do efeito 13 da referência Deps_-cz-Fg. 1080x1920, --alpha.
+       palavra  o que digita (QUERO) · ph  o texto vazio (Adicione um comentário…) · eu  o rótulo do balão (você)
+       quem  o autor da resposta (ninja.automacoes) · resp  a resposta (Te mandei o link) · x  y  o canto do campo (248, 1441; o balão e o cartão sobem a partir dele: balão y-304, cartão y-211) · dur (2.25)
+       ?palavra=QUERO&ph=Adicione um comentário…&eu=você&quem=ninja.automacoes&resp=Te mandei o link&dur=2.25 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+/* INTERFACE REAL: o campo e a notificação têm a cara do Instagram (tema escuro), não a da Fábrica (ordem do dono, 20/10) */
+html,body,#stage{width:1080px;height:1920px;background:transparent}
+#stage{padding:0;display:block;overflow:hidden;background:none;position:relative;font-family:-apple-system,"SF Pro Display","Helvetica Neue",Arial,sans-serif;
+  --g:#1c1f21;--gb:rgba(255,255,255,.1);--tx:#f5f5f5;--mu:#8a8e91}
+.ig{background:var(--g);border:2px solid var(--gb);box-sizing:border-box;box-shadow:0 6px 28px rgba(0,0,0,.45)}
+.pf{border-radius:50%;background:#a9aeb2;position:relative;overflow:hidden;flex:none}
+.pf:before{content:"";position:absolute;left:30%;top:18%;width:40%;height:38%;border-radius:50%;background:#6f757a}
+.pf:after{content:"";position:absolute;left:14%;top:62%;width:72%;height:60%;border-radius:50%;background:#6f757a}
+#cp{position:absolute;width:586px;height:99px;border-radius:50px;opacity:0}
+#cp .pf{position:absolute;left:18px;top:25px;width:48px;height:48px}
+#ph{position:absolute;left:84px;top:0;height:99px;display:flex;align-items:center;font-size:27px;line-height:1;color:var(--mu);white-space:nowrap}
+#lin{position:absolute;left:84px;top:0;height:99px;display:flex;align-items:center;white-space:nowrap}
+#tx{font-weight:700;font-size:38px;line-height:1;color:var(--tx);letter-spacing:.02em}
+#tx span{display:none}
+#car{flex:none;width:3px;height:42px;margin-left:3px;background:var(--tx);opacity:0}
+#bt{position:absolute;right:18px;top:25px;width:48px;height:48px;border-radius:50%;background:#3b3f42;display:flex;align-items:center;justify-content:center}
+#bt svg{width:22px;height:22px}
+#bt path{stroke:#9a9ea1}
+#foc{position:absolute;inset:-4px;border-radius:54px;border:4px solid #e8ebda;opacity:0}
+#bl{position:absolute;left:259px;top:0;height:73px;padding:0 26px 0 22px;border-radius:24px;opacity:0;display:flex;align-items:center;gap:12px;transform-origin:50% 100%}
+#bl i{font-size:21px;line-height:1;color:var(--mu);font-style:normal}
+#bl b{font-size:42px;line-height:1;color:var(--tx);font-weight:700;letter-spacing:.02em}
+#bl em{position:absolute;right:-14px;top:-16px;width:34px;height:34px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center}
+#bl em svg{width:22px;height:22px}
+#pf1{position:absolute;left:0;top:0;width:34px;height:34px;opacity:0}
+#fio{position:absolute;width:2px;height:62px;background:rgba(255,255,255,.35);opacity:0}
+#pt{position:absolute;left:0;top:0;width:96px;height:56px;border-radius:28px;opacity:0;display:flex;align-items:center;justify-content:center;gap:9px}
+#pt s{width:11px;height:11px;border-radius:50%;background:var(--tx);display:block}
+#av2{position:absolute;left:0;top:0;width:36px;height:36px;border-radius:50%;background:#d9593d;color:#fff;font-weight:700;font-size:21px;display:flex;align-items:center;justify-content:center;opacity:0}
+#rs{position:absolute;left:0;top:0;width:456px;height:165px;border-radius:24px;opacity:0;padding:18px 24px;box-sizing:border-box}
+#rs b{display:block;font-size:22px;line-height:1;color:var(--tx);font-weight:700}
+#rs p{margin:12px 0 0;font-size:26px;line-height:1.1;color:var(--tx);font-weight:400}
+#rs .bb{position:absolute;left:24px;right:24px;bottom:16px;height:36px;border-radius:18px;background:#3b3f42;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:600;color:#b8bcbf;letter-spacing:.01em}
+#bbt{opacity:0}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="ig" id="bl"><i id="eu"></i><b id="pal"></b><em><svg viewBox="0 0 24 24"><path fill="#ed4956" d="M12 21s-8-5.2-8-11a4.6 4.6 0 0 1 8-3 4.6 4.6 0 0 1 8 3c0 5.800-8 11-8 11z"/></svg></em></div>
+  <div class="pf" id="pf1"></div><div id="fio"></div>
+  <div class="ig" id="pt"><s></s><s></s><s></s></div>
+  <div id="av2"></div>
+  <div class="ig" id="rs"><b id="qm"></b><p id="rp"></p><div class="bb"><span id="bbt"></span></div></div>
+  <div class="ig" id="cp"><div id="foc"></div><div class="pf"></div><div id="ph"></div>
+    <div id="lin"><span id="tx"></span><i id="car"></i></div>
+    <div id="bt"><svg viewBox="0 0 22 22" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M11 18V5M5 11L11 4L17 11"/></svg></div></div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const dur = D.n('dur', '2.25'), X = D.n('x', '248'), Y = D.n('y', '1441');
+const palavra = D.q('palavra', 'QUERO');
+$('ph').textContent = D.q('ph', 'Adicione um comentário…');
+$('eu').textContent = D.q('eu', 'você'); $('pal').textContent = palavra;
+$('qm').textContent = D.q('quem', 'ninja.automacoes'); $('rp').textContent = D.q('resp', 'Te mandei o link');
+$('tx').innerHTML = [...palavra].map(c => '<span>' + c + '</span>').join('');
+Object.assign($('cp').style, {left: X + 'px', top: Y + 'px'});
+$('bl').style.top = (Y - 304) + 'px';
+Object.assign($('pf1').style, {left: (X + 4) + 'px', top: (Y - 300) + 'px'});
+Object.assign($('fio').style, {left: (X + 21) + 'px', top: (Y - 262) + 'px'});
+Object.assign($('pt').style, {left: (X + 108) + 'px', top: (Y - 232) + 'px'});
+Object.assign($('av2').style, {left: (X + 4) + 'px', top: (Y - 206) + 'px'});
+Object.assign($('rs').style, {left: (X + 52) + 'px', top: (Y - 211) + 'px'});
+$('av2').textContent = D.q('quem', 'ninja.automacoes')[0].toUpperCase();
+$('bbt').textContent = D.q('btn', 'Abrir link');
+D.monta(tl => {
+  const ts = [...$('tx').children], ESP = D.n('esp', '0.11'), T0 = D.n('digita', '1.3');
+  tl.fromTo('#cp', {opacity: .35}, {opacity: 1, duration: .125, ease: 'none'}, 0); D.cue(0, 'pop');
+  tl.to('#foc', {opacity: 1, duration: .125, ease: 'none'}, T0 - .45);
+  tl.set('#ph', {opacity: 0}, T0 - .01);
+  tl.set('#car', {opacity: 1}, T0 - .01);
+  tl.set('#bt', {backgroundColor: '#f5f0e6'}, T0 - .01); tl.set('#bt path', {stroke: '#1c1f21'}, T0 - .01);
+  ts.forEach((s, i) => { tl.set(s, {display: 'inline-block'}, T0 + i * ESP); D.cue(T0 + i * ESP, 'click'); });
+  const te = T0 + ts.length * ESP + .1;             // enviou: o campo esvazia e o balão sobe
+  tl.set('#lin', {opacity: 0}, te); tl.set('#foc', {opacity: 0}, te);
+  tl.set('#bt', {backgroundColor: '#3b3f42'}, te); tl.set('#bt path', {stroke: '#9a9ea1'}, te);
+  tl.set('#ph', {opacity: 1}, te + .12);
+  tl.fromTo('#bl', {opacity: 0, y: 300, scale: .6}, {opacity: 1, y: 0, scale: 1, duration: .125, ease: 'power3.out'}, te); D.cue(te, 'swish');
+  tl.fromTo('#pf1', {opacity: 0}, {opacity: 1, duration: .1, ease: 'none'}, te + .1);
+  tl.fromTo('#fio', {opacity: 0}, {opacity: 1, duration: .1, ease: 'none'}, te + .12);
+  tl.fromTo('#av2', {opacity: 0}, {opacity: 1, duration: .1, ease: 'none'}, te + .12);
+  tl.set('#pt', {opacity: 1}, te + .125);
+  tl.set('#pt', {opacity: 0}, te + .25);
+  tl.fromTo('#rs', {opacity: 0, y: 10}, {opacity: 1, y: 0, duration: .125, ease: 'power3.out'}, te + .25); D.cue(te + .25, 'pop');
+  tl.set('#bbt', {opacity: 1}, te + .9);
+  tl.set('#cp,#bl,#rs,#pt,#pf1,#fio,#av2', {opacity: 0}, dur - .04);
+  return dur;
+});
+</script>
+</body>
+</html>

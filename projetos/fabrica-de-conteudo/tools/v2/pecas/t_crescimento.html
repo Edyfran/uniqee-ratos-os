@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<!-- TIPO — duas linhas que se afastam, v2. 1440x1028.
+     O argumento é a DISTÂNCIA — agora ela é desenhada: o vão entre as duas é
+     um bloco amarelo que cresce junto. As duas avançam pelo MESMO x (um recorte
+     só), e uma bolinha anda na ponta de cada uma.
+       ?sobe=Minha empresa&fica=Minhas horas&t_traco=0.42&t_fim=3.60&dur=4.9 -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1440px;height:1028px}
+#stage{padding:44px var(--marg);justify-content:center}
+svg{width:100%;height:auto;display:block;overflow:visible}
+.vao{fill:var(--mk)}
+.fio{fill:none;stroke:var(--ink);stroke-linecap:round;stroke-linejoin:round}
+.up{fill:none;stroke:var(--ac);stroke-linecap:round}
+.flat{fill:none;stroke:var(--sur);stroke-linecap:round}
+.pu{fill:var(--mk);stroke:var(--ink);stroke-width:7}
+.pf{fill:var(--sur);stroke:var(--ink);stroke-width:7}
+.caixa{fill:var(--ac);stroke:var(--ink);stroke-width:5}
+.sombra{fill:var(--ink)}
+.rot{font:800 54px/1 var(--fd);letter-spacing:-.01em}
+.rot.up2{fill:#fff}
+.rot.flat2{fill:var(--ink6)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <svg viewBox="0 0 1260 560" preserveAspectRatio="xMidYMid meet">
+    <defs><clipPath id="rec"><rect id="rc" x="0" y="-40" width="0" height="640"></rect></clipPath></defs>
+    <g clip-path="url(#rec)">
+      <path class="vao" d="M40,470 C220,455 380,360 540,250 C640,182 700,140 740,118 L740,456 C700,460 640,466 540,472 C380,482 220,489 40,492 Z"></path>
+      <path class="fio" stroke-width="28" d="M40,470 C220,455 380,360 540,250 C640,182 700,140 740,118"></path>
+      <path class="up" id="pu" stroke-width="14" d="M40,470 C220,455 380,360 540,250 C640,182 700,140 740,118"></path>
+      <path class="fio" stroke-width="24" d="M40,492 C220,489 380,482 540,472 C640,466 700,460 740,456"></path>
+      <path class="flat" id="pf" stroke-width="10" d="M40,492 C220,489 380,482 540,472 C640,466 700,460 740,456"></path>
+    </g>
+    <circle class="pf" id="cf" r="17" cx="40" cy="492" opacity="0"></circle>
+    <circle class="pu" id="cu" r="20" cx="40" cy="470" opacity="0"></circle>
+    <g id="gu" opacity="0"><rect class="sombra" id="bs"></rect><rect class="caixa" id="bu"></rect><text id="ru" class="rot up2" x="790" y="136"></text></g>
+    <text id="rf" class="rot flat2" x="790" y="474" opacity="0"></text>
+  </svg>
+</div>
+<script>
+const dur = D.n('dur', '4.9'), tTraco = D.n('t_traco', '0.42'), tFim = D.n('t_fim', '3.60');
+document.getElementById('ru').textContent = D.q('sobe', 'Minha empresa');
+document.getElementById('rf').textContent = D.q('fica', 'Minhas horas');
+
+D.monta(tl => {
+  // a etiqueta de cima é um bloco com sombra dura, medido do texto
+  const b = document.getElementById('ru').getBBox(), sh = D.SH, px = 20, py = 12;
+  const r = {x: b.x - px, y: b.y - py, width: b.width + px * 2, height: b.height + py * 2};
+  Object.entries(r).forEach(([k, v]) => { document.getElementById('bu').setAttribute(k, v); document.getElementById('bs').setAttribute(k, v); });
+  document.getElementById('bs').setAttribute('transform', `translate(${sh} ${sh})`);
+  ['bu', 'bs'].forEach(id => { document.getElementById(id).setAttribute('rx', parseFloat(D.css('--raio-s'))); });
+
+  const amostra = p => { const L = p.getTotalLength(), a = []; for (let i = 0; i <= 300; i++) a.push(p.getPointAtLength(L * i / 300)); return a; };
+  const U = amostra(document.getElementById('pu')), F = amostra(document.getElementById('pf'));
+  const em = (a, x) => { let m = a[0]; for (const p of a) { if (p.x <= x) m = p; else break; } return m; };
+  const rc = document.getElementById('rc'), cu = document.getElementById('cu'), cf = document.getElementById('cf');
+  const o = {w: 0};
+  const pos = () => {
+    rc.setAttribute('width', o.w);
+    const x = Math.max(40, Math.min(o.w, 740)), a = em(U, x), f = em(F, x);
+    cu.setAttribute('cx', a.x); cu.setAttribute('cy', a.y);
+    cf.setAttribute('cx', f.x); cf.setAttribute('cy', f.y);
+  };
+  pos();
+
+  D.camera(dur, 1.0, 1.02);
+  // os rótulos chegam ANTES do traço: dizem o que vai ser desenhado
+  tl.fromTo('#gu', {opacity: 0, y: -30}, {opacity: 1, y: 0, duration: D.P.ENT * 1.2, ease: D.P.MOLA}, .06);
+  tl.fromTo('#rf', {opacity: 0, y: 20}, {opacity: 1, y: 0, duration: D.P.ENT, ease: D.P.EASE}, .14);
+  tl.fromTo([cu, cf], {opacity: 0}, {opacity: 1, duration: .2}, tTraco);
+  tl.fromTo(o, {w: 0}, {w: 790, duration: tFim - tTraco, ease: 'sine.inOut', onUpdate: pos}, tTraco);
+  tl.to(cu, {attr: {r: 28}, duration: .16, ease: 'power2.out', yoyo: true, repeat: 1}, tFim - .1);
+  D.sai(['svg'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

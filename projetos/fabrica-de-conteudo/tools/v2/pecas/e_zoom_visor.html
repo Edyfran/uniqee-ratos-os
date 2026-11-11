@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<!-- EFEITO — zoom digital com visor de câmera (clone do efeito 06 "digital zoom" do De25fKeTRl7, ficha 07, 30 qps medidos no rosto): o quadro
+     inteiro dá o soco de 1,00 a 1,12 em 2 quadros (com borrão de movimento) e fica entre 1,15 e 1,35 até o corte seco; por cima, as 4 cantoneiras
+     amarelas no rosto e a barra do visor (ponto REC, timecode do vídeo, régua 1x a 2x com o marcador, leitura 1.00 a 1.30). 1080x1920, tela
+     cheia, --alpha. A peça desenha o zoom ela mesma, nos quadros do vídeo-base (`fr`), porque a ref desce a pessoa uns 330 px enquanto cresce e
+     o quadro de cima da base não tem essa folga: as primeiras linhas do quadro são ESPELHADAS pra cima (as ripas do painel seguem na vertical)
+     e escurecem um pouco. A foto aprovada não é tocada. Dura os quadros f224 a f256 da ref (33); no f257 a ref corta seco pra base, que é o fim
+     da peça.
+       fr     pasta dos quadros do vídeo-base a 30 qps desde o t0 da peça (f000.jpg…, 1080x1920) ou uma imagem só (foto parada); sem `fr`, marcador listrado
+       olhos  o centro dos olhos no quadro-base, x,y em px (539.4,752.8 = a foto aprovada; a ref é 550,668). O zoom e a descida acontecem em torno deles
+       alvo   onde os olhos terminam na tela, y (1000): a ref termina em 1002; a descida inteira é escalada por (alvo - olhos y) / 334
+       io     a distância entre os olhos no quadro-base (131.7); a ref é 129. Escala as cantoneiras
+       tc     o tempo do vídeo, em s, no primeiro quadro da peça (7.4667): o timecode conta o tempo do vídeo, como na ref
+       folga  quantas linhas de cima se espelham pra dar folga (110) · borrao  1 liga o borrão de movimento do soco (1)
+       dur    duração (1.1 = 33 quadros)
+     etiqueta: zoom-digital, visor-de-camera, tela-cheia
+       ?fr=quadros&olhos=539.4,752.8&alvo=1000&io=131.7&tc=7.4667&dur=1.1 -->
+<html lang="pt-BR" class="alfa" data-qa="fundo">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block;overflow:hidden;position:relative}
+#c{position:absolute;left:0;top:0;width:1080px;height:1920px}
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="c" width="1080" height="1920"></canvas></div>
+<script>
+const $ = id => document.getElementById(id);
+const dur = D.n('dur', String(33 / 30)), HR = Math.round(D.n('folga', '110')), BORRAO = D.n('borrao', '1') >= 1;
+// `olhos`: um par (x,y) = o rosto parado; vários pares separados por `;` = o rosto quadro a quadro (o avatar da HeyGen se mexe e a mira e o zoom seguem o rosto dele)
+const OLH = D.q('olhos', '539.4,752.8').split(';').map(s => s.split(',').map(Number)), ALVO = D.n('alvo', '1000'), KIO = D.n('io', '131.7') / 129;
+const olhosEm = j => { const u = Math.max(0, Math.min(OLH.length - 1, j)), a = Math.floor(u), b = Math.min(OLH.length - 1, a + 1), f = u - a;
+  return [OLH[a][0] + (OLH[b][0] - OLH[a][0]) * f, OLH[a][1] + (OLH[b][1] - OLH[a][1]) * f]; };
+const TC0 = D.n('tc', String(224 / 30));
+const MK = D.css('--mk') || '#F2C744', AC = D.css('--ac') || '#0640FB';   // o amarelo e o azul são os do núcleo (docs/direcao.md); da ref fica a mecânica
+
+// a ref, medida quadro a quadro (f224 a f256): distância entre os olhos (io, base 128,7) e o centro dos olhos na tela (x, y). O f225 não tem rosto
+// (borrão): é o meio entre o f224 e o f226. A descida (y) é normalizada pelo total da ref (668 -> 1002) e reescalada pro alvo da nossa foto.
+const IO = [132.2, 138.3, 144.3, 154.8, 149.7, 147.4, 148.4, 148.2, 149.0, 152.2, 164.7, 173.9, 169.3, 166.7, 162.0, 163.1, 161.9, 161.9, 161.3, 161.1, 162.3, 161.3, 161.3, 161.4, 160.9, 160.8, 161.4, 162.1, 160.9, 161.6, 162.7, 162.3, 163.0];
+const EX = [551, 577, 603, 601, 580, 577, 579, 578, 578, 580, 584, 597, 585, 585, 584, 585, 584, 584, 584, 586, 585, 586, 585, 586, 585, 585, 586, 585, 586, 586, 587, 585, 585];
+const EY = [672, 818, 964, 955, 948, 947, 948, 948, 946, 954, 976, 991, 990, 988, 990, 989, 989, 988, 989, 990, 991, 993, 993, 994, 996, 999, 998, 1000, 1001, 1000, 1000, 1002, 1002];
+// a leitura do visor (OCR da ref): 1.00 no f224, 1.15 de f229 a f232, 1.26 em f238, sobe 0,01 a cada 4 quadros até 1.30
+const LEIT = [1.00, 1.01, 1.07, 1.17, 1.15, 1.15, 1.15, 1.15, 1.15, 1.16, 1.20, 1.29, 1.26, 1.26, 1.26, 1.26, 1.27, 1.27, 1.27, 1.27, 1.28, 1.28, 1.28, 1.28, 1.29, 1.29, 1.29, 1.29, 1.30, 1.30, 1.30, 1.30, 1.30];
+const N = IO.length, S0 = 128.7, REF_EY0 = 668, REF_EY1 = 1002;
+const alvoDe = j => {                                    // (escala, olhos na tela) do quadro j, também fracionário (o borrão)
+  const u = Math.max(0, Math.min(N - 1, j)), a = Math.floor(u), b = Math.min(N - 1, a + 1), f = u - a, L = (A, B) => A + (B - A) * f;
+  const s = L(IO[a], IO[b]) / S0, ex = L(EX[a], EX[b]), ey = L(EY[a], EY[b]), [ox, oy] = olhosEm(j), esc = (ALVO - oy) / (REF_EY1 - REF_EY0);
+  return {s, x: ox + (ex - 550), y: oy + (ey - REF_EY0) * esc, ox, oy};
+};
+
+// os quadros do vídeo-base, com a folga espelhada em cima
+const fr = D.q('fr', ''), raiz = fr ? (fr[0] === '/' ? 'file://' + fr : fr).replace(/\/$/, '') : '';
+const unica = /\.(jpe?g|png|webp)$/i.test(raiz), NQ = Math.ceil(dur * 30) + 2, imgs = [];
+if (raiz) for (let i = 0; i < (unica ? 1 : NQ); i++) {
+  const m = new Image(); m.src = unica ? raiz : raiz + '/f' + String(i).padStart(3, '0') + '.jpg'; m.style.display = 'none';
+  document.body.appendChild(m); imgs.push(m);
+}
+const ext = document.createElement('canvas'); ext.width = 1080; ext.height = 1920 + HR;
+const eg = ext.getContext('2d');
+let ultimo = -1;
+function montaExt(k) {                                    // o quadro k com HR linhas de cima espelhadas (e escurecidas) pra dar folga
+  const im = imgs.length ? imgs[Math.min(k, imgs.length - 1)] : null;
+  if (!im || !im.naturalWidth) { eg.fillStyle = '#2a2d33'; eg.fillRect(0, 0, 1080, 1920 + HR); return false; }
+  if (ultimo === (unica ? 0 : k)) return true;
+  ultimo = unica ? 0 : k;
+  eg.clearRect(0, 0, 1080, 1920 + HR);
+  eg.drawImage(im, 0, HR, 1080, 1920);
+  eg.save(); eg.translate(0, HR); eg.scale(1, -1); eg.drawImage(im, 0, 0, 1080, HR, 0, 0, 1080, HR); eg.restore();
+  const g = eg.createLinearGradient(0, 0, 0, HR); g.addColorStop(0, 'rgba(0,0,0,.34)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+  eg.fillStyle = g; eg.fillRect(0, 0, 1080, HR);          // o espelho some no escuro pro alto, sem emenda visível
+  return true;
+}
+
+// as cantoneiras, no espaço da imagem-base relativo aos olhos. Medidas na ref por limiar de cor (f240 a f256: caixa (324,948)-(757,1335) com os
+// olhos em (585,991) e zoom 1,26) e divididas pelo zoom: esquerda -207, direita +137, topo -34 (logo acima dos olhos), pé +273 (abaixo do queixo)
+const CX0 = -207 * KIO, CX1 = 137 * KIO, CY0 = -34 * KIO, CY1 = 273 * KIO, PERNA = 50;
+function cantoneiras(c, s, OX, OY) {
+  c.save();
+  c.lineWidth = 3.6 / s; c.lineCap = 'square'; c.strokeStyle = 'rgb(250,246,208)';   // creme quase branco (a ref mede 242/240/196 nas quinas)
+  const p = PERNA / s, x0 = OX + CX0, x1 = OX + CX1, y0 = OY + CY0, y1 = OY + CY1;
+  c.beginPath();
+  c.moveTo(x0, y0 + p); c.lineTo(x0, y0); c.lineTo(x0 + p, y0);
+  c.moveTo(x1 - p, y0); c.lineTo(x1, y0); c.lineTo(x1, y0 + p);
+  c.moveTo(x0, y1 - p); c.lineTo(x0, y1); c.lineTo(x0 + p, y1);
+  c.moveTo(x1 - p, y1); c.lineTo(x1, y1); c.lineTo(x1, y1 - p);
+  c.stroke();
+  c.restore();
+}
+
+const cv = $('c'), ctx = cv.getContext('2d');
+const acc = document.createElement('canvas'); acc.width = 1080; acc.height = 1920;
+const ag = acc.getContext('2d');
+function amostra(g, j) {                                  // a imagem transformada em j (as cantoneiras e o visor vão depois, nítidos)
+  const a = alvoDe(j);
+  g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, 1080, 1920);
+  g.setTransform(a.s, 0, 0, a.s, a.x - a.s * a.ox, a.y - a.s * a.oy);
+  g.imageSmoothingQuality = 'high';
+  g.drawImage(ext, 0, -HR);
+  g.setTransform(1, 0, 0, 1, 0, 0);
+}
+// média das amostras do obturador em FLOAT (a média corrente em 8 bits perde as amostras tardias)
+const tcv = document.createElement('canvas'); tcv.width = 1080; tcv.height = 1920; const tg = tcv.getContext('2d', {willReadFrequently: true});
+const FLT = new Float32Array(1080 * 1920 * 4);
+function mediaImagem(M, j) {
+  FLT.fill(0); const n = 1080 * 1920 * 4;
+  for (let i = 0; i < M; i++) {
+    amostra(tg, M === 1 ? j : j - .5 + (i + .5) / M);
+    const d = tg.getImageData(0, 0, 1080, 1920).data;
+    for (let k = 0; k < n; k++) FLT[k] += d[k];
+  }
+  const out = ag.createImageData(1080, 1920), o = out.data, inv = 1 / M;
+  for (let k = 0; k < n; k++) o[k] = FLT[k] * inv;
+  ag.putImageData(out, 0, 0);
+}
+
+// a barra do visor, presa à tela (y 1437): ponto REC, timecode, régua, marcador e leitura
+const Y = 1437, FD = '"Space Grotesk", sans-serif';
+// o visor borra junto com a imagem na leitura (nitidez da ref em f224 a f228 e f233 a f237: ~0,5 do parado) e menos no timecode e na régua. O canvas ignora desfoque
+// abaixo de 1 px (0,5 e 0,75 saem nítidos), então o "meio desfoque" é a mistura de uma cópia nítida com uma de 1 px: `mistura` soma as duas com pesos 1-f e f
+const MEXE = j => (j >= 0 && j <= 4) || (j >= 9 && j <= 13);
+// fração borrada (0 = nítido, 1 = 1 px) por quadro j (f224 = 0) do timecode (FT) e da régua com os rótulos 1x e 2x e o marcador (FR), ajustada na nitidez medida na ref
+// (timecode em x 170-380, régua em x 380-740, relativas ao f250). A régua da passada 2 ficava toda a 1 px: amolecia o dobro do que a ref
+const FT = [1, 1, 1, 1, .5, 0, 0, 0, 0, .64, .82, .71, .71, .64], FR = [.3, .3, .3, .3, 0, 0, 0, 0, 0, 0, .2, .22, .26, .48];
+const camada = document.createElement('canvas'); camada.width = 1080; camada.height = 1920; const lg = camada.getContext('2d');
+function mistura(c, f, desenhaGrupo) {
+  if (f <= 0) { desenhaGrupo(c); return; }
+  if (f >= 1) { c.save(); c.filter = 'blur(1px)'; desenhaGrupo(c); c.restore(); return; }
+  lg.setTransform(1, 0, 0, 1, 0, 0); lg.globalCompositeOperation = 'source-over'; lg.filter = 'none'; lg.globalAlpha = 1; lg.clearRect(0, 1380, 1080, 120);
+  lg.globalCompositeOperation = 'lighter';
+  lg.globalAlpha = 1 - f; lg.filter = 'none'; desenhaGrupo(lg);
+  lg.globalAlpha = f; lg.filter = 'blur(1px)'; desenhaGrupo(lg);
+  lg.filter = 'none'; lg.globalAlpha = 1; lg.globalCompositeOperation = 'source-over';
+  c.drawImage(camada, 0, 1380, 1080, 120, 0, 1380, 1080, 120);
+}
+function barra(c, j) {
+  const leit = LEIT[Math.max(0, Math.min(N - 1, j))], bl = MEXE(j) ? (j === 9 ? 3.0 : j >= 10 ? 4.0 : 3.0) : 0, ft = FT[j] || 0, fr = FR[j] || 0;
+  c.save();
+  c.shadowColor = 'rgba(0,0,0,.35)'; c.shadowBlur = 8;
+  c.fillStyle = '#E8332F'; c.beginPath(); c.arc(82, Y, 10, 0, Math.PI * 2); c.fill();
+  c.textBaseline = 'middle'; c.fillStyle = 'rgba(236,236,232,.94)'; c.font = '700 29px ' + FD; c.fillText('REC', 105, Y + 1);
+  c.restore();
+  const n = Math.round(TC0 * 30) + j, ff = n % 30, ss = Math.floor(n / 30) % 60, mm = Math.floor(n / 1800) % 60, hh = Math.floor(n / 108000);
+  const p2 = v => String(v).padStart(2, '0');
+  mistura(c, ft, g => {                                                           // o timecode
+    g.save(); g.textBaseline = 'middle'; g.shadowColor = 'rgba(0,0,0,.35)'; g.shadowBlur = 8;
+    g.fillStyle = 'rgba(224,224,220,.72)'; g.font = '500 27px ' + FD; g.fillText(`${p2(hh)}:${p2(mm)}:${p2(ss)}:${p2(ff)}`, 177, Y + 1); g.restore();
+  });
+  mistura(c, fr, g => {                                                           // os rótulos 1x e 2x, a régua (1x, 1,5x e 2x altos, 0,1x baixos) e o marcador
+    g.save(); g.textBaseline = 'middle'; g.shadowColor = 'rgba(0,0,0,.35)'; g.shadowBlur = 8;
+    g.font = '500 22px ' + FD; g.fillStyle = 'rgba(224,224,220,.7)'; g.fillText('1x', 385, Y + 1); g.fillText('2x', 710, Y + 1);
+    g.strokeStyle = 'rgba(236,236,232,.8)'; g.lineWidth = 2;
+    for (let i = 0; i <= 10; i++) {
+      const x = 420 + 28 * i, alto = i % 5 === 0;
+      g.beginPath(); g.moveTo(x, Y + (alto ? 11 : 6)); g.lineTo(x, Y - (alto ? 11 : 6)); g.stroke();
+    }
+    const mx = 420 + 280 * Math.max(0, Math.min(1, leit - 1));                   // o marcador: triângulo amarelo com haste, apontando pra baixo
+    g.fillStyle = MK; g.strokeStyle = MK; g.lineWidth = 2.4;
+    g.beginPath(); g.moveTo(mx - 8, Y - 28); g.lineTo(mx + 8, Y - 28); g.lineTo(mx, Y - 13); g.closePath(); g.fill();
+    g.beginPath(); g.moveTo(mx, Y - 14); g.lineTo(mx, Y + 14); g.stroke(); g.restore();
+  });
+  c.save(); c.shadowColor = 'rgba(0,0,0,.35)'; c.shadowBlur = 8;
+  c.filter = bl ? `blur(${bl}px)` : 'none';
+  c.fillStyle = 'rgba(244,244,240,.97)'; c.font = '700 49px ' + FD; c.textBaseline = 'alphabetic';
+  c.fillText(leit.toFixed(2), 806, Y + 17);
+  c.fillStyle = MK; c.font = '600 34px ' + FD; c.fillText('×', 914, Y + 17);
+  c.restore();
+}
+
+function desenha(t) {
+  const j = Math.round(t * 30);
+  ctx.clearRect(0, 0, 1080, 1920);
+  const ok = montaExt(j);
+  if (!ok) {                                              // sem quadros: o marcador listrado diz o que vai ali
+    ctx.fillStyle = '#2a2d33'; ctx.fillRect(0, 0, 1080, 1920);
+  } else {
+    // o borrão de movimento do soco: o obturador abre de j-0,5 a j+0,5 e cada quadro é a média (em float) das amostras
+    const a0 = alvoDe(j - .5), a1 = alvoDe(j + .5);
+    const mov = Math.hypot((a1.x - a0.x), (a1.y - a0.y)) + Math.abs(a1.s - a0.s) * 900;
+    const M = BORRAO ? Math.max(1, Math.min(14, Math.ceil(mov / 9))) : 1;
+    mediaImagem(M, j);
+    ctx.drawImage(acc, 0, 0);
+    // as cantoneiras ficam NÍTIDAS e brancas mesmo no soco (a ref as mantém nesses quadros): desenhadas depois do borrão, na pose do quadro
+    const a = alvoDe(j); ctx.save(); ctx.setTransform(a.s, 0, 0, a.s, a.x - a.s * a.ox, a.y - a.s * a.oy); cantoneiras(ctx, a.s, a.ox, a.oy); ctx.restore();
+  }
+  barra(ctx, Math.max(0, j));
+}
+
+D.monta(tl => {
+  const P = {t: 0};
+  tl.to(P, {t: dur, duration: dur, ease: 'none', onUpdate: () => desenha(P.t)}, 0);
+  desenha(0);
+  D.cue(2 / 30, 'whoosh'); D.cue(4 / 30, 'impact'); D.cue(11 / 30, 'impact');     // o soco, o assentar e o segundo estouro (f228 e f234 na ref)
+  return dur;
+});
+</script>
+</body>
+</html>

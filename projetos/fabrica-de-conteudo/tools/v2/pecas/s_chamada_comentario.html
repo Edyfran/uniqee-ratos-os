@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<!-- SOCIAL — chamada pro comentário: o campo de comentário com a palavra digitada e o botão acendendo; depois o campo
+     vira o comentário publicado (rótulo "você · agora", coração) e a resposta digita embaixo, com o coração enchendo.
+     Clone do efeito 17 da referência Dej8homsIzp. Sai por corte. 1080x1920, --alpha. Canto superior esquerdo
+     (x 52-683), longe do painel lateral.
+       palavra  o que se digita (QUERO) · eu  o rótulo do comentário (você) · resp  o texto da resposta
+       quem  o autor da resposta (ninja.automacoes) · foto  o avatar · x  y  o canto do campo (52, 302) · t0 (0.05) · dur (1.42)
+       ?palavra=QUERO&eu=você&quem=ninja.automacoes&resp=Enviado. Olha a DM.&t0=0.05&dur=1.42 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+#cp{position:absolute;width:631px;height:100px;border-radius:50px;opacity:0}
+.av{position:absolute;border-radius:50%;object-fit:cover;background:var(--ink);border:3px solid var(--ink)}
+#cp .av{left:20px;top:18px;width:58px;height:58px}
+#lb{position:absolute;left:98px;top:14px;font:600 16px/1 var(--fm);letter-spacing:.04em;color:var(--ink4);opacity:0;white-space:nowrap}
+#lin{position:absolute;left:98px;top:0;height:100px;display:flex;align-items:center;white-space:nowrap}
+#tx{font:700 38px/1 var(--fd);letter-spacing:-.01em;color:var(--ink)}
+#tx .l,#rt .l{white-space:pre}
+#car{flex:none;width:4px;height:42px;margin-left:3px;background:var(--ac);opacity:0}
+#bt{position:absolute;right:16px;top:16px;width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font:700 34px/1 var(--fd);background:var(--ink2);color:#fff;border:var(--bw) solid var(--ink2)}
+#co{position:absolute;right:24px;top:30px;width:40px;height:40px;opacity:0}
+#co path{fill:none;stroke:var(--ink);stroke-width:2.4;stroke-linejoin:round}
+#rs{position:absolute;left:108px;top:423px;width:575px;height:87px;border-radius:var(--raio);opacity:0;background:var(--sur)}
+#rs .av{left:18px;top:20px;width:44px;height:44px}
+#rs .nm{position:absolute;left:78px;top:14px;font:600 15px/1 var(--fm);letter-spacing:.04em;color:var(--ink4);white-space:nowrap}
+#rs .rt{position:absolute;left:78px;top:40px;font:700 28px/1.1 var(--fd);letter-spacing:-.01em;white-space:nowrap}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="nb" id="cp"><img class="av" id="a1"><div id="lb"></div>
+    <div id="lin"><span id="tx"></span><i id="car"></i></div>
+    <div id="bt">↑</div>
+    <svg id="co" viewBox="0 0 24 24"><path id="cr" d="M12 21s-8-5.2-8-11a4.6 4.6 0 0 1 8-3 4.6 4.6 0 0 1 8 3c0 5.8-8 11-8 11z"/></svg></div>
+  <div class="nb" id="rs"><img class="av" id="a2"><div class="nm" id="qm"></div><div class="rt" id="rt"></div></div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const dur = D.n('dur', '1.42'), t0 = D.n('t0', '0');
+const palavra = D.q('palavra', 'QUERO'), resp = D.q('resp', 'Enviado. Olha a DM.');
+$('a1').src = $('a2').src = D.q('foto', '../midia/perfil-avatar.png');
+$('tx').textContent = palavra; $('rt').textContent = resp;
+$('lb').textContent = D.q('eu', 'você') + ' · agora'; $('qm').textContent = D.q('quem', 'ninja.automacoes') + ' · agora';
+Object.assign($('cp').style, {left: D.n('x', '52') + 'px', top: D.n('y', '302') + 'px'});
+Object.assign($('rs').style, {left: D.n('x', '52') + 56 + 'px', top: D.n('y', '302') + 121 + 'px'});
+
+D.monta(tl => {
+  // a referência escreve ~1 letra a cada 0,06 s e a resposta a ~0,025 s por letra; a janela maior estica as pausas
+  const tIni = t0, tFim = tIni + .07 * palavra.length, tPub = Math.max(tFim + .3, dur - .75);
+  const tResp = tPub + .13, tRFim = tResp + .022 * resp.length, tCor = tRFim + .1, tSai = dur - .08;
+  tl.set('#cp', {opacity: 1}, 0);
+  const fim = D.digita('#tx', tIni, .07);
+  tl.set('#car', {opacity: 1}, tIni);
+  // o botão acende quando há texto
+  tl.set('#bt', {backgroundColor: D.css('--ac'), borderColor: D.css('--ink')}, tIni + .1);
+  for (let t = fim; t < tPub - .08; t += .14) tl.set('#car', {opacity: ((t - fim) / .14) % 2 < 1 ? 0 : 1}, t);
+  // publicado: rótulo, o texto desce, o botão dá lugar ao coração
+  tl.set('#car', {opacity: 0}, tPub);
+  tl.set('#lb', {opacity: 1}, tPub);
+  tl.set('#lin', {y: 12}, tPub);
+  tl.set('#bt', {opacity: 0}, tPub);
+  tl.set('#co', {opacity: 1}, tPub);
+  D.cue(tPub, 'click');
+  // a resposta surge cinza e vira branca; digita
+  tl.set('#rs', {opacity: .55, backgroundColor: D.css('--ink2')}, tPub + .05);
+  tl.set('#rs .nm, #rs .rt', {opacity: 0}, tPub + .05);
+  tl.set('#rs', {opacity: 1, backgroundColor: D.css('--sur')}, tResp);
+  tl.set('#rs .nm', {opacity: 1}, tResp);
+  tl.set('#rs .rt', {opacity: 1}, tResp);
+  D.digita('#rt', tResp, (tRFim - tResp) / resp.length);
+  // o coração enche
+  tl.set('#cr', {fill: D.css('--no'), stroke: D.css('--no')}, tCor);
+  tl.fromTo('#co', {scale: 1}, {scale: 1.25, duration: .08, yoyo: true, repeat: 1, ease: 'power2.out'}, tCor);
+  D.cue(tCor, 'certo');
+  tl.to('#rs', {opacity: 0, duration: .12, ease: 'none'}, tSai - .12);
+  tl.set('#cp', {opacity: 0}, tSai);
+  tl.set('#rs', {opacity: 0}, tSai);
+  return dur;
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<!-- TIPOGRAFIA + INTERFACE — o gancho "escolhe o estilo e fala: edita o meu assim": o título sobe palavra a palavra,
+     o campo de conversa sobe de baixo com o estilo escolhido já no anexo 1/2, o vídeo cru dele cai no anexo 2/2 (o
+     rosto só aparece dentro desse cartão), a frase se escreve no campo e, ao mesmo tempo, a mesma frase estoura em
+     letra gigante embaixo, com o ASSIM pulando (a frase dita duas vezes, no título e na interface). O corte seguinte
+     cai no aperto do enviar. 1080x1920, o mesmo papel, a mesma grade e a mesma luz da k_objeto e da k_pedido.
+     Movimento do núcleo (pesquisa/animacao-principios/ESTUDO.md): nada reimplementado aqui; o cartão pousa
+     (D.pousa), o vídeo vem em arco (D.arco, D.cursor), a frase se escreve no ritmo de mão (D.digita), o herói
+     estoura com antecipação (D.heroi). Texto que se lê dentro da área segura do anúncio (x 65–1015, y 270–1250);
+     o que fica abaixo de 44 px (rótulos de anexo, abas) é decoração de interface, não o que se lê.
+       tit  o título, linhas separadas por |: *amarelo* (marcador) e ~azul~ · pedido  a frase digitada
+       gig  a frase gigante: linha 1|linha 2 (a 2ª é o herói, em azul) · para  a aba do campo (Claude Code)
+       ea, ea2  o anexo 1 (ESTILO|LEGENDA) · amostra  a legenda dele, linhas separadas por |, *palavra* no marcador
+       eb, eb2  o anexo 2 (SEU VÍDEO|BRUTO) · vb  o vídeo cru (recorte do rosto, 270x166)
+       ex  o esticão horizontal da frase gigante (1.2) · t_tit (0.1) · t_card (0.78) · t_a (1.15) · t_vid  o vídeo pousa no anexo 2 (2.05) · t_pede  a 1ª letra (2.35)
+       p  s por letra (0.052) · t_envia  o aperto do enviar (3.85) · dur  (4.5: o anel do aperto acaba depois;
+       quem usa corta o vídeo em 3,95, no aperto máximo)
+       ?tit=Escolhe um ~estilo~|e *fala:*&pedido=edita o meu assim&gig=EDITA O MEU|ASSIM&dur=4.5 -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/editorial.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<script src="../nucleo/cursor.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+#stage{padding:0;display:block;overflow:hidden;background:var(--pp)}
+#mundo{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:50% 45%}
+#papel,#grade{position:absolute;left:0;top:0}
+.tit{position:absolute;left:78px;font:700 104px/1 var(--fd);letter-spacing:var(--ls);color:var(--ink);white-space:nowrap}
+.tit i{font-style:normal;color:var(--ac)}
+.tit b{font-weight:inherit;padding:0 .1em;margin:0 -.04em;background:linear-gradient(var(--mk),var(--mk)) no-repeat 0 60%/0% 88%;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone}
+#t1{top:282px} #t2{top:380px}
+/* a lente: o campo, a aba e o vídeo giram juntos (a câmera não para), como na k_pedido */
+#lente{position:absolute;left:0;top:0;width:1080px;height:1920px;perspective:1700px;perspective-origin:50% 55%}
+#bloco{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:540px 760px}
+#rotulo{position:absolute;left:100px;top:480px;padding:11px 18px 8px;z-index:21;display:flex;align-items:center;gap:12px;
+  font:700 32px/1 var(--fm);letter-spacing:.06em;white-space:nowrap}
+#rotulo i{width:16px;height:16px;border-radius:50%;background:var(--ok);border:3px solid var(--ink);box-sizing:border-box}
+#card{position:absolute;left:65px;top:532px;width:950px;height:338px;box-sizing:border-box;z-index:20}
+/* os anexos: o 1 e o 2 dividem a linha com o contador no meio */
+.anx{position:absolute;top:22px;width:300px;height:200px;box-sizing:border-box;overflow:hidden;padding:0}
+.ah{height:42px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;background:var(--pp);
+  border-bottom:3px solid var(--ink);font:700 22px/1 var(--fm);letter-spacing:.08em;white-space:nowrap}
+.ah u{text-decoration:none;padding:4px 8px 3px;border:2px solid var(--ink);border-radius:6px;background:var(--mk)}
+.ah u.cz{background:var(--pp2)}
+.ah s{display:inline-block;width:14px;height:14px;margin-right:8px;border-radius:50%;background:var(--no);text-decoration:none;vertical-align:-1px}
+.ab{position:relative;width:100%;height:147px;overflow:hidden}
+#sa{left:30px} #sa .ab{background:var(--ac);display:flex;align-items:center;justify-content:center;text-align:center}
+#sa p{margin:0;font:400 44px/1.12 var(--ed-gig);text-transform:uppercase;color:#fff;letter-spacing:.01em}
+#sa mark{color:var(--ink);background:var(--mk);padding:0 .12em;border-radius:5px}
+#sb{left:652px;z-index:25}
+#vaga{position:absolute;left:612px;top:22px;width:300px;height:200px;box-sizing:border-box;border:4px dashed var(--ink4);border-radius:12px;
+  display:grid;place-items:center;font:600 84px/1 var(--fd);color:var(--ink4)}
+#cont{position:absolute;left:351px;top:22px;width:240px;height:200px;text-align:center}
+#cl{position:absolute;left:0;right:0;top:6px;font:600 28px/1 var(--fm);letter-spacing:.14em;color:var(--ink6)}
+#cn,#cn2{position:absolute;left:0;right:0;top:38px;font:700 92px/1 var(--fd);letter-spacing:-.04em;color:var(--ink)}
+#cn2{color:var(--ac);opacity:0}
+#chev{position:absolute;left:0;right:0;top:142px;font:700 52px/1 var(--fd);color:var(--ink);letter-spacing:.02em;white-space:nowrap}
+#chev span{display:inline-block;margin:0 4px}
+#campo{position:absolute;left:24px;right:24px;bottom:22px;height:72px;box-sizing:border-box;background:var(--pp2);
+  border:3px solid var(--ink);border-radius:18px;padding:0 100px 0 26px;overflow:hidden}
+#msg{position:relative;height:66px;font:600 42px/66px var(--fd);letter-spacing:-.01em;color:var(--ink);white-space:pre}
+#car{position:absolute;left:0;top:0;z-index:2;width:5px;height:42px;background:var(--ac);opacity:0}
+#env{position:absolute;right:6px;top:50%;margin-top:-28px;width:56px;height:56px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font:800 38px/1 var(--fd);box-shadow:none}
+/* a frase gigante: Anton, a 1ª linha em tinta e o herói em azul com borda e sombra dura */
+#gig{position:absolute;left:0;top:0;width:1080px}
+.g1,.g2{position:absolute;left:0;width:1080px;text-align:center;font:400 84px/1 var(--ed-gig);text-transform:uppercase;white-space:nowrap}
+.g1{top:896px;color:var(--ink);letter-spacing:.012em}
+.g1 .mw{margin:0 .1em}
+.gs{display:inline-block;transform-origin:50% 100%;transform:scaleX(var(--ex,1.2))}
+.g2{top:1036px;font-size:200px;line-height:1;letter-spacing:.035em;filter:drop-shadow(10px 10px 0 var(--ink))}
+.g2 i{display:inline-block;font-style:normal;color:var(--ac);-webkit-text-stroke:8px var(--ink);paint-order:stroke fill;transform-origin:50% 100%}
+</style>
+</head>
+<body>
+<div id="stage"><div id="mundo">
+  <svg id="papel" width="1080" height="1920"></svg>
+  <svg id="grade" width="1080" height="1920"></svg>
+  <div class="tit" id="t1"></div>
+  <div class="tit" id="t2"></div>
+  <div id="lente"><div id="bloco">
+    <span class="nb cor-ac" id="rotulo"><i></i><span id="para"></span></span>
+    <div class="nb" id="card">
+      <div class="nb anx" id="sa"><div class="ah"><span id="ea"></span><u id="ea2"></u></div><div class="ab"><p id="amostra"></p></div></div>
+      <div id="cont"><span id="cl">ANEXOS</span><b id="cn">1/2</b><b id="cn2">2/2</b><div id="chev"><span>›</span><span>›</span><span>›</span><span>›</span></div></div>
+      <div id="vaga">+</div>
+      <div id="campo"><div id="msg"></div><i id="car"></i><span class="nb cor-ac" id="env">↑</span></div>
+    </div>
+    <div class="nb anx" id="sb" style="top:558px;left:681px"><div class="ah"><span><s></s><span id="eb"></span></span><u class="cz" id="eb2"></u></div><div class="ab" id="vid"></div></div>
+  </div></div>
+  <div id="gig"><div class="g1" id="g1"></div><div class="g2" id="g2"></div></div>
+</div></div>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const W = 1080, H = 1920, Q = D.QD, dur = D.n('dur', '4.5');
+const T_TIT = D.n('t_tit', '0.1'), T_CARD = D.n('t_card', '0.78'), T_A = D.n('t_a', '1.15'), T_VID = D.n('t_vid', '2.05'),
+      T_PEDE = D.n('t_pede', '2.35'), P = D.n('p', '0.052'), T_ENVIA = D.n('t_envia', '3.85');
+const pedido = D.q('pedido', 'edita o meu assim');
+const [gl1, gl2] = D.q('gig', 'EDITA O MEU|ASSIM').split('|');
+const md = s => esc(s).replace(/\*([^*]+)\*/g, '<b>$1</b>').replace(/~([^~]+)~/g, '<i>$1</i>');
+const [tit1, tit2] = D.q('tit', 'Escolhe um ~estilo~|e *fala:*').split('|');
+$('t1').innerHTML = md(tit1); $('t2').innerHTML = md(tit2 || '');
+
+// o papel com a luz, a grade e o código de barras da k_pedido: a mesma cena, o mesmo ar.
+// ponytail: copiado pela 3ª vez (k_objeto, k_pedido, k_edita); a próxima peça leva a cena pro núcleo
+$('papel').innerHTML = `<defs>
+  <pattern id="pt" width="36" height="36" patternUnits="userSpaceOnUse"><circle cx="18" cy="18" r="2.2" fill="rgba(11,13,18,.07)"/></pattern>
+  <radialGradient id="la"><stop offset="0" style="stop-color:var(--mk);stop-opacity:.42"/><stop offset=".55" style="stop-color:var(--mk);stop-opacity:.14"/><stop offset="1" style="stop-color:var(--mk);stop-opacity:0"/></radialGradient>
+  <radialGradient id="lb2"><stop offset="0" style="stop-color:var(--ac);stop-opacity:.16"/><stop offset="1" style="stop-color:var(--ac);stop-opacity:0"/></radialGradient>
+  <radialGradient id="lc"><stop offset="0" style="stop-color:var(--mk);stop-opacity:.30"/><stop offset="1" style="stop-color:var(--mk);stop-opacity:0"/></radialGradient></defs>
+  <rect width="${W}" height="${H}" style="fill:var(--pp)"/>
+  <circle id="luz-a" cx="820" cy="560" r="760" fill="url(#la)"/>
+  <circle id="luz-b" cx="120" cy="1180" r="640" fill="url(#lb2)"/>
+  <circle id="luz-c" cx="200" cy="320" r="520" fill="url(#lc)"/>
+  <rect width="${W}" height="${H}" fill="url(#pt)"/>`;
+$('grade').innerHTML = `<defs>
+  <pattern id="gr" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M60 0H0V60" fill="none" style="stroke:var(--ink)" stroke-opacity=".2" stroke-width="1.6"/></pattern>
+  <radialGradient id="gm" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff"/><stop offset=".6" stop-color="#fff" stop-opacity=".85"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+  <mask id="gk"><rect x="-40" y="330" width="1160" height="1080" fill="url(#gm)"/></mask></defs>
+  <rect x="-40" y="330" width="1160" height="1080" fill="url(#gr)" mask="url(#gk)"/>`;
+
+$('para').textContent = D.q('para', 'Claude Code').toUpperCase();
+const [ea, ea2] = D.q('ea', 'ESTILO|LEGENDA').split('|'), [eb, eb2] = D.q('eb', 'SEU VÍDEO|BRUTO').split('|');
+$('ea').textContent = ea; $('ea2').textContent = ea2; $('eb').textContent = eb; $('eb2').textContent = eb2;
+$('amostra').innerHTML = D.q('amostra', 'não usando|pra *nada*').split('|').map(l => md(l).replace(/<b>/g, '<mark>').replace(/<\/b>/g, '</mark>')).join('<br>');
+const vid = D.midia('#vid', D.q('vb', ''), 'bruto', 'cover');
+if (vid && vid.tagName === 'VIDEO') vid.dataset.off = String(Q / 2);
+
+// a frase gigante: a linha 1 vira palavras mascaradas (cada uma entra no instante em que o campo a escreve);
+// o herói é letra a letra
+$('g1').innerHTML = '<span class="gs">' + gl1.split(' ').map(w => `<span class="mw"><span class="w">${esc(w)}</span></span>`).join(' ') + '</span>';
+$('g2').innerHTML = '<span class="gs">' + [...gl2].map(l => `<i>${esc(l)}</i>`).join('') + '</span>';
+document.documentElement.style.setProperty('--ex', D.q('ex', '1.2'));
+const msg = $('msg');
+msg.textContent = pedido;
+
+D.monta(tl => {
+  // a frase se escreve (D.digita: rajadas, pausa onde a vírgula pede); a medida de cada letra sai com as letras no lugar
+  const fimFrase = D.digita('#msg', T_PEDE, P);
+  const quando = new Map();
+  tl.getChildren(false, true, false).forEach(tw => { const e = tw.targets()[0]; if (e && e.classList && e.classList.contains('l')) quando.set(e, tw.startTime()); });
+  const ls = [...msg.children];
+  const tm = msg.getBoundingClientRect();
+  ls.forEach(s => { s.style.display = 'inline-block'; });
+  const r = ls.map(s => s.getBoundingClientRect());
+  ls.forEach(s => { s.style.display = 'none'; });
+  // o instante em que cada palavra do pedido fica escrita (a última letra) e o do ASSIM (a 3ª letra: o herói cai com a mão)
+  const palavras = [...pedido.matchAll(/\S+/g)].map(m => ({a: m.index, b: m.index + m[0].length - 1}));
+  const tFim = p => quando.get(ls[p.b]) ?? fimFrase;
+
+  D.camera(dur, 1.0, 1.04);
+  tl.to('#luz-a', {attr: {cx: 780, cy: 610}, duration: dur, ease: 'sine.inOut'}, 0);
+  tl.to('#luz-c', {attr: {cx: 230, cy: 360}, duration: dur, ease: 'sine.inOut'}, 0);
+
+  /* 1. O TÍTULO: sobe palavra a palavra; o marcador varre o "fala:" e o azul pisca na palavra de cor depois */
+  D.palavras('#t1', T_TIT, .17);
+  D.palavras('#t2', T_TIT + .62, .2);
+  D.marca('#t2 b', T_TIT + 1.2);
+
+  /* 2. O CAMPO sobe de baixo (cartão: não amassa); a aba chega 2–3 quadros atrás */
+  D.pousa(['#card', '#rotulo'], T_CARD, {dy: 150, s: 1});
+  D.cue(T_CARD, 'papel');
+
+  /* 3. O ANEXO 1: o estilo escolhido pousa na vaga, o contador acende e as setas andam até o vídeo chegar */
+  D.pousa('#sa', T_A, {dy: -22, s: 1, som: 'pop'});
+  tl.fromTo(['#cl', '#cn'], {opacity: 0, scale: .6}, {opacity: 1, scale: 1, duration: .3, ease: D.P.MOLA, stagger: 2 * Q, immediateRender: false}, T_A + .1);
+  gsap.set('#cl', {transformOrigin: '50% 50%'}); gsap.set('#cn', {transformOrigin: '50% 60%'});
+  tl.fromTo('#vaga', {opacity: 0, scale: .9}, {opacity: 1, scale: 1, duration: .3, ease: 'power3.out', immediateRender: false}, T_A + .05);
+  const setas = [...document.querySelectorAll('#chev span')];
+  gsap.set(setas, {opacity: .18});
+  tl.fromTo('#chev', {opacity: 0}, {opacity: 1, duration: .2, ease: 'none', immediateRender: false}, T_A + .25);
+  for (let t = T_A + .3; t < T_VID - .1; t += .5)
+    setas.forEach((s, i) => { tl.to(s, {opacity: 1, duration: .08, ease: 'none'}, t + i * .08); tl.to(s, {opacity: .18, duration: .14, ease: 'none'}, t + i * .08 + .1); });
+
+  /* 4. O ANEXO 2: a seta traz o vídeo cru de fora do quadro, em arco, e solta na vaga; o contador vira 2/2 */
+  const fx = 681, fy = 558;                           // o canto do anexo 2 na vaga (px do palco: o cartão em 65,532 mais a borda de 4 e a vaga em 612,22)
+  const x0 = 1190, y0 = 1230;                         // fora do quadro, à direita e embaixo
+  const para = T_VID - 2 * Q, d = Math.max(.26, Math.min(.62, para - (T_VID - .7) - .06)), S1 = para - d;
+  const flecha = Math.min(120, Math.max(10, Math.hypot(fx - x0, fy - y0) * .15)), lado = Math.sign(fx - x0) || 1;
+  gsap.set('#sb', {x: x0 - fx, y: y0 - fy, opacity: 0});
+  D.arco('#sb', S1, [x0 - fx, y0 - fy], [0, 0], {dur: d, flecha, lado});
+  tl.fromTo('#sb', {opacity: 0}, {opacity: 1, duration: .1, ease: 'none', immediateRender: false}, S1);
+  tl.fromTo('#sb', {scale: 1.55, rotation: 11}, {scale: 1, rotation: -1.4, duration: d, ease: 'power3.inOut', immediateRender: false}, S1);
+  tl.to('#sb', {rotation: 0, duration: .25, ease: 'power2.out'}, T_VID);
+  tl.fromTo('#sb', {'--shx': '0px'}, {'--shx': D.SH + 'px', duration: d, ease: 'sine.inOut', immediateRender: false}, S1);
+  D.cursor('#mundo', [{x: x0 + 8, y: y0 + 18, t: T_VID - .7}, {x: fx + 10, y: fy + 14, t: T_VID, clica: true}], {sai: T_VID + .25});
+  D.cue(S1, 'whoosh'); D.cue(T_VID, 'thud');
+  // o 2/2 entra em mola por cima do 1/2, e as setas viram o ponto final
+  tl.to('#cn', {opacity: 0, scale: .7, duration: 3 * Q, ease: 'power2.in'}, T_VID + 2 * Q);
+  tl.fromTo('#cn2', {opacity: 0, scale: .55, y: 10}, {opacity: 1, scale: 1, y: 0, duration: .34, ease: D.P.MOLA, immediateRender: false}, T_VID + 5 * Q);
+  tl.to('#vaga', {opacity: 0, duration: .1, ease: 'none'}, T_VID);
+  tl.to('#chev', {opacity: 0, duration: .12, ease: 'none'}, T_VID);
+  D.cue(T_VID + 5 * Q, 'pop');
+
+  /* 5. A FRASE: o cursor de texto anda com a letra e pisca nas pausas */
+  const car = $('car');
+  gsap.set(car, {x: r[0].left - tm.left + 26, y: 12});
+  ls.forEach((s, i) => tl.set(car, {x: r[i].right - tm.left + 27, y: 12, opacity: 1}, quando.get(s)));
+  const pisca = (a, b) => { for (let t = a; t < b - .3; t += .5) { tl.set(car, {opacity: 1}, t); tl.set(car, {opacity: 0}, t + .25); } };
+  tl.set(car, {opacity: 1}, T_VID + .35); pisca(T_VID + .35, T_PEDE);
+  pisca(fimFrase + .05, T_ENVIA - .3);
+  D.deriva('#bloco', T_VID + .1, T_ENVIA - .25, {rotationY: -4, rotationX: 2.5});
+
+  /* 6. A FRASE GIGANTE: cada palavra estoura quando o campo a termina de escrever; o ASSIM cai como herói e pula */
+  const sobe = (el, t) => tl.fromTo(el, {yPercent: 115, rotation: 5, transformOrigin: '0% 100%'}, {yPercent: 0, rotation: 0, duration: 13 * Q, ease: 'power3.out'}, D.at(t));
+  [...$('g1').querySelectorAll('.w')].forEach((w, i) => sobe(w, tFim(palavras[i]) - .02));
+  D.cue(tFim(palavras[0]), 'pop');
+  const assim = palavras[palavras.length - 1];
+  const tAssim = (quando.get(ls[assim.a + 2]) ?? fimFrase) + .02;
+  D.heroi('#g2', tAssim);
+  const g2 = [...$('g2').querySelectorAll('i')];
+  const tHop = tAssim + D.T.heroi * .5;
+  // o pulo: sobe desacelerando, cai acelerando e amassa no chão (uma letra por vez, 2 quadros entre elas)
+  g2.forEach((l, i) => {
+    const t = tHop + i * 2.5 * Q;
+    tl.to(l, {y: -16, scaleY: 1.06, duration: 6 * Q, ease: 'power2.out'}, t);
+    tl.to(l, {y: 0, scaleY: 1, duration: 5 * Q, ease: 'power2.in'}, t + 6 * Q);
+    tl.to(l, {scaleX: 1.07, scaleY: .93, duration: 2 * Q, ease: 'power2.out'}, t + 11 * Q);
+    tl.to(l, {scaleX: 1, scaleY: 1, duration: .25, ease: D.P.MOLA}, t + 13 * Q);
+  });
+  D.cue(tHop + 11 * Q, 'thud');
+
+  /* 7. O CLIQUE: a seta volta de baixo e aperta o enviar; o vídeo acaba no aperto máximo, onde o corte seguinte cai */
+  const bx = 950, by = 808;                           // o centro do botão enviar no palco (a conta do cartão: 65+4+950-8-24-3-6-28, 532+4+338-8-22-3-33)
+  tl.fromTo('#env', {scale: .5, opacity: 0}, {scale: 1, opacity: 1, duration: .3, ease: D.P.MOLA, immediateRender: false}, T_CARD + .3);
+  D.cursor('#mundo', [{x: 840, y: by + 470, t: T_ENVIA - .72}, {x: bx, y: by, t: T_ENVIA, clica: true, alvo: '#env'}]);
+  return dur;
+});
+</script>
+</body>
+</html>

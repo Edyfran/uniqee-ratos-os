@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<!-- PROVA — celular com a conversa real. 1080x1920 (?alfa=1 por cima do vídeo).
+     Primeiro o aparelho inteiro, pra situar; a tela rola um pouco; depois a
+     câmera APROXIMA o trecho que interessa (foco_y, fração da captura).
+     Moldura genérica — não imita aparelho nem app de ninguém.
+     A saída (Skillry #302): em `t_sai` o resultado (`sai`, imagem ou vídeo 9:16) sai da tela do
+     celular, cresce até ocupar o quadro e a etiqueta `sai_tag` bate nele; o celular fica pra trás.
+     É a prova literal com movimento: o que a conversa pediu sai pronto. t_sai=-1: sem saída.
+       ?img=&rola=0.25&foco_y=0.62&z=1.55&tag=De onde você estiver&t=0.2&t_zoom=2.0&sai=../midia/vitrine-cracha.jpg&t_sai=3.6&sai_tag=PRONTO&dur=6
+       sem saída: ?img=conversa.png&rola=0.25&foco_y=0.62&z=1.55&tag=De onde você estiver&t=0.2&t_zoom=2.0&dur=6 -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+#stage{padding:0;justify-content:center;align-items:center}
+.fw{position:relative}
+.fone{position:relative;width:640px;height:1300px;border:16px solid var(--ink);border-radius:88px;background:var(--ink);
+  box-shadow:var(--shx,18px) var(--shx,18px) 0 var(--ac);opacity:0}
+.tela{position:absolute;inset:0;border-radius:70px;overflow:hidden;background:#fff}
+.rolo{position:absolute;left:0;top:0;width:100%}
+.rolo .mid{height:auto}
+.rolo .vazio{position:absolute;inset:0;height:1300px}
+.ilha{position:absolute;left:50%;top:22px;width:170px;height:40px;margin-left:-85px;border-radius:20px;background:var(--ink);z-index:2}
+.tag{position:absolute;left:-150px;bottom:150px;padding:18px 26px;font:700 44px/1 var(--fd);letter-spacing:var(--ls);white-space:nowrap;opacity:0;z-index:3}
+.tag:empty{display:none}
+#sai{position:absolute;left:0;top:0;opacity:0;overflow:hidden;z-index:5;border-radius:70px}
+#sai .jan{position:absolute;inset:0;overflow:hidden;border-radius:inherit}
+#stag{position:absolute;opacity:0;z-index:6;white-space:nowrap}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="fw" id="fw">
+    <div class="fone" id="fo"><div class="tela"><div class="rolo" id="ro"></div></div><div class="ilha"></div></div>
+    <div class="tag nb cor-mk" id="tg"></div>
+  </div>
+  <div class="nb" id="sai"><div class="jan" id="saij"></div></div><span class="kick" id="stag"></span>
+</div>
+<script>
+const dur = D.n('dur', '6'), t0 = D.n('t', '0.2'), tz = D.n('t_zoom', '2.0');
+const rola = D.n('rola', '0.25'), fy = D.n('foco_y', '0.62'), z = D.n('z', '1.55');
+document.getElementById('tg').textContent = D.q('tag', 'De onde você estiver');
+const img = D.midia('#ro', D.q('img'), 'conversa real no celular', 'fill');
+
+D.monta(tl => {
+  const tela = 640 - 32, alt = 1300 - 32;
+  const hImg = img && img.naturalWidth ? tela * img.naturalHeight / img.naturalWidth : alt;
+  if (img) img.style.height = hImg + 'px';
+  const sobra = Math.max(0, hImg - alt);
+  D.pousa('#fo', t0, {dy: -60, s: 1.04, rot: D.P.ROT * .6, som: 'pop'});
+  if (sobra > 0) tl.fromTo('#ro', {y: 0}, {y: -sobra * rola, duration: tz - t0 - .4, ease: 'sine.inOut'}, t0 + .5);
+  // aproxima: o ponto de foco vai pro centro do quadro
+  const fw = document.getElementById('fw');
+  const foY = 16 + alt * fy;
+  gsap.set(fw, {transformOrigin: `50% ${foY}px`});
+  tl.to(fw, {scale: z, y: (1300 / 2 - foY), duration: 1.0, ease: 'power3.inOut'}, D.at(tz));
+  D.cue(tz, 'whoosh');
+  if (D.q('tag', 'De onde você estiver')) {
+    D.carimbo('#tg', t0 + .7, D.P.ROT - 2);
+    tl.to('#tg', {opacity: 0, x: -40, duration: .3, ease: D.P.SAI}, D.at(tz));   // sai quando a câmera entra na conversa
+  }
+  const tSai = D.n('t_sai', '-1');
+  if (tSai >= 0) {
+    // o celular recua (desfaz a aproximação e apaga) e ela nasce da tela dele já recuada
+    const fw = document.getElementById('fw'), k = .78;
+    const ox = fw.offsetLeft + 320, oy = fw.offsetTop + foY, p = (x, y) => [ox + (x - 320) * k, oy + (y - foY) * k];
+    const [x0, y0] = p(16, 16), w0 = 608 * k, h0 = 1268 * k;
+    // pra onde: quase a largura toda, 9:16, no meio do quadro
+    const w1 = 880, h1 = w1 * 16 / 9, x1 = (1080 - w1) / 2, y1 = (1920 - h1) / 2 + 30;
+    D.midia('#saij', D.q('sai', ''), 'o resultado');
+    const sai = document.getElementById('sai');
+    gsap.set(sai, {left: x0, top: y0, width: w0, height: h0, '--shx': '0px'});
+    tl.to(fw, {scale: k, y: 0, opacity: .3, duration: .45, ease: 'power3.out'}, D.at(tSai) - .1);
+    tl.set(sai, {opacity: 1}, D.at(tSai) + .05);
+    tl.to(sai, {left: x1, top: y1, width: w1, height: h1, rotation: -2.5, borderRadius: 24, '--shx': D.SH * 1.6 + 'px',
+      duration: .55, ease: D.P.MOLA}, D.at(tSai) + .05);
+    D.cue(D.at(tSai), 'whoosh');
+    D.cue(tSai + .35, 'thud');
+    const st = document.getElementById('stag');
+    st.textContent = D.q('sai_tag', 'PRONTO');
+    if (st.textContent) {
+      Object.assign(st.style, {left: x1 - 18 + 'px', top: y1 - 40 + 'px'});
+      D.carimbo(st, tSai + .5, -5);
+    }
+    D.sai(['#sai', '#stag'], dur - .45);
+  }
+  D.sai('#fw', dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

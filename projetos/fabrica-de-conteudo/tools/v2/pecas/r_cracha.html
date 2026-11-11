@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<!-- PROVA — crachá de crédito de filme, preso no peito de quem faz. 1080x1920, --alpha.
+     O cartão da equipe no cordão: a faixa azul (casa), a função em mono e o nome em display.
+     Cai no peito e balança: no plano, e girando em volta do cordão, com lado, costas e a sombra dura em
+     placa, do núcleo (D.espessura; a intensidade é o i3d=contida|media|ousada). Em `risca` o nome leva um traço (o e_carimbo escreve o nome novo por
+     cima) e, em `t_novo`, o cartão passa a dizer o `novo` (o carimbo sai, o crédito fica com quem
+     faz). Em `marca` o nome ganha o marcador amarelo (o crédito que fica). Crédito, nunca leitura de
+     rosto: nada de mira, caixa no rosto ou porcentagem.
+       x, y   o centro do cartão; `anda` segue quem veste: t@x,y;t@x,y, no tempo da peça (o
+              videos/fabrica/peito.py mede o peito na pose e escreve os dois no plano)
+       esc    a escala do cartão (1)
+       ?funcao=ROSTO&nome=MATHEUS&casa=EQUIPE&x=760&y=820&rot=-4&t=0.1&risca=1.1&novo=NINJA 01&t_novo=1.8&dur=3 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+#pos{position:absolute;left:0;top:0;transform-style:preserve-3d}
+/* o cartão gira no cordão: a lente, o lado e a sombra são do núcleo (D.palco3d, D.espessura) */
+#cr{position:relative;transform-origin:50% 0;opacity:0;transform-style:preserve-3d}
+/* o cordão: as duas tiras sobem do clipe pro pescoço e somem */
+.tira{position:absolute;bottom:100%;left:50%;width:18px;height:170px;margin-left:-9px;background:var(--ac);
+  border:3px solid var(--ink);transform-origin:50% 100%;
+  -webkit-mask-image:linear-gradient(to top,#000 55%,transparent);mask-image:linear-gradient(to top,#000 55%,transparent)}
+.tira.e{transform:translateX(-14px) rotate(-17deg)}
+.tira.d{transform:translateX(14px) rotate(17deg)}
+.clip{position:absolute;left:50%;top:-22px;width:58px;height:34px;margin-left:-29px;background:var(--ink);
+  border-radius:var(--raio-s);z-index:2}
+.clip::after{content:"";position:absolute;left:17px;top:12px;width:24px;height:9px;border-radius:5px;background:var(--ink4)}
+.card{position:relative;padding:0 0 20px;min-width:300px;text-align:left}
+.casa{border-radius:calc(var(--raio) - var(--bw)) calc(var(--raio) - var(--bw)) 0 0;font:700 24px/1 var(--fm);letter-spacing:.16em;text-transform:uppercase;padding:16px 24px 13px;
+  background:var(--ac);color:#fff;border-bottom:var(--bw) solid var(--ink)}
+.fn{font:700 44px/1 var(--fm);letter-spacing:.06em;text-transform:uppercase;color:var(--ink6);padding:18px 24px 8px;white-space:nowrap}
+.nm{position:relative;display:inline-block;margin:0 24px;font:700 60px/1.05 var(--fd);letter-spacing:var(--ls);
+  color:var(--ink);white-space:nowrap}
+.nv{position:absolute;left:0;top:0;color:var(--ac);opacity:0}
+.risco{position:absolute;left:-8px;right:-8px;top:46%;height:10px;border-radius:5px;background:var(--no);
+  transform-origin:0 50%}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="pos"><div id="cr">
+    <i class="tira e"></i><i class="tira d"></i><i class="clip"></i>
+    <div class="card nb">
+      <div class="casa" id="cs"></div>
+      <div class="fn" id="fn"></div>
+      <div class="nm mkr" id="nm"><span id="nt"></span><i class="risco" id="rs"></i><span class="nv" id="nv"></span></div>
+    </div>
+  </div></div>
+</div>
+<script>
+const dur = D.n('dur', '3'), t0 = D.n('t', '0.1'), rot = D.n('rot', '-4'), esc = D.n('esc', '1');
+const x0 = D.n('x', '760'), y0 = D.n('y', '820');
+// padrão neutro: a peça vai no pacote do aluno. O nome de verdade vem no plano (nome=)
+document.getElementById('cs').textContent = D.q('casa', 'EQUIPE');
+document.getElementById('fn').textContent = D.q('funcao', 'ROSTO');
+document.getElementById('nt').textContent = D.q('nome', 'Seu nome');
+document.getElementById('nv').textContent = D.q('novo', '');
+// "t@x,y;t@x,y": o caminho do centro do cartão, no tempo da peça
+const anda = (D.q('anda', '') || '').split(';').filter(Boolean).map(s => {
+  const [t, xy] = s.split('@'); const [x, y] = xy.split(',').map(parseFloat);
+  return {t: parseFloat(t), x, y};
+}).sort((a, b) => a.t - b.t);
+
+D.monta(tl => {
+  const pos = document.getElementById('pos'), cr = document.getElementById('cr');
+  gsap.set('#rs', {scaleX: 0, rotation: -3});
+  const w = cr.offsetWidth, h = cr.offsetHeight;
+  pos.style.left = (x0 - w / 2) + 'px';
+  pos.style.top = (y0 - h / 2) + 'px';
+  gsap.set(pos, {scale: esc, transformOrigin: '50% 50%'});
+  if (anda.length) {
+    tl.set(pos, {x: anda[0].x - x0, y: anda[0].y - y0}, 0);
+    // caminho medido (o peito.py, um ponto a cada .2 s) anda reto entre os pontos; o escrito à mão, com curva
+    anda.slice(1).forEach((p, i) => tl.to(pos, {x: p.x - x0, y: p.y - y0, duration: Math.max(.04, p.t - anda[i].t),
+      ease: p.t - anda[i].t < .5 ? 'none' : 'sine.inOut'}, anda[i].t));
+  }
+  D.palco3d('#stage', `${x0}px ${y0}px`);
+  D.espessura('.card', {costas: true});
+  if (t0 <= 0.04) {
+    // o gancho: já está no peito no quadro 0
+    gsap.set(cr, {opacity: 1, rotation: rot});
+  } else {
+    D.pousa(cr, t0, {rot, som: 'swish'});
+  }
+  // balança no cordão e assenta: o pêndulo no plano e o giro em volta do cordão, que perde força a cada ida
+  const tb = Math.max(0, D.at(t0) + .45);
+  tl.to(cr, {rotation: rot + 3, duration: .32, ease: 'sine.inOut', yoyo: true, repeat: 1}, tb);
+  const tg = Math.max(0, D.at(t0));
+  tl.fromTo(cr, {rotationY: 34, rotationX: -10}, {rotationY: -22, rotationX: 3, duration: .46, ease: 'sine.inOut'}, tg);
+  tl.to(cr, {rotationY: 10, rotationX: -1, duration: .4, ease: 'sine.inOut'}, tg + .46);
+  tl.to(cr, {rotationY: 0, rotationX: 0, duration: .38, ease: 'sine.out'}, tg + .86);
+  const risca = D.q('risca', ''), marca = D.q('marca', '');
+  if (risca !== '') {
+    tl.to('#rs', {scaleX: 1, duration: .16, ease: 'power2.out'}, D.at(+risca));
+    tl.to('#nt', {opacity: .55, duration: .16}, D.at(+risca));
+  }
+  if (D.q('novo', '') && D.q('t_novo', '') !== '') {
+    // o nome riscado sai e o novo assenta no lugar dele
+    const tn = D.at(+D.q('t_novo'));
+    tl.to(['#nt', '#rs'], {opacity: 0, duration: .14}, tn);
+    tl.fromTo('#nv', {opacity: 0, scale: 1.25}, {opacity: 1, scale: 1, duration: .26, ease: 'back.out(2)'}, tn);
+  }
+  if (marca !== '') {
+    D.marca('#nm', D.at(+marca));
+    D.cue(+marca, 'marca');
+  }
+  if (D.q('sai', '1') !== '0') tl.to(cr, {opacity: 0, y: 24, duration: .18, ease: 'power2.in'}, dur - .2);
+  return dur;
+});
+</script>
+</body>
+</html>

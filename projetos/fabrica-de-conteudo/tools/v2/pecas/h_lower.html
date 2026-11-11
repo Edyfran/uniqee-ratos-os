@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<!-- AULA — lower-third: quem está falando. 1920x1080, --alpha. Contido.
+     A placa do nome abre da esquerda (recorte), as letras sobem e o cargo bate
+     como etiqueta azul. Sai fechando pelo mesmo lado.
+     Fica à esquerda: à direita, embaixo, é a zona do rosto.
+       ?nome=Seu nome&cargo=automação e IA&handle=@usuario&y=730&t0=0.2&dur=4 -->
+<html lang="pt-BR" class="h alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/direcao-h.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+.lw{position:absolute;left:120px;right:520px;top:var(--y,730px);display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.nome{padding:14px 24px 18px;font:700 56px/1 var(--fd);letter-spacing:var(--ls);white-space:nowrap}
+.lin2{display:flex;align-items:center;gap:12px}
+.cargo,.hd2{padding:11px 16px 9px;font:700 22px/1 var(--fm);letter-spacing:.08em;text-transform:uppercase;border-radius:var(--raio-s);white-space:nowrap;opacity:0}
+.hd2{text-transform:none;letter-spacing:.02em}
+.cargo:empty,.hd2:empty{display:none}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="lw" id="lw">
+    <div class="nome nb" id="nm"></div>
+    <div class="lin2"><span class="cargo nb cor-ac" id="cg"></span><span class="hd2 nb cor-mk" id="hd"></span></div>
+  </div>
+</div>
+<script>
+const dur = D.n('dur', '4'), t0 = D.n('t0', '0.2'), $ = id => document.getElementById(id);
+if (D.q('y')) document.documentElement.style.setProperty('--y', D.q('y') + 'px');
+// padrão neutro: a peça vai no pacote do aluno. O nome de verdade vem no plano (nome=)
+$('nm').textContent = D.q('nome', 'Seu nome');
+$('cg').textContent = D.q('cargo', 'automação e IA');
+$('hd').textContent = D.q('handle', '');
+
+D.monta(tl => {
+  D.cabe('.nome', 36, '.lw');
+  const nm = $('nm'), W = nm.offsetWidth + 60;
+  const fechado = `inset(-30px ${W}px -40px -30px)`, aberto = 'inset(-30px -40px -40px -30px)';
+  tl.fromTo(nm, {clipPath: fechado}, {clipPath: aberto, duration: .5, ease: 'power3.inOut'}, D.at(t0));
+  D.cue(t0, 'swish');
+  D.palavras('#nm', t0 + .18, .05);
+  if ($('cg').textContent) D.carimbo('#cg', t0 + .45, 0);
+  if ($('hd').textContent) D.carimbo('#hd', t0 + .58, 0);
+  if (D.q('sai', '1') !== '0') {
+    tl.to(['#cg', '#hd'], {opacity: 0, y: 12, duration: .2, ease: 'power2.in'}, dur - .5);
+    tl.to(nm, {clipPath: fechado, duration: .35, ease: 'power3.in'}, dur - .4);
+    D.cue(dur - .4, 'whoosh-out');
+  }
+  return dur;
+});
+</script>
+</body>
+</html>

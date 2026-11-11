@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<!-- OFERTA — o cartão final do anúncio: a marca, o vídeo pronto tocando, o preço e a chamada. 1080x1920, opaca.
+     Toda letra mora na zona do Reels (x 65–1015, y 270–1250). A marca pousa no alto; o vídeo pronto entra num cartão
+     em pé à esquerda (imagem ou vídeo, segue a timeline: o fecho não fica parado); o preço cai com a mola do herói ao
+     lado; os itens batem com ✓ (verde: o que a pessoa recebe); o botão azul assenta e é apertado; a seta embaixo
+     aponta pro botão de verdade do anúncio e balança até o fim. Montado em ~2,4 s, segura o resto (≥ 3 s parado,
+     criativo-sem-preguica), e não sai: é o último quadro.
+       img    a marca, quadrada (../midia/marca-fabrica.svg) · nome  o nome · sub  o carimbo ao lado (com IA; vazio: nenhum)
+       vid    o vídeo pronto, 9:16 · tag  a etiqueta no cartão (✓ editado; vazio: nenhuma)
+       pre    o prefixo do preço (R$) · preco  o valor (67) · it  "linha;linha;…" com ✓
+       cta    o texto do botão (Toca em Saiba mais) · t0 · t_cta  o aperto do botão · dur
+     ?img=../midia/marca-fabrica.svg&nome=Fábrica de Conteúdo&sub=com IA&vid=../midia/vitrine-camadas.jpg&tag=editado&preco=67&it=um arquivo .zip;Claude Code ou Codex;você só grava&cta=Toca em Saiba mais&dur=5.5 -->
+<html lang="pt-BR" data-qa="fica">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+#stage{padding:0;display:block;overflow:hidden}
+.ab{position:absolute;opacity:0}
+#logo{left:65px;top:290px;width:950px;display:flex;align-items:center;gap:26px}
+#pl{flex:none;width:118px;height:118px;padding:12px;display:grid;place-items:center}
+#pl img{width:100%;height:100%}
+#nm{font:800 64px/1 var(--fd);letter-spacing:var(--ls);color:var(--ink);white-space:nowrap}
+#logo .kick{margin:0;align-self:center;opacity:1}
+#ca{left:65px;top:450px;width:360px;height:640px;overflow:hidden;border-radius:28px;background:var(--ink)}
+#ca .mid,#ca .vazio{position:absolute;inset:0;width:100%;height:100%}
+#tg{position:absolute;left:18px;top:18px;padding:12px 16px 10px;font:700 34px/1 var(--fm);letter-spacing:.06em;
+  text-transform:uppercase;opacity:0}
+#pr{left:465px;top:440px;width:550px;font:900 300px/.86 var(--fd);letter-spacing:-.05em;color:var(--ink);
+  text-shadow:.03em .03em 0 var(--ac);white-space:nowrap}
+#pr small{font-size:.3em;font-weight:800;vertical-align:.95em;margin-right:.16em;letter-spacing:-.02em}
+#it{left:465px;top:770px;width:550px;display:flex;flex-direction:column;gap:20px}
+#it .li{display:flex;align-items:center;gap:18px;opacity:0}
+#it .ok{flex:none;width:64px;height:64px;display:grid;place-items:center;font:700 40px/1 var(--fd)}
+#it .tx{font:700 46px/1.05 var(--fd);letter-spacing:var(--ls);color:var(--ink)}
+#bt{left:65px;top:1116px;width:885px;height:126px;font-size:64px}
+#se{left:470px;top:1270px;width:140px;height:190px}
+#se svg{width:100%;height:100%;overflow:visible}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="ab" id="logo"><div class="nb" id="pl"></div><span id="nm"></span><span class="kick" id="sb"></span></div>
+  <div class="ab nb" id="ca"><span class="nb cor-mk" id="tg"></span></div>
+  <div class="ab" id="pr"></div>
+  <div class="ab" id="it"></div>
+  <div class="ab btn" id="bt"></div>
+  <div class="ab" id="se"><svg viewBox="0 0 140 190"><path d="M45 6h50v104h39L70 184 6 110h39z" fill="var(--mk)"
+    stroke="var(--ink)" stroke-width="8" stroke-linejoin="round"/></svg></div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const dur = D.n('dur', '5.5'), t0 = D.n('t0', '0.1'), tCta = D.n('t_cta', '2.1');
+$('pl').innerHTML = `<img src="${esc(D.q('img', '../midia/marca-fabrica.svg'))}" alt="">`;
+$('nm').textContent = D.q('nome', 'Fábrica de Conteúdo');
+$('sb').textContent = D.q('sub', 'com IA');
+D.midia('#ca', D.q('vid', '../midia/vitrine-camadas.jpg'), 'o vídeo pronto');
+$('ca').appendChild($('tg'));   // a etiqueta por cima do vídeo
+const tag = D.q('tag', 'editado');
+if (tag) $('tg').textContent = '✓ ' + tag; else $('tg').remove();
+$('pr').innerHTML = `<small>${esc(D.q('pre', 'R$'))}</small>${esc(D.q('preco', '67'))}`;
+$('it').innerHTML = D.q('it', 'um arquivo .zip;Claude Code ou Codex;você só grava').split(';').filter(Boolean)
+  .map(l => `<div class="li"><span class="ok nb cor-ok">✓</span><span class="tx">${esc(l)}</span></div>`).join('');
+$('bt').textContent = D.q('cta', 'Toca em Saiba mais');
+
+D.monta(tl => {
+  D.cabe('#nm', 40, ['#logo', .62]);
+  D.cabe('#it .tx', 40, ['#it', .85]);   // a coluna menos o ✓ (64 + 18)
+  D.cabe('#bt', 44, .92);
+  D.pousa('#logo', t0, {som: 'pop'});
+  tl.fromTo('#ca', {opacity: 0, y: 120, rotation: -9, '--shx': '0px'}, {opacity: 1, y: 0, rotation: -2.5, '--shx': D.SH + 'px',
+    duration: .55, ease: D.P.POUSA}, D.at(t0 + .25));
+  D.cue(t0 + .25, 'whoosh');
+  if (tag) D.carimbo('#tg', t0 + .7, -3);
+  D.heroi('#pr', t0 + .6);
+  D.lista('#it .li', t0 + 1.05, .2, {som: 'certo'});
+  tl.set('#it', {opacity: 1}, D.at(t0 + 1.05));
+  D.pousa('#bt', t0 + 1.7, {som: 'pop'});
+  // o aperto: o botão afunda na sombra e volta
+  tl.to('#bt', {x: D.SH * .7, y: D.SH * .7, '--shx': '0px', duration: .1, ease: 'power2.in'}, tCta);
+  tl.to('#bt', {x: 0, y: 0, '--shx': D.SH + 'px', duration: .22, ease: D.P.POUSA}, tCta + .1);
+  D.cue(tCta, 'click');
+  // a seta aponta pro botão de verdade do anúncio, embaixo da zona, e balança até o fim
+  tl.fromTo('#se', {opacity: 0, y: -40}, {opacity: 1, y: 0, duration: .35, ease: D.P.POUSA}, D.at(tCta + .2));
+  const per = .7;
+  for (let t = tCta + .55; t < dur - per; t += per)
+    tl.fromTo('#se', {y: 0}, {y: 26, duration: per / 2, ease: 'sine.inOut', yoyo: true, repeat: 1, immediateRender: false}, t);
+  return dur;
+});
+</script>
+</body>
+</html>

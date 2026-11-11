@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<!-- EFEITO — mundo de interface: o fundo escurece em 5 quadros (a pessoa e o laptop ficam como estão) e quatro janelas de vidro escuro
+     entram em volta dela, cada uma com a mola que a ref mede: passam do lugar e voltam em 5 a 7 quadros. A prévia sobe do canto de baixo à direita,
+     pequena e borrada, cresce, passa 36 px do lugar e assenta em f301, inclinada em perspectiva, com conteúdo que toca (o giz ferve, o coração se
+     desenha, vira rosa e ganha raios); o pedido digita (~1,4 letra por quadro); a linha do tempo sobe do canto de baixo como barra escura, passa 29 px
+     e assenta, com as miniaturas entrando uma por quadro; o botão do pedido acende em f304 e f305, um reflexo cruza o painel e o texto brilha;
+     o progresso vai de 0 a 100% em 10 quadros e termina num círculo com visto; a cabeça de reprodução anda numa curva em S. No fim tudo some de uma
+     vez (corte seco). Depois de assentar, as quatro janelas derivam juntas ~0,5 px por quadro pra direita e 0,25 pra cima (a ref mede o mesmo nas 4).
+     Clone do efeito 08 ui world do De25fKeTRl7 (ficha 09; passada 2: curvas medidas quadro a quadro no original). A mecânica é a da ref, o texto e a foto são os nossos.
+     1080x1920, --alpha. Duas camadas, como a r_orbita: `camada=tras` é só o palco escuro (entra com "atras": true, o recorte da pessoa fura;
+     o furo do laptop vem pronto) e `camada=frente` são as janelas e a luz sobre a pessoa. Sem camada, as duas (a biblioteca).
+     Tempo em quadros da ref desde a linha acesa do selo (f290): a camada de trás nasce 1 quadro ANTES (t0 = -1/30), a da frente em 0.
+       etiqueta: janelas-de-vidro, palco-escuro, atras-da-pessoa
+       camada  tras | frente | todas (todas) · dur  quanto dura (1.1)
+       texto  o que o pedido digita (edita meu reel) · ped  o rótulo do pedido (PEDIDO) · prog  o rótulo do progresso (editando...)
+       tl  o rótulo da linha do tempo (LINHA DO TEMPO) · arq  o nome do arquivo (reel_v2.mp4) · pv  o rótulo da prévia (PRÉVIA) · vivo  (AO VIVO) · efeito  o nome na prévia (rabisco tremido)
+       img  a foto das miniaturas e da prévia (sem ela, só o tom das janelas) · ct  o contorno do rabisco na prévia (JSON de polilinhas em px da foto, ou o caminho de um arquivo com ele)
+       furo  o polígono que o palco deixa claro: o laptop (x,y;x,y;... em px; o padrão "" liga o palco inteiro)
+       palco  o PNG com o mapa de escuridão (preto com alfa, 1080x1920; o do gera_palco.py faz o fundo da nossa sala ir ao nível da ref, e apaga a luminária); sem ele, um degradê reto
+       ?camada=todas&dur=1.1 -->
+<html lang="pt-BR" class="alfa" data-qa="fica">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block;overflow:hidden}
+#palco{position:absolute;inset:0;opacity:0}
+.j{position:absolute;opacity:0;border-radius:24px;color:#fff;font-family:var(--fd);
+  background:linear-gradient(180deg,rgba(32,34,42,.92),rgba(14,15,20,.94));border:1.5px solid rgba(255,255,255,.15);
+  box-shadow:0 22px 44px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.09)}
+.cap{position:absolute;font:600 17px/1 var(--fd);letter-spacing:.2em;text-transform:uppercase;color:#9AA0AD}
+.seta{position:absolute;width:42px;height:42px;border-radius:13px;background:#4A4D57;display:flex;align-items:center;justify-content:center}
+.seta svg{width:20px;height:20px}
+.ch{opacity:0}
+.cur{position:absolute;width:3px;height:36px;background:var(--mk);border-radius:2px;opacity:0}
+.pct{position:absolute;font:700 31px/1 var(--fd);color:var(--mk);opacity:0}
+.trilho{position:absolute;height:10px;border-radius:10px;background:rgba(255,255,255,.17);overflow:hidden}
+.trilho i{display:block;height:100%;width:0;background:linear-gradient(180deg,#F8DD7A,#F2C744);border-radius:10px;box-shadow:0 0 10px rgba(242,199,68,.7)}
+.brilho{position:absolute;inset:0;border-radius:24px;overflow:hidden;pointer-events:none}
+.brilho i{position:absolute;top:-60px;left:-65px;width:132px;height:300px;opacity:0;transform-origin:50% 50%;
+  background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.34) 50%,rgba(255,255,255,0))}
+.mini{position:absolute;top:50px;width:80px;height:98px;border-radius:9px;overflow:hidden;background:#15161B;border:1px solid rgba(255,255,255,.1);opacity:0}
+.mini .im{position:absolute;inset:0;background-repeat:no-repeat}
+.mini b{position:absolute;left:0;right:0;bottom:6px;text-align:center;font:700 12.5px/1.05 var(--fd);color:var(--mk);text-shadow:0 1px 4px rgba(0,0,0,.9);letter-spacing:-.01em}
+/* a forma de onda: ~82 tracinhos de 2 px a cada ~6 px, cinza médio, de altura sorteada (3 a 27 px, média 10), centrados num eixo, como onda de áudio (a ref mede 82 em 490 px) */
+.onda{position:absolute;left:18px;right:18px;top:155px;height:30px;opacity:0}
+.onda i{position:absolute;top:50%;width:2px;background:rgba(255,255,255,.32);border-radius:1px}
+.cabeca{position:absolute;top:44px;width:3px;height:140px;margin-left:-1px;background:var(--mk);border-radius:2px;opacity:0}
+.cabeca::before{content:'';position:absolute;left:-6px;top:-8px;width:15px;height:15px;background:var(--mk);transform:rotate(45deg);border-radius:3px}
+/* a prévia: moldura grossa de vidro (18 px nas laterais e 20 no pé, a ref mede 18 a 23) com bisel claro em cima e à esquerda e escuro embaixo, e o vídeo numa tela de canto redondo que não chega à borda */
+.pv{box-shadow:0 22px 44px rgba(0,0,0,.55),inset 0 2px 0 rgba(255,255,255,.3),inset 2px 0 0 rgba(255,255,255,.13),inset -2px 0 0 rgba(0,0,0,.28),inset 0 -3px 0 rgba(0,0,0,.42)}
+.pv .tela{position:absolute;left:18px;right:18px;top:48px;bottom:20px;border-radius:14px;overflow:hidden;background:#0B0C10;
+  box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.2),inset 0 7px 14px rgba(0,0,0,.4);outline:1.5px solid rgba(0,0,0,.45)}
+.pv .im{position:absolute;inset:0;overflow:hidden}
+.pv .im i{position:absolute;inset:0;background-repeat:no-repeat;transform-origin:50% 40%}
+.pv .rot{position:absolute;left:0;right:0;top:326px;text-align:center;font:700 37px/1 var(--fd);color:var(--mk);letter-spacing:-.02em;text-shadow:0 2px 8px rgba(0,0,0,.8)}
+#ok{position:absolute;left:246px;top:31px;width:34px;height:34px;border-radius:50%;background:#6E705E;opacity:0;display:flex;align-items:center;justify-content:center}
+#ok svg{width:20px;height:20px}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+const FR = 1 / 30;
+const camada = D.q('camada', 'todas'), dur = D.n('dur', '1.1');
+const IMG = D.q('img', '');
+// o laptop da nossa foto (px): o palco escuro não cobre
+const FURO = D.q('furo', '');
+const PALCO = D.q('palco', '');
+const TEXTO = D.q('texto', 'edita meu reel');
+function lerCT(v) { if (!v) return []; if (v[0] === '[') { try { return JSON.parse(v); } catch (e) { return []; } } try { const x = new XMLHttpRequest(); x.open('GET', v, false); x.send(); return JSON.parse(x.responseText); } catch (e) { console.error('ct: não consegui ler ' + v); return []; } }
+const CT = lerCT(D.q('ct', ''));
+const rnd = s => { const x = Math.sin(s * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const T_ = (f) => f * FR;   // quadro da janela (0 = f290 da ref)
+
+// A MOLA de cada janela, medida na ref quadro a quadro (f290 = 0): [quadro, dx, dy, escala, borrão (px), opacidade] em relação ao lugar de repouso.
+// V (centro do cartão; pelo ponto amarelo de AO VIVO e pela área do conteúdo): sobe de f290 a f294 pequena e borrada, passa 30 px do lugar em f297 e assenta em f301.
+const MV = [[0, 74, 387, .33, 6, 1], [1, 47, 243, .66, 7, 1], [2, 24, 132, .82, 6, 1], [3, 10, 55, .94, 4.5, 1], [4, 1.8, 5.8, .97, .8, 1], [5, -4.1, -18.4, 1, 0, 1],
+  [6, -8.2, -26.4, 1.03, 0, 1], [7, -9, -30.2, 1.03, 0, 1], [8, -8.8, -24.1, 1.04, 0, 1], [9, -6.3, -17.9, 1.03, 0, 1], [10, -3, -13.6, 1, 0, 1], [11, -.7, -6.2, .99, 0, 1],
+  [12, -.2, .3, 1, 0, 1], [13, 0, 0, 1, 0, 1]];
+// P (o pedido): entra pela esquerda, passa 61 px do lugar em f297 e volta em f302 (rótulo em x 88, 117, 124, 118, 102, 84, 69, 63)
+const MP = [[3, -99, 0, 1, 10, .3], [4, -12, 2, 1, 5, .85], [5, 25, -1, 1, 1.2, 1], [6, 53, -2, 1, 0, 1], [7, 61, -2, 1, 0, 1], [8, 54, -2, 1, 0, 1], [9, 39, -1, 1, 0, 1],
+  [10, 21, -1, 1, 0, 1], [11, 6, 0, 1, 0, 1], [12, -1, 0, 1, 0, 1], [13, 0, 0, 1, 0, 1]];
+// B (o progresso): 1 quadro depois de P, vem de baixo e da esquerda, passa 49 px à direita e 34 acima em f298 (rótulo em x 44, 83, 105, 112, 106, 94, 80, 68, 63 e y 938, 903, 889, 885, 889, 895, 905, 912, 916)
+const MB = [[4, -95, 55, 1, 9, .35], [5, -21, 20, 1, 4, .75], [6, 20, -14, 1, 0, 1], [7, 42, -29, 1, 0, 1], [8, 49, -34, 1, 0, 1], [9, 43, -30, 1, 0, 1], [10, 31, -22, 1, 0, 1],
+  [11, 17, -12, 1, 0, 1], [12, 5, -4, 1, 0, 1], [13, 0, 0, 1, 0, 1]];
+// T (a linha do tempo): sobe do pé como barra escura e borrada (topo do painel em y 1650, 1520, 1415, 1357, 1297, 1262...), maior que o final (1,2 a 1,0), passa 29 px em f301 e assenta em f306
+const MT = [[3, 0, 393, 1.2, 10, .35], [4, 0, 263, 1.17, 9, .9], [5, 0, 158, 1.13, 7, 1], [6, -8, 100, 1.07, 5, 1], [7, -11, 41, 1.02, 1.5, 1], [8, -7, 6, 1, 0, 1], [9, -4, -15, 1, 0, 1],
+  [10, -2, -27, 1, 0, 1], [11, -1, -29, 1, 0, 1], [12, -1, -26, 1, 0, 1], [13, -2, -19, 1, 0, 1], [14, -2, -11, 1, 0, 1], [15, -3, -4, 1, 0, 1], [16, -3, 1, 1, 0, 1],
+  [17, -2, 1, 1, 0, 1], [18, -1, 1, 1, 0, 1], [19, -1, 0, 1, 0, 1], [20, 0, 0, 1, 0, 1]];
+
+D.monta(tl => {
+  const stage = document.getElementById('stage');
+  const tras = camada === 'tras' || camada === 'todas', frente = camada === 'frente' || camada === 'todas';
+  const total = Math.round(dur / FR);
+  const html = [];
+  const sh = camada === 'tras' ? 1 : 0;      // a camada de trás nasce 1 quadro antes: o quadro f290 dela é o 1
+  // o escurecimento do palco por quadro (ref: 1 menos a razão da luz, normalizada: f290 .54, f291 .83, f292 .91, f293 .97, f294 1)
+  const FADE = [.54, .83, .91, .97, 1];
+  if (tras) {
+    const furo = FURO ? 'M0 0H1080V1920H0Z M' + FURO.split(';').map(p => p.replace(',', ' ')).join('L') + 'Z' : '';
+    const fundo = PALCO ? `url('${PALCO}') 0 0/1080px 1920px no-repeat` : 'linear-gradient(90deg,rgba(5,6,8,.95),rgba(5,6,8,.92) 45%,rgba(5,6,8,.76))';
+    html.push(`<div id="palco" style="background:${fundo};${furo ? `clip-path:path(evenodd,'${furo}')` : ''}"></div>`);
+  }
+  if (frente) {
+    // as miniaturas e a prévia: a nossa foto recortada de jeitos diferentes, e o nome do efeito embaixo
+    const minis = ['interface', 'zoom digital', 'manchetes', 'antes e depois', 'tela verde', 'rabisco'];
+    // a cabeça (centro 522,730 na foto) no meio de cada miniatura de 80x98; `e` é a escala da foto e `cy` o centro vertical da cabeça
+    const quad = [[.115, 40, 40], [.2, 40, 48], [.105, 40, 40], [.115, 40, 40], [.115, 40, 40], [.115, 40, 40]];
+    const tint = ['', '', 'linear-gradient(rgba(242,199,68,.38),rgba(0,0,0,0))', 'linear-gradient(90deg,rgba(255,255,255,.22) 50%,rgba(0,0,0,0) 50%)', 'linear-gradient(rgba(23,163,84,.6),rgba(23,163,84,.3))', ''];
+    const mm = minis.map((n, i) => { const [e, cx, cy] = quad[i];
+      return `<div class="mini" id="mi${i}" style="left:${14 + i * 86}px"><div class="im" style="background-image:${tint[i] ? tint[i] + ',' : ''}url('${IMG}');background-size:${tint[i] ? '100% 100%,' : ''}${(1080 * e).toFixed(0)}px auto;background-position:${tint[i] ? '0 0,' : ''}${(cx - 522 * e).toFixed(1)}px ${(cy - 730 * e).toFixed(1)}px"></div><b>${n.replace(' e ', ' e<br>').replace('zoom ', 'zoom<br>').replace('tela ', 'tela<br>')}</b></div>`; }).join('');
+    // altura sorteada: média 10 e desvio ~5 (soma de 3 sorteios), entre 3 e 27 px
+    const alt = i => Math.max(3, Math.min(27, Math.round(10 + 5.2 * 2 * (rnd(i * 1.7) + rnd(i * 3.1 + .5) + rnd(i * 5.3 + .9) - 1.5))));
+    const onda = Array.from({length: 85}, (_, i) => { const h = alt(i); return `<i style="left:${(i * 5.9).toFixed(1)}px;height:${h}px;margin-top:${-h / 2}px"></i>`; }).join('');
+    const ch = [...TEXTO].map((c, i) => `<span class="ch" id="ch${i}">${c === ' ' ? '&nbsp;' : c}</span>`).join('');
+    const pcts = [0, 2, 6, 15, 29, 50, 71, 85, 94, 98, 100].map((v, i) => `<span class="pct" id="pc${i}" style="left:150px;top:38px">${v}%</span>`).join('');
+    html.push(`
+      <svg width="0" height="0" style="position:absolute"><defs>${['P', 'B', 'T', 'V'].map(i => `<filter id="mb${i}" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur id="g${i}" stdDeviation="0 0"/></filter>`).join('')}</defs></svg>
+      <div class="j" id="jP" style="left:30px;top:722px;width:292px;height:153px">
+        <div class="cap" style="left:24px;top:32px">${D.q('ped', 'PEDIDO')}</div>
+        <div class="seta" id="seta" style="right:17px;top:21px"><svg viewBox="0 0 24 24" fill="none" stroke="#9AA0AD" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" id="setaS"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div>
+        <div style="position:absolute;left:24px;top:88px;font:700 35px/1 var(--fd);letter-spacing:-.02em;white-space:nowrap" id="digita">${ch}</div>
+        <div class="cur" id="cur" style="left:24px;top:84px"></div>
+        <div class="brilho"><i id="brilho"></i></div>
+      </div>
+      <div class="j" id="jB" style="left:30px;top:890px;width:292px;height:105px">
+        <div style="position:absolute;left:24px;top:36px;font:500 23px/1 var(--fd);color:#D8DAE0">${D.q('prog', 'editando...')}</div>
+        ${pcts}
+        <div class="trilho" style="left:24px;right:24px;top:74px"><i id="barra"></i></div>
+        <div id="ok"><svg viewBox="0 0 24 24" fill="none" stroke="#14151A" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.500l4.500 4.500L19 7"/></svg></div>
+      </div>
+      <div class="j" id="jT" style="left:55px;top:1330px;width:540px;height:190px">
+        <div class="cap" style="left:22px;top:20px">${D.q('tl', 'LINHA DO TEMPO')}</div>
+        <div style="position:absolute;right:22px;top:19px;font:500 17px/1 var(--fm);color:#9AA0AD">${D.q('arq', 'reel_v2.mp4')}</div>
+        ${mm}<div class="onda" id="onda">${onda}</div><div class="cabeca" id="cabeca"></div>
+      </div>
+      <div class="j pv" id="jV" style="left:653px;top:1040px;width:314px;height:417px">
+        <div style="position:absolute;left:20px;top:17px;display:flex;gap:7px"><i style="width:10px;height:10px;border-radius:50%;background:#5C5F69"></i><i style="width:10px;height:10px;border-radius:50%;background:#5C5F69"></i><i style="width:10px;height:10px;border-radius:50%;background:#5C5F69"></i></div>
+        <div class="cap" style="left:68px;top:14px;font-size:15px">${D.q('pv', 'PRÉVIA')}</div>
+        <div style="position:absolute;right:20px;top:14px;font:700 14px/1 var(--fd);letter-spacing:.12em;color:var(--mk)">● ${D.q('vivo', 'AO VIVO')}</div>
+        <div class="tela">
+        <div class="im"><i id="vfoto" style="background-image:url('${IMG}');background-size:340px auto;background-position:-25px -120px"></i></div>
+        <svg viewBox="0 0 278 349" style="position:absolute;left:0;top:0;width:278px;height:349px;overflow:visible">
+          <defs><clipPath id="vrosa"><rect id="vrosaR" x="40" y="96" width="0" height="50"/></clipPath>
+            <pattern id="vhach" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(40)"><rect width="5" height="5" fill="#D8527F"/><line x1="0" y1="0" x2="0" y2="5" stroke="#F4A9C2" stroke-width="2"/></pattern></defs>
+          <path id="pvct" d="" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+          <g transform="translate(-12 -48)">
+          <g id="vestrela"><path d="M258 82c3 10 5 15 14 19-9 4-11 9-14 20-3-11-6-16-14-20 9-4 11-9 14-19z" fill="rgba(242,199,68,.22)" stroke="#F2C744" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/></g>
+          <g id="vcoracao"><path id="vcor" d="M72 140c-12-10-26-22-26-36 0-9 7-14 14-14 6 0 10 4 12 9 2-5 6-9 12-9 7 0 14 5 14 14 0 14-14 26-26 36z" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100"/>
+            <path d="M72 140c-12-10-26-22-26-36 0-9 7-14 14-14 6 0 10 4 12 9 2-5 6-9 12-9 7 0 14 5 14 14 0 14-14 26-26 36z" fill="url(#vhach)" clip-path="url(#vrosa)" opacity=".92"/></g>
+          <g id="vraios" stroke="#E8E36E" stroke-width="2.4" stroke-linecap="round" opacity="0"><path d="M104 100l9-6M108 112l10-2M101 90l5-9"/></g>
+          <g id="vfaisca" opacity="0"><path d="M232 66l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="none" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></g>
+          <g id="vfaisca2" opacity="0"><path d="M276 134l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="none" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></g>
+          </g>
+        </svg>
+        <div style="position:absolute;left:0;right:0;top:250px;height:99px;background:linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.85) 55%)"></div>
+        <div style="position:absolute;left:0;right:0;top:270px;text-align:center;font:500 11px/1 var(--fm);color:#C9CCD3">11/16</div>
+        <div class="rot" style="top:284px">${D.q('efeito', 'rabisco tremido')}</div>
+        <div style="position:absolute;left:14px;right:14px;top:332px;height:4px;border-radius:4px;background:rgba(255,255,255,.25)"><div id="vprog" style="width:6%;height:100%;border-radius:4px;background:#fff"></div></div>
+        </div>
+      </div>
+      <div id="luz" style="position:absolute;inset:0;opacity:0;background:radial-gradient(ellipse farthest-corner at 50% 45%,rgba(0,0,0,.1),rgba(0,0,0,.02) 60%,rgba(0,0,0,0) 100%)"></div>`);
+  }
+  stage.innerHTML = html.join('');
+  const $ = s => document.querySelector(s);
+
+  // o palco: a luz cai em 5 quadros (a ref, normalizada: .54, .83, .91, .97, 1)
+  if (tras) FADE.forEach((a, k) => tl.set('#palco', {opacity: a}, T_(k + sh)));
+
+  if (!frente) return dur;
+  gsap.set('#luz', {opacity: FADE[0]}); FADE.forEach((a, k) => tl.set('#luz', {opacity: a}, T_(k)));
+
+  // ---- as quatro janelas: cada quadro tem o seu estado (x, y, escala, borrão, opacidade); depois de assentar, todas derivam juntas ----
+  const mola = (id, tab, rest, dr) => {
+    const el = $('#j' + id), g = document.getElementById('g' + id), ult = tab[tab.length - 1][0];
+    gsap.set(el, {filter: `url(#mb${id})`});
+    tab.forEach(([f, x, y, s, b, o]) => {
+      const p = {x, y, scale: s, opacity: o};
+      if (id === 'V') Object.assign(p, {rotation: -3, rotationY: -5, transformPerspective: 900});
+      // um `tl.set` no tempo 0 não vale no 1º quadro: o estado do quadro 0 entra direto
+      if (f === 0) { gsap.set(el, p); gsap.set(g, {attr: {stdDeviation: `${b} ${b}`}}); }
+      tl.set(el, p, T_(f));
+      tl.set(g, {attr: {stdDeviation: `${b} ${b}`}}, T_(f));
+    });
+    // a deriva: depois do último quadro da mola, +0,53 px por quadro em x e -0,25 em y (contados do quadro `rest`)
+    for (let f = ult + 1; f <= total; f++) {
+      const p = {x: +(dr[0] * (f - rest)).toFixed(2), y: +(dr[1] * (f - rest)).toFixed(2), scale: 1, opacity: 1};
+      if (id === 'V') Object.assign(p, {rotation: -3, rotationY: -5, transformPerspective: 900});
+      tl.set(el, p, T_(f));
+    }
+  };
+  mola('V', MV, 13, [.53, -.23]);
+  mola('P', MP, 13, [.53, -.26]);
+  mola('B', MB, 13, [.53, -.26]);
+  mola('T', MT, 20, [.5, -.25]);
+
+  // ---- V: o contorno do giz ferve a cada quadro, a estrela e o coração são desenhados à mão, a foto "toca" ----
+  const pvct = $('#pvct');
+  const k = 340 / 1080, ox = -25, oy = -120;
+  const desenha = q => CT.map((l, li) => 'M' + l.map(([x, y], i) => `${(x * k + ox + (rnd(q * 3.1 + i * .37 + li) - .5) * 2.2).toFixed(1)} ${(y * k + oy + (rnd(q * 5.3 + i * .53 + li * 2) - .5) * 2.2).toFixed(1)}`).join('L')).join('');
+  if (CT.length) { pvct.setAttribute('d', desenha(0)); for (let f = 1; f <= total; f++) tl.set(pvct, {attr: {d: desenha(f)}}, T_(f)); }
+  for (let f = 4; f <= total; f++) tl.set('#vestrela', {x: +((rnd(f * 2.3) - .5) * 2).toFixed(2), y: +((rnd(f * 4.1) - .5) * 2).toFixed(2), rotation: +((rnd(f * 7.7) - .5) * 5).toFixed(2), transformOrigin: '258px 101px'}, T_(f));
+  // a foto: um zoom lento e uma deriva (o vídeo toca)
+  for (let f = 4; f <= total; f++) tl.set('#vfoto', {scale: +(1 + .0012 * (f - 4) + (rnd(f * 1.9) - .5) * .004).toFixed(4), x: +((rnd(f * 3.3) - .5) * 1.4).toFixed(2), y: +((rnd(f * 5.9) - .5) * 1.4).toFixed(2)}, T_(f));
+  // o coração se desenha de f299 a f304 (um risco em f299 e f300, o arco em f301, o resto até f304), fica branco, e vira rosa de f312 a f314
+  [[9, 96], [10, 93], [11, 72], [12, 55], [13, 25], [14, 0]].forEach(([f, off]) => tl.set('#vcor', {attr: {'stroke-dashoffset': off}}, T_(f)));
+  [[22, 18], [23, 38], [24, 56]].forEach(([f, w]) => tl.set('#vrosaR', {attr: {width: w}}, T_(f)));
+  tl.set('#vrosaR', {attr: {width: 66}}, T_(25));
+  // os raios do coração (f308, f311, f314) e as faíscas brancas (f308, f314, f320)
+  tl.set('#vraios', {opacity: 0}, 0);
+  [[18, .5], [21, .8], [24, 1]].forEach(([f, o]) => tl.set('#vraios', {opacity: o}, T_(f)));
+  [[18, .45], [20, .8], [21, 1]].forEach(([f, o]) => tl.set('#vfaisca', {opacity: o}, T_(f)));
+  [[26, .6], [28, 1]].forEach(([f, o]) => tl.set('#vfaisca2', {opacity: o}, T_(f)));
+  // a barra branca da prévia avança
+  tl.fromTo('#vprog', {width: '25%'}, {width: '72%', duration: total * FR, ease: 'none', immediateRender: false}, 0);
+
+  // ---- T: o painel chega como barra; o rótulo e a régua nascem com ele; as miniaturas entram uma por quadro (1 quadro borradas); a cabeça aparece em f297 ----
+  tl.set('#onda', {opacity: 1}, T_(7));
+  const ENT = [6, 7, 8, 9, 10, 11];      // quadro em que cada miniatura nasce (f296 a f301): 1º quadro 5 px de borrão e 60%, 2º 2 px, depois nítida
+  ENT.forEach((f, i) => {
+    tl.set('#mi' + i, {opacity: .6, filter: 'blur(5px)'}, T_(f));
+    tl.set('#mi' + i, {opacity: 1, filter: 'blur(2px)'}, T_(f + 1));
+    tl.set('#mi' + i, {opacity: 1, filter: 'blur(0px)'}, T_(f + 2));
+  });
+  // a cabeça de reprodução (px da ref, desde a esquerda da janela): sai devagar em f297 e segue numa curva em S até f322
+  const cab = [[7, 5], [8, 12], [9, 20], [10, 28], [12, 51], [14, 83], [16, 130], [18, 185], [20, 253], [22, 319], [24, 375], [26, 425], [28, 460], [30, 481], [32, 494]];
+  tl.set('#cabeca', {opacity: 1, x: cab[0][1]}, T_(cab[0][0]));
+  cab.forEach(([f, x], i) => { if (i) tl.fromTo('#cabeca', {x: cab[i - 1][1]}, {x, duration: (f - cab[i - 1][0]) * FR, ease: 'none', immediateRender: false}, T_(cab[i - 1][0])); });
+
+  // ---- P: a digitação (~1,4 letra por quadro a partir de "ed" em f295), o envio em f304 e f305, o reflexo, o brilho do texto e o cursor que pisca ----
+  const n = [...TEXTO].length, RITMO = 1.43, fk = q => Math.round(5 + (q - 2) / RITMO);   // quadro em que já há q letras
+  const dg = document.getElementById('digita'), fins = [...dg.querySelectorAll('.ch')].map(c => c.offsetLeft + c.offsetWidth);
+  tl.set('#cur', {opacity: 1, x: fins[Math.min(1, n - 1)] + 2}, T_(5));
+  for (let i = 0; i < n; i++) {
+    const f = i < 2 ? 5 : fk(i + 1);
+    tl.set('#ch' + i, {opacity: 1}, T_(f));
+    if (i >= 2) tl.set('#cur', {x: fins[i] + 2}, T_(f));
+  }
+  // o cursor: aceso até f305, apagado f306 a f308, aceso f309 a f311, apagado f312 a f314, aceso f315 a f317, apagado f318 a f320, aceso f321 em diante (a ref pisca de 3 em 3 quadros)
+  [[16, 0], [19, 1], [22, 0], [25, 1], [28, 0], [31, 1]].forEach(([f, o]) => tl.set('#cur', {opacity: o}, T_(f)));
+  const mix = (a, b, t) => { const p = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16)), A = p(a), B = p(b); return '#' + A.map((v, i) => Math.round(v + (B[i] - v) * t).toString(16).padStart(2, '0')).join(''); };
+  tl.set('#seta', {backgroundColor: mix('#4A4D57', '#F2C744', .78)}, T_(14)); tl.set('#setaS', {stroke: mix('#9AA0AD', '#0B0D12', .6)}, T_(14));
+  tl.set('#seta', {backgroundColor: '#F2C744'}, T_(15)); tl.set('#setaS', {stroke: '#0B0D12'}, T_(15));
+  // o reflexo diagonal cruza o painel da esquerda pra direita em 3 quadros (f305, f306, f307) e o texto brilha
+  [[15, 70], [16, 180], [17, 255]].forEach(([f, x]) => tl.set('#brilho', {x, rotation: 22, opacity: 1}, T_(f)));
+  tl.set('#brilho', {opacity: 0}, T_(18));
+  tl.set('#digita', {textShadow: '0 0 14px rgba(255,255,255,.6)'}, T_(15)); tl.set('#digita', {textShadow: '0 0 6px rgba(255,255,255,.25)'}, T_(18)); tl.set('#digita', {textShadow: 'none'}, T_(19));
+
+  // ---- B: o progresso (OCR da ref): 0% até f304 e depois 2, 6, 15, 29, 50, 71, 85, 94, 98, 100% a cada quadro de f305 a f314; o círculo com visto em f316 e f317 ----
+  const pv = [0, 2, 6, 15, 29, 50, 71, 85, 94, 98, 100];
+  tl.set('#pc0', {opacity: 1}, T_(6));
+  pv.forEach((v, i) => {
+    if (!i) return;
+    tl.set('#pc' + (i - 1), {opacity: 0}, T_(14 + i));
+    tl.set('#pc' + i, {opacity: 1}, T_(14 + i));
+    tl.set('#barra', {width: v + '%'}, T_(14 + i));
+  });
+  tl.set('#ok', {opacity: 1, scale: .55}, T_(26));
+  tl.set('#ok', {backgroundColor: '#F2C744', scale: 1}, T_(27));
+  tl.set('#ok', {scale: .95}, T_(28)); tl.set('#ok', {scale: 1.06}, T_(29)); tl.set('#ok', {scale: 1}, T_(31));
+  return dur;
+});
+</script>
+</body>
+</html>

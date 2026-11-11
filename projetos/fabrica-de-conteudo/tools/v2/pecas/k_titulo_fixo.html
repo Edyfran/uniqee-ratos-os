@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<!-- TIPO — o título fixo do gancho do De2SEI7JP8r (fichas 01 e 02, f0 a f290): duas linhas brancas em negrito, centradas, com contorno escuro (a ref desenha a letra com borda preta de uns 5 px) e uma sombra leve, paradas na tela o tempo todo, sem entrada nem
+     saída. Cada linha vai no lugar medido na ref (x, y da tinta) e é esticada na horizontal até a largura da tinta (`w`): a letra da ref é mais estreita que a nossa e o corpo
+     (77 px) vem da altura. Por cima da pessoa, 1080x1920, --alpha.
+       l  as linhas, JSON [{"t": texto, "x": começo da tinta, "y": topo da tinta, "w": largura da tinta}] (as duas medidas da ref estão no exemplo) · fs  o corpo (77; cada linha pode trazer o seu) · pw  o peso da letra (650) · sw  o contorno escuro, em px de traço (8: quatro por fora, a letra por cima; medido: a 10 a tinta escura passava 20% da ref)
+       dur  a janela em s
+     etiqueta: titulo, texto-fixo
+       ?l=%5B%7B%22t%22%3A%22Everything%20you%20need%20to%22%2C%22x%22%3A121%2C%22y%22%3A291%2C%22w%22%3A841%7D%2C%7B%22t%22%3A%22edit%20your%20video%20with%20AI%22%2C%22x%22%3A135%2C%22y%22%3A395%2C%22w%22%3A809%7D%5D&dur=9.7 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+@font-face{font-family:'Inter';font-style:normal;font-weight:100 900;src:url(../nucleo/fontes/Inter-opsz-wght.ttf) format('truetype')}
+html,body,#stage{width:1080px;height:1920px;background:transparent}
+#stage{padding:0;display:block;overflow:hidden;background:none;position:relative;font-family:'Inter',system-ui,sans-serif}
+.t{position:absolute;white-space:pre;line-height:1;color:#fafafa;transform-origin:0 0;paint-order:stroke fill;text-shadow:0 3px 8px rgba(0,0,0,.35)}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+const dur = D.n('dur', '9.7'), fs = D.n('fs', '77'), KT = D.n('ktopo', '0.062');
+let ls = []; try { ls = JSON.parse(D.q('l', '[]')); } catch (e) {}
+Promise.all(['400', '500', '650', '800'].map(w => document.fonts.load(w + ' 26px Inter'))).then(() => {   // a medida do texto só vale com a Inter carregada
+ls.forEach(o => {
+  const d = document.createElement('div'); d.className = 't';
+  const f = o.fs || fs; d.style.fontSize = f + 'px'; d.style.fontWeight = D.n('pw', '650'); d.style.webkitTextStroke = D.n('sw', '8') + 'px #101010'; d.style.left = o.x + 'px'; d.style.top = (o.y - f * KT) + 'px';
+  d.textContent = o.t;
+  document.getElementById('stage').appendChild(d);
+  if (o.w) d.style.transform = `scaleX(${(o.w + 2) / d.getBoundingClientRect().width})`;
+});
+D.monta(tl => { tl.to({}, {duration: dur}, 0); return dur; });
+});
+</script>
+</body>
+</html>

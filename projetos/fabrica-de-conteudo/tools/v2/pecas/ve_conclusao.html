@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<!-- ENSAIO — conclusão: a frase que fica. 1920x1080, --alpha, EM CAMADAS.
+     Um campo tinta sobe do pé do quadro ATRÁS da pessoa (ela fica na frente dele)
+     e a frase sobe por palavra, com a <b> grifada. Pede ao compositor uma
+     aproximação lenta durante a peça.
+       ?frase=Não é sobre saber programar. É sobre <b>saber explicar</b>.&kick=pra fechar&lado=dir&t0=0.2&dur=5 -->
+<html lang="pt-BR" class="h alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/direcao-h.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<script src="../nucleo/ensaio.js"></script>
+<style>
+.pn{position:absolute;left:-20px;right:-20px;top:600px;bottom:-20px;background:radial-gradient(circle,rgba(255,255,255,.07) 2px,transparent 2.6px) 0 0/36px 36px,var(--ink);border-top:var(--bw) solid var(--ink)}
+.tx{position:absolute;top:650px;display:flex;flex-direction:column;align-items:flex-start}
+.tx .kick{margin-bottom:22px}
+.tx .hd{font-size:64px;color:#fff;margin:0}
+.tx .hd b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div id="stage"><div class="pn" id="pn" data-c="tras"></div><div class="tx" id="tx" data-c="tras"><div class="kick" id="k"></div><div class="hd" id="hd"></div></div></div>
+<script>
+const dur = D.n('dur', '5'), t0 = D.n('t0', '0.2'), $ = id => document.getElementById(id);
+const p = E.pessoa('dir'), esq = p.lado === 'esq';
+Object.assign($('tx').style, esq ? {left: (p.r + 40) + 'px', width: (1800 - p.r - 40) + 'px'} : {left: '120px', width: (p.l - 160) + 'px'});
+$('k').textContent = D.q('kick', 'pra fechar');
+$('hd').innerHTML = D.q('frase', 'Não é sobre saber programar. É sobre <b>saber explicar</b>.');
+E.video(t0, dur, 'zoom', {de: 1, para: 1.04, entra: dur - t0});
+D.monta(tl => {
+  tl.fromTo('#pn', {clipPath: 'inset(100% -30px -30px -30px)'}, {clipPath: 'inset(0% -30px -30px -30px)', duration: .6, ease: 'power3.inOut'}, D.at(t0));
+  D.cue(t0, 'swish');
+  D.carimbo('#k', t0 + .35, 0);
+  D.titulo('#hd', t0 + .45, .075);
+  if (D.q('sai', '1') !== '0') { D.sai(['#k', '#hd'], dur - .6); tl.to('#pn', {clipPath: 'inset(100% -30px -30px -30px)', duration: .4, ease: 'power3.in'}, dur - .42); }
+  return dur;
+});
+</script>
+</body>
+</html>

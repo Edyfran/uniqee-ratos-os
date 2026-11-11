@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<!-- GANCHO — o placar dos pedidos. 1080x1920, --alpha.
+     O vídeo que se edita na frente de quem assiste: no topo, a etiqueta do estado (BRUTO, que vira
+     ✓ EDITADO) e o placar "SKILLS N/5" com uma luz por pedido. Cada pedido chega num balão escrito
+     do jeito que se manda mensagem (nada de terminal): a frase se escreve, ganha ✓, a etiqueta da
+     skill bate no canto, o placar conta e a luz acende. A etiqueta e o placar estão na tela no
+     quadro 0 e ficam até o fim: são o gancho e o contador que segura.
+       pedidos  "texto|skill|t0|t1;…" — o balão entra em t0 e a frase termina de se escrever em t1,
+                onde entra o ✓; ele sai quando chega o próximo, ou `fica` s depois do ✓
+       total    as luzes do placar (5) · rot  o nome do placar (SKILLS)
+       tag      a etiqueta do começo (BRUTO) · tag2  a do fim (EDITADO) · t_tag  quando ela vira (-1: não vira)
+       topo     o y da linha do placar (90) · y  o topo do balão (250) · fica  (1.1) · dur
+       margem   a folga dos lados, do placar e do balão (40; no anúncio, 65: a borda da zona segura)
+     ?pedidos=tira as pausas|ritmo|0.3|1.1;põe legenda e grifa a palavra forte|legendas|1.6|3.0;divide a tela|composição|3.5|4.3&total=5&rot=SKILLS&tag=BRUTO&tag2=EDITADO&t_tag=5.2&dur=6.5 -->
+<html lang="pt-BR" class="alfa" data-qa="entra-seco fica">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block;position:relative;overflow:hidden}
+.topo{position:absolute;left:40px;right:40px;display:flex;align-items:center;justify-content:space-between}
+.tags{position:relative;height:84px;min-width:330px}
+.tag{position:absolute;left:0;top:0;height:84px;display:flex;align-items:center;gap:16px;padding:0 28px;
+  font:700 44px/1 var(--fm);letter-spacing:.06em;white-space:nowrap}
+.tag .pt{width:22px;height:22px;border-radius:50%;background:var(--no);border:4px solid var(--ink);box-sizing:border-box}
+.tag2{opacity:0}
+.placar{display:flex;align-items:center;gap:22px;height:84px;padding:0 26px}
+.placar .rt{font:700 30px/1 var(--fm);letter-spacing:.1em;color:var(--ink6)}
+.placar .n{display:flex;align-items:baseline;font:800 58px/1 var(--fd);letter-spacing:var(--ls);color:var(--ink)}
+.jan{height:1em;overflow:hidden;display:inline-block}
+.jan .ro{display:flex;flex-direction:column}
+.jan .ro span{height:1em;display:block}
+.luzes{display:flex;gap:10px}
+.luz{width:30px;height:30px;border:var(--bw) solid var(--ink);border-radius:6px;background:var(--sur);box-sizing:border-box;position:relative;overflow:hidden}
+.luz i{position:absolute;inset:0;background:var(--ac);transform:scale(0)}
+.bal{position:absolute;left:40px;right:40px;padding:22px 36px 34px;opacity:0;border-radius:34px 34px 34px 8px}
+.bal .rp{font:600 30px/1 var(--fm);letter-spacing:.1em;text-transform:uppercase;color:var(--ink4);margin-bottom:16px}
+.bal .fr{font:700 58px/1.12 var(--fd);letter-spacing:var(--ls);color:var(--ink);white-space:nowrap}
+.bal .fr .l{display:none}
+.cur{display:inline-block;width:.42em;height:.95em;margin-left:.05em;vertical-align:-.12em;background:var(--ac)}
+.ok{position:absolute;right:-18px;top:-30px;width:84px;height:84px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font:800 50px/1 var(--fd);opacity:0}
+.sk{position:absolute;left:28px;bottom:-34px;padding:10px 22px;font:700 34px/1 var(--fm);letter-spacing:.08em;
+  text-transform:uppercase;opacity:0}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="topo" id="topo">
+    <div class="tags">
+      <div class="tag nb cor-mk" id="tg1"><span class="pt"></span><span id="tx1"></span></div>
+      <div class="tag nb cor-ok tag2" id="tg2"><span>✓</span><span id="tx2"></span></div>
+    </div>
+    <div class="placar nb" id="pl"><span class="rt" id="rt"></span><span class="n"><span class="jan"><span class="ro" id="ro"></span></span><span id="tot"></span></span><span class="luzes" id="lz"></span></div>
+  </div>
+</div>
+<script>
+const dur = D.n('dur', '6.5'), fica = D.n('fica', '1.1'), tTag = D.n('t_tag', '5.2');
+const PED = D.q('pedidos', 'tira as pausas|ritmo|0.3|1.1;põe legenda e grifa a palavra forte|legendas|1.6|3.0;divide a tela|composição|3.5|4.3')
+  .split(';').filter(Boolean).map(s => { const [tx, sk, a, b] = s.split('|'); return {tx, sk, t0: parseFloat(a), t1: parseFloat(b)}; });
+const total = Math.max(1, parseInt(D.q('total', '5'), 10));
+const $ = id => document.getElementById(id);
+const stage = $('stage');
+$('topo').style.top = D.n('topo', '90') + 'px';
+const M = D.n('margem', '40');
+$('topo').style.left = $('topo').style.right = M + 'px';
+$('tx1').textContent = D.q('tag', 'BRUTO');
+$('tx2').textContent = D.q('tag2', 'EDITADO');
+$('rt').textContent = D.q('rot', 'SKILLS');
+$('tot').textContent = '/' + total;
+$('ro').innerHTML = Array.from({length: Math.min(PED.length, total) + 1}, (_, i) => `<span>${i}</span>`).join('');
+$('lz').innerHTML = Array.from({length: total}, () => '<span class="luz"><i></i></span>').join('');
+const Y = D.n('y', '250');
+PED.forEach((p, i) => stage.insertAdjacentHTML('beforeend',
+  `<div class="bal nb" id="b${i}" style="top:${Y}px;left:${M}px;right:${M}px"><div class="rp">pedido ${i + 1}</div><div class="fr" id="f${i}"></div>` +
+  `<div class="ok nb cor-ok" id="k${i}">✓</div><div class="sk nb cor-mk" id="s${i}"></div></div>`));
+
+D.monta(tl => {
+  PED.forEach((p, i) => { $('f' + i).textContent = p.tx; $('s' + i).textContent = p.sk; });
+  D.cabe('.bal .fr', 40, ['.bal', 1]);
+  const luzes = [...document.querySelectorAll('.luz i')];
+  PED.forEach((p, i) => {
+    const b = '#b' + i, prox = PED[i + 1];
+    const sai = Math.min(prox ? prox.t0 - .12 : dur, p.t1 + fica, dur - .05);
+    D.pousa(b, p.t0, {dy: -30, rot: i % 2 ? .8 : -.8});
+    // a frase se escreve até o ✓, e o cursor anda junto (cada letra aparece por `display`: seekável)
+    const el = $('f' + i), tx = el.textContent;
+    el.textContent = '';
+    const ls = [...tx].map(ch => { const s = document.createElement('span'); s.className = 'l'; s.textContent = ch; el.appendChild(s); return s; });
+    const cur = document.createElement('span'); cur.className = 'cur'; el.appendChild(cur);
+    const a = p.t0 + .12, passo = Math.max(.012, Math.min(.07, (p.t1 - .08 - a) / ls.length));
+    ls.forEach((s, k) => tl.set(s, {display: 'inline'}, a + k * passo));
+    D.cue(a, 'type', {dur: +(ls.length * passo).toFixed(3)});
+    tl.set(cur, {opacity: 0}, p.t1);
+    // o ✓, a skill que bate no canto, o placar conta e a luz acende
+    D.pousa('#k' + i, p.t1, {s: 1.6, dy: 0, som: 'certo'});
+    if (p.sk) D.carimbo('#s' + i, p.t1 + .1, -3);
+    if (i < total) {
+      tl.to('#ro', {yPercent: -100 * (i + 1) / (PED.length + 1), duration: .4, ease: D.P.MOLA}, D.at(p.t1));
+      tl.to(luzes[i], {scale: 1, duration: .3, ease: D.P.MOLA}, D.at(p.t1));
+      tl.fromTo('#pl', {scale: 1}, {scale: 1.06, duration: .12, ease: 'power2.out', yoyo: true, repeat: 1}, D.at(p.t1));
+    }
+    // a saída é mais rápida que a entrada
+    if (sai < dur - .06) tl.to(b, {opacity: 0, y: -26, scale: .96, '--shx': '0px', duration: .22, ease: D.P.SAI}, sai);
+  });
+  // a etiqueta vira: a de BRUTO sai e a de EDITADO bate no lugar
+  if (tTag >= 0 && tTag < dur) {
+    tl.to('#tg1', {opacity: 0, scale: .8, duration: .18, ease: D.P.SAI}, D.at(tTag));
+    D.carimbo('#tg2', tTag, -2);
+  }
+  return dur;
+});
+</script>
+</body>
+</html>

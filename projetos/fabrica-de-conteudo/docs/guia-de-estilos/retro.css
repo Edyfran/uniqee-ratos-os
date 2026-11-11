@@ -1,0 +1,43 @@
+/* Retrô: anos 70. Creme, laranja queimado e mostarda, letra gorda de serifa redonda,
+   canto bem redondo, nenhuma borda, e a sombra em duas faixas de cor, como placa de
+   lanchonete. Atrás, um sol de raios bem leve.
+   Copie para marca/tema.css e troque as quatro cores (docs/guia-de-estilos.md).
+   As letras moram em tools/video-use/assets/fontes/: copie cada arquivo do url() pra
+   marca/fontes/, com o <Família>-OFL.txt do lado. A Fraunces sai gorda e redonda pelo
+   eixo SOFT (font-variation-settings, abaixo). */
+
+@font-face{font-family:'Marca';font-weight:700 900;src:url(fontes/Fraunces-Variable.ttf) format('truetype')}
+@font-face{font-family:'MarcaApoio';font-weight:100 900;src:url(fontes/Jost-Variable.ttf) format('truetype')}
+
+html.marca{
+  /* as quatro cores: chão, letra, bloco, marcador */
+  --pp:#F4E3C1; --ink:#3B2314; --ac:#C8512B; --mk:#F0B23C;
+  --ink9:var(--ink); --sur:color-mix(in srgb,var(--pp) 40%,white);
+  --ink6:color-mix(in srgb,var(--ink) 72%,var(--pp));
+  --ac2:color-mix(in srgb,var(--ac) 18%,var(--pp)); --act:color-mix(in srgb,var(--ac) 28%,var(--pp));
+  --fd:'Marca',Georgia,serif; --fm:'MarcaApoio',system-ui,sans-serif; --ls:-.015em;
+
+  /* a forma: sem borda, canto redondo, a etiqueta em pílula, sombra em duas faixas */
+  --bw:0px; --sh:7px; --sombra:var(--mk); --raio:30px; --raio-s:999px;
+  --tex:repeating-conic-gradient(from -90deg at 50% 112%,color-mix(in srgb,var(--mk) 20%,transparent) 0deg 6deg,transparent 6deg 12deg);
+  font-synthesis:none; font-variation-settings:'SOFT' 100,'WONK' 1;
+
+  /* o reel editorial e a capa */
+  --ed-sans:'Marca',Georgia,serif;
+  --ed-pp:var(--pp); --ed-pp-luz:color-mix(in srgb,var(--pp) 40%,white);
+  --ed-tx:var(--ink);
+  --ed-dg-azul:linear-gradient(180deg,color-mix(in srgb,var(--ac) 50%,white) 0%,var(--ac) 70%);
+  --ed-dg-ouro:linear-gradient(180deg,color-mix(in srgb,var(--mk) 30%,white) 8%,var(--mk) 58%,color-mix(in srgb,var(--mk) 80%,black) 100%);
+  --ed-dg-some-azul:linear-gradient(180deg,var(--ac) 0%,color-mix(in srgb,var(--ac) 55%,transparent) 55%,color-mix(in srgb,var(--ac) 6%,transparent) 100%);
+  --ed-dg-some-ouro:linear-gradient(180deg,var(--mk) 0%,color-mix(in srgb,var(--mk) 55%,transparent) 55%,color-mix(in srgb,var(--mk) 6%,transparent) 100%);
+}
+/* duas faixas atrás de cada objeto: mostarda e laranja. O --shx é o mesmo que o D.pousa anima */
+html.marca .nb{box-shadow:var(--shx,var(--sh)) var(--shx,var(--sh)) 0 var(--mk),
+  calc(var(--shx,var(--sh))*2) calc(var(--shx,var(--sh))*2) 0 var(--ac)}
+html.marca .nb.cor-ac{color:var(--pp);box-shadow:var(--shx,var(--sh)) var(--shx,var(--sh)) 0 var(--mk),
+  calc(var(--shx,var(--sh))*2) calc(var(--shx,var(--sh))*2) 0 var(--ink)}
+html.marca .nb.cor-mk{box-shadow:var(--shx,var(--sh)) var(--shx,var(--sh)) 0 var(--ac),
+  calc(var(--shx,var(--sh))*2) calc(var(--shx,var(--sh))*2) 0 var(--ink)}
+html.marca .kick{background:var(--ac);color:var(--pp);border:0;box-shadow:none;font-weight:600;letter-spacing:.14em}
+html.marca .ic{border:0;border-radius:50%}
+html.marca .btn{border:0}

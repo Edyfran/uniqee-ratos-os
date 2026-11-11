@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<!-- PROVA — a nota do próprio vídeo: o quanto custou cada coisa, impressa linha a linha. 1080x1920, --alpha.
+     Uma tira de papel de caixa (borda tinta, sombra dura, serrilha embaixo) no alto da tela. No quadro 0
+     ela já está lá com a pergunta (o gancho). Cada linha sai como da cabeça de impressão, da esquerda
+     pra direita, e a tira desce uma linha; passando de `janela` linhas, a fita corre pra cima e o
+     cabeçalho fica. No TOTAL a tira desenrola inteira (todas as linhas), e o valor dele bate no
+     amarelo. O rodapé (o asterisco) entra como carimbo. Valor que termina em * ganha o asterisco
+     no amarelo: é o que o rodapé explica.
+       linhas  "RÓTULO|valor@t;…" · total "RÓTULO|valor@t" · rodape "texto@t"
+       titulo  a pergunta, "|" quebra · loja · data · janela (4) · lh (58), a altura da linha
+       x, y    o canto de cima-esquerdo (padrão: centrada, y 290) · larg (800) · dur
+       Parâmetro ausente cai no exemplo: o plano passa todos
+     ?titulo=QUANTO CUSTOU|ESSE ANÚNCIO?&loja=FÁBRICA DE CONTEÚDO&data=03/10/2026&linhas=EDIÇÃO|R$ 0,00@0.6;CENAS|R$ 0,00*@1.4;CAPA|R$ 0,00@2.2;AVATAR|R$ 0,00*@3;VOZ|R$ 0,00*@3.8;AGENTE DE IA|≈ R$ 0,70@4.6&total=TOTAL|≈ R$ 0,70@5.6&rodape=* reaproveitado de um vídeo pronto@6.6&dur=8.5 -->
+<html lang="pt-BR" class="alfa" data-qa="entra-seco fica">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block;position:relative;overflow:hidden}
+/* a sombra dura segue a serrilha: drop-shadow sem blur na tira inteira */
+#nota{position:absolute;left:0;top:0;transform-origin:50% 0;
+  filter:drop-shadow(var(--sh) var(--sh) 0 var(--ink))}
+/* a serrilha: dentes de 40×20 na borda de baixo; a tinta por trás e o papel 1 borda pra dentro */
+.fundo{position:absolute;inset:0;
+  -webkit-mask:linear-gradient(#000 0 0) top/100% calc(100% - 19px) no-repeat,
+    conic-gradient(from -45deg at bottom,transparent,#000 1deg 89deg,transparent 90deg) bottom/40px 20px repeat-x}
+.fundo.tinta{background:var(--ink)}
+.fundo.papel{inset:var(--bw) var(--bw) var(--bw) var(--bw);background:var(--pp)}
+.cx{position:relative;padding:26px 40px 44px}
+.topo{display:flex;justify-content:space-between;font:700 26px/1 var(--fm);letter-spacing:.12em;color:var(--ink6)}
+.tt{margin-top:14px;font:700 62px/1.04 var(--fd);letter-spacing:var(--ls);text-transform:uppercase;color:var(--ink)}
+.corte{height:0;border-top:var(--bw) dashed var(--ink);margin:18px 0 6px}
+#jan{position:relative;overflow:hidden;height:0}
+#fita{position:relative}
+.ln{display:flex;align-items:baseline;gap:14px;white-space:nowrap}
+.ln .rt{font:700 42px/1 var(--fd);text-transform:uppercase;color:var(--ink)}
+.ln .pt{flex:1;min-width:24px;border-bottom:5px dotted var(--ink4);transform:translateY(-8px)}
+.ln .vl{font:700 42px/1 var(--fm);color:var(--ink)}
+.ln .ast{background:var(--mk);padding:0 2px;margin-left:2px}
+.tot{border-top:var(--bw) dashed var(--ink);margin-top:10px;padding-top:16px}
+.tot .rt{font-size:58px}
+.tot .vl{font-size:54px;background:var(--mk);border:var(--bw) solid var(--ink);border-radius:var(--raio-s);padding:4px 12px}
+.rod{margin-top:16px;display:inline-block;font:700 34px/1 var(--fm);color:var(--ink);background:var(--mk);
+  border:var(--bw) solid var(--ink);border-radius:var(--raio-s);padding:10px 14px;transform-origin:30% 50%}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="nota">
+    <div class="fundo tinta"></div><div class="fundo papel"></div>
+    <div class="cx">
+      <div class="topo"><span id="loja"></span><span id="data"></span></div>
+      <div class="tt" id="tt"></div>
+      <div class="corte"></div>
+      <div id="jan"><div id="fita"></div></div>
+    </div>
+  </div>
+</div>
+<script>
+const dur = D.n('dur', '8.5'), larg = D.n('larg', '800'), LH = D.n('lh', '58'), JAN = D.n('janela', '4');
+const X = D.n('x', String((1080 - larg) / 2)), Y = D.n('y', '290');
+const $ = id => document.getElementById(id);
+const um = s => { const i = s.lastIndexOf('@'); return [s.slice(0, i), parseFloat(s.slice(i + 1))]; };
+const LN = D.q('linhas', 'EDIÇÃO|R$ 0,00@0.6;CENAS|R$ 0,00*@1.4;CAPA|R$ 0,00@2.2;AVATAR|R$ 0,00*@3;VOZ|R$ 0,00*@3.8;AGENTE DE IA|≈ R$ 0,70@4.6')
+  .split(';').filter(Boolean).map(s => { const [tx, t] = um(s), [rt, vl] = tx.split('|'); return {rt, vl: vl || '', t}; });
+const TOT = D.q('total', 'TOTAL|≈ R$ 0,70@5.6') ? (([tx, t]) => ({rt: tx.split('|')[0], vl: tx.split('|')[1] || '', t}))(um(D.q('total', 'TOTAL|≈ R$ 0,70@5.6'))) : null;
+const ROD = D.q('rodape', '* reaproveitado de um vídeo pronto@6.6') ? um(D.q('rodape', '* reaproveitado de um vídeo pronto@6.6')) : null;
+$('loja').textContent = D.q('loja', 'FÁBRICA DE CONTEÚDO');
+$('data').textContent = D.q('data', '03/10/2026');
+$('tt').innerHTML = D.q('titulo', 'QUANTO CUSTOU|ESSE ANÚNCIO?').split('|').join('<br>');
+$('nota').style.width = larg + 'px';
+const valor = v => v.endsWith('*') ? `${v.slice(0, -1)}<span class="ast">*</span>` : v;
+const linha = (l, cls, k) => `<div class="ln${cls}" id="${k}" style="height:${cls ? 'auto' : LH + 'px'}">` +
+  `<span class="rt">${l.rt}</span><span class="pt"></span><span class="vl">${valor(l.vl)}</span></div>`;
+$('fita').innerHTML = LN.map((l, k) => linha(l, '', 'l' + k)).join('') +
+  (TOT ? linha(TOT, ' tot', 'tot') : '') + (ROD ? `<div class="rod" id="rod">${ROD[0]}</div>` : '');
+
+D.monta(tl => {
+  D.cabe('.tt', 40, ['.cx', 1]);
+  D.cabe('.rod', 26, ['.cx', 1]);
+  gsap.set('#nota', {x: X, y: Y});
+  // o gancho: a tira já está na tela no quadro 0, com a pergunta, e assenta
+  tl.fromTo('#nota', {scale: 1.06, rotation: -1.2}, {scale: 1, rotation: 0, duration: .3, ease: 'back.out(2)'}, 0);
+  D.cue(0, 'papel');
+  const fita = $('fita');
+  // a linha sai da cabeça de impressão, da esquerda pra direita
+  const imprime = (el, t, passo = .3) => {
+    tl.fromTo(el, {clipPath: 'inset(0 100% 0 0)'}, {clipPath: 'inset(0 0% 0 0)', duration: passo, ease: 'none'}, D.at(t));
+    D.cue(t, 'type', {dur: passo});
+  };
+  LN.forEach((l, k) => {
+    gsap.set('#l' + k, {clipPath: 'inset(0 100% 0 0)'});
+    const n = k + 1;
+    // a tira desce uma linha; cheia a janela, a fita corre pra cima
+    tl.to('#jan', {height: Math.min(n, JAN) * LH, duration: .18, ease: 'power2.out'}, D.at(l.t) - .12);
+    if (n > JAN) tl.to(fita, {y: -(n - JAN) * LH, duration: .18, ease: 'power2.out'}, D.at(l.t) - .12);
+    imprime('#l' + k, l.t);
+  });
+  if (TOT) {
+    gsap.set('#tot', {clipPath: 'inset(0 100% 0 0)'});
+    // o total: a tira desenrola inteira, e o valor bate no amarelo
+    const alto = () => fita.scrollHeight;
+    gsap.set(['#rod'], {opacity: 0});
+    const semRod = ROD ? $('rod').offsetHeight + 16 : 0;
+    tl.to('#jan', {height: alto() - semRod, duration: .45, ease: D.P.EASE}, D.at(TOT.t) - .45);
+    tl.to(fita, {y: 0, duration: .45, ease: D.P.EASE}, D.at(TOT.t) - .45);
+    D.cue(TOT.t - .45, 'papel');
+    imprime('#tot', TOT.t, .35);
+    tl.fromTo('#tot .vl', {scale: 1.25}, {scale: 1, duration: .3, ease: 'back.out(2.4)', transformOrigin: 'right center'}, D.at(TOT.t) + .35);
+    D.cue(TOT.t + .35, 'caixa');
+    if (ROD) {
+      tl.to('#jan', {height: alto(), duration: .2, ease: 'power2.out'}, D.at(ROD[1]) - .15);
+      tl.set('#jan', {overflow: 'visible'}, D.at(ROD[1]));   // o carimbo bate maior que a tira
+      D.carimbo('#rod', ROD[1], -3);
+    }
+  }
+  return dur;
+});
+</script>
+</body>
+</html>

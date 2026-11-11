@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<!-- RECEITAS de talking head — o compositor que o receita_para_video.py dirige.
+     Não tem timeline: o renderer chama __prepara(cfg) uma vez e __quadro(n) por
+     quadro, e cada quadro é desenhado do zero a partir de t = n / fps. É isso que
+     deixa o render determinístico e permite pedir qualquer quadro fora de ordem.
+     O desenho mora no receitas-core.js; aqui só se carrega insumo e se escolhe cena. -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&family=Montserrat:wght@800&display=swap" rel="stylesheet">
+<style>html,body{margin:0;overflow:hidden;background:#000}canvas{display:block}</style>
+</head>
+<body>
+<canvas id="tela" width="1080" height="1920"></canvas>
+<script src="receitas-core.js"></script>
+<script src="legendas-core.js"></script>
+<script>
+const tela = document.getElementById('tela'), ctx = tela.getContext('2d');
+let r, cfg, placa, ativa = null, leg = null;
+const avisos = new Set();          // o renderer lê no fim e imprime
+window.__avisos = () => [...avisos];
+
+const carrega = src => new Promise((ok, erro) => {
+  const im = new Image(); im.onload = () => ok(im); im.onerror = () => erro(new Error('não carregou: ' + src)); im.src = src;
+});
+// "cover" nas medidas lógicas do core (540×960), igual à prévia
+const cobre = (g, im) => {
+  const iw = im.naturalWidth, ih = im.naturalHeight, s = Math.max(r.W / iw, r.H / ih);
+  g.drawImage(im, (r.W - iw * s) / 2, (r.H - ih * s) / 2, iw * s, ih * s);
+};
+// o track vem em px de 1080×1920; o core pensa em 540×960
+const rosto = (track, n) => { const b = track[Math.max(0, Math.min(track.length - 1, n))]; return {x: b.x / r.S, y: b.y / r.S, w: b.w / r.S, h: b.h / r.S}; };
+const quadroDe = (fonte, n) => fonte.dir + '/' + String(Math.max(0, Math.min(fonte.n - 1, n)) + 1).padStart(6, '0') + '.png';
+// o primeiro quadro n cujo t = n/fps alcança o instante (sem erro de ponto flutuante)
+const primeiro = t => Math.ceil(t * cfg.fps - 1e-6);
+
+// preenche F (placa + avatar) e P (só o avatar) com o quadro n da fonte
+async function insumos(fonte, n, F, P) {
+  const im = await carrega(quadroDe(fonte, n));
+  const f = F.getContext('2d'); f.clearRect(0, 0, r.W, r.H); cobre(f, placa); cobre(f, im);
+  if (P) { const g = P.getContext('2d'); g.clearRect(0, 0, r.W, r.H); cobre(g, im); }
+}
+
+window.__prepara = async c => {
+  cfg = c;
+  r = new Receitas(540, 960, 1080 / 540);
+  r.M2 = r.P;                                // a máscara é o alfa do próprio .webm
+  placa = await carrega(cfg.placa);
+  // legenda v3: só quando o plano pede. Desligada, nada aqui muda o quadro.
+  leg = null; r.state.legOn = false;
+  const L = cfg.legenda;
+  if (L && L.versao === 3) {
+    const ws = (L.palavras || []).map(w => ({tx: w.tx, t0: w.t0, t1: w.t1}));
+    const auto = Legendas.regras(ws);       // também marca o valor de cada número (o contador precisa)
+    leg = new Legendas();
+    leg.base = L.base || 'suave';
+    // drama: "auto" = a regra sem LLM; lista = os momentos do plano; nome de preset = fixo pra todos
+    const lista = Array.isArray(L.drama) ? L.drama : L.momentos;
+    leg.drama = typeof L.drama === 'string' && L.drama !== 'auto' ? L.drama : 'auto';
+    leg.setWords(ws, lista || auto);
+    r.state.legOn = true;
+  }
+  const cues = [];
+  for (const rec of cfg.receitas) {
+    rec.i = Receitas.NOMES[rec.receita];
+    if (rec.i === undefined) throw new Error('receita desconhecida: ' + rec.receita + ' (há: ' + Object.keys(Receitas.NOMES).join(', ') + ')');
+    rec.dd = rec.ate - rec.de;
+    rec.p = {...rec};
+    if (rec.captura) rec.p.captura = await carrega(rec.captura);
+    for (const q of r.cues(rec.i, rec.dd, rec.p)) cues.push({...q, t: +(q.t + rec.de).toFixed(3)});
+  }
+  // tese → janela colada: a janela entra pela silhueta, e o som da passagem vem junto
+  cfg.receitas.forEach((rec, k) => {
+    const prox = cfg.receitas[k + 1];
+    rec.silhueta = rec.i === 0 && prox && prox.i === 1 && Math.abs(prox.de - rec.ate) < 1e-6 ? prox : null;
+    if (rec.silhueta) cues.push({t: +(rec.ate - .35).toFixed(3), tipo: 'whoosh'});
+  });
+  cues.sort((a, b) => a.t - b.t);
+  window.__cues = cues;
+  return {cues};
+};
+
+window.__quadro = async n => {
+  const t = n / cfg.fps, S = r.S;
+  const rec = cfg.receitas.find(q => t >= q.de && t < q.ate) || null;
+  // entrou noutra janela: o estado de uma não vaza pra outra (freeze, grade)
+  if (rec !== ativa) { r.fzs = {}; r.livres = null; r.crop02 = null; ativa = rec; }
+  r.ocupaCena = null;
+  ctx.setTransform(S, 0, 0, S, 0, 0);
+  if (rec) {
+    const ts = t - rec.de, lt = Math.max(0, Math.min(1, ts / rec.dd)), n0 = primeiro(rec.de);
+    // freeze: congela o quadro do INSTANTE certo, mesmo se o render pulou até aqui
+    const fz = r.congelaDe(rec.i, rec.dd, rec.p);
+    if (fz && ts >= fz[1] && ts < fz[2]) {
+      const nf = Math.max(n0, primeiro(rec.de + fz[1]));
+      if (!r.fzs[fz[0]] || r.fzs[fz[0]].n !== nf) {
+        await insumos(cfg.fonte, nf, r.F, r.P); r.face = rosto(cfg.fonte.track, nf);
+        delete r.fzs[fz[0]]; r.congela(fz[0], true).n = nf;
+      }
+    }
+    // a grade da escala nasce do rosto do primeiro quadro da janela
+    if (rec.i === 12 && !r.livres) {
+      r.face = rosto(cfg.fonte.track, n0); r.calculaLivres(rec.p.n ?? 43);
+      if (r.livres.length < (rec.p.n ?? 43)) avisos.add(`escala em ${rec.de}s: só ${r.livres.length} de ${rec.p.n ?? 43} azulejos cabem em volta do corpo`);
+    }
+    // o cartão da janela também: enquadrado pelo rosto do primeiro quadro, e parado
+    if (rec.i === 1 && !r.crop02) { r.face = rosto(cfg.fonte.track, n0); r.enquadra02(); }
+    await insumos(cfg.fonte, n, r.F, r.P); r.face = rosto(cfg.fonte.track, n);
+    if (rec.i === 16 && rec.take_b) {
+      // take B: o quadro que estava em take_b_de quando a janela abriu, andando junto
+      const b = cfg.takes[rec.take_b], nb = (primeiro(rec.take_b_de || 0) + n - n0) % b.n;
+      r.FB = r.FB || r.cv(); await insumos(b, nb, r.FB, null); r.faceB = rosto(b.track, nb);
+    }
+    r.cena(rec.i, ctx, lt, ts, rec.dd, rec.p);
+    if (rec.silhueta && rec.dd - ts < .35) {
+      const px = rec.silhueta, ocupa = r.ocupaCena;
+      r.crop02 = null;                       // a prévia da janela enquadra pelo rosto deste quadro
+      r.silhueta(ctx, 1 - (rec.dd - ts) / .35, g => r.cena(px.i, g, 0, 0, px.dd, px.p));
+      r.crop02 = null; r.ocupaCena = ocupa;
+    }
+    // legenda v3: depois da cena, antes do grão
+    if (leg) leg.desenha(ctx, t, {receita: rec.i, lt, face: r.face, ocupa: r.ocupaCena});
+    r.grao_(ctx, t, .13);                    // grão baixo em toda receita, como na prévia
+  } else {
+    // fora das janelas: talking head limpo, placa + avatar
+    await insumos(cfg.fonte, n, r.F, null);
+    r.cheio(ctx, r.F);
+    if (leg) { r.face = rosto(cfg.fonte.track, n); leg.desenha(ctx, t, {receita: -1, lt: 0, face: r.face}); }
+  }
+  return true;
+};
+window.__pronto = true;
+</script>
+</body>
+</html>

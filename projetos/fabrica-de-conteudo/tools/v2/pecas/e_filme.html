@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<!-- EFEITO — "visual de filme": uma linha branca fina com brilho varre o quadro de cima pra baixo em 0,15 s; acima dela
+     já vale o look (película quente, vinheta nos cantos, grão). Depois fica estável até sair. 1080x1920, --alpha, tela cheia (o painel passa por cima). Tudo aqui é película de
+     alfa; a gradação de cor de verdade (pretos esmagados, contraste, verdes dessaturados) é passo de render:
+     o preset mais perto do `grade.py` é `warm_cinematic`, forçado.
+       veu  1 (padrão) põe a película quente; 0 deixa só a linha, a vinheta e o grão (a cor vira passo de render)
+       forca  a opacidade do look (1) · t0  quando entra (0) · dur  (1.4)
+       ?forca=1&veu=1&dur=1.2 -->
+<html lang="pt-BR" class="alfa" data-qa="fundo">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;padding:0;display:block;overflow:hidden;background:none}
+#lk{position:absolute;inset:0;transform-origin:50% 0;
+  background:radial-gradient(ellipse 75% 62% at 50% 46%,rgba(0,0,0,0) 50%,rgba(15,8,0,.38) 100%)}
+#tn{position:absolute;inset:0;background:linear-gradient(rgba(255,206,90,.26),rgba(255,226,150,.2))}
+#gr{position:absolute;inset:0;opacity:.13;mix-blend-mode:normal;
+  background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1.6 -.3'/></filter><rect width='300' height='300' filter='url(%23n)'/></svg>")}
+#ln{position:absolute;left:0;top:-2px;width:1080px;height:4px;background:#fff;box-shadow:0 0 18px 4px rgba(255,255,255,.75)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="lk"><div id="tn"></div><div id="gr"></div></div><div id="ln"></div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const dur = D.n('dur', '1.2'), t0 = D.n('t0', '0'), f = D.n('forca', '1'), S = .145;
+D.monta(tl => {
+  // a linha anda 75 → 1920 em S; o look acima e o flash abaixo seguem a mesma reta
+  const y0 = 75;
+  gsap.set('#lk', {opacity: f});
+  if (D.n('veu', '1') < 1) $('tn').remove();
+  tl.fromTo('#ln', {y: y0}, {y: 1920 + 4, duration: S, ease: 'none'}, t0);
+  tl.fromTo('#lk', {scaleY: y0 / 1920}, {scaleY: 1, duration: S, ease: 'none'}, t0);
+  tl.set('#ln', {autoAlpha: 0}, t0 + S + .01);
+  tl.to('#lk', {opacity: 0, duration: .1, ease: 'none'}, dur - .1);
+  D.cue(t0, 'whoosh');
+  return dur;
+});
+</script>
+</body>
+</html>

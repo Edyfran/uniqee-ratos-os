@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<!-- EFEITO — conta-gotas de cor, na faixa de baixo (clone do "Eyedropper grade"). 1080x1920, --alpha.
+     Uma barra de papel vazia entra; um anel de cursor e um conta-gotas vêm pela esquerda, o conta-gotas pousa no rosto
+     (anel em volta da ponta) e solta uma gota que cai na barra; as cores vão aparecendo em fila (bolinha, hex, nome),
+     a paleta troca pela graduada (o indicador vai de 1 a 3) e a barra sai pela esquerda. A imagem esfriar é passo de
+     render (`grade.py`), não desta peça. Fica abaixo do painel lateral (topo y 1166); o conta-gotas passa a x < 540.
+       de     os hex da primeira amostra, vírgula, sem # (até 5; os da cena crua)
+       para   os hex da paleta graduada, na mesma ordem (a cena fria)
+       nomes  os rótulos, separados por ; (parede;quadro;camisa;boné;pele)
+       kick   o rótulo da esquerda (amostras) · grade  o da direita (grade)
+       fx  fy  o ponto do rosto onde o conta-gotas pousa (428, 856) · x  y  w  a barra (35, 1166, 950)
+       veu  1 (padrão) desenha o véu frio sobre a imagem, 0 só a interface
+       t0 · troca  quando a paleta vira a graduada (0.5) · dur  (1.2); a pausa estica, o movimento não
+       ?de=171713,B0A392,CBC4A8,8E8678,A8785F&para=090C0C,788183,949898,919B9F,6D6560&nomes=parede;quadro;camisa;boné;pele&kick=amostras&grade=grade&dur=1.2 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+#veu{position:absolute;left:0;top:0;width:1080px;height:1920px;background:#7C94AA;opacity:0}
+.br{position:absolute;height:117px;border-radius:20px;background:var(--pp2);--sh:8px}
+.cab{position:absolute;left:30px;right:30px;top:15px;display:flex;justify-content:space-between;align-items:center;font:600 15px/1 var(--fm);letter-spacing:.14em;text-transform:uppercase;color:var(--ink4)}
+.cab .g{display:flex;align-items:center;gap:8px}
+.cab .g u{display:block;width:16px;height:9px;border-radius:3px;background:var(--ink2)}
+.cab .g u.o{background:var(--ink)}
+.sm{position:absolute;top:46px;display:flex;flex-direction:column;gap:6px;width:170px}
+.sm .l{display:flex;align-items:center;gap:10px}
+.sm .d{width:28px;height:28px;border-radius:50%;border:3px solid var(--ink);flex:none;position:relative}
+.sm .d i{position:absolute;inset:-3px;border-radius:50%}
+.sm .h{font:700 20px/1 var(--fm);color:var(--ink);letter-spacing:.01em;position:relative;height:20px;width:100px}
+.sm .h b{position:absolute;left:0;top:0;font-weight:700}
+.sm .n{margin-left:38px;font:600 13px/1 var(--fm);letter-spacing:.14em;color:var(--ink4);text-transform:uppercase}
+.cg{position:absolute;left:0;top:0;width:84px;height:84px;overflow:visible;fill:#fff;stroke:var(--ink);stroke-width:1.5;
+  stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(4px 4px 0 var(--ink));opacity:0}
+.an{position:absolute;left:0;top:0;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;border:4px solid #fff;box-shadow:0 0 0 2px var(--ink),inset 0 0 0 2px var(--ink);opacity:0}
+.go{position:absolute;left:0;top:0;width:28px;height:28px;margin:-14px 0 0 -14px;border-radius:50%;border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);opacity:0}
+</style>
+</head>
+<body>
+<div id="stage">
+<div id="veu"></div>
+  <div class="br nb" id="br"><div class="cab"><span id="k"></span><span class="g"><span id="gr"></span><u class="o"></u><u></u><u></u></span></div><div id="sm"></div></div>
+  <div class="an" id="an"></div>
+  <svg class="cg" id="cg" viewBox="0 0 24 24"><path d="M2 22l1-1h3l9-9"/><path d="M3 21v-3l9-9"/><path d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3z"/></svg>
+  <div id="gotas"></div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const hexes = (k, d) => D.q(k, d).split(',').map(s => s.trim().replace(/^#/, '').toUpperCase()).filter(s => /^[0-9A-F]{6}$/.test(s)).slice(0, 5);
+const A = hexes('de', '171713,B0A392,CBC4A8,8E8678,A8785F'), B = hexes('para', '090C0C,788183,949898,919B9F,6D6560');
+const nomes = D.q('nomes', 'parede;quadro;camisa;boné;pele').split(';'), N = A.length;
+const dur = D.n('dur', '1.2'), t0 = D.n('t0', '0'), veu = D.q('veu', '1') !== '0', troca = D.n('troca', '0.5');
+const FX = D.n('fx', '428'), FY = D.n('fy', '856'), BX = D.n('x', '35'), BY = D.n('y', '1166'), BW = D.n('w', '950');
+$('k').textContent = D.q('kick', 'amostras'); $('gr').textContent = D.q('grade', 'grade');
+const br = $('br'); br.style.left = BX + 'px'; br.style.top = BY + 'px'; br.style.width = BW + 'px';
+const pitch = (BW - 90) / N, SX = i => 30 + i * pitch;
+$('sm').innerHTML = A.map((h, i) => `<div class="sm" style="left:${SX(i)}px"><div class="l"><div class="d" style="background:#${h}"><i style="background:#${B[i] || h};opacity:0"></i></div><div class="h"><b style="opacity:0">#${h}</b><b style="opacity:0">#${B[i] || h}</b></div></div><div class="n" style="opacity:0">${nomes[i] || ''}</div></div>`).join('');
+$('gotas').innerHTML = A.map((h, i) => `<div class="go" style="background:#${h}"></div>`).join('');
+const marca = (cx, cy, el, S, px, py) => ({x: cx - px * S / 24, y: cy - py * S / 24});
+
+D.monta(tl => {
+  const a0 = D.at(t0), S = 84, tip = (x, y) => ({x: x - 2 * S / 24, y: y - 22 * S / 24});
+  const cg = $('cg'), an = $('an');
+  tl.set(br, {opacity: 1}, 0);
+  // a barra entra seca; o anel já está no alto e o conta-gotas embaixo à esquerda
+  const p0 = tip(216, 734), p1 = tip(FX, FY);
+  tl.set(an, {x: 298, y: 467, opacity: 1}, 0);
+  tl.set(cg, {x: p0.x, y: p0.y, opacity: 1, rotation: 0}, 0);
+  const v = a0, ch = v + .12;
+  tl.to(cg, {x: p1.x, y: p1.y, duration: .12, ease: 'power3.out'}, v);
+  tl.to(an, {x: FX, y: FY, duration: .12, ease: 'power3.out'}, v);
+  D.cue(v, 'swish');
+  // 1 quadro no rosto e vão-se
+  tl.set([cg, an], {opacity: 0}, ch + .04);
+  const g0 = ch, pas = .02, dots = [...document.querySelectorAll('.sm')];
+  const gs = [...document.querySelectorAll('.go')];
+  gs.forEach((g, i) => {
+    const s = g0 + i * pas, dx = BX + SX(i) + 14, dy = BY + 46 + 14;
+    tl.set(g, {x: FX, y: FY, opacity: 0}, 0);
+    tl.fromTo(g, {opacity: 1, scale: .6}, {opacity: 1, scale: 1, duration: .03, ease: 'none'}, s);
+    // y chega logo e x atrasa: a gota desce à esquerda do painel e só depois vai pro lado
+    tl.to(g, {y: dy, duration: .14, ease: 'power2.out'}, s);
+    tl.to(g, {x: dx, duration: .14, ease: 'power3.in'}, s);
+    tl.set(g, {opacity: 0}, s + .14);
+    const d = dots[i];
+    tl.fromTo(d.querySelector('.d'), {opacity: 0, scale: .4}, {opacity: 1, scale: 1, duration: .1, ease: 'power2.out'}, s + .12);
+    tl.fromTo(d.querySelector('.h b'), {opacity: 0}, {opacity: 1, duration: .06, ease: 'none'}, s + .14);
+    tl.fromTo(d.querySelector('.n'), {opacity: 0}, {opacity: 1, duration: .08, ease: 'none'}, s + .16);
+    D.cue(s + .12, 'click');
+  });
+  // a paleta vira a graduada: bolinha e hex trocam, o indicador anda de 1 a 3
+  const tt = Math.max(g0 + (N - 1) * pas + .3, a0 + troca);
+  dots.forEach((d, i) => {
+    tl.to(d.querySelector('.d i'), {opacity: 1, duration: .24, ease: 'power1.inOut'}, tt + i * .03);
+    const bs = d.querySelectorAll('.h b');
+    tl.to(bs[0], {opacity: 0, duration: .1, ease: 'none'}, tt + i * .03);
+    tl.to(bs[1], {opacity: 1, duration: .1, ease: 'none'}, tt + i * .03 + .08);
+  });
+  const us = [...document.querySelectorAll('.cab .g u')];
+  tl.call(() => us[1].classList.add('o'), null, tt + .02);
+  tl.call(() => us[2].classList.add('o'), null, tt + .16);
+  tl.call(() => { us[1].classList.remove('o'); us[2].classList.remove('o'); }, null, 0.001);
+  // a barra sai pela esquerda, cortada, no fim da janela
+  const s = Math.max(tt + .3, a0 + dur - .2);
+  tl.to(br, {x: -(BX + BW * .85), duration: .12, ease: 'power2.in'}, s);
+  tl.to(br, {opacity: 0, duration: .04, ease: 'none'}, s + .1);
+  // véu frio: a imagem esfria devagar e volta de uma vez; com veu=0 a cor fica pro render
+  if (veu) { tl.fromTo('#veu', {opacity: 0}, {opacity: .45, duration: .6, ease: 'power1.inOut'}, a0 + .25);
+    tl.to('#veu', {opacity: 0, duration: .1, ease: 'none'}, s + .08); }
+  return Math.max(dur, s + .16);
+});
+</script>
+</body>
+</html>

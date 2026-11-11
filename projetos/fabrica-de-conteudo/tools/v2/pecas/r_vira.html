@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<!-- PROVA — o cartão que vira: de um lado o pedido, do outro o resultado. 1080x1920, --alpha.
+     O cartão 9:16 pousa com o pedido escrito do jeito que se manda mensagem e o botão de enviar. A
+     seta clica no botão, e o cartão dá meia-volta no próprio eixo, com lado e luz do núcleo
+     (D.espessura, D.luz): o verso é o resultado (imagem ou vídeo 9:16), e a etiqueta bate nele. A
+     sombra dura fica no chão e estreita com o giro. Da referência (Skillry #225, #410, o painel ao lado
+     do celular que vira e mostra o resultado) saiu só o movimento.
+       pedido  o texto da frente · para  o rótulo da frente (vazio: nenhum) · img  o verso
+       tag     a etiqueta do verso (PRONTO; vazio: nenhuma) · cursor  1|0 a seta que clica (1)
+       x, y    o centro do cartão (540, 980) · t0 · t_vira  quando ele está de verso · dur
+       ?pedido=transforma esse bruto num reel com legenda e capa&para=para o seu agente&img=../midia/vitrine-semana.jpg&tag=PRONTO&cursor=1&x=540&y=980&t0=0.2&t_vira=2.0&dur=4.2 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<script src="../nucleo/cursor.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+#pos{position:absolute;width:600px;height:1066px;opacity:0}
+#som{position:absolute;inset:0;border-radius:var(--raio);background:var(--sombra,var(--ink));transform-origin:50% 50%}
+#car{position:absolute;inset:0}
+.fc{position:absolute;inset:0;overflow:hidden;box-shadow:none;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+#frente{transform:translateZ(1px);display:flex;flex-direction:column;padding:56px 50px;gap:34px}
+#verso{transform:translateZ(calc(-1 * var(--esp) - 1px)) rotateY(180deg)}
+#verso .jan{position:absolute;inset:0;overflow:hidden}
+#para{align-self:flex-start;font:700 34px/1 var(--fm);letter-spacing:.06em;background:var(--mk);border:var(--bw) solid var(--ink);
+  border-radius:var(--raio-s);padding:12px 16px 10px;white-space:nowrap}
+#para:empty{display:none}
+#ped{font:600 76px/1.14 var(--fd);letter-spacing:-.02em;color:var(--ink);opacity:0}
+#env{position:absolute;right:44px;bottom:44px;width:120px;height:120px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font:800 64px/1 var(--fd);color:#fff;background:var(--ac);border:var(--bw) solid var(--ink)}
+#tag{position:absolute;opacity:0;white-space:nowrap;font-size:38px}
+#tag:empty{display:none}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="pos">
+    <i id="som"></i>
+    <div id="car"><div class="fc nb" id="frente"><span id="para"></span><div id="ped"></div><span id="env">↑</span></div>
+      <div class="fc nb" id="verso"><div class="jan" id="vj"></div></div></div>
+    <span class="kick" id="tag"></span>
+  </div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const dur = D.n('dur', '4.2'), t0 = D.n('t0', '0.2'), tVira = D.n('t_vira', '2.0'), X = D.n('x', '540'), Y = D.n('y', '980');
+$('ped').textContent = D.q('pedido', 'transforma esse bruto num reel com legenda e capa');
+$('para').textContent = D.q('para', 'para o seu agente');
+$('tag').textContent = D.q('tag', 'PRONTO') ? '✓ ' + D.q('tag', 'PRONTO') : '';
+// esc: escala a peça inteira a partir do meio do topo (1 = como sempre); a tela dividida pede a peça maior ou menor
+const ESC = D.n('esc', '1');
+if (ESC !== 1) Object.assign(document.getElementById('stage').style, {transform: `scale(${ESC})`, transformOrigin: '540px 0'});
+const PLANA = D.q('esp', '') === '0';   // esp=0: o giro passa de lado sem deixar linha (borda e sombra somem de perfil)
+D.midia('#vj', D.q('img', '../midia/vitrine-semana.jpg'), 'o resultado');
+Object.assign($('pos').style, {left: X - 300 + 'px', top: Y - 533 + 'px'});
+
+D.monta(tl => {
+  D.palco3d('#pos', '50% 50%');
+  D.espessura('#car', {sombra: false, ...(PLANA ? {esp: 0} : {})});
+  D.luz(['#frente', '#verso']);
+  const car = $('car'), som = $('som');
+  // a sombra fica no chão: deslocada pela altura e estreita com o giro (o cosseno do ângulo)
+  const S = {sh: 0};
+  D.aoQuadro(() => {
+    const a = gsap.getProperty(car, 'rotationY') * Math.PI / 180, z = gsap.getProperty(car, 'z') || 0;
+    gsap.set(som, {x: S.sh + z * .12, y: S.sh + z * .12, scaleX: Math.max(PLANA ? 0 : .02, Math.abs(Math.cos(a)))});
+  });
+  D.pousa('#pos', t0, {s: 1.04, som: 'pop'});
+  tl.fromTo(S, {sh: 0}, {sh: D.SH * 1.4, duration: D.P.ENT, ease: D.P.POUSA}, D.at(t0));
+  D.palavras('#ped', t0 + .3, .06);
+  // a seta vai até o botão e clica; o cartão vira logo depois do clique
+  const tc = tVira - .6;
+  if (D.q('cursor', '1') === '1') {
+    const p = $('pos'), bx = p.offsetLeft + 600 - 104, by = p.offsetTop + 1066 - 104;
+    D.cursor('#stage', [{x: bx + 160, y: by + 220, t: tc - .5}, {x: bx, y: by, t: tc, clica: true}, {x: bx + 170, y: by + 260, t: tc + .45}], {sai: tc + .7});
+  }
+  tl.to('#env', {scale: .86, duration: .07, yoyo: true, repeat: 1, ease: 'power2.out'}, tc);
+  const ta = tVira - .55;
+  tl.to(car, {rotationY: 180, duration: .7, ease: 'expo.inOut'}, ta);
+  tl.to(car, {z: 140, duration: .35, ease: 'power2.out'}, ta);
+  tl.to(car, {z: 0, duration: .35, ease: 'power2.in'}, ta + .35);
+  D.cue(ta, 'whoosh');
+  D.cue(tVira, 'thud');
+  if ($('tag').textContent) {
+    Object.assign($('tag').style, {left: '-18px', top: '-36px'});
+    D.carimbo('#tag', tVira + .2, -4);
+  }
+  D.deriva(car, tVira + .3, dur - .5, {rotationY: 174, rotationX: -3});
+  D.sai('#pos', dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

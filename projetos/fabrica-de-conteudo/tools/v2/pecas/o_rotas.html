@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<!-- OFERTA — rotas: cada tipo de trabalho vai pro seu modelo. 1440x1028.
+     A tarefa cai à esquerda; a linha se desenha com um ponto correndo nela;
+     o destino aterrissa na ponta. A escolha de caminho É o movimento — sem
+     porcentagem de economia inventada.
+       ?r=Trabalho simples|Modelo econômico@0.5;Trabalho exigente|Modelo mais forte|ac@2.0&dur=5 -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1440px;height:1028px}
+#stage{padding:40px var(--marg) 50px;justify-content:center}
+.hd{font-size:72px;margin-bottom:40px}
+.hd:empty{display:none}
+.mapa{position:relative}
+svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.ln{fill:none;stroke:var(--ink);stroke-width:8;stroke-linecap:round}
+.pt{fill:var(--mk);stroke:var(--ink);stroke-width:5}
+.ponta{fill:var(--ink)}
+.cd{position:absolute;display:flex;align-items:center;padding:0 30px;opacity:0}
+.cd b{font:700 54px/1.05 var(--fd);letter-spacing:var(--ls);white-space:nowrap}
+.cd.de{left:0;width:430px}
+.cd.pa{right:10px;width:450px}
+.cd.pa .tg{flex:none;font:700 26px/1 var(--fm);letter-spacing:.1em;text-transform:uppercase;margin-right:18px;
+  padding:.4em .5em .34em;border:var(--bw) solid currentColor;border-radius:var(--raio-s)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="kick" id="k"></div>
+  <div class="hd" id="h"></div>
+  <div class="mapa" id="m"><svg id="sv"></svg></div>
+</div>
+<script>
+const dur = D.n('dur', '5');
+document.getElementById('k').textContent = D.q('kick', '');
+document.getElementById('h').innerHTML = D.q('hd', '');
+const rs = D.itens('r', 'Trabalho simples|Modelo econômico@0.5;Trabalho exigente|Modelo mais forte|ac@2.0', ['de', 'pa', 'cor']);
+
+D.monta(tl => {
+  D.cabe('.hd', 44);
+  const m = document.getElementById('m'), sv = document.getElementById('sv');
+  const W = m.clientWidth;
+  // o mapa tem a altura das rotas, e o palco centra título + mapa juntos —
+  // mapa elástico empurrava o título pra longe
+  const gap = 44, alto = rs.length > 3 ? 130 : 150;
+  const H = rs.length * alto + (rs.length - 1) * gap;
+  m.style.height = H + 'px';
+  const top0 = 0;
+  let svg = '';
+  rs.forEach((r, i) => {
+    const y = top0 + i * (alto + gap);
+    const a = document.createElement('div'); a.className = 'cd de nb'; a.id = 'de' + i;
+    a.style.top = y + 'px'; a.style.height = alto + 'px'; a.innerHTML = `<b>${r.de}</b>`;
+    const b = document.createElement('div'); b.className = 'cd pa nb' + (r.cor === 'ac' ? ' cor-ac' : ' cor-mk'); b.id = 'pa' + i;
+    b.style.top = y + 'px'; b.style.height = alto + 'px'; b.innerHTML = `<span class="tg">0${i + 1}</span><b>${r.pa}</b>`;
+    m.appendChild(a); m.appendChild(b);
+    const cy = y + alto / 2, x0 = 430 + D.SH + 16, x1 = W - 10 - 450 - 34;
+    svg += `<path class="ln" id="ln${i}" d="M ${x0} ${cy} L ${x1} ${cy}"></path>`
+         + `<polygon class="ponta" id="pn${i}" points="${x1 - 4},${cy - 20} ${x1 + 22},${cy} ${x1 - 4},${cy + 20}"></polygon>`
+         + `<circle class="pt" id="pt${i}" r="15" cx="${x0}" cy="${cy}"></circle>`;
+  });
+  sv.innerHTML = svg;
+  D.cabe('.cd.de b', 32, '.cd');
+  D.cabe('.cd.pa b', 32, ['.cd', .78]);
+
+  D.camera(dur, 1.0, 1.02);
+  if (D.q('kick')) D.carimbo('#k', .06);
+  if (D.q('hd')) D.titulo('#h', .15);
+  rs.forEach((r, i) => {
+    D.pousa('#de' + i, r.t, {dx: -40, rot: D.inclina(i) * .5, som: 'pop'});
+    const p = document.getElementById('ln' + i), L = p.getTotalLength(), pt = document.getElementById('pt' + i);
+    gsap.set(p, {strokeDasharray: L, strokeDashoffset: L});
+    const o = {k: 0};
+    const anda = () => { const q = p.getPointAtLength(L * o.k); pt.setAttribute('cx', q.x); pt.setAttribute('cy', q.y); };
+    tl.fromTo(pt, {opacity: 0}, {opacity: 1, duration: .12}, r.t + .25);
+    tl.to(p, {strokeDashoffset: 0, duration: .55, ease: 'power2.inOut'}, r.t + .25);
+    tl.fromTo(o, {k: 0}, {k: 1, duration: .55, ease: 'power2.inOut', onUpdate: anda}, r.t + .25);
+    tl.to(pt, {opacity: 0, duration: .12}, r.t + .8);
+    tl.fromTo('#pn' + i, {opacity: 0, scale: .2, transformOrigin: '50% 50%'}, {opacity: 1, scale: 1, duration: .25, ease: 'back.out(3)'}, r.t + .72);
+    D.cue(r.t + .3, 'swish');
+    D.pousa('#pa' + i, r.t + .92, {dx: 40, rot: -D.inclina(i) * .5, s: 1.08, som: 'pop'});
+  });
+  D.sai(['#k', '#h', '#m'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

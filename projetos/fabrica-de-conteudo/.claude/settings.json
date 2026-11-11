@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 120,
+            "command": "py=\"$CLAUDE_PROJECT_DIR/.venv/bin/python\"; [ -f \"$py\" ] || py=\"$CLAUDE_PROJECT_DIR/.venv/Scripts/python.exe\"; [ -f \"$py\" ] && \"$py\" \"$CLAUDE_PROJECT_DIR/tools/economia/hook.py\" || true"
+          }
+        ]
+      }
+    ]
+  }
+}

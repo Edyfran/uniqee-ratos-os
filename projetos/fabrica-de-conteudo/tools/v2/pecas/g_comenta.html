@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<!-- GANCHO — CTA de comentário. 1080x1920, --alpha.
+     Um campo de comentário genérico (não imita app nenhum): a palavra é
+     DIGITADA, o botão de enviar é apertado, e o campo acende. Se houver
+     `promessa`, ela cai embaixo — é o porquê de comentar.
+       ?rot=Comenta a palavra&palavra=AGENTE&promessa=que eu te mando o passo a passo&pos=base&t=0.2&dur=5 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+.zona{position:absolute;left:56px;right:70px;display:flex;flex-direction:column;align-items:stretch;gap:26px}
+.zona.topo{top:240px}
+.zona.centro{top:760px}
+.zona.base{top:1180px}
+.bx{display:flex;flex-direction:column;gap:20px;padding:26px 28px 30px;opacity:0}
+.bx .rt{font:700 58px/1.05 var(--fd);letter-spacing:var(--ls);opacity:0}
+.lin{display:flex;align-items:stretch;gap:18px}
+.inp{flex:1;min-width:0;display:flex;align-items:center;padding:0 24px;height:128px;background:#fff;
+  border:var(--bw) solid var(--ink);border-radius:var(--raio-s)}
+.inp .tx{font:700 var(--tp,76px)/1 var(--fm);letter-spacing:.04em;white-space:nowrap}
+.inp .car{flex:none;width:7px;height:.9em;font-size:var(--tp,76px);background:var(--ac);margin-left:6px}
+.env{flex:none;width:128px;height:128px;display:flex;align-items:center;justify-content:center;font:700 64px/1 var(--fd)}
+.pr{align-self:flex-start;padding:18px 26px;font:700 42px/1.1 var(--fd);letter-spacing:var(--ls);opacity:0}
+.pr:empty{display:none}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="zona" id="z">
+    <div class="bx nb" id="bx">
+      <div class="rt" id="rt"></div>
+      <div class="lin"><div class="inp" id="in"><span class="tx" id="tx"></span><span class="car" id="car"></span></div><div class="env nb cor-ac" id="en">→</div></div>
+    </div>
+    <div class="pr nb cor-mk" id="pr"></div>
+  </div>
+</div>
+<script>
+const dur = D.n('dur', '5'), t0 = D.n('t', '0.2');
+const palavra = D.q('palavra', 'AGENTE');
+document.getElementById('z').classList.add(['topo', 'centro', 'base'].includes(D.q('pos')) ? D.q('pos') : 'base');
+document.getElementById('rt').innerHTML = D.q('rot', 'Comenta a palavra');
+document.getElementById('tx').textContent = palavra;
+document.getElementById('pr').textContent = D.q('promessa', '');
+
+D.monta(tl => {
+  D.cabe('.bx .rt', 36, '.bx');
+  const util = document.getElementById('in').clientWidth - 48 - 16;
+  document.documentElement.style.setProperty('--tp', Math.min(76, Math.floor(util / (palavra.length * .64))) + 'px');
+  D.pousa('#bx', t0, {rot: D.P.ROT * .6, s: 1.06, som: 'pop'});
+  D.palavras('#rt', t0 + .12);
+  const fim = D.digita('#tx', t0 + .55, .085);
+  for (let t = t0; t < fim; t += .5) tl.to('#car', {opacity: 0, duration: .01}, t + .25).to('#car', {opacity: 1, duration: .01}, t + .5);
+  // enviar: o botão afunda na sombra e volta; o campo acende
+  const te = fim + .25;
+  tl.to('#en', {x: D.SH, y: D.SH, '--shx': '0px', duration: .09, ease: 'power2.out'}, te);
+  tl.to('#en', {x: 0, y: 0, '--shx': D.SH + 'px', duration: .4, ease: D.P.MOLA}, te + .1);
+  D.cue(te, 'click');
+  tl.to('#car', {opacity: 0, duration: .1}, te);
+  tl.to('#in', {backgroundColor: D.css('--mk'), duration: .2}, te + .05);
+  if (D.q('promessa')) D.pousa('#pr', te + .45, {rot: -D.P.ROT, dy: -24, som: 'pop'});
+  D.flutua(['#bx', '#pr'], te + .6, dur - .5, .7);
+  D.sai(['#bx', '#pr'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

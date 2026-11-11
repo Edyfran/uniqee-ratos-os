@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<!-- TRANSIÇÃO — corte em blocos. 1080x1920 ou 1920x1080 (?ar=), --alpha.
+     Faixas de cor chapada, com borda tinta e sombra dura na frente, atravessam o
+     quadro em cascata sem parar: cada uma entra por um lado e sai pelo outro num
+     movimento só. O quadro fica coberto só no instante do `meio`, onde cai o
+     corte do vídeo por baixo (window.__corte). No círculo, cada disco cresce e
+     já sai andando no mesmo instante, sem segurar.
+     Na íris (Skillry #250), seis lâminas fecham girando até o hexágono sumir no `meio` e abrem
+     do outro lado: o corte acontece com o quadro fechado.
+     No risco (Joba, proposta 5 de pesquisa/referencias-conteudo/joba-esqueca-consistencia.md), três
+     quadros a 30 qps (100 ms): o risco nasce de um lado, no quadro do meio cobre a tela (o corte) e
+     sobra do outro lado; o glitch vai por baixo. Só pra entrar no mapa (l_mapa) e no cartão do rosto.
+     i=contida (um fio de ouro, a tela apaga no quadro do corte) · media (faixa ameixa e fio de ouro,
+     cobre de ameixa) · ousada (três faixas que tremem, cobre de ouro). Pede ?tema=tinteiro.
+     forma=faixas|diagonal|circulo|iris|risco · cores=ac,mk,ink (ac mk ink br) · dir=direita|esquerda|cima|baixo
+     lento=1 (padrão) · >1 estica a travessia das faixas e do círculo. Medido (diagonal, uma cor): lento=1 deixa o bloco ~0,27 s
+     no quadro; lento=1.8, ~0,47 s (entra em 0,2 s, cobre tudo por 0,07 s, sai em 0,2 s). O `meio` e a `dur` mínimos sobem
+     junto (EK = 0,34 × lento): com lento=1.8 passe meio=0.62 e dur=1.27.
+       ?forma=faixas&cores=ac,mk,ink&dir=direita&meio=0.5&dur=1 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+html.h,html.h body,html.h #stage{width:1920px;height:1080px}
+html,body{background:transparent}
+#stage{position:relative;overflow:hidden;background:none;padding:0;display:block}
+#pl{position:absolute;inset:0}
+html.diag #pl{inset:0 -35%;transform:skewX(-14deg)}
+html.diag.vert #pl{inset:-35% 0;transform:skewY(-14deg)}
+.fx{position:absolute;inset:0;box-sizing:border-box}
+.fx.ac{background:var(--ac)}.fx.mk{background:var(--mk)}.fx.ink{background:var(--ink)}.fx.br{background:#fff}
+.fx.c{inset:auto;border-radius:50%}
+</style>
+</head>
+<body>
+<div id="stage"><div id="pl"></div></div>
+<script>
+const R = document.documentElement, HZ = D.q('ar', '1080x1920').startsWith('1920');
+if (HZ) R.classList.add('h');
+const W = HZ ? 1920 : 1080, H = HZ ? 1080 : 1920;
+const forma = ['faixas', 'diagonal', 'circulo', 'iris', 'risco'].includes(D.q('forma')) ? D.q('forma') : 'faixas';
+const cores = D.q('cores', 'ac,mk,ink').split(',').map(c => c.trim()).filter(c => ['ac', 'mk', 'ink', 'br'].includes(c)).slice(0, 4);
+if (!cores.length) cores.push('ac', 'mk', 'ink');
+const dir = ['direita', 'esquerda', 'cima', 'baixo'].includes(D.q('dir')) ? D.q('dir') : 'direita';
+const vert = dir === 'cima' || dir === 'baixo', sg = dir === 'esquerda' || dir === 'cima' ? -1 : 1;
+const n = cores.length, E = .34, S = .07;   // meia travessia de cada faixa, cascata
+const K = Math.max(.5, D.n('lento', '1')), EK = E * K;   // lento: esticar a travessia (1 = o padrão)
+const meio = Math.max(EK + (n - 1) * S, D.n('meio', '0.5'));
+const dur = Math.max(meio + EK + .02, D.n('dur', '1'));
+window.__corte = meio;
+if (forma === 'diagonal') R.classList.add('diag');
+if (vert) R.classList.add('vert');
+const pl = document.getElementById('pl'), SH = D.SH * 1.6, BW = 8, eixo = vert ? 'yPercent' : 'xPercent';
+const els = cores.map(c => {
+  const d = document.createElement('div'); d.className = 'fx ' + c;
+  // borda tinta nos dois lados que cruzam o quadro; sombra dura no lado que vai na frente
+  if (vert) { d.style.borderTop = d.style.borderBottom = BW + 'px solid var(--ink)'; d.style.boxShadow = `0 ${sg * SH}px 0 var(--ink)`; }
+  else { d.style.borderLeft = d.style.borderRight = BW + 'px solid var(--ink)'; d.style.boxShadow = `${sg * SH}px 0 0 var(--ink)`; }
+  pl.appendChild(d); return d;
+});
+if (forma === 'circulo') {
+  const D0 = Math.hypot(W, H) + 60;
+  els.forEach(d => { d.classList.add('c'); Object.assign(d.style, {width: D0 + 'px', height: D0 + 'px', left: (W - D0) / 2 + 'px', top: (H - D0) / 2 + 'px', border: BW + 'px solid var(--ink)', boxShadow: `0 0 0 ${SH}px var(--ink)`}); });
+}
+// a íris: seis meios-planos, cada um com a borda de dentro a uma distância do centro; com a
+// distância zero eles cobrem o quadro inteiro, e o buraco do meio é o hexágono que fecha
+const LAM = 6, DG = Math.hypot(W, H);
+if (forma === 'iris') {
+  els.forEach(d => d.remove());
+  els.length = 0;
+  for (let k = 0; k < LAM; k++) {
+    const d = document.createElement('div'); d.className = 'fx ' + cores[k % cores.length];
+    Object.assign(d.style, {inset: 'auto', left: (W / 2 - DG) + 'px', top: H / 2 + 'px', width: 2 * DG + 'px', height: DG + 'px',
+      transformOrigin: '50% 0', borderTop: BW + 'px solid var(--ink)', boxShadow: `0 ${-SH}px 0 var(--ink)`});
+    pl.appendChild(d); els.push(d);
+  }
+}
+// o risco: um corte de três quadros, sem as faixas de cor
+const QD = 1 / 30, RISCO = {
+  contida: {cobre: 'pp', resto: .5, tremor: 0, fios: [{c: 'mk', h: 14}]},
+  media: {cobre: 'ac', resto: .85, tremor: 0, fios: [{c: 'ac', h: 90, d: 18}, {c: 'mk', h: 34}]},
+  ousada: {cobre: 'mk', resto: .9, tremor: 22, fios: [{c: 'ac', h: 160, d: -40}, {c: 'mk', h: 60}, {c: 'ink', h: 12, d: 54}]},
+}[['contida', 'media', 'ousada'].includes(D.q('i')) ? D.q('i') : 'media'];
+let cobre = null;
+if (forma === 'risco') {
+  els.forEach(d => d.remove());
+  els.length = 0;
+  window.__corte = QD;
+  cobre = document.createElement('div');
+  Object.assign(cobre.style, {position: 'absolute', inset: 0, background: `var(--${RISCO.cobre})`, opacity: 0});
+  pl.appendChild(cobre);
+  const L = Math.hypot(W, H) + 200;
+  RISCO.fios.forEach(f => {
+    const d = document.createElement('div');
+    Object.assign(d.style, {position: 'absolute', left: (W - L) / 2 + 'px', top: H / 2 - f.h / 2 + (f.d || 0) + 'px',
+      width: L + 'px', height: f.h + 'px', background: `var(--${f.c})`, opacity: 0});
+    pl.appendChild(d); els.push(d);
+  });
+}
+D.monta(tl => {
+  if (forma === 'risco') {
+    // quadro 0: nasce da esquerda · 1: inteiro, a tela coberta (o corte) · 2: sobra à direita
+    const Q = [{s: .55, o: '0% 50%', a: 1, c: 0}, {s: 1, o: '50% 50%', a: 1, c: 1}, {s: .45, o: '100% 50%', a: RISCO.resto, c: 0}];
+    // o quadro 0 é o estado de partida (um set no tempo 0 da timeline não aparece no quadro 0);
+    // os outros entram um pouco antes do quadro deles
+    Q.forEach((q, k) => {
+      const tr = RISCO.tremor * (k === 1 ? 0 : k ? 1 : -1);
+      const pos = (alvo, v) => k ? tl.set(alvo, v, k * QD - .005) : gsap.set(alvo, v);
+      pos(cobre, {opacity: q.c});
+      pos(els, {opacity: q.a, rotation: -14, scaleX: q.s, transformOrigin: q.o, y: tr, x: -tr});
+    });
+    tl.set([cobre, ...els], {opacity: 0}, 3 * QD - .001);
+    D.cue(0, 'glitch');
+    return 3 * QD;
+  }
+  if (forma === 'iris') {
+    const A = {r: DG / 2 + 40, g: -30};
+    D.aoQuadro(() => els.forEach((d, k) => { d.style.transform = `rotate(${k * 360 / LAM + A.g}deg) translateY(${A.r}px)`; }));
+    tl.to(A, {r: -12, g: 0, duration: E * 1.4, ease: 'power3.in'}, meio - E * 1.4);
+    tl.to(A, {r: DG / 2 + 40, g: 30, duration: E * 1.4, ease: 'power3.out'}, meio);
+    D.cue(Math.max(0, meio - E * 1.4 + .1), 'whoosh');
+    D.cue(meio, 'stamp');
+    return Math.max(dur, meio + E * 1.4 + .02);
+  }
+  // a última faixa (a de cima) passa pelo centro exatamente no `meio`: é o único
+  // instante em que o quadro fica todo coberto
+  const tA = meio - (n - 1) * S - EK;
+  els.forEach((d, i) => {
+    const a = tA + i * S;
+    if (forma === 'circulo') {
+      // cresce e já sai andando: cada disco cobre o quadro só no instante em que chega
+      tl.fromTo(d, {scale: 0}, {scale: 1, duration: EK, ease: 'power3.in'}, a);
+      tl.to(d, {[eixo]: sg * 112, duration: EK, ease: 'power1.out'}, a + EK);
+    } else tl.fromTo(d, {[eixo]: -sg * 112}, {[eixo]: sg * 112, duration: EK * 2, ease: 'power2.inOut'}, a);
+  });
+  D.cue(Math.max(0, tA + .23 * K - .11), 'whoosh');   // .11 s antes do bloco aparecer (com lento=1, tA + .12)
+  D.cue(meio + .08 * K, 'whoosh-out');
+  return dur;
+});
+</script>
+</body>
+</html>

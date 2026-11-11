@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<!-- TIPO — headline sobre vídeo, v2. Mesmo objeto do chip (borda + sombra dura).
+     No topo a frase ESTÁ INTEIRA NO PRIMEIRO QUADRO (regra de conteúdo, mantida):
+     o movimento vem depois — o marcador varre o <i> e o card flutua.
+     No centro (CTA do fecho) ela cai, e as palavras sobem.
+       ?l=Zero gestor de tráfego. <i>Só um agente</i>.&dur=3.24
+       ?l=Clique em <i>Saiba Mais</i>&dur=5.13&pos=centro&tam=68
+       ?l=Quer as 171 peças?<br>Comenta QUERO&dur=2.4&pos=base&tam=42
+       ?l=Pega os +100 efeitos<br>Comenta <b>QUERO</b> aqui embaixo&estilo=pilula&dur=1.3&tam=44&l2t=.5
+         estilo=pilula: cada linha (<br>) vira uma pílula branca arredondada, texto escuro em caixa normal, sans 700,
+         centrada em y≈1236 (a legenda dos efeitos 17–18); a 2ª entra `l2t` s depois. <b> = destaque (azul, 900). -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+/* a mesma fonte da legenda (captions_viral): a Creato, se estiver instalada, senão a
+   Montserrat livre que viaja com os helpers — nunca um caminho de uma máquina só */
+@font-face{font-family:'CapviralCreato';font-weight:400 900;
+  src:local('Creato Display Black'),local('CreatoDisplay-Black'),
+      url('../../video-use/assets/fontes/Montserrat%5Bwght%5D.ttf') format('truetype')}
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+.zona{position:absolute;left:64px;right:76px;display:flex;align-items:center}
+.zona.topo{top:130px;min-height:260px}
+.zona.centro{top:0;bottom:0}
+/* base: a legenda em caixa do reel de efeitos, abaixo do peito; anima como o topo */
+.zona.base{bottom:470px}
+.card{width:100%;padding:30px 40px;opacity:0}
+.fr{font:900 var(--tam,64px)/1.12 'CapviralCreato',var(--fd);letter-spacing:.005em;
+  text-align:center;text-transform:uppercase;color:var(--ink)}
+.fr i{font-style:normal;color:var(--ac);padding:0 .08em;
+  background:linear-gradient(var(--mk),var(--mk)) no-repeat 0 60%/0% 88%;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone}
+.zp{position:absolute;left:0;right:0;top:1190px;display:flex;flex-direction:column;align-items:center;gap:0}
+.pl{display:inline-block;background:#fff;color:var(--ink);border-radius:16px;padding:12px 28px 14px;opacity:0;
+  font:700 var(--tam,44px)/1.2 'Inter',var(--fd);letter-spacing:-.02em;white-space:nowrap}
+.pl b{font-weight:900;color:var(--ac)}
+</style>
+</head>
+<body>
+<div id="stage"><div class="zona" id="z"><div class="card nb" id="c"><div class="fr" id="f"></div></div></div></div>
+<script>
+const dur = D.n('dur', '4');
+if (D.q('estilo') === 'pilula') {
+  document.getElementById('stage').innerHTML = '<div class="zp" id="zp"></div>';
+  document.documentElement.style.setProperty('--tam', D.q('tam', '44') + 'px');
+  D.q('l', 'Linha um<br>Linha <b>dois</b>').split(/<br\s*\/?>/i).forEach(t => {
+    const e = document.createElement('div'); e.className = 'pl'; e.innerHTML = t; document.getElementById('zp').appendChild(e);
+  });
+  const l2t = D.n('l2t', '.5');
+  D.monta(tl => {
+    [...document.querySelectorAll('.pl')].forEach((e, i) => {
+      tl.fromTo(e, {opacity: 0}, {opacity: 1, duration: .1, ease: 'none'}, i ? l2t : 0);
+      tl.to(e, {opacity: 0, duration: .1, ease: 'none'}, dur - .1);
+    });
+    return dur;
+  });
+} else {
+const pos = ['centro', 'base'].includes(D.q('pos')) ? D.q('pos') : 'topo';
+const centro = pos === 'centro';
+document.getElementById('z').classList.add(pos);
+document.documentElement.style.setProperty('--tam', D.q('tam', '64') + 'px');
+document.getElementById('f').innerHTML = D.q('l', 'Headline');
+
+D.monta(tl => {
+  D.cabe('.fr', 44, '.card');
+  if (centro) {
+    D.pousa('#c', .36, {rot: D.P.ROT * .6});
+    const ws = D.palavras('#f', .44);
+    D.marca('.fr i', .44 + ws.length * .055 + .1);
+  } else {
+    D.pousa('#c', .1, {rot: D.P.ROT * .6, dy: -24});
+    D.marca('.fr i', .32);
+  }
+  D.flutua('#c', centro ? 1.1 : .2, dur - .45, .9);
+  D.sai('#c', dur - .4);
+  return dur;
+});
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<!-- CAPA TINTEIRO — a vertente do canal de Lorcana da capa do Nick (g_capa_nick, que segue intacta): a mesma composição
+     (marca no topo, título em 2 linhas com o destaque numa faixa, o rosto grande recortado no meio, dois "lados"
+     encostando nas orelhas), no mundo do Tinteiro. 1080x1920, opaca, parada: sai como JPEG.
+     - o fundo: os rios de tinta do banner (midia/tinteiro/fundo-rios.jpg) sob um mosaico inclinado de cartas reais
+       (frentes da Lorcast, e o verso do Tinteiro de quando em quando), escurecidas pra não brigar com o texto;
+     - a letra: Unbounded (título, marca, faixa) e Kalam (a anotação e o texto dos lados), embutidas em midia/tinteiro/;
+     - a cor: ameixa #120C1A e ouro #E8AE4F (tema tinteiro, forçado aqui); o destaque é a faixa de ouro com letra ameixa;
+     - os lados: moldura ouro sobre painel ameixa; imagem vira o miolo (a carta fica inteira, o logo ganha folga).
+     Zona segura como a g_capa_nick: marca, rosto e título em y 290–1610 (corte 4:5 285–1635, que cabe no 3:4 do perfil).
+       titulo    3–5 palavras; "|" força a quebra
+       destaque  o trecho do título que vai na faixa de ouro
+       topo      o nome em Unbounded, caixa alta, creme
+       nota      anotação em Kalam, ouro, inclinada, embaixo do topo (opcional)
+       letreiro  o endereço de uma imagem horizontal (o nome da série, PNG com alfa) que ocupa o topo no lugar de `topo`
+       lados     os dois lados, sempre imagem (logo, carta, quadro da cena); com "~" na frente, sem moldura (o logo
+                 solto) · iy  o alto dos lados, em px (640)
+       rosto     PNG com alfa, topo da cabeça no topo da imagem e tronco comprido (o capa.py recorta e põe o `cx`)
+       cx · larg · ry · tb · tm   como na g_capa_nick (o meio do rosto, a largura do PNG, onde começa o cabelo, o fim do título, a folga)
+     ?titulo=como foi o|TCGFest?&destaque=TCGFest?&letreiro=…/letreiro.png&lados=~…/logo.png,…/carta.png -->
+<html lang="pt-BR" data-qa="entra-seco fica">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>document.documentElement.classList.add('tinteiro')</script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+@font-face{font-family:'Unbounded';src:url(../midia/tinteiro/unbounded-var.woff2) format('woff2');font-weight:200 900}
+@font-face{font-family:'Kalam';src:url(../midia/tinteiro/kalam-700.woff2) format('woff2');font-weight:700}
+html,body{width:1080px;height:1920px;background:var(--pp)}
+#stage{width:1080px;height:1920px;background:var(--pp);padding:0;display:block;position:relative;overflow:hidden}
+/* o fundo do canal: os rios de tinta do banner, de ponta a ponta */
+.rios{position:absolute;inset:0;background:url(../midia/tinteiro/fundo-rios.jpg) 50% 50%/auto 100%;filter:brightness(1.25) saturate(1.2)}
+/* o mosaico de cartas, inclinado e escurecido: a luz fica no meio, onde mora o rosto */
+.mosaico{position:absolute;left:-330px;top:-380px;width:1740px;height:2680px;transform:rotate(-9deg);
+  display:grid;grid-template-columns:repeat(7,250px);grid-auto-rows:350px;gap:44px 36px;justify-content:center;
+  filter:brightness(.62) saturate(.95) blur(1.2px)}
+.mosaico img{width:250px;height:350px;border-radius:14px;display:block;box-shadow:0 10px 24px rgba(0,0,0,.6)}
+.mosaico img:nth-child(14n+8),.mosaico img:nth-child(14n+9),.mosaico img:nth-child(14n+10),.mosaico img:nth-child(14n+11),
+.mosaico img:nth-child(14n+12),.mosaico img:nth-child(14n+13),.mosaico img:nth-child(14n+14){translate:143px 0}
+.escuro{position:absolute;inset:0;background:
+  radial-gradient(60% 18% at 50% 0,rgba(232,174,79,.18),transparent 75%),
+  radial-gradient(58% 28% at 50% 40%,rgba(232,174,79,.28),transparent 70%),
+  radial-gradient(80% 22% at 50% 100%,rgba(232,174,79,.30),transparent 75%),
+  linear-gradient(180deg,rgba(18,12,26,.25) 0,rgba(18,12,26,.30) 24%,rgba(18,12,26,.62) 66%,rgba(18,12,26,.62) 84%,rgba(18,12,26,.2) 100%)}
+.topo{position:absolute;top:340px;left:60px;right:60px;transform:translateY(-50%);text-align:center;white-space:nowrap;color:var(--ink);
+  filter:drop-shadow(0 8px 20px rgba(0,0,0,.7))}
+.topo b{display:block;font:800 104px/1 var(--fd);letter-spacing:-.02em;text-transform:uppercase}
+.letr{position:absolute;top:385px;left:50%;width:var(--lw,980px);transform:translate(-50%,-50%);display:block;
+  filter:drop-shadow(0 8px 20px rgba(0,0,0,.7))}
+.nota{position:absolute;top:388px;left:0;right:0;text-align:center;font:700 54px/1 'Kalam',cursive;color:var(--mk);transform:rotate(-3deg);
+  text-shadow:0 4px 14px rgba(0,0,0,.8)}
+.rosto{position:absolute;width:var(--rl);
+  filter:brightness(1.06) contrast(1.05) drop-shadow(0 0 3px rgba(232,174,79,.7)) drop-shadow(0 0 36px rgba(232,174,79,.45));
+  --m:linear-gradient(90deg,transparent 0,#000 13%,#000 87%,transparent 100%);-webkit-mask-image:var(--m);mask-image:var(--m)}
+.luz{position:absolute;left:0;right:0;bottom:0;height:560px;mix-blend-mode:screen;
+  background:radial-gradient(80% 95% at 50% 108%,rgba(232,174,79,.55),transparent 72%),
+             linear-gradient(0deg,rgba(91,43,120,.35),transparent 40%)}
+/* os lados: moldura ouro, painel ameixa, inclinados */
+.ic,html.tinteiro .ic{position:absolute;display:block;width:270px;height:auto;padding:10px;box-sizing:border-box;border:7px solid var(--mk);border-radius:28px;background:var(--sur);
+  box-shadow:0 30px 60px -16px rgba(0,0,0,.75),0 0 40px rgba(232,174,79,.25)}
+.ic.solto,html.tinteiro .ic.solto{padding:0;border:0;background:none;box-shadow:none;width:300px;filter:drop-shadow(0 18px 30px rgba(0,0,0,.7))}
+.ic.solto img{border-radius:0}
+.ic.a{left:50px;transform:rotate(-8deg)} .ic.b{right:50px;transform:rotate(8deg)}
+.ic img{width:100%;height:auto;display:block;border-radius:14px}
+/* o título acaba em 1610: dentro do 4:5 e do 3:4 */
+.tit{position:absolute;left:36px;right:36px;bottom:310px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.tit .s,.tit .d{font:800 130px/1.12 var(--fd);letter-spacing:-.03em;text-transform:uppercase;white-space:nowrap;color:var(--ink)}
+.tit .s{text-shadow:0 8px 26px rgba(0,0,0,.85),0 0 60px rgba(0,0,0,.7)}
+.tit .d{background:var(--mk);color:var(--ink9);border-radius:20px;padding:.06em .14em .02em;margin-top:8px;
+  box-shadow:0 18px 40px -10px rgba(0,0,0,.75)}
+.tit .d + .s{margin-top:10px}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const st = document.getElementById('stage');
+const add = (tag, cls, html = '') => { const e = document.createElement(tag); e.className = cls; e.innerHTML = html; st.appendChild(e); return e; };
+
+add('div', 'rios');
+// o mosaico: sorteio fixo (mesma capa sempre); o verso do Tinteiro entra de 6 em 6
+const mos = add('div', 'mosaico');
+for (let k = 0; k < 7 * 8; k++)
+  mos.insertAdjacentHTML('beforeend', `<img src="../midia/tinteiro/${k % 6 === 4 ? 'verso.jpg' : `cartas/c${(k * 5 + (k / 7 | 0)) % 14}.jpg`}" alt="">`);
+add('div', 'escuro');
+
+// a marca em letra de display e a anotação em Kalam
+const nome = D.q('topo', ''), nota = D.q('nota', ''), letr = D.q('letreiro', '');
+if (letr) { const l = add('img', 'letr'); l.src = letr; l.style.setProperty('--lw', D.n('lw', '980') + 'px'); }
+else if (nome) add('div', 'topo', `<b>${esc(nome)}</b>`);
+if (nota) add('div', 'nota', esc(nota));
+
+D.q('lados', '').split(',').filter(Boolean).slice(0, 2).forEach((u, i) => {
+  const solto = u.startsWith('~');
+  const e = add('div', 'ic ' + 'ab'[i] + (solto ? ' solto' : ''), `<img src="${esc(u.replace(/^~/, ''))}" alt="">`);
+  e.style.top = D.n('iy', '640') + 'px';
+});
+
+// o rosto por cima dos lados: o meio dele (`cx`) no meio da tela
+const RL = D.n('larg', '860');
+document.documentElement.style.setProperty('--rl', RL + 'px');
+const ro = add('img', 'rosto');
+ro.src = D.q('rosto', '../midia/rosto-estudio.png');
+ro.style.left = (540 - D.n('cx', '.51') * RL) + 'px';
+ro.style.top = D.n('ry', '440') + 'px';
+add('div', 'luz');
+
+// o título se parte em volta do destaque: antes · faixa · depois
+const titulo = D.q('titulo', 'como foi o|TCGFest?'), dq = D.q('destaque', 'TCGFest?');
+const j = dq ? titulo.indexOf(dq) : -1;
+const partes = j < 0 ? [['s', titulo]] : [['s', titulo.slice(0, j)], ['d', dq], ['s', titulo.slice(j + dq.length)]];
+const tit = add('div', 'tit');
+tit.style.bottom = D.n('tb', '310') + 'px';
+tit.style.left = tit.style.right = D.n('tm', '36') + 'px';
+partes.filter(([, t]) => t.replace(/[|,\s]/g, '')).forEach(([k, t]) => {
+  const e = document.createElement('div');
+  e.className = k;
+  e.innerHTML = t.split('|').map(x => esc(x.trim())).filter(Boolean).join('<br>');
+  tit.appendChild(e);
+});
+
+// o D.monta espera a letra e as imagens (o tamanho dos lados vem da imagem)
+window.__folha = Promise.all([
+  document.fonts.load("800 100px 'Unbounded'"), document.fonts.load("700 100px 'Kalam'"),
+  ...[...document.images].map(i => i.decode().catch(() => null)),
+]).catch(() => null);
+
+D.monta(tl => {
+  if (document.querySelector('.topo b')) D.cabe('.topo b', 50, .88);
+  D.cabe('.tit .s', 60, '.tit');
+  D.cabe('.tit .d', 60, ['.tit', .95]);   // a faixa tem folga dos lados
+  // as duas linhas quase no mesmo corpo, como no Nick: a de cima passa da faixa no máximo 1,2×
+  const fd = parseFloat(getComputedStyle(document.querySelector('.tit .d') || document.body).fontSize);
+  if (document.querySelector('.tit .d')) document.querySelectorAll('.tit .s').forEach(e => {
+    if (parseFloat(getComputedStyle(e).fontSize) > fd * 1.2) e.style.fontSize = fd * 1.2 + 'px'; });
+  tl.set('.tit', {opacity: 1}, 0);   // parada: a capa é um quadro só
+  return D.n('dur', '1');
+});
+</script>
+</body>
+</html>

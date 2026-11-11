@@ -1,0 +1,46 @@
+/* Pixel: tela de jogo de 8 bits, sem personagem nem marca de ninguém. Chão azul-noite com
+   pontos de grade, letra de pixel, caixa de diálogo de borda em degrau (o canto fica
+   dentado, como no jogo antigo) e sombra preta seca.
+   Copie para marca/tema.css e troque as quatro cores (docs/guia-de-estilos.md).
+   As letras moram em tools/video-use/assets/fontes/: copie cada arquivo do url() pra
+   marca/fontes/, com o <Família>-OFL.txt do lado. */
+
+@font-face{font-family:'Marca';font-weight:400 700;src:url(fontes/PixelifySans-Variable.ttf) format('truetype')}
+@font-face{font-family:'MarcaApoio';font-weight:400 700;src:url(fontes/PixelifySans-Variable.ttf) format('truetype')}
+
+html.marca{
+  /* as quatro cores: chão (escuro), letra (clara), bloco, marcador */
+  --pp:#1A1C3A; --ink:#F7F7F2; --ac:#6C4CF5; --mk:#FFC93C;
+  --sur:color-mix(in srgb,var(--pp) 78%,var(--ac)); --ink9:var(--pp);
+  --ink6:color-mix(in srgb,var(--ink) 70%,var(--pp)); --ink4:color-mix(in srgb,var(--ink) 48%,var(--pp));
+  --ink2:color-mix(in srgb,var(--ink) 18%,var(--pp));
+  --ac2:color-mix(in srgb,var(--ac) 30%,var(--pp)); --act:color-mix(in srgb,var(--ac) 40%,var(--pp));
+  --no2:color-mix(in srgb,var(--no) 25%,var(--pp));
+  --fd:'Marca',ui-monospace,monospace; --fm:'MarcaApoio',ui-monospace,monospace; --ls:0em;
+
+  /* a forma: a borda é feita de sombra (o canto fica em degrau), sombra preta seca, sem canto */
+  --bw:0px; --sh:8px; --sombra:#000; --raio:0px; --raio-s:0px; --lado:#000;
+  --tex:radial-gradient(color-mix(in srgb,var(--ink) 16%,transparent) 0 2px,transparent 2.5px) 0 0/48px 48px;
+  font-synthesis:none; -webkit-font-smoothing:none;
+
+  /* o reel editorial e a capa: o painel também escurece */
+  --ed-sans:'Marca',ui-monospace,monospace;
+  --ed-pp:var(--pp); --ed-pp-luz:color-mix(in srgb,var(--pp) 85%,var(--ac)); --ed-folha:transparent;
+  --ed-tx:var(--ink);
+  --ed-dg-apaga-tx:linear-gradient(180deg,#FFFFFF 0%,rgba(255,255,255,.82) 42%,rgba(255,255,255,.2) 95%);
+  --ed-dg-azul:linear-gradient(180deg,var(--ac) 0%,var(--ac) 100%);
+  --ed-dg-ouro:linear-gradient(180deg,var(--mk) 0%,var(--mk) 100%);
+  --ed-dg-some-azul:linear-gradient(180deg,var(--ac) 0%,color-mix(in srgb,var(--ac) 55%,transparent) 55%,color-mix(in srgb,var(--ac) 6%,transparent) 100%);
+  --ed-dg-some-ouro:linear-gradient(180deg,var(--mk) 0%,color-mix(in srgb,var(--mk) 55%,transparent) 55%,color-mix(in srgb,var(--mk) 6%,transparent) 100%);
+}
+html.marca body{color:var(--ink)}
+/* quatro sombras sem desfoque fazem a borda em degrau; a quinta é a sombra seca, que o D.pousa anima */
+html.marca .nb,html.marca .kick,html.marca .ic,html.marca .btn{border:0;
+  box-shadow:0 -6px 0 var(--ink),0 6px 0 var(--ink),-6px 0 0 var(--ink),6px 0 0 var(--ink),
+    calc(var(--shx,var(--sh)) + 6px) calc(var(--shx,var(--sh)) + 6px) 0 #000}
+html.marca .nb.cor-ac{color:#fff}
+html.marca .nb.cor-mk,html.marca .kick,html.marca .ic{color:var(--ink9)}
+html.marca .nb.cor-ink{background:var(--ink9);color:var(--ink)}
+html.marca .hd b,html.marca .mkr{color:var(--ink9)}
+html.marca .hd,html.marca .big{text-shadow:6px 6px 0 #000}
+html.marca .hd b{text-shadow:none}

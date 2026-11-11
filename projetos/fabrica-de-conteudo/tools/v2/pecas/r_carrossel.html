@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<!-- PROVA — o carrossel: os vídeos que saíram da fábrica, num anel em 3D, e o chicote até o herói.
+     1080x1920. Os cartões 9:16 (imagem ou vídeo) giram devagar num anel; em `t_gira` o anel
+     chicoteia, freia com o herói de frente, e ele avança pra quem assiste enquanto os outros
+     apagam; a etiqueta bate nele. Com `t_enche`, o herói cresce até a tela inteira: o vídeo segue
+     dali. A lente, a espessura, a luz e a sombra são do núcleo (D.palco3d, D.espessura; a força é o
+     ?i3d=). O chicote pede motion blur: renderize com --rastro. Da referência (Skillry #410, o
+     carrossel 3D de vídeos reais com o chicote no herói) saiu só o movimento; o reflexo no chão
+     ficou de fora (é degradê).
+       img     "url;url;…" os cartões, de 5 a 8 · heroi  qual vem pra frente (2, a contar do 0)
+       hd      a frase de cima (<b> grifa) · tag  a etiqueta do herói (ESTE AQUI; vazio: nenhuma)
+       t0 · t_gira  o chicote · t_heroi  o herói de frente · t_enche  ele toma a tela (-1: não)
+       voltas  quantas voltas o chicote dá (1) · dur
+       ?img=../midia/vitrine-a-pergunta.jpg;../midia/vitrine-camadas.jpg;../midia/vitrine-cracha.jpg;../midia/vitrine-quanto-custou.jpg;../midia/vitrine-semana.jpg;../midia/vitrine-rotulo.jpg&heroi=2&hd=Tudo isso saiu da <b>mesma fábrica</b>&tag=ESTE AQUI&t0=0.2&t_gira=1.6&t_heroi=2.5&t_enche=-1&dur=4.2 -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+#stage{padding:0;display:block;overflow:hidden}
+#hd{position:absolute;left:var(--marg);right:var(--marg);top:230px;text-align:center;margin:0}
+#anel{position:absolute;left:540px;top:1040px;width:0;height:0;transform-style:preserve-3d}
+.enc{position:absolute;left:-135px;top:-240px;width:270px;height:480px;transform-style:preserve-3d}
+.cd{position:absolute;inset:0;overflow:visible;opacity:0}
+.cd .jan{position:absolute;inset:0;overflow:hidden;border-radius:calc(var(--raio) - var(--bw))}
+.cd *{backface-visibility:hidden;-webkit-backface-visibility:hidden}
+#tag{position:absolute;opacity:0;white-space:nowrap}
+</style>
+</head>
+<body>
+<div id="stage"><h1 class="hd" id="hd"></h1><div id="anel"></div><span class="kick" id="tag"></span></div>
+<script>
+const $ = id => document.getElementById(id);
+const dur = D.n('dur', '4.2'), t0 = D.n('t0', '0.2'), tGira = D.n('t_gira', '1.6'), tHeroi = D.n('t_heroi', '2.5'),
+      tEnche = D.n('t_enche', '-1'), voltas = Math.round(D.n('voltas', '1'));
+const imgs = D.q('img', ['a-pergunta', 'camadas', 'cracha', 'quanto-custou', 'semana', 'rotulo'].map(n => `../midia/vitrine-${n}.jpg`).join(';'))
+  .split(';').filter(Boolean);
+const N = Math.max(3, imgs.length), H0 = Math.min(N - 1, Math.max(0, Math.round(D.n('heroi', '2'))));
+$('hd').innerHTML = D.q('hd', 'Tudo isso saiu da <b>mesma fábrica</b>');
+$('tag').textContent = D.q('tag', 'ESTE AQUI');
+const PASSO = 360 / N, R = Math.round((270 + 44) / (2 * Math.sin(Math.PI / N)));
+const cds = imgs.map((u, i) => {
+  const e = document.createElement('div');
+  e.className = 'enc';
+  e.style.transform = `rotateY(${i * PASSO}deg) translateZ(${R}px)`;
+  e.innerHTML = '<div class="cd nb"><div class="jan"></div></div>';
+  $('anel').appendChild(e);
+  D.midia(e.querySelector('.jan'), u, 'vídeo ' + (i + 1));
+  return e.querySelector('.cd');
+});
+
+D.monta(tl => {
+  D.palco3d('#stage', '540px 1040px');
+  D.espessura(cds, {costas: true});
+  const anel = $('anel'), heroi = cds[H0];
+  // o anel entra girando e segue devagar; o chicote dá `voltas` e freia com o herói de frente
+  const ini = -40, ate = -H0 * PASSO - 360 * voltas;
+  tl.fromTo(anel, {rotationY: ini, rotationX: -14}, {rotationY: ini + 24, duration: Math.max(.3, tGira - D.at(t0)), ease: 'sine.inOut'}, D.at(t0));
+  cds.forEach((c, i) => tl.fromTo(c, {opacity: 0, '--shx': '0px'}, {opacity: 1, '--shx': D.SH + 'px', duration: .3, ease: D.P.POUSA}, D.at(t0) + i * .06));
+  D.cue(D.at(t0), 'whoosh');
+  D.titulo('#hd', t0 + .2);
+  tl.to(anel, {rotationY: ate, rotationX: -10, duration: tHeroi - tGira, ease: 'expo.inOut'}, tGira);
+  D.cue(tGira, 'whoosh');
+  // o herói avança no próprio eixo e cresce um pouco; os outros apagam
+  tl.to(heroi, {z: 120, scale: 1.12, duration: .45, ease: D.P.POUSA}, tHeroi - .05);
+  cds.forEach((c, i) => { if (i !== H0) tl.to(c, {opacity: .22, duration: .3}, tHeroi - .05); });
+  tl.to(anel, {rotationX: -6, duration: .45, ease: 'sine.out'}, tHeroi - .05);
+  D.cue(tHeroi, 'thud');
+  if ($('tag').textContent) {
+    // a etiqueta no canto do herói, já com a lente: o tamanho que ele aparenta de frente
+    const persp = parseFloat(getComputedStyle($('stage')).perspective) || 1800;
+    const k = 1.12 * persp / (persp - R - 120);
+    Object.assign($('tag').style, {left: 540 - 135 * k - 16 + 'px', top: 1040 - 240 * k - 34 + 'px'});
+    D.carimbo('#tag', tHeroi + .35, -4);
+  }
+  if (tEnche >= 0) {
+    // do tamanho aparente até cobrir a tela: o vídeo segue dali
+    const persp = parseFloat(getComputedStyle($('stage')).perspective) || 1800;
+    const cobre = 1960 / (480 * persp / (persp - R - 120));
+    tl.to(heroi, {scale: cobre, duration: .5, ease: 'power3.in'}, D.at(tEnche) - .3);
+    tl.to(anel, {y: -80, duration: .5, ease: 'power3.in'}, D.at(tEnche) - .3);
+    tl.to(['#hd', '#tag'], {opacity: 0, duration: .2}, D.at(tEnche) - .3);
+    tl.to(cds.filter((_, i) => i !== H0), {opacity: 0, duration: .2}, D.at(tEnche) - .3);
+    D.cue(D.at(tEnche) - .3, 'zoom-in');
+  }
+  return dur;
+});
+</script>
+</body>
+</html>

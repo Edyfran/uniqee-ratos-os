@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<!-- DADO — a grade que enche e o número que sobe junto: cada cartão que pousa é um item da contagem (modelos, apps, lojas). Mostra a QUANTIDADE
+     em vez de só escrevê-la. O número vem da fala (`n`) e a grade é uma amostra dele: `cel` cartões representam as n unidades. Os cartões pousam em
+     onda, na diagonal, e no fim o sufixo (o "+" de "mais de") bate. 1080x1920 (tela cheia) e 920x730 (o painel da e_dividida). --alpha.
+     O cartão já está na tela no quadro 0.
+       n  o número final (400) · suf  o que vem depois (+) · rot  o rótulo (modelos de TV) · cel  quantos cartões (96) · ic  o desenho do cartão: tv | app | ponto (tv)
+       t0  quando começa a encher (0.3) · dc  quanto leva (sem ele: a batida inteira, dur - t0 - 0,7) · dur  duração
+     etiqueta: grade, contador, numero, quantidade
+       ?n=400&suf=%2B&rot=modelos de TV&cel=96&ic=tv&dc=2.2&dur=4.5 -->
+<html lang="pt-BR" class="alfa" data-qa="entra-seco fica">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+html.pn,html.pn body,html.pn #stage{width:920px;height:730px}
+#stage{position:relative;overflow:hidden;padding:0;display:block;--nm:230px}
+html.pn #stage{--nm:170px}
+.cx{position:absolute;left:60px;top:300px;width:960px;height:880px;background:var(--sur);display:flex;flex-direction:column;padding:34px 44px 40px;gap:26px}
+html.pn .cx{left:0;top:0;width:920px;height:730px;border:0;border-radius:0;box-shadow:none!important;padding:26px 36px 32px;gap:18px}
+.hd{flex:none;display:flex;align-items:flex-end;gap:26px}
+.num{display:flex;align-items:baseline;font:700 var(--nm)/.9 var(--fd);letter-spacing:-.05em;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1}
+.num small{font-size:.8em;margin-left:.04em;color:var(--cor-suf,var(--ink));display:inline-block;transform-origin:50% 80%;opacity:0}
+.rt{font:700 38px/1.1 var(--fm);letter-spacing:.08em;text-transform:uppercase;color:var(--ink6)}
+html.pn .rt{font-size:28px}
+.gd{flex:1;min-height:0;display:grid;gap:10px;grid-template-columns:repeat(var(--c),1fr);grid-auto-rows:1fr}
+.it{position:relative;border:calc(var(--bw)*.75) solid var(--ink);border-radius:calc(var(--raio-s)*.7);background:var(--ac2);opacity:0}
+.it:nth-child(3n+1){background:var(--ac2)}.it:nth-child(3n+2){background:var(--sur)}.it:nth-child(3n){background:var(--ink2)}
+.it i{position:absolute;display:block}
+.tv i{left:12%;right:12%;top:16%;bottom:30%;background:var(--ac);border-radius:2px}
+.tv i+i{left:36%;right:36%;top:auto;bottom:12%;height:8%;background:var(--ink);border-radius:2px}
+.tv:nth-child(5n+2) i:first-child{background:var(--mk)}.tv:nth-child(7n+3) i:first-child{background:var(--ok)}.tv:nth-child(11n+5) i:first-child{background:var(--no)}
+.app i{inset:22%;border-radius:30%;background:var(--ac)}.app:nth-child(4n+2) i{background:var(--mk)}.app:nth-child(4n+3) i{background:var(--ok);border-radius:50%}.app:nth-child(4n) i{background:var(--no);border-radius:12%}
+.ponto i{inset:30%;border-radius:50%;background:var(--ac)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="cx nb" id="cx">
+    <div class="cab"><div class="num"><span id="vl">0</span><small id="sf"></small></div><div class="rt" id="rt"></div></div>
+    <div class="gd" id="gd"></div>
+  </div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const N = Math.round(D.n('n', '400')), CEL = Math.max(8, Math.round(D.n('cel', '96'))), T0 = D.n('t0', '0.3'), dur = D.n('dur', '4.5'), DC = D.q('dc', '') ? D.n('dc', '2.2') : Math.max(1.2, dur - T0 - .7);   // sem `dc`, o contador dura a batida inteira
+const IC = D.q('ic', 'tv');
+$('sf').textContent = D.q('suf', '+'); $('rt').textContent = D.q('rot', 'modelos de TV');
+const PN = document.documentElement.classList.contains('pn');
+// colunas e linhas pela proporção da área da grade (cartão mais largo que alto): as linhas que sobram saem do total
+const area = PN ? [848, 430] : [872, 600], COLS = Math.max(4, Math.round(Math.sqrt(CEL * area[0] / area[1] / 1.25)));
+$('gd').style.setProperty('--c', COLS);
+for (let i = 0; i < CEL; i++) $('gd').insertAdjacentHTML('beforeend', `<div class="it ${IC}" id="it${i}">${IC === 'tv' ? '<i></i><i></i>' : '<i></i>'}</div>`);
+D.monta(tl => {
+  const lin = Math.ceil(CEL / COLS), pos = i => (i % COLS) + Math.floor(i / COLS);   // a onda anda na diagonal
+  const maxp = COLS - 1 + lin - 1;
+  const o = {v: 0};
+  tl.to(o, {v: N, duration: DC, ease: 'power1.inOut', onUpdate: () => { $('vl').textContent = Math.round(o.v); }}, T0);
+  for (let i = 0; i < CEL; i++) {
+    const a = T0 + pos(i) / maxp * (DC - .35) + (i % 3) * .02;
+    tl.fromTo('#it' + i, {opacity: 0, scale: .55}, {opacity: 1, scale: 1, duration: .28, ease: 'back.out(2)', immediateRender: false}, a);
+    if (i % 9 === 0) D.cue(a, 'pop');
+  }
+  tl.fromTo('#sf', {opacity: 1, scale: 0}, {opacity: 1, scale: 1, duration: .3, ease: 'back.out(3)', immediateRender: false}, T0 + DC);
+  D.cue(T0 + DC, 'stamp');
+  return Math.max(dur, T0 + DC + 1.2);
+});
+</script>
+</body>
+</html>

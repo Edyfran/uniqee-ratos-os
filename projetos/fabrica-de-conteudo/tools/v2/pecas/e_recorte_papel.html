@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<!-- EFEITO — recorte de papel: a pessoa vira adesivo de tesoura (borda branca de 20 px, contorno poligonal) sobre quatro papéis rasgados (preto, papelão,
+     amarelo e quadriculado) que mexem em stop motion a 12 qps, com as letras da palavra em pedaços de revista, uma por quadro, e uma rachadura de papel
+     preto que desce no fim (clone do efeito 07 "paper cut" do De25fKeTRl7, ficha 08, 30 qps medidos). 1080x1920, tela cheia, --alpha. Cobre f259 a f287
+     da ref (29 quadros); no f288 a ref corta seco pra base, que é o fim da peça. A peça redesenha a pessoa (o recorte da base) por cima dos papéis, porque
+     a borda branca é o contorno da mesma máscara.
+     Linha do tempo (quadro 0 = f259): a sala original e uma tira de papel preto rasgada, com fibra branca, que desce do topo e estreita (f259) · a sala e o preto
+     que vem de cima, com os papelões entrando, tudo borrado na horizontal (f260) · as camadas nítidas, sem o quadriculado (f261) · o quadriculado varre da esquerda,
+     borrado (f262) · assenta (f263) · daí o fundo e a borda só mudam de forma nos quadros 3, 5, 6, 8, 10, 13, 15, 18, 20, 23 (segura 2, 3, 2, 3: 12 qps)
+     · as letras entram uma por quadro (a ref: PAPER f264 a f268, CUT f271 a f273; aqui as palavras são PT e saem do `l1`/`l2`) · de f284 a f287 uma fenda cinza,
+     com fibra branca nas bordas, abre no papel preto (a borda esquerda fica, a direita anda), desce até o amarelo e termina num fio preto (ponta em 270, 400, 760
+     e 915 px). O papel preto sobe até além do quadro (y 0 coberto). Os papéis, a borda e as letras acompanham o rosto (`olhos`), porque a ref os põe em volta da cabeça dela.
+       fr     os quadros do vídeo-base (pasta f000.jpg… ou uma imagem só), mt  o recorte da pessoa: PNG branco com alfa (pasta g000.png… ou um arquivo só)
+       olhos  o centro dos olhos no quadro-base, x,y (539.4,752.8 = a foto aprovada; a ref é 553,667)
+       l1  l2 as duas palavras das letras (RECORTE, PAPEL); a primeira entra de f264 em diante, a segunda dois quadros depois da primeira acabar
+       borda  a espessura da borda branca em px (20) · dur  duração (0.9667 = 29 quadros)
+     etiqueta: recorte-de-papel, adesivo, atras-da-pessoa
+       ?fr=quadros&mt=recorte.png&olhos=539.4,752.8&l1=RECORTE&l2=PAPEL&borda=24&rach=25&dur=0.9667 -->
+<html lang="pt-BR" class="alfa" data-qa="fundo">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&family=Playfair+Display:wght@900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block;overflow:hidden;position:relative}
+#c{position:absolute;left:0;top:0;width:1080px;height:1920px}
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="c" width="1080" height="1920"></canvas></div>
+<script>
+const $ = id => document.getElementById(id);
+const RACH0 = Math.round(D.n('rach', '25')), dur = D.n('dur', String((RACH0 + 4) / 30)), RB = D.n('borda', '24');
+const [OX, OY] = D.q('olhos', '539.4,752.8').split(',').map(Number), DX = OX - 553, DY = OY - 667;
+const L1 = [...D.q('l1', 'RECORTE')], L2 = [...D.q('l2', 'PAPEL')];
+document.fonts.load('900 60px "Playfair Display"'); document.fonts.load('italic 900 60px "Playfair Display"');
+const SERIF = '"Playfair Display", "Didot", "Bodoni 72", serif', SANS = '"Space Grotesk", sans-serif';
+const MK = D.css('--mk') || '#F2C744', AC = D.css('--ac') || '#0640FB', PRETO = '#050506';   // o amarelo e o azul são os do núcleo (docs/direcao.md); da ref fica a mecânica; o preto da ref mede luminância 4 e é liso
+
+function carrega(param, pref, ext, n) {
+  const v = D.q(param, ''), raiz = v ? (v[0] === '/' ? 'file://' + v : v).replace(/\/$/, '') : '';
+  const unica = /\.(jpe?g|png|webp)$/i.test(raiz), lista = [];
+  if (raiz) for (let i = 0; i < (unica ? 1 : n); i++) {
+    const m = new Image(); m.src = unica ? raiz : raiz + '/' + pref + String(i).padStart(3, '0') + ext; m.style.display = 'none';
+    document.body.appendChild(m); lista.push(m);
+  }
+  return k => lista.length ? lista[Math.min(k, lista.length - 1)] : null;
+}
+const NQ = Math.ceil(dur * 30) + 3, quadroBase = carrega('fr', 'f', '.jpg', NQ), recorte = carrega('mt', 'g', '.png', NQ);
+
+function prng(seed) { let s = (seed * 2654435761) >>> 0; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+
+// ---- o stop motion: o passo muda nos quadros da ref (f262, 264, 265, 267, 269, 272, 274, 277, 279, 282) e antes disso é o f259 a f262 inteiro
+const MUDA = [3, 5, 6, 8, 10, 13, 15, 18, 20, 23];
+const passo = j => MUDA.filter(m => m <= j).length + (j > 23 ? Math.max(0, Math.floor((Math.min(j, RACH0 - 1) - 23) / 2.5)) : 0);   // se a parte parada esticar (`rach` maior), o fundo continua a ferver a 12 qps até a rachadura
+
+// ---- o contorno do adesivo: máscara -> distância -> marching squares -> Douglas-Peucker. Tudo em baixa resolução (1/4) e volta a 1080x1920
+const LW = 270, LH = 480, KS = 4;
+const lc = document.createElement('canvas'); lc.width = LW; lc.height = LH; const lg = lc.getContext('2d', {willReadFrequently: true});
+function mascaraBaixa(img) {
+  lg.setTransform(1, 0, 0, 1, 0, 0); lg.clearRect(0, 0, LW, LH); lg.drawImage(img, 0, 0, LW, LH);
+  const d = lg.getImageData(0, 0, LW, LH).data, b = new Uint8Array((LW + 2) * (LH + 2));
+  for (let y = 0; y < LH; y++) for (let x = 0; x < LW; x++) b[(y + 1) * (LW + 2) + x + 1] = d[(y * LW + x) * 4 + 3] > 110 ? 1 : 0;
+  // o pé do quadro: a pessoa sai por baixo, então as últimas linhas repetem a de cima (senão o contorno fecha por dentro do quadro e a borda branca aparece no rodapé)
+  const W = LW + 2, ref = (LH - 9) * W; for (let y = LH - 8; y <= LH + 1; y++) for (let x = 0; x < W; x++) b[y * W + x] = b[ref + x];
+  return b;
+}
+function dilata(b, raio) {                                 // distância ao primeiro plano (chanfro 3x3) e corte no raio: um disco de verdade
+  const W = LW + 2, H = LH + 2, d = new Float32Array(W * H);
+  for (let i = 0; i < W * H; i++) d[i] = b[i] ? 0 : 1e9;
+  for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) { const i = y * W + x;
+    d[i] = Math.min(d[i], d[i - 1] + 1, d[i - W] + 1, d[i - W - 1] + 1.414, d[i - W + 1] + 1.414); }
+  for (let y = H - 2; y >= 1; y--) for (let x = W - 2; x >= 1; x--) { const i = y * W + x;
+    d[i] = Math.min(d[i], d[i + 1] + 1, d[i + W] + 1, d[i + W + 1] + 1.414, d[i + W - 1] + 1.414); }
+  const o = new Uint8Array(W * H);
+  for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) o[y * W + x] = d[y * W + x] <= raio ? 1 : 0;   // a borda do quadro fica de fora: o contorno fecha lá
+  return o;
+}
+function contornoPoligono(b) {                             // o maior laço da fronteira, por marching squares binário
+  const W = LW + 2, H = LH + 2, seg = new Map();
+  const add = (a, c) => { const ka = a[0] + ',' + a[1], kc = c[0] + ',' + c[1]; (seg.get(ka) || seg.set(ka, []).get(ka)).push(c); (seg.get(kc) || seg.set(kc, []).get(kc)).push(a); };
+  for (let y = 0; y < H - 1; y++) for (let x = 0; x < W - 1; x++) {
+    const c = (b[y * W + x] ? 8 : 0) | (b[y * W + x + 1] ? 4 : 0) | (b[(y + 1) * W + x + 1] ? 2 : 0) | (b[(y + 1) * W + x] ? 1 : 0);
+    if (c === 0 || c === 15) continue;
+    const t = [x + .5, y], r = [x + 1, y + .5], bo = [x + .5, y + 1], l = [x, y + .5];
+    switch (c) { case 1: case 14: add(l, bo); break; case 2: case 13: add(bo, r); break; case 3: case 12: add(l, r); break; case 4: case 11: add(t, r); break;
+      case 5: add(l, t); add(bo, r); break; case 6: case 9: add(t, bo); break; case 7: case 8: add(l, t); break; case 10: add(t, r); add(l, bo); break; }
+  }
+  const visto = new Set(); let melhor = [], areaMax = 0;
+  for (const [k0, vs] of seg) {
+    if (visto.has(k0)) continue;
+    const pts = []; let atual = k0.split(',').map(Number), ant = null, guarda = 0;
+    while (guarda++ < 60000) {
+      const ka = atual[0] + ',' + atual[1]; if (visto.has(ka) && pts.length > 2) break; visto.add(ka); pts.push(atual);
+      const viz = seg.get(ka) || []; let prox = viz.find(v => !ant || v[0] !== ant[0] || v[1] !== ant[1]);
+      if (!prox) break; ant = atual; atual = prox;
+    }
+    let a = 0; for (let i = 0; i < pts.length; i++) { const p = pts[i], q = pts[(i + 1) % pts.length]; a += p[0] * q[1] - q[0] * p[1]; }
+    if (Math.abs(a) > areaMax) { areaMax = Math.abs(a); melhor = pts; }
+  }
+  return melhor;
+}
+function rdpAberto(p, eps) {                               // Douglas-Peucker numa linha aberta
+  if (p.length < 3) return p;
+  const keep = new Uint8Array(p.length); keep[0] = keep[p.length - 1] = 1; const pilha = [[0, p.length - 1]];
+  while (pilha.length) {
+    const [i0, i1] = pilha.pop(); let dm = 0, im = -1; const a = p[i0], c = p[i1], dx = c[0] - a[0], dy = c[1] - a[1], n = Math.hypot(dx, dy) || 1;
+    for (let i = i0 + 1; i < i1; i++) { const q = p[i], d = Math.abs(dy * (q[0] - a[0]) - dx * (q[1] - a[1])) / n; if (d > dm) { dm = d; im = i; } }
+    if (im >= 0 && dm > eps) { keep[im] = 1; pilha.push([i0, im], [im, i1]); }
+  }
+  return p.filter((q, i) => keep[i]);
+}
+function rdp(p, eps) {                                     // num laço fechado: parte no ponto mais longe do primeiro e simplifica as duas metades
+  if (p.length < 6) return p;
+  let k = 0, dm = 0; p.forEach((q, i) => { const d = Math.hypot(q[0] - p[0][0], q[1] - p[0][1]); if (d > dm) { dm = d; k = i; } });
+  const a = rdpAberto(p.slice(0, k + 1), eps), c = rdpAberto(p.slice(k).concat([p[0]]), eps);
+  return a.concat(c.slice(1, -1));
+}
+const POLIS = {};                                          // contorno por passo do stop motion (calcula uma vez)
+function poligono(j) {
+  const ps = passo(j);
+  if (POLIS[ps]) return POLIS[ps];
+  const im = recorte(j); if (!im) return (POLIS[ps] = []);
+  const b = dilata(mascaraBaixa(im), RB / KS);
+  let pts = contornoPoligono(b);
+  pts = rdp(pts, 2.4);
+  const r = prng(100 + ps);
+  return (POLIS[ps] = pts.map(([x, y]) => [(x - 1) * KS + (r() - .5) * 7, (y - 1) * KS + (r() - .5) * 7]));
+}
+
+// ---- os papéis rasgados (em px da ref + deslocamento do rosto)
+function bordaRasgada(x0, y0, x1, y1, amp, r) {            // uma borda irregular entre dois pontos (caminhada aleatória curta)
+  const n = Math.max(3, Math.round(Math.hypot(x1 - x0, y1 - y0) / 11)), pts = []; let o = 0;
+  for (let i = 0; i <= n; i++) { const u = i / n; o = o * .55 + (r() - .5) * amp * 2; const nx = -(y1 - y0), ny = x1 - x0, nn = Math.hypot(nx, ny) || 1;
+    pts.push([x0 + (x1 - x0) * u + nx / nn * o, y0 + (y1 - y0) * u + ny / nn * o]); }
+  return pts;
+}
+function papelRasgado(g, x0, y0, x1, y1, cor, seed, amp, lados, rot, grao = 1) {   // lados: quais bordas rasgam (t, r, b, l); o resto é reto e vai pra fora do quadro
+  const r = prng(seed);
+  const t = lados.includes('t') ? amp : 1, rr = lados.includes('r') ? amp : 1, b = lados.includes('b') ? amp : 1, l = lados.includes('l') ? amp : 1;
+  const pts = [...bordaRasgada(x0, y0, x1, y0, t, r), ...bordaRasgada(x1, y0, x1, y1, rr, r), ...bordaRasgada(x1, y1, x0, y1, b, r), ...bordaRasgada(x0, y1, x0, y0, l, r)];
+  const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+  g.save(); g.translate(cx, cy); g.rotate((rot || 0) * Math.PI / 180); g.translate(-cx, -cy);
+  const caminho = () => { g.beginPath(); pts.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.closePath(); };
+  g.save(); caminho(); g.shadowColor = 'rgba(0,0,0,.5)'; g.shadowBlur = 16; g.shadowOffsetX = 3; g.shadowOffsetY = 8; g.fillStyle = cor; g.fill(); g.restore();
+  // a fibra branca na borda rasgada: um traço claro e irregular por baixo do papel
+  g.save(); caminho(); g.lineWidth = 5; g.strokeStyle = 'rgba(255,250,240,.82)'; g.lineJoin = 'round'; g.stroke(); g.restore();
+  caminho(); g.fillStyle = cor; g.fill();
+  g.save(); caminho(); g.clip();                           // o grão do papel: pontinhos claros e escuros
+  const rg = prng(seed + 7); for (let i = 0; i < 520; i++) { const px = x0 + rg() * (x1 - x0), py = y0 + rg() * (y1 - y0); g.fillStyle = rg() < .5 ? `rgba(255,255,255,${.07 * grao})` : `rgba(0,0,0,${.07 * grao})`; g.fillRect(px, py, 2 + rg() * 5, 1 + rg() * 2); }
+  g.restore();
+  g.restore();
+  return pts;
+}
+function quadriculado(g, x0, y0, x1, y1, seed, rot) {
+  papelRasgado(g, x0, y0, x1, y1, '#f4f2ec', seed, 7, 'tr', rot);
+  g.save(); g.beginPath(); g.rect(x0, y0, x1 - x0, y1 - y0); g.clip(); g.strokeStyle = 'rgba(120,150,205,.5)'; g.lineWidth = 1.6;
+  for (let x = x0 + 12; x < x1; x += 60) { g.beginPath(); g.moveTo(x, y0); g.lineTo(x, y1); g.stroke(); }
+  for (let y = y0 + 8; y < y1; y += 60) { g.beginPath(); g.moveTo(x0, y); g.lineTo(x1, y); g.stroke(); }
+  g.restore();
+}
+// a fibra branca de uma borda rasgada: uma faixa irregular cinza-clara ao longo da linha (a fibra que sobra do papel rasgado) e pedacinhos brancos por cima, mais
+// fundo pro lado de dentro (`lado` +1: o dentro é a direita). `cor` é o tom da faixa
+function fibras(g, pts, lado, r, larg, dens, cor) {
+  g.save();
+  g.lineJoin = 'round'; g.lineCap = 'round'; g.strokeStyle = `rgba(${cor[0]},${cor[1]},${cor[2]},.88)`;
+  for (const [lw, off] of [[larg * .5, larg * .22], [larg * .26, larg * .5]]) {
+    g.lineWidth = lw; g.beginPath(); let ox = 0;
+    pts.forEach(([x, y], i) => { ox = ox * .6 + (r() - .5) * 5; const qx = x + lado * off + ox; i ? g.lineTo(qx, y) : g.moveTo(qx, y); });
+    g.stroke();
+  }
+  for (let i = 0; i < pts.length - 1; i++) {
+    const [x0, y0] = pts[i], [x1, y1] = pts[i + 1], n = Math.max(1, Math.round(Math.hypot(x1 - x0, y1 - y0) / 2.2));
+    for (let k = 0; k < n; k++) {
+      if (r() > dens) continue;
+      const u = k / n, px = x0 + (x1 - x0) * u + lado * (-larg * .3 + r() * larg * 1.05), py = y0 + (y1 - y0) * u + (r() - .5) * 4, rad = 1.6 + r() * r() * 6.4, L = cor[0] + Math.round(r() * (252 - cor[0]));
+      g.fillStyle = `rgba(${L},${L - 1},${L - 5},${.7 + r() * .3})`;
+      g.beginPath(); const m = 5 + (r() * 3 | 0);
+      for (let q = 0; q < m; q++) { const a = q / m * Math.PI * 2 + r() * .6, rr = rad * (.6 + r() * .6), qx = px + Math.cos(a) * rr, qy = py + Math.sin(a) * rr; q ? g.lineTo(qx, qy) : g.moveTo(qx, qy); }
+      g.closePath(); g.fill();
+    }
+  }
+  g.restore();
+}
+// a tira rasgada do f259: um pedaço de papel preto que desce do topo e estreita, com fibra branca nas duas bordas (a ref: de x 420-680 no alto a ~480-610 em y 440)
+function tiraRasgada(g, ps) {
+  const r = prng(77 + ps), esq = [], dir = []; let oe = 0, od = 0;
+  for (let y = -260; y <= 440; y += 8) { const u = Math.max(0, y) / 440; oe = oe * .5 + (r() - .5) * 15; od = od * .5 + (r() - .5) * 15; esq.push([420 + 62 * u + oe, y]); dir.push([680 - 70 * u + od, y]); }
+  const ponta = [[470, 452], [520, 470], [548, 482], [575, 468], [606, 450]];
+  const pts = [...esq, ...ponta, ...dir.slice().reverse()];
+  g.save(); g.beginPath(); pts.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.closePath();
+  g.shadowColor = 'rgba(0,0,0,.4)'; g.shadowBlur = 10; g.shadowOffsetX = 2; g.shadowOffsetY = 5; g.fillStyle = PRETO; g.fill(); g.restore();
+  fibras(g, esq, 1, r, 16, .9, [226, 223, 214]); fibras(g, dir, -1, r, 12, .8, [226, 223, 214]); fibras(g, ponta, 1, r, 9, .9, [226, 223, 214]);
+}
+// os papéis de uma camada de stop motion; `rev` diz o quanto já apareceu: 0 só a tira preta (f259) · 1 o preto de cima e os papelões que entram (f260, borrado)
+// · 2 tudo menos o quadriculado, com o amarelo da direita `dA` px à direita do lugar (f261, borrado na direita) · 3 o quadriculado chegando, `desl` px à esquerda do lugar
+// (f262, borrado na esquerda) · 4 tudo no lugar (f263 em diante)
+function papeis(g, ps, rev, desl, dA) {
+  const r = prng(500 + ps), jx = () => (r() - .5) * 10, jr = () => (r() - .5) * 1.4;
+  g.save(); g.translate(DX, DY);
+  if (rev === 0) tiraRasgada(g, ps);
+  else if (rev === 1) {
+    papelRasgado(g, 200, 640, 430, 900, '#b98c58', 51 + ps, 7, 'tblr', 0);
+    papelRasgado(g, 710, 660, 870, 950, '#b98c58', 61 + ps, 7, 'tblr', 0);
+    papelRasgado(g, 230, -260, 900, 330, PRETO, 72, 9, 'blr', 0, .05);
+  } else {
+    papelRasgado(g, -30, 690, 1110, 1300, '#b98c58', 44 + ps, 7, 'tr', 0);                    // o papelão que fica por baixo do quadriculado e do amarelo (a ref o mostra à esquerda do amarelo em f261)
+    if (rev >= 3) { const d = rev === 3 ? desl : 0; quadriculado(g, -30 + d + jx(), 690 + jx(), 395 + d + jx(), 1115 + jx(), 31 + ps, jr()); }
+    { const a = rev === 2 ? dA : 0; papelRasgado(g, 700 + a + jx(), 700 + jx(), 1110 + a, 968 + jx(), MK, 41 + ps, 6, 'tl', jr()); }
+    papelRasgado(g, -30, 498 + jx(), 350 + jx(), 706 + jx(), '#b98c58', 51 + ps, 7, 'br', jr());
+    papelRasgado(g, 735 + jx(), 498 + jx(), 1110, 700 + jx(), '#b98c58', 61 + ps, 7, 'bl', jr());
+    papelRasgado(g, -30, -260, 1110, 506 + jx() * .4, PRETO, 73 + ps, 7, 'b', 0, .05);        // o preto sobe até além do quadro (y 0 coberto)
+  }
+  g.restore();
+}
+
+// ---- o borrão de movimento da entrada (f260 e f262): média na horizontal do fundo SEM a pessoa (recorte dilatado em 14 px fica de fora da média), pra a cor dela
+// não escorrer pro papel; a pessoa e a borda branca vêm depois, nítidas
+const holec = document.createElement('canvas'); holec.width = 1080; holec.height = 1920; const holeg = holec.getContext('2d', {willReadFrequently: true});
+function borraNaHorizontal(g, mt, sigma, xa = 0, xb = 1080) {   // só nas colunas de xa a xb (bordas de 80 px em rampa): o amarelo varre na direita em f261 e o quadriculado na esquerda em f262
+  const W = 1080, H = 1920, n = W * H;
+  holeg.setTransform(1, 0, 0, 1, 0, 0); holeg.globalCompositeOperation = 'source-over'; holeg.clearRect(0, 0, W, H); holeg.fillStyle = '#fff'; holeg.fillRect(0, 0, W, H);
+  holeg.globalCompositeOperation = 'destination-out';
+  for (let k = 0; k < 16; k++) { const a = k / 16 * Math.PI * 2; holeg.drawImage(mt, Math.cos(a) * 14, Math.sin(a) * 14, W, H); }
+  holeg.drawImage(mt, 0, 0, W, H); holeg.globalCompositeOperation = 'source-over';
+  const sd = g.getImageData(0, 0, W, H).data, wd = holeg.getImageData(0, 0, W, H).data, A = new Float32Array(n * 4);
+  for (let p = 0; p < n; p++) { const w = wd[p * 4 + 3] / 255; A[p * 4] = sd[p * 4] * w; A[p * 4 + 1] = sd[p * 4 + 1] * w; A[p * 4 + 2] = sd[p * 4 + 2] * w; A[p * 4 + 3] = w; }
+  const wb = (Math.max(3, Math.round(Math.sqrt(4 * sigma * sigma + 1))) | 1), rad = (wb - 1) >> 1, lin = new Float32Array(W), sai = new Float32Array(W);
+  for (let pass = 0; pass < 3; pass++) for (let y = 0; y < H; y++) for (let c = 0; c < 4; c++) {          // 3 caixas = uma gaussiana
+    const o = y * W * 4 + c;
+    for (let x = 0; x < W; x++) lin[x] = A[o + x * 4];
+    let s = 0; for (let k = -rad; k <= rad; k++) s += lin[Math.min(W - 1, Math.max(0, k))];
+    for (let x = 0; x < W; x++) { sai[x] = s / wb; s += lin[Math.min(W - 1, x + rad + 1)] - lin[Math.max(0, x - rad)]; }
+    for (let x = 0; x < W; x++) A[o + x * 4] = sai[x];
+  }
+  const out = g.createImageData(W, H), od = out.data;
+  const ss = u => { u = Math.max(0, Math.min(1, u)); return u * u * (3 - 2 * u); };
+  for (let p = 0; p < n; p++) {
+    const x = p % W, m = (xa <= 0 ? 1 : ss((x - xa) / 80)) * (xb >= W ? 1 : ss((xb - x) / 80)), w = Math.max(A[p * 4 + 3], .02);
+    for (let c = 0; c < 3; c++) od[p * 4 + c] = sd[p * 4 + c] * (1 - m) + A[p * 4 + c] / w * m;
+    od[p * 4 + 3] = 255;
+  }
+  g.putImageData(out, 0, 0);
+}
+
+// ---- as letras: pedaços de revista, cada um com papel, tinta e giro próprios
+const ESTILOS = [
+  {bg: '#f4f1ea', fg: AC, f: `italic 700 __PX__px ${SERIF}`, rot: -2}, {bg: '#b98d57', fg: '#151515', f: `900 __PX__px ${SERIF}`, rot: 3},
+  {bg: '#141414', fg: MK, f: `900 __PX__px ${SERIF}`, rot: -6}, {bg: MK, fg: '#151515', f: `900 __PX__px ${SERIF}`, rot: 1},
+  {bg: '#b98d57', fg: '#151515', f: `italic 900 __PX__px ${SERIF}`, rot: 2}, {bg: '#f4f1ea', fg: AC, f: `900 __PX__px ${SANS}`, rot: -3},
+  {bg: '#cfcfca', fg: '#151515', f: `italic 900 __PX__px ${SERIF}`, rot: 0}, {bg: AC, fg: '#f4f1ea', f: `italic 700 __PX__px ${SERIF}`, rot: -5}];
+// onde cada letra cai e quando: a 1ª palavra de f264 em diante (1 por quadro), a 2ª dois quadros depois que a 1ª acaba
+function planoLetras() {
+  const out = [], n1 = L1.length, n2 = L2.length;
+  const w1 = Math.min(76, 540 / n1), w2 = Math.min(80, 420 / n2), x1 = 480 + (500 - n1 * w1) / 2 + 0, x2 = 545 + (390 - n2 * w2) / 2;
+  L1.forEach((ch, i) => out.push({ch, x: x1 + i * w1, y: 1010 + (i % 2) * 6, w: w1 + 2, h: 124 + (i * 7 % 13), j: 5 + i, st: ESTILOS[i % ESTILOS.length]}));
+  L2.forEach((ch, i) => out.push({ch, x: x2 + i * w2, y: 1197 + (i % 2) * 5, w: w2 + 2, h: 128 + (i * 5 % 11), j: 5 + n1 + 2 + i, st: ESTILOS[(i + 5) % ESTILOS.length]}));
+  return out;
+}
+const LETRAS = planoLetras();
+function letras(g, j, ps) {
+  g.save(); g.translate(DX, DY);
+  LETRAS.forEach((l, i) => {
+    if (j < l.j) return;
+    const idade = j - l.j, r = prng(900 + i * 13 + ps * 3);
+    const esc = idade === 0 ? 1.32 : idade === 1 ? 1.1 : 1, rot = l.st.rot + (r() - .5) * 3;
+    g.save(); g.translate(l.x + l.w / 2, l.y + l.h / 2); g.rotate(rot * Math.PI / 180); g.scale(esc, esc);
+    const w = l.w, h = l.h, c = () => { const q = prng(i + 3); g.beginPath(); g.moveTo(-w / 2 + q() * 3, -h / 2 + q() * 3); g.lineTo(w / 2 - q() * 3, -h / 2 + q() * 4); g.lineTo(w / 2 - q() * 3, h / 2 - q() * 3); g.lineTo(-w / 2 + q() * 4, h / 2 - q() * 3); g.closePath(); };
+    g.save(); c(); g.shadowColor = 'rgba(0,0,0,.5)'; g.shadowBlur = idade === 0 ? 16 : 9; g.shadowOffsetX = 2; g.shadowOffsetY = idade === 0 ? 9 : 5; g.fillStyle = l.st.bg; g.fill(); g.restore();
+    c(); g.fillStyle = l.st.bg; g.fill();
+    g.save(); c(); g.clip(); const rg = prng(i + 40); for (let k = 0; k < 90; k++) { g.fillStyle = rg() < .5 ? 'rgba(255,255,255,.1)' : 'rgba(0,0,0,.08)'; g.fillRect(-w / 2 + rg() * w, -h / 2 + rg() * h, 2 + rg() * 4, 1 + rg() * 2); } g.restore();
+    const px = Math.round(h * .78); g.font = l.st.f.replace('__PX__', px); g.fillStyle = l.st.fg; g.textAlign = 'center'; g.textBaseline = 'middle';
+    let tw = g.measureText(l.ch).width; const fit = Math.min(1, (w - 8) / Math.max(tw, 1)); g.save(); g.scale(fit, 1); g.fillText(l.ch, 0, h * .04); g.restore();
+    g.restore();
+  });
+  g.restore();
+}
+
+// ---- a fenda do fim (f284 a f287): uma abertura cinza no papel preto, com fibra branca nas duas bordas; a borda esquerda fica parada e a direita anda (a abertura
+// alarga no alto), desce atrás do painel e vira um fio preto, sobre o amarelo, que acaba em ponta. Medido na ref: largura no alto 42, 70, 111 e 168 px; a ponta
+// chega a 270, 400, 760 e ~915 px (a ficha dizia 240, 380, 760 e 800); cinza de 27 a 60 de luminância (o preto é 3)
+const TOPOS = [30, 58, 98, 156], PONTAS = [270, 400, 760, 915], YPRETO = 592;   // TOPOS: largura do cinza; com a fibra (uns 14 px a mais) fica 42, 70, 111 e 168, que é o que a ref mede
+const BORDAE = (() => { const r = prng(1311), p = []; let o = 0; for (let y = -30; y <= 1000; y += 5) { o = o * .7 + (r() - .5) * 10; p.push([817 + 11 * Math.max(0, y) / 700 + o + (r() - .5) * 9, y]); } return p; })();
+const suave = u => { u = Math.max(0, Math.min(1, u)); return u * u * (3 - 2 * u); };
+function fenda(g, j) {
+  const i = j - RACH0; if (i < 0 || i > 3) return;
+  const topo = TOPOS[i], ponta = PONTAS[i], rd = prng(1400 + i), rf = prng(1500 + i);
+  const larg = y => Math.max(2.5, Math.max(20, topo * (1 - Math.max(0, y) / 890)) * (1 - .45 * suave((y - 480) / 90)) * suave((ponta - y) / 70));   // abaixo do preto só o fio
+  const Y = y => y + DY * suave((y - 380) / 126);                                              // a ref mede com os papéis no lugar dela: o que passa da borda do preto (y 506) desce os 86 px do rosto
+  const desvio = y => -24 * suave((y - 790) / 120);                                           // perto da ponta o fio entorta pra esquerda
+  const esq = [], dir = []; let od = 0;
+  for (const [x, y] of BORDAE) {
+    if (y > ponta + 4) break;
+    od = od * .6 + (rd() - .5) * 8 + (rd() - .5) * 8;
+    esq.push([x + desvio(y), Y(y)]); dir.push([x + desvio(y) + larg(y) + od, Y(y)]);
+  }
+  g.save(); g.translate(DX, 0);
+  const gr = g.createLinearGradient(0, -30, 0, 1100), st = y => (y + 30) / 1130;
+  gr.addColorStop(0, '#1b1e1e'); gr.addColorStop(st(330), '#3c3a36'); gr.addColorStop(st(560), '#2e2d2b'); gr.addColorStop(st(640), '#101010'); gr.addColorStop(1, '#0a0a0a');
+  g.beginPath(); esq.forEach(([x, y], k) => k ? g.lineTo(x, y) : g.moveTo(x, y)); dir.slice().reverse().forEach(([x, y]) => g.lineTo(x, y)); g.closePath();
+  g.fillStyle = gr; g.fill();
+  const corte = a => a.filter(q => q[1] <= YPRETO + 8), fio = a => a.filter(q => q[1] >= YPRETO);       // no papel preto a fibra é larga; sobre o papelão e o amarelo é um fio com poucos farelos brancos
+  fibras(g, corte(esq), 1, rf, 17, .8, [128, 130, 132]); fibras(g, corte(dir), -1, rf, 14, .75, [128, 130, 132]);
+  fibras(g, fio(esq), 1, rf, 9, .5, [214, 212, 205]); fibras(g, fio(dir), -1, rf, 6, .18, [214, 212, 205]);
+  g.restore();
+}
+
+const ctx = $('c').getContext('2d');
+const pc = document.createElement('canvas'); pc.width = 1080; pc.height = 1920; const pg = pc.getContext('2d');
+const bc = document.createElement('canvas'); bc.width = 1080; bc.height = 1920; const bgx = bc.getContext('2d', {willReadFrequently: true});
+const BORRA = [null, [44, 0, 1080], [22, 520, 1080], [24, 0, 600]];   // o borrão na horizontal em f259 a f262: [desvio px, de x, até x] (nítido, o quadro todo, só a direita (o amarelo varre), só a esquerda (o quadriculado varre))
+function desenha(tt) {
+  const j = Math.round(tt * 30), ps = passo(j), base = quadroBase(j), mt = recorte(j);
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, 1080, 1920); ctx.globalCompositeOperation = 'source-over';
+  if (!base || !mt) { ctx.fillStyle = '#2a2d33'; ctx.fillRect(0, 0, 1080, 1920); return; }
+  bgx.setTransform(1, 0, 0, 1, 0, 0); bgx.clearRect(0, 0, 1080, 1920); bgx.drawImage(base, 0, 0, 1080, 1920);   // a sala original, até o papel cobrir
+  papeis(bgx, ps, Math.min(j, 4), -110, 150);
+  if (BORRA[j]) borraNaHorizontal(bgx, mt, ...BORRA[j]);
+  ctx.drawImage(bc, 0, 0);
+  // o adesivo: o polígono branco (stop motion) e a pessoa por cima
+  const poli = poligono(j);
+  if (poli.length > 2) {
+    ctx.save(); ctx.beginPath(); ctx.rect(0, 0, 1080, 1800); ctx.clip();      // a borda não desce até o pé: na nossa foto a quina de baixo do laptop sobe do quadro e a borda viraria uma faixa solta
+    ctx.beginPath(); poli.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.closePath();
+    ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 14; ctx.shadowOffsetX = 3; ctx.shadowOffsetY = 7; ctx.fillStyle = '#f7f4ee'; ctx.fill(); ctx.restore();
+  }
+  pg.setTransform(1, 0, 0, 1, 0, 0); pg.globalCompositeOperation = 'source-over'; pg.clearRect(0, 0, 1080, 1920);
+  pg.drawImage(base, 0, 0, 1080, 1920); pg.globalCompositeOperation = 'destination-in'; pg.drawImage(mt, 0, 0, 1080, 1920); pg.globalCompositeOperation = 'source-over';
+  ctx.drawImage(pc, 0, 0);
+  letras(ctx, j, ps);
+  fenda(ctx, j);
+}
+
+D.monta(tl => {
+  const P = {t: 0};
+  tl.to(P, {t: dur, duration: dur, ease: 'none', onUpdate: () => desenha(P.t)}, 0);
+  desenha(0);
+  D.cue(0, 'papel'); D.cue(5 / 30, 'papel'); D.cue(11 / 30, 'papel'); D.cue(RACH0 / 30, 'papel'); D.cue((RACH0 + 1) / 30, 'impact');
+  return dur;
+});
+</script>
+</body>
+</html>

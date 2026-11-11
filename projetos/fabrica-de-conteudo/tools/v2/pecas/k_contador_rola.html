@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<!-- TIPOGRAFIA — o número que rola: nasce borrado como "00", os dígitos sobem num rolo com janela e pousam na
+     ordem, o último com o sufixo. Amarelo, Black, ~230 px de dígito, na faixa de cima. Rola 0,375 s com ease-out,
+     sem estourar; parado até sair; sai com blur curto. 1080x1920, --alpha. Clone do efeito 08 do Deps_-cz-Fg.
+       n      o número final (100) · suf  o que vem depois do número (+) · rot  o rótulo embaixo (vazio: sem)
+       y      o topo da tinta dos dígitos (275) · h  a altura do dígito (228)
+       t0     quando entra · rola  quanto dura a contagem (.5) · sai  quando sai (-1: fica até o fim) · dur
+       ?n=100&suf=%2B&rot=efeitos de vídeo&y=275&h=228&t0=0&sai=1.4&dur=1.5 -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/editorial.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px;background:transparent}
+#stage{padding:0;display:block;background:none}
+#c{position:absolute;left:0;top:0;display:flex;align-items:flex-start;font:900 100px/1 var(--ed-sans);letter-spacing:-.03em;
+  color:var(--mk);-webkit-text-stroke:8px var(--ink);paint-order:stroke fill;filter:drop-shadow(8px 8px 0 var(--ink))}
+.j{overflow:hidden;position:relative}
+.f{display:block}
+.f b{display:block;font-weight:900}
+#r{position:absolute;left:0;width:1080px;text-align:center;font:800 84px/1 var(--ed-sans);letter-spacing:-.03em;color:var(--mk);
+  -webkit-text-stroke:8px var(--ink);paint-order:stroke fill;filter:drop-shadow(6px 6px 0 var(--ink));opacity:0}
+</style>
+</head>
+<body>
+<div id="stage"><div id="c"></div><div id="r"></div></div>
+<script>
+const dur = D.n('dur', '1.5'), t0 = D.n('t0', '0'), sai = D.n('sai', '-1'), rola = D.n('rola', '.5');
+const alvo = String(D.q('n', '100')), suf = D.q('suf', '+'), rot = D.q('rot', '');
+const c = document.getElementById('c'), r = document.getElementById('r');
+// um span por dígito: o número SOBE em ordem (cada quadro um número maior), ease-out; só o dígito das unidades borra na troca
+const ds = [...alvo].map(() => { const j = document.createElement('div'); j.className = 'j'; c.appendChild(j); return j; });
+if (suf) { const s = document.createElement('div'); s.className = 'j'; s.textContent = suf; c.appendChild(s); }
+const N = +alvo, W = alvo.length;
+const put = v => { const t = String(Math.min(N, Math.floor(v))).padStart(W, '0'); ds.forEach((j, i) => { j.textContent = t[i]; }); };
+put(0);
+r.textContent = rot;
+D.monta(tl => {
+  const cx = document.createElement('canvas').getContext('2d');
+  cx.font = '900 100px ' + D.css('--ed-sans').split(',')[0];
+  const m = cx.measureText('0');
+  const alt = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent;
+  let k = D.n('h', '228') / alt;
+  const tw = cx.measureText(alvo + suf).width * k;
+  if (tw > 940) k *= 940 / tw;
+  c.style.fontSize = (100 * k) + 'px';
+  const lh = 100 * k;               // altura da linha = corpo (line-height 1)
+  const wr = c.getBoundingClientRect();
+  const topoTinta = (lh / 2 + (m.fontBoundingBoxAscent - m.fontBoundingBoxDescent) * k / 2) - m.actualBoundingBoxAscent * k;
+  const topo = D.n('y', '275') - topoTinta;
+  c.style.left = (540 - wr.width / 2) + 'px'; c.style.top = topo + 'px';
+  // a janela do rolo passa um pouco da tinta, pra o dígito entrar e sair cortado
+  const dw = cx.measureText('0').width * k;
+  ds.forEach(j => { j.style.width = dw + 'px'; j.style.textAlign = 'center'; j.style.height = lh + 'px'; });
+  const o = {v: 0}, un = ds[ds.length - 1];
+  tl.to(o, {v: N, duration: rola, ease: 'power3.out', onUpdate: () => {
+    put(o.v); const p = Math.min(1, o.v / N);
+    un.style.filter = 'blur(' + (7 * (1 - p) * (1 - p)).toFixed(2) + 'px)';   // desacelera até parar nítido
+  }}, t0 + .08);
+  tl.fromTo(c, {opacity: 0, filter: 'blur(14px) drop-shadow(8px 8px 0 var(--ink))'},
+    {opacity: 1, filter: 'blur(0px) drop-shadow(8px 8px 0 var(--ink))', duration: .1, ease: 'none'}, t0);
+  if (rot) {
+    r.style.top = (D.n('y', '275') + D.n('h', '228') + 40) + 'px';
+    tl.fromTo(r, {opacity: 0}, {opacity: 1, duration: .1, ease: 'none'}, t0 + rola + .1);
+  }
+  if (sai >= 0) tl.to([c, r], {opacity: 0, filter: 'blur(10px)', duration: .12, ease: 'none'}, sai - .12);
+  return dur;
+});
+</script>
+</body>
+</html>

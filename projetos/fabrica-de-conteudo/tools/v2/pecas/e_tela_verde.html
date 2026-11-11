@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<!-- EFEITO — tela verde: a pessoa recortada (com o laptop) sobre outro vídeo em tela cheia (clone do efeito 04 "green screen" do De25fKeTRl7, ficha 05,
+     30 qps medidos no rosto). 1080x1920, tela cheia, --alpha. A peça cobre f154 a f184 da ref (31 quadros); no f185 a ref corta seco pra base.
+     Linha do tempo (quadro 0 da peça = f154): soco de câmera de 1,6% e 1,2% (f154, f155; o f152 e o f153 são da câmera do plano) · lavagem de luz larga
+     entra pela borda esquerda sobre a base (f154) · o FUNDO troca de uma vez pro cenário VAZIO (f155), coberto pela lavagem · a lavagem passa pra borda direita
+     (f156) e acaba (f157) · a pessoa dá o "whip": uma mancha lisa, sem traço de rosto, que corre pra direita e pra baixo encolhendo (f158 a f162) · o personagem
+     do fundo ENTRA no f159 (o vídeo começa nele) · a pessoa assenta e fica em x,y fixos até o f184.
+     A pessoa é o recorte da base (`fr` x `mt`): escala 0,775 (io 102, a da ref) e olhos em (870,976), a mesma posição do rosto da ref; a margem do recorte é macia; o
+     corpo desce até o pé do quadro (a ref passa do quadro; o recorte da foto acaba antes, então a última linha se estende, escurecida); em cima o quadro escurece até
+     18 de luminância e embaixo até quase preto. O fundo é uma cena NOSSA do banco de cenas, no lugar do clipe da ref (direitos autorais): `bg` são os quadros dela
+     a partir de f159, e `pl` é a placa do mesmo cenário sem o personagem, que ocupa de f155 a f158.
+       fr     os quadros do vídeo-base (pasta f000.jpg… ou uma imagem só), mt  o recorte da pessoa: PNG branco com alfa (pasta g000.png… ou um arquivo só)
+       bg     pasta dos quadros do vídeo de fundo a 30 qps, 1080x1920 (f000.jpg…), a partir do quadro em que o personagem entra (f159)
+       pl     a placa vazia do fundo (uma imagem 1080x1920) · entra  o quadro da peça em que o personagem entra (5 = f159)
+       olhos  o centro dos olhos no quadro-base, x,y (539.4,752.8); a ref é 553,665 · escala  a escala final da pessoa (0.775) · alvo  onde os olhos terminam (870,976)
+       escuro  o multiplicador do vídeo de fundo, R,G,B (0.62,0.68,0.78): a ref tem o fundo escuro e azulado; a cena nossa é clara e quente
+       soco   a escala do soco de câmera nos primeiros quadros da peça (1.016,1.012: f154 e f155), em volta do centro do quadro
+       dur    duração (1.0333 = 31 quadros)
+     etiqueta: tela-verde, recorte-da-pessoa, chao-de-video
+       ?fr=quadros&mt=recorte.png&bg=cena&pl=placa.jpg&entra=5&olhos=539.4,752.8&escala=0.775&alvo=870,976&soco=1.016,1.012&dur=1.0333 -->
+<html lang="pt-BR" class="alfa" data-qa="fundo">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block;overflow:hidden;position:relative}
+#c{position:absolute;left:0;top:0;width:1080px;height:1920px}
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="c" width="1080" height="1920"></canvas></div>
+<script>
+const $ = id => document.getElementById(id);
+const lista = (nome, pad) => { const v = D.q(nome, '').split(',').filter(x => x.trim() !== '').map(Number); return v.length ? v : pad; };
+const dur = D.n('dur', String(31 / 30)), S1 = D.n('escala', '0.775'), ESC = lista('escuro', [0.62, 0.68, 0.78]), ENTRA = Math.round(D.n('entra', '5'));
+const [OX, OY] = D.q('olhos', '539.4,752.8').split(',').map(Number), [TX, TY] = D.q('alvo', '870,976').split(',').map(Number);
+const SOCO = lista('soco', [1.016, 1.012]);
+const PENA = D.n('pena', '52');   // a rampa da ponta esquerda do corpo, em px do quadro-base (52 x 0,775 = 40 px na tela); 0 desliga
+const SO = D.q('so', ''), LAV = D.n('lav', '1');   // so=lavagem: só a lavagem de luz, em quadro transparente (vai POR CIMA do selo, que é vidro fosco opaco) · lav=0: a peça sem a lavagem
+
+// carrega uma pasta de quadros (prefixo + NNN + ext) ou um arquivo só
+function carrega(param, pref, ext, n) {
+  const v = D.q(param, ''), raiz = v ? (v[0] === '/' ? 'file://' + v : v).replace(/\/$/, '') : '';
+  const unica = /\.(jpe?g|png|webp)$/i.test(raiz), lst = [];
+  if (raiz) for (let i = 0; i < (unica ? 1 : n); i++) {
+    const m = new Image(); m.src = unica ? raiz : raiz + '/' + pref + String(i).padStart(3, '0') + ext; m.style.display = 'none';
+    document.body.appendChild(m); lst.push(m);
+  }
+  const f = k => lst.length && k >= 0 ? lst[Math.min(k, lst.length - 1)] : null;
+  f.unica = unica; return f;
+}
+const NQ = Math.ceil(dur * 30) + 3;
+const quadroBase = carrega('fr', 'f', '.jpg', NQ), recorte = carrega('mt', 'g', '.png', NQ), quadroFundo = carrega('bg', 'f', '.jpg', NQ), placa = carrega('pl', 'p', '.jpg', 1);
+
+// a pose da pessoa (escala, olhos na tela) por quadro f da ref; f é fracionário (o obturador). Medido no rosto (Vision): f160 0,81 em (811,914) · f161 0,83 em (855,955) ·
+// f162 0,78 em (869,973) · f163 a f184 0,77 a 0,79 em (870,975 -> 960). f158 e f159 são mancha sem rosto: o caminho vem da cabeça no quadro cheio (no f158 ela
+// ainda está perto da base, borrada na diagonal; no f159 já passou da metade do caminho; no f160 está a 80%)
+const PONTOS = [[157, 1 * .78 / S1, 0, 0], [158, .95, .12, .19], [159, .88, .62, .62], [160, .81, .81, .90], [161, .83, .95, .97], [162, .78, 1, 1]];   // [quadro, escala relativa, progresso x, progresso y]
+function pose(f) {
+  if (f <= 157) return {s: 1, x: OX, y: OY};      // até o f157 a base, parada (a escala 1 é a base; o resto é relativo a ela)
+  if (f >= 162) { const u = Math.min(1, (f - 162) / 22); return {s: S1 * (1 + .004 * (1 - u)), x: TX, y: TY - 12 * u}; }
+  let i = 0; while (i < PONTOS.length - 2 && f > PONTOS[i + 1][0]) i++;
+  const a = PONTOS[i], b = PONTOS[i + 1], u = (f - a[0]) / (b[0] - a[0]), L = (p, q) => p + (q - p) * u;
+  const rel = L(a[1], b[1]), px = L(a[2], b[2]), py = L(a[3], b[3]);
+  return {s: rel * S1 / .78, x: OX + px * (TX - OX), y: OY + py * (TY - OY)};   // os 0,78 do PONTOS são a escala final da ref; a nossa vai em `escala`
+}
+// o obturador da pessoa por quadro (em quadros, antes e depois do instante): o whip é uma mancha LISA, então a janela é longa e puxa pra trás
+const EXPO = {158: [-1.6, .5], 159: [-1.4, .45], 160: [-1.1, .35], 161: [-.6, .3], 162: [-.4, .25]};
+const DESF = {158: 12, 159: 9, 160: 5, 161: 2};          // e um desfoque liso por cima da trilha (px na tela): a ref é uma mancha sem traço de rosto no f158 e no f159
+
+const CV = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+const ctx = $('c').getContext('2d');
+const EXT = 190, PH = 1920 + EXT;
+const pc = CV(1080, PH), pg = pc.getContext('2d', {willReadFrequently: true});              // a pessoa recortada, com o corpo estendido até o pé do quadro
+const T1 = CV(1080, 1920), t1g = T1.getContext('2d');
+const T2 = CV(540, 960), t2g = T2.getContext('2d', {willReadFrequently: true}), A2 = CV(540, 960), a2g = A2.getContext('2d');
+const FLS = new Float32Array(540 * 960 * 4);
+let pronta = -1;
+function estendeCorpo() {          // o recorte da foto acaba antes do pé do quadro (a quina de baixo do laptop sobe): repete a última linha de cada coluna, escurecida
+  const Y0 = 1700, h = PH - Y0, id = pg.getImageData(0, Y0, 1080, h), d = id.data;
+  for (let x = 0; x < 1080; x++) {
+    let yb = -1;
+    for (let y = 1919; y >= Y0; y--) if (d[((y - Y0) * 1080 + x) * 4 + 3] > 200) { yb = y; break; }
+    if (yb < 0) continue;
+    let r = 0, g = 0, b = 0, n = 0;
+    for (let y = yb - 9; y <= yb - 4; y++) { if (y < Y0) continue; const o = ((y - Y0) * 1080 + x) * 4; r += d[o]; g += d[o + 1]; b += d[o + 2]; n++; }
+    if (!n) continue; r = r / n * .8; g = g / n * .8; b = b / n * .8;
+    for (let y = yb + 1; y < PH; y++) { const o = ((y - Y0) * 1080 + x) * 4; d[o] = r; d[o + 1] = g; d[o + 2] = b; d[o + 3] = 255; }
+  }
+  pg.putImageData(id, 0, Y0);
+}
+function preparaPessoa(k) {
+  const chave = quadroBase.unica && recorte.unica ? 0 : k;
+  if (pronta === chave) return true;
+  const fb = quadroBase(k), mt = recorte(k);
+  pg.setTransform(1, 0, 0, 1, 0, 0); pg.globalCompositeOperation = 'source-over'; pg.filter = 'none'; pg.clearRect(0, 0, 1080, PH);
+  if (!fb) return false;
+  pg.drawImage(fb, 0, 0, 1080, 1920);
+  if (mt) { pg.globalCompositeOperation = 'destination-in'; pg.filter = 'blur(2.4px)'; pg.drawImage(mt, 0, 0, 1080, 1920); pg.filter = 'none'; pg.globalCompositeOperation = 'source-over'; }
+  estendeCorpo();
+  // a ponta esquerda do corpo (a manga e o suéter, que o quadro corta em x 0) some em rampa de PENA px, como na ref (o fundo passa numa faixa de uns 40 px); o resto da borda fica a 2,4 px
+  if (PENA > 0) {
+    const gr = pg.createLinearGradient(0, 0, 1080, 0); [[0, 0], [.25, .12], [.5, .45], [.75, .82], [1, 1]].forEach(([q, a]) => gr.addColorStop(q * PENA / 1080, `rgba(0,0,0,${a})`)); gr.addColorStop(1, 'rgba(0,0,0,1)');
+    pg.globalCompositeOperation = 'destination-in'; pg.fillStyle = gr; pg.fillRect(0, 0, 1080, PH); pg.globalCompositeOperation = 'source-over';
+  }
+  pronta = chave; return true;
+}
+// a pessoa no instante de pose p, num canvas (g) com a escala RS
+function poePessoa(g, p, RS) {
+  g.setTransform(RS * p.s, 0, 0, RS * p.s, RS * (p.x - p.s * OX), RS * (p.y - p.s * OY));
+  g.imageSmoothingQuality = 'high'; g.drawImage(pc, 0, 0);
+}
+// o borrão de movimento: média das amostras do obturador em FLOAT e com o alfa pré-multiplicado (a pessoa tem fundo transparente: a cor da amostra pesa pelo alfa dela)
+function pessoaBorrada(f) {
+  const [e0, e1] = EXPO[f], a0 = pose(f + e0), a1 = pose(f + e1);
+  const cam = Math.hypot(a1.x - a0.x, a1.y - a0.y) + Math.abs(a1.s - a0.s) * 900;
+  const M = Math.max(14, Math.min(110, Math.ceil(cam / 2.2))), n = 540 * 960 * 4;
+  FLS.fill(0);
+  for (let i = 0; i < M; i++) {
+    t2g.setTransform(1, 0, 0, 1, 0, 0); t2g.clearRect(0, 0, 540, 960);
+    poePessoa(t2g, pose(f + e0 + (e1 - e0) * (i + .5) / M), .5);
+    const d = t2g.getImageData(0, 0, 540, 960).data;
+    for (let k = 0; k < n; k += 4) { const a = d[k + 3] / 255; FLS[k] += d[k] * a; FLS[k + 1] += d[k + 1] * a; FLS[k + 2] += d[k + 2] * a; FLS[k + 3] += d[k + 3]; }
+  }
+  const out = a2g.createImageData(540, 960), o = out.data;
+  for (let k = 0; k < n; k += 4) {
+    const sa = FLS[k + 3] / 255;
+    if (sa > 1e-4) { o[k] = FLS[k] / sa; o[k + 1] = FLS[k + 1] / sa; o[k + 2] = FLS[k + 2] / sa; o[k + 3] = FLS[k + 3] / M; }
+  }
+  a2g.putImageData(out, 0, 0);
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.imageSmoothingQuality = 'high';
+  if (DESF[f]) ctx.filter = `blur(${DESF[f]}px)`;
+  ctx.drawImage(A2, 0, 0, 540, 960, 0, 0, 1080, 1920); ctx.filter = 'none';
+}
+
+// a lavagem de luz: um mapa de alfa por tiles (linhas: centros em y 80, 240 … 1840; colunas: centros a 45, 135 … 495 px da borda), no quadro de pico (a esquerda em f154,
+// a direita em f156), ajustado ao ganho de luminância que a ref soma em cada tile de 90x160 px (`_f1/afina_lav05.py`; a ref soma ~+74 na margem esquerda e ~+80 na direita
+// em y 400 a 1000). `a` é a amplitude do quadro (LEAK) e o mapa vale pro pico. A esquerda morre em x ~270 e é estreita no alto; a direita é forte pelo alto (x 720 a 1080)
+// e acaba em y ~1000. Mais uns raios finos e borrados só de detalhe.
+const WE = [
+  [0.016, 0.000, 0.006, 0.000, 0.000, 0.000],
+  [0.135, 0.000, 0.000, 0.017, 0.007, 0.000],
+  [0.077, 0.000, 0.000, 0.006, 0.000, 0.000],
+  [0.338, 0.008, 0.000, 0.012, 0.005, 0.008],
+  [0.310, 0.048, 0.000, 0.012, 0.035, 0.008],
+  [0.458, 0.173, 0.002, 0.000, 0.006, 0.009],
+  [0.608, 0.386, 0.027, 0.000, 0.007, 0.000],
+  [0.309, 0.386, 0.113, 0.000, 0.005, 0.007],
+  [0.299, 0.432, 0.249, 0.014, 0.000, 0.006],
+  [0.266, 0.360, 0.310, 0.006, 0.000, 0.005],
+  [0.173, 0.244, 0.252, 0.055, 0.017, 0.000],
+  [0.166, 0.195, 0.192, 0.054, 0.015, 0.000]];
+const WD = [
+  [0.298, 0.465, 0.321, 0.185, 0.137, 0.117],
+  [0.520, 0.477, 0.299, 0.348, 0.159, 0.175],
+  [0.437, 0.392, 0.208, 0.066, 0.176, 0.074],
+  [0.320, 0.130, 0.059, 0.111, 0.037, 0.023],
+  [0.429, 0.309, 0.261, 0.240, 0.097, 0.026],
+  [0.809, 0.666, 0.345, 0.241, 0.148, 0.006],
+  [0.112, 0.067, 0.071, 0.021, 0.002, 0.028],
+  [0.049, 0.036, 0.005, 0.006, 0.034, 0.014],
+  [0.005, 0.007, 0.024, 0.019, 0.013, 0.011],
+  [0.029, 0.015, 0.003, 0.002, 0.009, 0.000],
+  [0.017, 0.006, 0.005, 0.003, 0.000, 0.000],
+  [0.023, 0.015, 0.005, 0.003, 0.000, 0.000]];
+const LWs = CV(135, 240), LWsg = LWs.getContext('2d'), LWc = CV(1080, 1920), LWg = LWc.getContext('2d');
+function lavagem(g, lado, a) {
+  if (a <= 0) return;
+  const T = lado === 'e' ? WE : WD, k = a / (lado === 'e' ? .50 : .72), NC = T[0].length, NR = T.length;
+  const img = LWsg.createImageData(135, 240), d = img.data;
+  for (let py = 0; py < 240; py++) {
+    const y = (py + .5) * 8, fy = Math.max(0, Math.min(NR - 1, (y - 80) / 160)), y0 = Math.floor(fy), y1 = Math.min(NR - 1, y0 + 1), uy = fy - y0;
+    for (let px = 0; px < 135; px++) {
+      const xs = (px + .5) * 8, dist = lado === 'e' ? xs : 1080 - xs, fx = Math.max(0, Math.min(NC - 1, (dist - 45) / 90)), x0 = Math.floor(fx), x1 = Math.min(NC - 1, x0 + 1), ux = fx - x0;
+      let v = (T[y0][x0] * (1 - ux) + T[y0][x1] * ux) * (1 - uy) + (T[y1][x0] * (1 - ux) + T[y1][x1] * ux) * uy;
+      const fim = 45 + 90 * (NC - 1); if (dist > fim) v *= Math.max(0, 1 - (dist - fim) / 90);
+      const i = (py * 135 + px) * 4; d[i] = 255; d[i + 1] = 238; d[i + 2] = 212; d[i + 3] = Math.round(255 * Math.min(1, v * k));
+    }
+  }
+  LWsg.putImageData(img, 0, 0);
+  g.save(); g.globalCompositeOperation = 'screen'; g.setTransform(1, 0, 0, 1, 0, 0); g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+  g.drawImage(LWs, 0, 0, 135, 240, 0, 0, 1080, 1920); g.restore();
+  // os raios: só detalhe, curtos (a esquerda não passa de x 270) e borrados
+  const w = LWg; w.setTransform(1, 0, 0, 1, 0, 0); w.globalCompositeOperation = 'source-over'; w.filter = 'none'; w.clearRect(0, 0, 1080, 1920);
+  const x0r = lado === 'e' ? 0 : 1080, dir = lado === 'e' ? 1 : -1; w.filter = 'blur(30px)';
+  [[.05, 90, .75], [.2, 60, .55], [.34, 130, .6], [.5, 70, .45], [.66, 100, .5], [.8, 55, .4]].forEach(([py, wd, q], i) => {
+    w.fillStyle = `rgba(255,248,232,${Math.min(.5, a * q * .25)})`; w.beginPath();
+    const y = py * 1920, len = (lado === 'e' ? 200 : 380) + (i % 3) * 40;
+    w.moveTo(x0r, y); w.lineTo(x0r + dir * len, y + 260 + i * 20); w.lineTo(x0r + dir * (len - wd * .5), y + 260 + i * 20 + wd * .6); w.lineTo(x0r, y + wd); w.closePath(); w.fill();
+  });
+  w.filter = 'none';
+  g.save(); g.globalCompositeOperation = 'screen'; g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(LWc, 0, 0); g.restore();
+}
+const LEAK = {154: [.50, 0], 155: [.10, 0], 156: [.03, .72], 157: [0, .07]};
+
+function desenha(tt) {
+  const j = Math.round(tt * 30), f = 154 + j;
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1; ctx.filter = 'none';
+  ctx.clearRect(0, 0, 1080, 1920);
+  if (SO === 'lavagem') { const lk = LEAK[f]; if (lk) { lavagem(ctx, 'e', lk[0]); lavagem(ctx, 'd', lk[1]); } return; }
+  const base = quadroBase(j);
+  if (!base) { ctx.fillStyle = '#2a2d33'; ctx.fillRect(0, 0, 1080, 1920); return; }
+  const so = SOCO[j] || 1;
+  ctx.save();
+  if (so !== 1) { ctx.translate(540, 960); ctx.scale(so, so); ctx.translate(-540, -960); }
+  if (j === 0) {
+    ctx.drawImage(base, 0, 0, 1080, 1920);                                    // o quadro ainda é o original
+  } else {
+    const fundo = j < ENTRA ? placa(0) : quadroFundo(j - ENTRA);
+    if (fundo) ctx.drawImage(fundo, 0, 0, 1080, 1920); else { ctx.fillStyle = '#2a2d33'; ctx.fillRect(0, 0, 1080, 1920); }
+    ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = `rgb(${ESC.map(v => Math.round(255 * v)).join(',')})`; ctx.fillRect(0, 0, 1080, 1920); ctx.globalCompositeOperation = 'source-over';
+    if (preparaPessoa(j)) {
+      if (EXPO[f]) pessoaBorrada(f);
+      else { let p = pose(f); if (so !== 1) p = {s: p.s * so, x: 540 + so * (p.x - 540), y: 960 + so * (p.y - 960)}; poePessoa(ctx, p, 1); }   // o soco entra na pose (o setTransform da pessoa não herda o do quadro)
+    }
+  }
+  ctx.restore();
+  if (j > 0) {
+    // o escuro de cima (luminância 18 em y 0 a 40, 20 em 40 a 100, 26 em 100 a 200, 36 em y 250 na ref) e o de baixo (por cima de tudo, a pessoa inclusive)
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    let g = ctx.createLinearGradient(0, 0, 0, 440);
+    [[0, .90], [.09, .89], [.23, .83], [.34, .77], [.45, .75], [.57, .79], [.68, .66], [.82, .32], [1, 0]].forEach(([p, a]) => g.addColorStop(p, `rgba(6,7,10,${a})`));
+    ctx.fillStyle = g; ctx.fillRect(0, 0, 1080, 440);
+    g = ctx.createLinearGradient(0, 1480, 0, 1920); g.addColorStop(0, 'rgba(6,7,10,0)'); g.addColorStop(.55, 'rgba(6,7,10,.55)'); g.addColorStop(1, 'rgba(6,7,10,.92)');
+    ctx.fillStyle = g; ctx.fillRect(0, 1480, 1080, 440);
+  }
+  const lk = LEAK[f]; if (LAV && lk) { lavagem(ctx, 'e', lk[0]); lavagem(ctx, 'd', lk[1]); }
+}
+
+D.monta(tl => {
+  const P = {t: 0};
+  tl.to(P, {t: dur, duration: dur, ease: 'none', onUpdate: () => desenha(P.t)}, 0);
+  desenha(0);
+  D.cue(1 / 30, 'whoosh'); D.cue(1 / 30, 'shimmer'); D.cue(4 / 30, 'swish');
+  return dur;
+});
+</script>
+</body>
+</html>

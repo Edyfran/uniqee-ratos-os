@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<!-- CAPA — a capa do Reel (o quadro da grade do perfil e do feed antes do play), na voz editorial. 1080x1920, opaca, parada: sai como JPEG.
+     A anatomia medida nas capas do Nick Saraev: o assunto em cima, o rosto no meio
+     ladeado por duas peças inclinadas, e o título em duas linhas embaixo, a de cima em sans e a de baixo destacada.
+     Aqui o destaque é a serifa itálica com degradê (azul no claro, ouro na tinta), e no lugar dos ícones de app
+     entram duas cenas do próprio vídeo. Tudo cabe no 3:4 central (y 240–1680), que é o que a grade do perfil mostra,
+     e o título começa logo abaixo do queixo (1150) e termina acima de 1480, onde o feed põe a legenda.
+       titulo    2–6 palavras; "|" força a quebra
+       destaque  o trecho do título que vai sozinho na linha de serifa
+       rosto     PNG com alfa, 1080 de largura, topo da cabeça no topo (o rembg tira o fundo, como no capa.py)
+       cx        o x do meio do rosto dentro do PNG (540) · escala  largura do PNG na capa, em px (860)
+       topo      rótulo em cima (o assunto, em texto: logo de terceiro não entra)
+       img       o fundo atrás do rosto, desfocado: o quarto dele (rosto nunca em chão liso, regra do dono em 30/09)
+       lados     as duas peças inclinadas: imagem ("a.jpg,b.jpg") ou texto, "voz|1,voz|2" (serifa em cima, número embaixo)
+       selo      pílula ao lado da cabeça ("feito com IA")
+     O chão é o do sistema: ?tema=tinta.
+     ?titulo=70 cenas, nenhuma filmada&destaque=nenhuma filmada&topo=Higgsfield&selo=feito com IA -->
+<html lang="pt-BR" data-qa="entra-seco fica">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/editorial.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block;position:relative;overflow:hidden}
+.ed-painel{opacity:1}
+.img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(10px) saturate(.85)}
+.rosto{position:absolute;width:var(--rl)}
+/* claro: o rosto num cartão, e a cabeça passa da borda de cima (a mesma do e_editorial) */
+.cartao{position:absolute;left:80px;right:80px;top:var(--ct);height:550px;border-radius:84px;overflow:hidden;
+  background:var(--ed-pp-tinta);box-shadow:0 40px 80px -30px rgba(11,13,18,.5),0 8px 24px rgba(11,13,18,.16)}
+.cartao .img{opacity:.9}
+.cabeca{-webkit-mask-image:linear-gradient(180deg,#000 var(--cm),transparent var(--cm));mask-image:linear-gradient(180deg,#000 var(--cm),transparent var(--cm))}
+/* tinta: o chão inteiro é a cena apagada, e o corpo some no escuro (a capa do Nick) */
+html.tinta .img{opacity:.7}
+.chao{position:absolute;inset:0;background:linear-gradient(180deg,var(--ed-pp-tinta) 2%,transparent 24%,transparent 40%,var(--ed-pp-tinta) 70%)}
+/* o recorte some pra baixo e pros lados: a borda do quadro (o braço do microfone, o ombro) não vira uma reta */
+html.tinta .rosto{--m:linear-gradient(180deg,#000 50%,transparent 84%),linear-gradient(90deg,transparent 2%,#000 22%,#000 78%,transparent 98%);
+  -webkit-mask-image:var(--m);mask-image:var(--m);-webkit-mask-composite:source-in;mask-composite:intersect}
+.lado{position:absolute;width:260px;height:260px;border-radius:58px;object-fit:cover;border:6px solid var(--ed-pp-luz);
+  box-shadow:0 30px 60px -20px rgba(11,13,18,.45),0 6px 18px rgba(11,13,18,.18)}
+.lado.a{left:40px;top:500px;transform:rotate(-9deg)}
+.lado.b{right:40px;top:500px;transform:rotate(9deg)}
+html.tinta .lado{top:600px;border:0}
+/* lado de texto: o chão ao contrário do da capa, o número no degradê */
+.lado.txt{display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--ed-pp-tinta);color:var(--ed-br)}
+html.tinta .lado.txt{background:var(--ed-pp-luz);color:var(--ed-tx)}
+.lado.txt i{font:400 72px/1 var(--ed-serif);font-style:italic;letter-spacing:var(--ed-ls-rot)}
+.lado.txt b{font:800 160px/.86 var(--ed-sans);letter-spacing:var(--ed-ls);padding:0 .06em .04em}
+.topo{position:absolute;top:320px;left:60px;right:60px;text-align:center;transform:translateY(-50%);white-space:nowrap}
+.selo{position:absolute;top:420px;right:230px;transform:rotate(4deg)}
+.tit{position:absolute;left:56px;right:56px;top:1150px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.tit .s{font:800 160px/1 var(--ed-sans);letter-spacing:var(--ed-ls);color:var(--ed-tx);white-space:nowrap}
+.tit .d{font:400 212px/1 var(--ed-serif);font-style:italic;letter-spacing:-.01em;white-space:nowrap;padding:0 .08em .08em}
+.tit .s + .d{margin-top:-.12em}
+.tit .d + .s{margin-top:-.02em}
+html.tinta .tit .s,html.tinta .topo{color:var(--ed-br)}
+html.tinta .tit{filter:drop-shadow(0 8px 26px rgba(0,0,0,.55))}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="ed-painel"><i class="folha" style="left:-120px;top:120px;width:560px;height:260px"></i><i class="folha" style="right:-160px;top:40px;width:620px;height:300px"></i><div class="grao"></div></div>
+</div>
+<script>
+const esc = s => String(s).replace(/[&<>]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;'}[c]));
+const st = document.getElementById('stage');
+const add = (tag, cls, html = '') => { const e = document.createElement(tag); e.className = cls; e.innerHTML = html; st.appendChild(e); return e; };
+const tinta = document.documentElement.classList.contains('tinta');
+st.querySelector('.ed-painel').classList.add(tinta ? 'tinta' : 'claro');
+// o rosto: topo da cabeça em y 420, o ponto `cx` da imagem no meio da tela
+const RL = D.n('escala', '860'), K = RL / 1080, TOPO = 420, CT = TOPO + 150;
+const RX = 540 - D.n('cx', '540') * K;
+const R = document.documentElement.style;
+R.setProperty('--rl', RL + 'px'); R.setProperty('--ct', CT + 'px'); R.setProperty('--cm', (CT - TOPO) + 'px');
+const foto = (pai, cls, src, x, y) => { const e = document.createElement('img'); e.className = cls; e.src = src;
+  Object.assign(e.style, {left: x + 'px', top: y + 'px'}); pai.appendChild(e); return e; };
+const rosto = D.q('rosto', '../midia/rosto-capa.png');
+if (tinta) {
+  if (D.q('img')) add('img', 'img').src = D.q('img');
+  add('div', 'chao');
+  foto(st, 'rosto', rosto, RX, TOPO);
+} else {
+  const c = add('div', 'cartao');
+  if (D.q('img')) foto(c, 'img', D.q('img'), 0, 0);
+  foto(c, 'rosto', rosto, RX - 80, TOPO - CT);
+  foto(st, 'rosto cabeca', rosto, RX, TOPO);
+}
+const IMG = /^(data:|file:|https?:)|\.(png|jpe?g|webp|gif)$/i;
+D.q('lados', '').split(',').filter(Boolean).slice(0, 2).forEach((u, i) => {
+  if (IMG.test(u)) { add('img', 'lado ' + 'ab'[i]).src = u; return; }
+  const [a, b] = u.includes('|') ? u.split('|') : ['', u];
+  add('div', 'lado txt ' + 'ab'[i], (a ? `<i>${esc(a)}</i>` : '') + `<b class="ed-dg ${tinta ? 'azul' : 'ouro'}">${esc(b)}</b>`);
+});
+if (D.q('topo')) add('div', 'topo ed-rot', esc(D.q('topo')));
+if (D.q('selo')) add('div', 'selo ed-pilula', esc(D.q('selo')));
+
+// o título se parte em volta do destaque: antes (sans) · destaque (serifa) · depois (sans)
+const titulo = D.q('titulo', '70 cenas, nenhuma filmada'), dq = D.q('destaque', 'nenhuma filmada');
+const i = dq ? titulo.indexOf(dq) : -1;
+const partes = i < 0 ? [['s', titulo]] : [['s', titulo.slice(0, i)], ['d', dq], ['s', titulo.slice(i + dq.length)]];
+const tit = add('div', 'tit');
+partes.filter(([, t]) => t.replace(/[|,\s]/g, '')).forEach(([k, t]) => {
+  const e = document.createElement('div');
+  e.className = k === 'd' ? 'd ed-dg ' + (tinta ? 'ouro' : 'azul') : 's';
+  e.innerHTML = t.split('|').map(x => esc(x.trim())).join('<br>');
+  tit.appendChild(e);
+});
+
+const SANS = D.css('--ed-sans').split(',')[0], SERIF = D.css('--ed-serif').split(',')[0];
+window.__folha = Promise.all(['800 100px ' + SANS, 'italic 400 100px ' + SERIF, '400 100px ' + SERIF]
+  .map(f => document.fonts.load(f).catch(() => null)));
+
+D.monta(tl => {
+  D.cabe('.tit .s', 64, '.tit');
+  D.cabe('.tit .d', 96, '.tit');
+  D.cabe('.topo', 56, '.topo');
+  tl.set('.tit', {opacity: 1}, 0);   // parada: a capa é um quadro só
+  return D.n('dur', '1');
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<!-- PROVA — o rótulo de fábrica do vídeo. 1080x1920, --alpha.
+     Uma etiqueta de embalagem industrial (faixa tinta "CONTÉM", lote, data e código de barras) que
+     bate na tela como carimbo no quadro 0 e diz o que tem dentro do vídeo, uma linha por vez: a
+     linha nova sobe e o número dela ROLA até parar (o que importa para no zero: minutos de câmera
+     0). Texto em vez de número entra palavra por palavra. A etiqueta pula de canto no corte de cena,
+     pra nunca cobrir rosto, e no fim encolhe pro canto como selo, com a primeira linha de volta.
+       linhas  "RÓTULO|valor@t;…": valor só com dígitos rola até ele; o resto entra como texto
+       pos     "x,y@t;…": o canto de cima-esquerdo da etiqueta a partir de t (o primeiro vale do 0)
+       titulo  (CONTÉM) · lote  (LOTE 001) · data  · larg  (460)
+       t_selo  quando ela encolhe (-1: não encolhe) · selo  "x,y,escala,giro" do selo · dur
+       Parâmetro ausente cai no exemplo: o plano passa todos
+     ?linhas=MINUTOS DE CÂMERA|0@0;EDITADO POR|a fábrica@1.6;CENAS GERADAS|10@3.2;CENAS FILMADAS|0@4.6&pos=65,270@0;555,270@3.2&t_selo=6.2&dur=8 -->
+<html lang="pt-BR" class="alfa" data-qa="entra-seco fica">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block;position:relative;overflow:hidden}
+.rot{position:absolute;left:0;top:0;padding:0;overflow:hidden;transform-origin:0 0}
+.cab{display:flex;align-items:center;gap:14px;height:52px;padding:0 16px;background:var(--ink);color:#fff}
+.cab .tt{font:700 30px/1 var(--fm);letter-spacing:.14em}
+.cab .lt{font:600 20px/1.1 var(--fm);letter-spacing:.06em;color:var(--ink2)}
+.cab .bar{margin-left:auto;width:96px;height:30px;
+  background:repeating-linear-gradient(90deg,#fff 0 3px,transparent 3px 5px,#fff 5px 6px,transparent 6px 10px,#fff 10px 14px,transparent 14px 16px)}
+.cx{position:relative;height:150px}
+.ln{position:absolute;left:18px;right:18px;top:12px;opacity:0}
+.ln .rt{font:700 40px/44px var(--fd);letter-spacing:-.01em;text-transform:uppercase;color:var(--ink6);white-space:nowrap}
+.ln .vl{display:flex;align-items:center;height:92px;font:700 84px/1 var(--fd);letter-spacing:-.03em;color:var(--ink);white-space:nowrap}
+.ln .vl.tx{font-size:64px;color:var(--ac)}
+.col{width:.62em;height:1em;overflow:hidden;display:inline-block;border-radius:var(--raio-s)}
+.col .st{display:flex;flex-direction:column}
+.col .st span{height:1em;display:flex;align-items:center;justify-content:center}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="rot nb" id="rot">
+    <div class="cab"><span class="tt" id="tt"></span><span class="lt" id="lt"></span><span class="bar"></span></div>
+    <div class="cx" id="cx"></div>
+  </div>
+</div>
+<script>
+const dur = D.n('dur', '8'), tSelo = D.n('t_selo', '6.2'), larg = D.n('larg', '460');
+const $ = id => document.getElementById(id);
+const lista = (k, d) => D.q(k, d).split(';').filter(Boolean).map(s => { const i = s.lastIndexOf('@'); return [s.slice(0, i), parseFloat(s.slice(i + 1))]; });
+const LN = lista('linhas', 'MINUTOS DE CÂMERA|0@0;EDITADO POR|a fábrica@1.6;CENAS GERADAS|10@3.2;CENAS FILMADAS|0@4.6')
+  .map(([s, t]) => { const [rt, vl] = s.split('|'); return {rt, vl: vl || '', t, num: /^\d+$/.test(vl || '')}; });
+const POS = lista('pos', '65,270@0;555,270@3.2').map(([s, t]) => { const [x, y] = s.split(',').map(Number); return {x, y, t}; });
+const SELO = D.q('selo', '65,1040,.62,-6').split(',').map(Number);
+$('tt').textContent = D.q('titulo', 'CONTÉM');
+$('lt').innerHTML = [D.q('lote', 'LOTE 001'), D.q('data', '01/10/2026')].filter(Boolean).join('<br>');
+$('rot').style.width = larg + 'px';
+// cada número é uma fita por casa: três voltas de 0 a 9 e para no dígito dele (o zero, grifado)
+const fita = d => '<span class="st">' + Array.from({length: 30 + d + 1}, (_, k) => `<span>${k % 10}</span>`).join('') + '</span>';
+LN.forEach((l, k) => {
+  const vl = l.num ? [...l.vl].map(d => `<span class="col">${fita(+d)}</span>`).join('') : l.vl;
+  $('cx').insertAdjacentHTML('beforeend', `<div class="ln" id="l${k}"><div class="rt">${l.rt}</div>` +
+    `<div class="vl${l.num ? '' : ' tx'}" id="v${k}">${vl}</div></div>`);
+});
+
+D.monta(tl => {
+  D.cabe('.ln .rt', 30, ['.rot', 1]);
+  D.cabe('.ln .vl.tx', 40, ['.rot', 1]);
+  const p0 = POS[0] || {x: 65, y: 270};
+  gsap.set('#rot', {x: p0.x, y: p0.y});
+  // o rótulo bate no quadro 0: o gancho é ele na tela com a primeira linha
+  tl.fromTo('#rot', {scale: 1.25, rotation: -5}, {scale: 1, rotation: -1.5, duration: .32, ease: 'back.out(2.2)'}, 0);
+  D.cue(0, 'stamp');
+  const mostra = (k, t) => {
+    const l = LN[k], el = '#l' + k;
+    if (t <= 0) gsap.set(el, {opacity: 1});
+    else tl.fromTo(el, {opacity: 0, yPercent: 60}, {opacity: 1, yPercent: 0, duration: .3, ease: D.P.EASE}, D.at(t));
+    if (l.num) {
+      const cols = [...document.querySelectorAll(`#v${k} .st`)], roda = .9;
+      cols.forEach((c, i) => tl.fromTo(c, {yPercent: 0}, {yPercent: -100 * (30 + +l.vl[i]) / (31 + +l.vl[i]),
+        duration: roda + i * .12, ease: 'expo.out'}, Math.max(0, D.at(t)) + .08));
+      D.cue(Math.max(0, t), 'tick-roll', {dur: roda});
+      if (l.vl === '0') tl.fromTo('#v' + k + ' .col', {backgroundColor: 'transparent'}, {backgroundColor: D.css('--mk'), duration: .12}, Math.max(0, D.at(t)) + roda);
+      tl.fromTo('#v' + k, {scale: 1}, {scale: 1.08, duration: .12, yoyo: true, repeat: 1, ease: 'power2.out', transformOrigin: 'left center'}, Math.max(0, D.at(t)) + roda);
+    } else {
+      D.palavras('#v' + k, t + .05, .07);
+      D.cue(t, 'pop');
+    }
+  };
+  LN.forEach((l, k) => {
+    if (k) tl.to('#l' + (k - 1), {opacity: 0, yPercent: -60, duration: .2, ease: D.P.SAI}, D.at(l.t));
+    mostra(k, l.t);
+  });
+  // pula de canto no corte de cena: some num quadro e bate no outro
+  POS.slice(1).forEach(p => {
+    if (p.t >= dur) return;
+    tl.set('#rot', {x: p.x, y: p.y}, p.t);
+    tl.fromTo('#rot', {scale: 1.12}, {scale: 1, duration: .25, ease: 'back.out(2)', immediateRender: false}, p.t);
+  });
+  // o selo: a primeira linha volta e a etiqueta encolhe pro canto
+  if (tSelo >= 0 && tSelo < dur) {
+    const ult = LN.length - 1;
+    if (ult > 0) {
+      tl.to('#l' + ult, {opacity: 0, duration: .15}, D.at(tSelo));
+      tl.to('#l0', {opacity: 1, yPercent: 0, duration: .2}, D.at(tSelo) + .1);
+    }
+    const [sx, sy, se, sg] = SELO;
+    tl.to('#rot', {x: sx, y: sy, scale: se, rotation: sg, duration: .45, ease: D.P.MOLA}, D.at(tSelo));
+    D.cue(tSelo + .3, 'stamp');
+  }
+  return dur;
+});
+</script>
+</body>
+</html>

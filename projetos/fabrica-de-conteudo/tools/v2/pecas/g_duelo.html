@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<!-- GANCHO — o duelo: dois agentes, o mesmo material e o mesmo pedido. 1080x1920, --alpha.
+     Duas janelas 9:16 lado a lado, cada uma com o nome do agente escrito em cima (texto, nunca logo);
+     o bloco da pergunta; o mesmo arquivo cai nas duas e o mesmo pedido se escreve nas duas. Em
+     `t_video` o miolo das janelas some e o vídeo de cada agente aparece por baixo (quem põe é o
+     compositor, nos retângulos de `win`). Um selo por passo embaixo de cada janela, ao mesmo tempo nas
+     duas, e no fim o placar empatado com o marcador e a frase que fecha.
+       win     x,y,l,a;x,y,l,a — as duas janelas (o buraco do vídeo é o retângulo inteiro)
+       arq     o nome do arquivo que cai · det  a linha de baixo dele
+       passos  nome@t;nome@t — o selo de cada passo, com a conta n/total; `nome a|nome b` dá a cada
+               janela o seu texto (o que cada agente fez naquele passo), e `ASSUNTO:a|b` põe o assunto
+               numa linha em cima do texto
+       frase   linha|linha — o cartão do fim, em `t_frase`
+       sub2    a linha do alto que troca a do "mesmo pedido" em `t_sub2` (ex.: cada um editou do seu jeito)
+       conta   0 tira a conta n/total dos selos (o texto de cada janela fica com a largura toda)
+       ?a=CLAUDE CODE&b=CODEX&titulo=QUAL DOS DOIS?&sub=mesmo material, mesmo pedido&arq=do-zero-ao-pronto/&det=voz · avatar · cenas&pedido=Monta esse vídeo: corta as pausas e põe a legenda.&win=81,466,439,780;560,466,439,780&t_arq=0.3&t_pedido=1.3&t_video=3.6&passos=corte@4.2;legenda@5.2;capa@6.4&t_placar=7.4&placar=1 × 1&empate=EMPATE&frase=quem sabe fazer é a skill|e ela roda nos dois&t_frase=7.9&dur=9.5 -->
+<html lang="pt-BR" class="alfa" data-qa="entra-seco fica">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block;position:relative;overflow:hidden}
+/* o bloco do alto: a pergunta, o "mesmo pedido" e o placar, um de cada vez no mesmo lugar */
+.topo{position:absolute;left:65px;right:65px;top:282px;height:118px;display:flex;align-items:center;justify-content:center}
+.bl{position:absolute;padding:14px 34px 18px;font:700 84px/1 var(--fd);letter-spacing:var(--ls);white-space:nowrap;opacity:0}
+.bl.sub{font-size:56px;padding:16px 30px 20px}
+.pl{display:flex;align-items:center;gap:26px}
+.pl .n{font:700 92px/1 var(--fd);letter-spacing:var(--ls)}
+.pl .e{font:700 44px/1 var(--fm);letter-spacing:.14em;padding:12px 18px 10px;border-radius:var(--raio-s);
+  background:linear-gradient(var(--mk),var(--mk)) no-repeat 0 50%/0% 100%;color:var(--ink);border:var(--bw) solid var(--ink)}
+.tag{position:absolute;font:700 44px/1 var(--fm);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;
+  padding:10px 16px 8px;transform:translate(-50%,0);opacity:0}
+/* a janela: a moldura não tem fundo (o vídeo entra por baixo); o miolo vazio some em t_video */
+.jan{position:absolute;border:var(--bw) solid var(--ink);border-radius:var(--raio);
+  box-shadow:var(--sh) var(--sh) 0 var(--ink);overflow:hidden}
+.vz{position:absolute;inset:0;background:var(--pp);background-image:var(--tex);display:flex;flex-direction:column;
+  align-items:stretch;gap:22px;padding:30px 22px}
+.arq{align-self:flex-start;padding:16px 20px;opacity:0}
+.arq b{display:block;font:700 34px/1.1 var(--fm);color:var(--ink);white-space:nowrap}
+.arq span{display:block;margin-top:8px;font:600 26px/1.1 var(--fm);color:var(--ink4);white-space:nowrap}
+.bal{align-self:flex-end;max-width:100%;padding:18px 20px 20px;font:600 44px/1.2 var(--fd);letter-spacing:-.01em;
+  border-radius:var(--raio) var(--raio) 4px var(--raio);opacity:0}
+.bal .l{display:none}
+.cur{display:inline-block;width:.42em;height:.95em;margin-left:.04em;vertical-align:-.12em;background:#fff}
+.passo{position:absolute;transform:translate(-50%,0);padding:12px 18px 10px;font:700 44px/1 var(--fm);text-align:center;
+  letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;opacity:0}
+.passo i{font-style:normal;color:var(--ok)}
+.passo small{font-size:28px;color:var(--ink4);margin-left:12px;letter-spacing:.02em}
+.passo .tp{display:block;margin-bottom:8px;font-weight:600;color:var(--ink4)}
+.frase{position:absolute;left:65px;right:65px;padding:26px 30px 30px;text-align:center;opacity:0}
+.frase div{font:700 60px/1.18 var(--fd);letter-spacing:var(--ls);white-space:nowrap}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="topo">
+    <div class="bl nb cor-ac" id="tit"></div>
+    <div class="bl sub nb" id="sub"></div>
+    <div class="bl sub nb" id="sub2"></div>
+    <div class="bl nb pl" id="pl"><span class="n" id="pn"></span><span class="e" id="pe"></span></div>
+  </div>
+  <div id="js"></div>
+  <div class="frase nb" id="fr"></div>
+</div>
+<script>
+const dur = D.n('dur', '9.5');
+// sem o tempo no plano, o do exemplo; -1 desliga o momento
+const PADRAO = {t_arq: .3, t_pedido: 1.3, t_video: 3.6, t_placar: 7.4, t_frase: 7.9};
+const T = k => D.n(k, String(PADRAO[k]));
+const nomes = [D.q('a', 'CLAUDE CODE'), D.q('b', 'CODEX')];
+const wins = D.q('win', '81,466,439,780;560,466,439,780').split(';').map(s => s.split(',').map(parseFloat));
+const passos = D.q('passos', 'corte@4.2;legenda@5.2;capa@6.4').split(';').filter(Boolean)
+  .map(s => { const [n, t] = s.split('@'), c = n.indexOf(':');
+    return c < 0 ? {n, t: parseFloat(t)} : {tp: n.slice(0, c), n: n.slice(c + 1), t: parseFloat(t)}; });
+const $ = id => document.getElementById(id);
+$('tit').textContent = D.q('titulo', 'QUAL DOS DOIS?');
+$('sub').textContent = D.q('sub', 'mesmo material, mesmo pedido');
+$('sub2').textContent = D.q('sub2', '');
+const conta = D.q('conta', '1') !== '0';
+$('pn').textContent = D.q('placar', '1 × 1');
+$('pe').textContent = D.q('empate', 'EMPATE');
+$('fr').innerHTML = D.q('frase', 'quem sabe fazer é a skill|e ela roda nos dois').split('|').map(l => `<div></div>`).join('');
+D.q('frase', 'quem sabe fazer é a skill|e ela roda nos dois').split('|').forEach((l, i) => { $('fr').children[i].textContent = l; });
+// as duas janelas, o nome em cima de cada uma e o selo do passo embaixo
+$('js').innerHTML = wins.map((w, i) => `
+  <div class="tag nb cor-ink" id="tg${i}" style="left:${w[0] + w[2] / 2}px;top:${w[1] - 72}px"></div>
+  <div class="jan" style="left:${w[0]}px;top:${w[1]}px;width:${w[2]}px;height:${w[3]}px">
+    <div class="vz" id="vz${i}">
+      <div class="arq nb" id="aq${i}"><b></b><span></span></div>
+      <div class="bal nb cor-ac" id="bl${i}"></div>
+    </div>
+  </div>
+  ${passos.map((p, k) => `<div class="passo nb" id="p${i}_${k}" style="left:${w[0] + w[2] / 2}px;top:${w[1] + w[3] - (p.tp ? 196 : 108)}px">${p.tp ? '<b class="tp"><i>✓</i> </b>' : '<i>✓</i> '}<span></span>${conta ? `<small>${k + 1}/${passos.length}</small>` : ''}</div>`).join('')}`).join('');
+wins.forEach((w, i) => {
+  $('tg' + i).textContent = nomes[i] || '';
+  $('aq' + i).querySelector('b').textContent = D.q('arq', 'do-zero-ao-pronto/');
+  $('aq' + i).querySelector('span').textContent = D.q('det', 'voz · avatar · cenas');
+  passos.forEach((p, k) => { const ns = p.n.split('|');
+    $(`p${i}_${k}`).querySelector('span').textContent = ns[Math.min(i, ns.length - 1)];
+    if (p.tp) $(`p${i}_${k}`).querySelector('.tp').append(p.tp); });
+});
+
+D.monta(tl => {
+  const tTit = D.n('t_titulo', '0'), tArq = T('t_arq'), tPed = T('t_pedido'), tVid = T('t_video');
+  const tPl = T('t_placar'), tFr = T('t_frase');
+  // o gancho: a pergunta e os dois nomes já estão no quadro 0
+  if (tTit <= .04) gsap.set(['#tit', '#tg0', '#tg1'], {opacity: 1, rotation: -1.2});
+  else { D.carimbo('#tit', tTit); D.lista(['#tg0', '#tg1'], tTit + .15, .08); }
+  // o mesmo arquivo cai nas duas, junto
+  if (tArq >= 0) wins.forEach((w, i) => D.pousa('#aq' + i, tArq + i * .06, {dy: -260, rot: i ? 2 : -2, som: i ? null : 'thud'}));
+  // o mesmo pedido se escreve nas duas, letra a letra, no mesmo tempo
+  if (tPed >= 0) {
+    tl.to('#tit', {opacity: 0, scale: .9, duration: .18, ease: 'power2.in'}, D.at(tPed));
+    D.pousa('#sub', tPed + .1, {rot: 1});
+    const tx = D.q('pedido', 'Monta esse vídeo: corta as pausas e põe a legenda.'), chs = [...tx];
+    const fim = (tVid >= 0 ? tVid : dur) - .35, passo = Math.max(.008, (fim - tPed - .35) / chs.length);
+    wins.forEach((w, i) => {
+      const bl = $('bl' + i);
+      chs.forEach(ch => { const s = document.createElement('span'); s.className = 'l'; s.textContent = ch; bl.appendChild(s); });
+      const cur = document.createElement('span'); cur.className = 'cur'; bl.appendChild(cur);
+      D.pousa(bl, tPed + .15, {dy: 30});
+      bl.querySelectorAll('.l').forEach((s, k) => tl.set(s, {display: 'inline'}, D.at(tPed + .3) + k * passo));
+      tl.set(cur, {display: 'none'}, D.at(tPed + .3) + chs.length * passo + .2);
+    });
+    D.cue(tPed + .3, 'type', {dur: +(chs.length * passo).toFixed(3)});
+  }
+  // o vídeo de cada agente entra por baixo: o miolo vazio sai e a pergunta do alto também
+  if (tVid >= 0) {
+    tl.to(['#vz0', '#vz1'], {opacity: 0, duration: .12, ease: 'none'}, D.at(tVid));
+    D.cue(tVid, 'whoosh');
+  }
+  // a segunda linha do alto toma o lugar do "mesmo pedido"
+  const tS2 = D.n('t_sub2', '-1');
+  if (tS2 >= 0 && D.q('sub2', '')) {
+    tl.to('#sub', {opacity: 0, y: -20, duration: .18, ease: 'power2.in'}, D.at(tS2) - .2);
+    D.pousa('#sub2', tS2, {rot: -1});
+  }
+  // um selo por passo: o novo bate e o anterior sai, nas duas ao mesmo tempo
+  passos.forEach((p, k) => {
+    wins.forEach((w, i) => {
+      D.carimbo(`#p${i}_${k}`, p.t, i ? 1.5 : -1.5);
+      if (k) tl.to(`#p${i}_${k - 1}`, {opacity: 0, duration: .1}, D.at(p.t));
+    });
+  });
+  // o placar empata: o número bate e o marcador varre o EMPATE
+  // o "mesmo pedido" fica no alto enquanto os dois trabalham; o placar entra no lugar dele
+  if (tPl >= 0) {
+    tl.to(['#sub', '#sub2'], {opacity: 0, y: -20, duration: .18, ease: 'power2.in'}, D.at(tPl) - .2);
+    D.carimbo('#pl', tPl, -1.5);
+    tl.to('#pe', {backgroundSize: '100% 100%', duration: .4, ease: 'power3.inOut'}, D.at(tPl) + .35);
+    D.cue(tPl + .35, 'marca');
+  }
+  if (tFr >= 0) D.pousa('#fr', tFr, {rot: -1, som: 'papel'});
+  if (tFr >= 0) gsap.set('#fr', {top: wins[0][1] + wins[0][3] / 2 - 90});
+  return dur;
+});
+</script>
+</body>
+</html>

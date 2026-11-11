@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<!-- INTERFACE — os 3 passos em vidro, com a pessoa num cartão. 1080x1920, --alpha, tema neon.
+     A mecânica do anúncio de edição do concorrente (videos/fabrica/avatar-camadas/REF.md, 18,6–28,4 s): o
+     sobretítulo, o título de duas linhas (a 2ª em lilás), os passos que acendem na palavra falada (o de trás
+     ganha o ✓), o ícone grande de vidro que troca a cada passo, as fichas do que sai, e o cartão da pessoa
+     no canto, que é um FURO transparente: quem compõe põe o vídeo ali.
+       kick   o sobretítulo · l  "linha 1|linha 2" (a 2ª em lilás)
+       passos "Título|detalhe|ícone@t;…" (ícone: engrenagem envio varinha tesoura legenda play capa)
+       fichas "TEXTO|ícone@t;…" as fichas que saltam embaixo dos passos
+       furo   "x,y,l,a" do cartão da pessoa (690,930,320,569) · y  o topo do bloco (290) · dur · sai=0
+     ?kick=EM 3 PASSOS&l=Instala, manda|e pede&passos=Instalar|a Fábrica no computador|engrenagem@1.2;Mandar|o vídeo que você gravou|envio@2.6;Pedir|do seu jeito|varinha@4.0&fichas=CORTE|tesoura@5.6;LEGENDA|legenda@6.0;MOTION|play@6.4;CAPA|capa@6.8&dur=8&tema=neon -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block;position:relative}
+#bl{position:absolute;left:70px;right:70px}
+.kk{font:800 28px/1 var(--fm);letter-spacing:.24em;color:var(--ink6);opacity:0}
+.kk::before{content:"";display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--ac2);margin-right:16px;vertical-align:3px;box-shadow:0 0 12px var(--ac)}
+.tit{margin-top:18px;font:900 100px/.95 var(--fd);letter-spacing:-.045em;color:#fff}
+.tit span{display:block;opacity:0;white-space:nowrap;text-shadow:0 6px 24px rgba(5,0,20,.55)}
+.tit span.ac{background:var(--gr-ac);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 0 22px rgba(124,92,255,.6))}
+#ps{margin-top:44px;display:flex;flex-direction:column;gap:18px;width:600px}
+.ps{display:flex;align-items:center;gap:22px;padding:20px 24px;border-radius:var(--raio-s);border:2px solid rgba(210,198,255,.14);background:rgba(16,10,36,.35);opacity:0}
+.ps .ic{flex:none;width:68px;height:68px;border-radius:20px;display:flex;align-items:center;justify-content:center;background:rgba(124,92,255,.22);border:2px solid rgba(210,198,255,.25)}
+.ps .ic svg,.fi svg,.gr svg{stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.ps .ic svg{width:36px;height:36px}
+.ps .tx{flex:1}.ps .tt{font:800 48px/1 var(--fd);letter-spacing:-.02em;color:#fff}.ps .dt{margin-top:8px;font:600 30px/1.1 var(--fd);color:var(--ink6)}
+.ps .ok{flex:none;width:44px;height:44px;border-radius:50%;background:var(--ac2);display:flex;align-items:center;justify-content:center;opacity:0}
+.ps .ok svg{width:26px;height:26px;stroke:#0A0614;fill:none;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+#fis{margin-top:30px;display:grid;grid-template-columns:repeat(2,max-content);gap:16px}
+.fi{display:flex;align-items:center;gap:12px;padding:14px 22px 14px 16px;border-radius:999px;font:800 34px/1 var(--fm);letter-spacing:.08em;color:#fff;
+  background:linear-gradient(180deg,rgba(148,116,255,.55),rgba(90,56,220,.45));border:2px solid rgba(235,228,255,.5);box-shadow:0 0 26px rgba(124,92,255,.45);opacity:0}
+.fi svg{width:32px;height:32px}
+/* o ícone grande: a placa de vidro do g_vidro */
+#gr{position:absolute;width:190px;height:190px;perspective:var(--persp)}
+.gr{position:absolute;inset:0;border-radius:28%;opacity:0;overflow:hidden;background:linear-gradient(150deg,var(--vidro-a),var(--vidro-b));
+  border:3px solid var(--vidro-borda);box-shadow:0 0 60px var(--vidro-halo),inset 0 3px 0 rgba(255,255,255,.55),inset 0 -8px 20px rgba(20,0,90,.35)}
+.gr::before{content:'';position:absolute;left:-10%;top:-28%;width:120%;height:62%;border-radius:50%;background:linear-gradient(180deg,rgba(255,255,255,.42),rgba(255,255,255,0))}
+.gr svg{position:absolute;inset:22%;width:56%;height:56%;filter:drop-shadow(0 0 10px rgba(255,255,255,.55))}
+.anel{position:absolute;inset:-34px;border-radius:50%;border:2px solid rgba(167,139,250,.35)}
+.anel+.anel{inset:-64px;border-color:rgba(167,139,250,.18)}
+#card{position:absolute;border-radius:var(--raio);border:3px solid rgba(230,222,255,.6);box-shadow:0 0 50px rgba(124,92,255,.5);opacity:0}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="bl"><div class="kk"></div><div class="tit"></div><div id="ps"></div><div id="fis"></div></div>
+  <div id="gr"><i class="anel"></i><i class="anel"></i></div>
+  <div id="card"></div>
+</div>
+<script>
+const G = {
+  engrenagem: '<circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+  envio: '<path d="M12 15V3M7 8l5-5 5 5"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/>',
+  varinha: '<path d="M15 4V2M15 10V8M11 6h2M17 6h2M4 20 14 10"/><path d="M19.5 12.5l.8 1.7 1.7.8-1.7.8-.8 1.7-.8-1.7-1.7-.8 1.7-.8z"/>',
+  tesoura: '<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.12 15.88M14.47 14.48L20 20M8.12 8.12L12 12"/>',
+  legenda: '<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M7 11h10M7 15h4M14 15h3"/>',
+  play: '<path d="M7 4.5l12 7.5-12 7.5z"/>',
+  capa: '<rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="9.5" r="3"/><path d="M8 16h8M8 19h5"/>',
+};
+const svg = n => `<svg viewBox="0 0 24 24">${G[n] || G.varinha}</svg>`;
+const esc = s => String(s).replace(/[&<>]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;'}[c]));
+const dur = D.n('dur', '8');
+document.getElementById('bl').style.top = D.n('y', '290') + 'px';
+document.querySelector('.kk').textContent = D.q('kick', 'EM 3 PASSOS');
+const hd = document.querySelector('.tit');
+D.q('l', 'Instala, manda|e pede').split('|').forEach((s, i) => hd.insertAdjacentHTML('beforeend', `<span class="${i ? 'ac' : ''}">${esc(s)}</span>`));
+const ps = D.itens('passos', 'Instalar|a Fábrica no computador|engrenagem@1.2;Mandar|o vídeo que você gravou|envio@2.6;Pedir|do seu jeito|varinha@4.0', ['tt', 'dt', 'ic']);
+const okSvg = '<svg viewBox="0 0 24 24"><path d="M5 12.5 10 17l9-10"/></svg>';
+ps.forEach((s, i) => {
+  document.getElementById('ps').insertAdjacentHTML('beforeend',
+    `<div class="ps" id="ps${i}"><span class="ic">${svg(s.ic)}</span><span class="tx"><div class="tt">${esc(s.tt)}</div><div class="dt">${esc(s.dt || '')}</div></span><span class="ok">${okSvg}</span></div>`);
+  document.getElementById('gr').insertAdjacentHTML('beforeend', `<div class="gr" id="gr${i}">${svg(s.ic)}</div>`);
+});
+const fis = D.itens('fichas', 'CORTE|tesoura@5.6;LEGENDA|legenda@6.0;MOTION|play@6.4;CAPA|capa@6.8', ['tx', 'ic']);
+fis.forEach((s, i) => document.getElementById('fis').insertAdjacentHTML('beforeend', `<span class="fi" id="fi${i}">${svg(s.ic)}${esc(s.tx)}</span>`));
+const [fx, fy, fl, fa] = D.q('furo', '690,930,320,569').split(',').map(Number);
+Object.assign(document.getElementById('card').style, {left: fx + 'px', top: fy + 'px', width: fl + 'px', height: fa + 'px'});
+
+D.monta(tl => {
+  // o ícone grande fica à direita dos passos, no meio deles
+  const pz = document.getElementById('ps'), gr = document.getElementById('gr');
+  gr.style.left = (70 + pz.offsetWidth + (1080 - 70 - pz.offsetWidth - 190) / 2) + 'px';
+  gr.style.top = (pz.getBoundingClientRect().top + pz.offsetHeight / 2 - 95) + 'px';
+  tl.fromTo('.kk', {opacity: 0, x: -20}, {opacity: 1, x: 0, duration: .35, ease: 'expo.out'}, 0);
+  tl.fromTo('.tit span', {opacity: 0, yPercent: 50, filter: 'blur(14px)'}, {opacity: 1, yPercent: 0, filter: 'blur(0px)', duration: .45, ease: 'expo.out', stagger: .16}, .08);
+  tl.fromTo('.ps', {opacity: 0, x: -30}, {opacity: .42, x: 0, duration: .35, ease: 'expo.out', stagger: .08}, .3);
+  tl.fromTo('#card', {opacity: 0}, {opacity: 1, duration: .3}, 0);
+  tl.fromTo('.anel', {opacity: 0, scale: .6}, {opacity: 1, scale: 1, duration: .5, ease: 'expo.out'}, .3);
+  D.cue(0, 'whoosh');
+  ps.forEach((s, i) => {
+    const el = document.getElementById('ps' + i), t = D.at(s.t);
+    // o passo acende; o de trás apaga um pouco e ganha o ✓
+    tl.to(el, {opacity: 1, scale: 1.03, borderColor: 'rgba(196,181,253,.85)', backgroundColor: 'rgba(124,92,255,.28)',
+      boxShadow: '0 0 36px rgba(124,92,255,.45)', duration: .3, ease: 'expo.out'}, t);
+    if (i) {
+      const ant = document.getElementById('ps' + (i - 1));
+      tl.to(ant, {opacity: .7, scale: 1, borderColor: 'rgba(210,198,255,.22)', backgroundColor: 'rgba(16,10,36,.35)', boxShadow: '0 0 0 rgba(0,0,0,0)', duration: .3}, t);
+      tl.fromTo(ant.querySelector('.ok'), {opacity: 0, scale: .3}, {opacity: 1, scale: 1, duration: .3, ease: D.P.HEROI}, t);
+      tl.to('#gr' + (i - 1), {opacity: 0, scale: .6, rotationY: 60, duration: .2, ease: D.P.SAI}, t - .05);
+    }
+    tl.fromTo('#gr' + i, {opacity: 0, scale: .5, rotationY: -70}, {opacity: 1, scale: 1, rotationY: 0, duration: .5, ease: D.P.HEROI}, t + .05);
+    D.cue(s.t, 'pop');
+  });
+  // o último passo também se marca quando as fichas começam
+  if (ps.length && fis.length) {
+    const ult = document.getElementById('ps' + (ps.length - 1));
+    tl.fromTo(ult.querySelector('.ok'), {opacity: 0, scale: .3}, {opacity: 1, scale: 1, duration: .3, ease: D.P.HEROI}, D.at(fis[0].t));
+  }
+  fis.forEach((s, i) => {
+    tl.fromTo('#fi' + i, {opacity: 0, scale: .4, y: 20}, {opacity: 1, scale: 1, y: 0, duration: .4, ease: D.P.HEROI}, D.at(s.t));
+    D.cue(s.t, 'pop');
+  });
+  if (D.q('sai', '1') !== '0') {
+    tl.to(['#bl', '#gr', '#card'], {opacity: 0, scale: .97, filter: 'blur(10px)', duration: .26, ease: D.P.SAI}, dur - .28);
+    D.cue(dur - .28, 'whoosh-out');
+  }
+  return dur;
+});
+</script>
+</body>
+</html>

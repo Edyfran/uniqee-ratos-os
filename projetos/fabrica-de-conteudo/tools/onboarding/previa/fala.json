@@ -1,0 +1,281 @@
+{
+ "language": "pt",
+ "language_probability": 1,
+ "duration": 12.0,
+ "text": "Você grava, manda pro seu agente e pede em português. Corta as pausas, põe a legenda e destaca esta frase.",
+ "words": [
+  {
+   "type": "word",
+   "text": "Você",
+   "start": 0.4,
+   "end": 0.8,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "spacing",
+   "text": " ",
+   "start": 0.8,
+   "end": 0.92,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "word",
+   "text": "grava,",
+   "start": 0.92,
+   "end": 1.41,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "spacing",
+   "text": " ",
+   "start": 1.41,
+   "end": 1.53,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "word",
+   "text": "manda",
+   "start": 1.53,
+   "end": 2.02,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "spacing",
+   "text": " ",
+   "start": 2.02,
+   "end": 2.14,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "word",
+   "text": "pro",
+   "start": 2.14,
+   "end": 2.44,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "spacing",
+   "text": " ",
+   "start": 2.44,
+   "end": 2.56,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "word",
+   "text": "seu",
+   "start": 2.56,
+   "end": 2.86,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "spacing",
+   "text": " ",
+   "start": 2.86,
+   "end": 2.98,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "word",
+   "text": "agente",
+   "start": 2.98,
+   "end": 3.57,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "spacing",
+   "text": " ",
+   "start": 3.57,
+   "end": 3.69,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "word",
+   "text": "e",
+   "start": 3.69,
+   "end": 3.79,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "spacing",
+   "text": " ",
+   "start": 3.79,
+   "end": 3.91,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "word",
+   "text": "pede",
+   "start": 3.91,
+   "end": 4.3,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "spacing",
+   "text": " ",
+   "start": 4.3,
+   "end": 4.42,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "word",
+   "text": "em",
+   "start": 4.42,
+   "end": 4.62,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "spacing",
+   "text": " ",
+   "start": 4.62,
+   "end": 4.74,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "word",
+   "text": "português.",
+   "start": 4.74,
+   "end": 5.63,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "spacing",
+   "text": " ",
+   "start": 5.63,
+   "end": 5.75,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "word",
+   "text": "Corta",
+   "start": 5.75,
+   "end": 6.24,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "spacing",
+   "text": " ",
+   "start": 6.24,
+   "end": 6.36,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "word",
+   "text": "as",
+   "start": 6.36,
+   "end": 6.56,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "spacing",
+   "text": " ",
+   "start": 6.56,
+   "end": 6.68,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "word",
+   "text": "pausas,",
+   "start": 6.68,
+   "end": 7.28,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "spacing",
+   "text": " ",
+   "start": 7.28,
+   "end": 7.39,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "word",
+   "text": "põe",
+   "start": 7.39,
+   "end": 7.69,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "spacing",
+   "text": " ",
+   "start": 7.69,
+   "end": 7.81,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "word",
+   "text": "a",
+   "start": 7.81,
+   "end": 7.91,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "spacing",
+   "text": " ",
+   "start": 7.91,
+   "end": 8.03,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "word",
+   "text": "legenda",
+   "start": 8.03,
+   "end": 8.72,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "spacing",
+   "text": " ",
+   "start": 8.72,
+   "end": 8.84,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "word",
+   "text": "e",
+   "start": 8.84,
+   "end": 8.94,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "spacing",
+   "text": " ",
+   "start": 8.94,
+   "end": 9.06,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "word",
+   "text": "destaca",
+   "start": 9.06,
+   "end": 9.75,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "spacing",
+   "text": " ",
+   "start": 9.75,
+   "end": 9.87,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "word",
+   "text": "esta",
+   "start": 9.87,
+   "end": 10.27,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "spacing",
+   "text": " ",
+   "start": 10.27,
+   "end": 10.39,
+   "speaker_id": "speaker_0"
+  },
+  {
+   "type": "word",
+   "text": "frase.",
+   "start": 10.39,
+   "end": 10.88,
+   "speaker_id": "speaker_0"
+  }
+ ]
+}

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<!-- ENSAIO — pergunta retórica que congela a cena. 1920x1080, --alpha, EM CAMADAS.
+     Pede ao compositor (window.__video) que CONGELE e tire a cor da pessoa; atrás
+     dela o fundo escurece e a pergunta bate linha a linha, a última em amarelo.
+       ?l=E se o problema|nunca foi|a ferramenta?&kick=pergunta&lado=dir&t0=0.2&dur=4 -->
+<html lang="pt-BR" class="h alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/direcao-h.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<script src="../nucleo/ensaio.js"></script>
+<style>
+.veu{position:absolute;inset:0;background:rgba(11,13,18,.6);opacity:0}
+.pg{position:absolute;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:6px}
+.pg .kick{margin-bottom:20px}
+.lh{font:700 124px/1.02 var(--fd);letter-spacing:var(--ls);color:#fff;white-space:nowrap;opacity:0;transform-origin:left center}
+.lh.ult{color:var(--mk)}
+</style>
+</head>
+<body>
+<div id="stage"><div class="veu" id="veu" data-c="tras"></div><div class="pg" id="pg" data-c="tras"><div class="kick" id="k"></div></div></div>
+<script>
+const dur = D.n('dur', '4'), t0 = D.n('t0', '0.2'), $ = id => document.getElementById(id);
+const p = E.pessoa('dir'), esq = p.lado === 'esq';
+Object.assign($('pg').style, esq ? {left: (p.r + 40) + 'px', width: (1800 - p.r - 40) + 'px'} : {left: '120px', width: (p.l - 150) + 'px'});
+$('k').textContent = D.q('kick', 'pergunta');
+const ls = D.q('l', 'E se o problema|nunca foi|a ferramenta?').split('|');
+ls.forEach((l, i) => $('pg').insertAdjacentHTML('beforeend', `<div class="lh${i === ls.length - 1 ? ' ult' : ''}">${l}</div>`));
+E.video(t0 + .05, dur - .35, 'congela');
+E.video(t0 + .05, dur - .35, 'pb');
+D.monta(tl => {
+  D.cabe('.lh', 60, '.pg');
+  tl.fromTo('#veu', {opacity: 0}, {opacity: 1, duration: .3, ease: 'power2.out'}, D.at(t0));
+  D.cue(t0, 'tape-stop');   // a cena congela
+  D.carimbo('#k', t0 + .1, 0);
+  [...document.querySelectorAll('.lh')].forEach((el, i) => {
+    tl.fromTo(el, {opacity: 0, scale: .72, y: 20}, {opacity: 1, scale: 1, y: 0, duration: .36, ease: D.P.MOLA}, D.at(t0 + .25 + i * .28));
+    D.cue(t0 + .25 + i * .28, 'pop');
+  });
+  if (D.q('sai', '1') !== '0') { D.sai(['#k', '.lh'], dur - .5); tl.to('#veu', {opacity: 0, duration: .3}, dur - .35); }
+  return dur;
+});
+</script>
+</body>
+</html>

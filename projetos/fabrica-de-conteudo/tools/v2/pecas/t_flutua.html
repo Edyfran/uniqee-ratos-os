@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<!-- TIPO — peças que flutuam SOBRE o vídeo, v2. Fundo transparente (--alpha).
+     Cada chip é um objeto: borda preta, sombra dura, selo amarelo. Cai do lado
+     indicado e aterrissa; depois flutua de leve até sair — o rosto continua
+     inteiro, e a peça nunca fica parada em cima dele.
+       ?chip=Anúncios|analisa e sobe@0.4;Posts|prepara|forte@1.2&lado=direita&dur=8&k=1.2 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+.pilha{position:absolute;left:52px;right:64px;top:300px;display:flex;flex-direction:column;gap:30px}
+.chip{display:flex;align-items:center;gap:24px;width:var(--chip,100%);padding:24px 30px;opacity:0}
+.chip .ic{width:calc(72px*var(--k,1));height:calc(72px*var(--k,1));font-size:calc(30px*var(--k,1))}
+.chip .tx{flex:1;min-width:0}
+.chip b{display:block;font:900 calc(56px*var(--k,1))/1.04 var(--fd);letter-spacing:var(--ls);color:var(--ink)}
+.chip em{display:block;font:600 calc(var(--piso)*var(--k,1))/1.15 var(--fd);color:var(--ink6);font-style:normal;margin-top:4px}
+.chip.forte .ic{background:#fff}
+.chip.forte b{color:#fff}
+.chip.forte em{color:var(--act)}
+</style>
+</head>
+<body>
+<div id="stage"><div class="pilha" id="p"></div></div>
+<script>
+const dur = D.n('dur', '8');
+const pilha = document.getElementById('p');
+const INI = D.n('ini', '1');
+if (D.q('topo')) pilha.style.top = D.q('topo') + 'px';
+if (D.q('larg')) document.documentElement.style.setProperty('--chip', D.q('larg') + 'px');
+const chips = D.itens('chip', 'Anúncios|analisa, propõe e sobe@0.4;Posts|prepara pro Instagram@1.3;Membros|cuida da área@2.2;Suporte|responde o e-mail@3.1', ['nome', 'det', 'forte']);
+chips.forEach((c, i) => {
+  const el = document.createElement('div');
+  el.className = 'chip nb' + (c.forte === 'forte' ? ' cor-ac forte' : '');
+  el.id = 'ch' + i;
+  el.innerHTML = `<span class="ic">0${i + INI}</span>
+    <span class="tx"><b>${c.nome}</b>${c.det ? `<em>${c.det}</em>` : ''}</span>`;
+  pilha.appendChild(el);
+});
+const lado = D.q('lado', 'esquerda') === 'direita' ? 1 : -1;
+
+D.monta(tl => {
+  D.cabe('.chip b', 34, '.tx');
+  D.cabe('.chip em', 26, '.tx');
+  chips.forEach((c, i) => {
+    D.pousa('#ch' + i, c.t, {dx: lado * 90, dy: -D.P.QUEDA * .35, rot: D.inclina(i)});
+    D.flutua('#ch' + i, c.t + .7, dur - .55, 1.6, i);
+  });
+  D.sai('.chip', dur - .5);
+  return dur;
+});
+</script>
+</body>
+</html>

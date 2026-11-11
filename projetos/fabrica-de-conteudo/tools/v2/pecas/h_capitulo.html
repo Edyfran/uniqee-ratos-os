@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<!-- GANCHO — capítulo com barra de progresso. 1920x1080, --alpha.
+     A barra desce do topo com um segmento por capítulo (os mesmos dos chapters
+     do YouTube): o que já passou fica tinta, o atual enche de amarelo. O cartão
+     do capítulo cai no terço esquerdo com o número em bloco.
+       ?caps=Introdução;O webhook;O agente;A planilha;Publicar&atual=3
+        &kick=capítulo 3 de 5&hd=O agente&t0=0.2&dur=3.5 -->
+<html lang="pt-BR" class="h alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/direcao-h.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+.barra{position:absolute;left:120px;right:120px;top:40px;display:flex;gap:10px}
+.seg{flex:1;min-width:0;position:relative;height:46px;border:3px solid var(--ink);border-radius:7px;background:var(--sur);overflow:hidden;box-shadow:calc(var(--sh)*.4) calc(var(--sh)*.4) 0 var(--sombra,var(--ink));opacity:0}
+.seg i{position:absolute;inset:0;background:var(--mk);transform-origin:left center;transform:scaleX(0)}
+.seg.feito{background:var(--ink)}
+.seg span{position:relative;display:block;padding:0 14px;font:700 17px/40px var(--fm);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink4)}
+.seg.feito span{color:var(--sur)}
+.seg.agora span{color:var(--ink)}
+.cap{position:absolute;left:120px;top:330px;display:flex;align-items:center;gap:40px;max-width:1240px;padding:30px 60px 30px 30px;opacity:0}
+.cap .n{flex:none;width:220px;height:220px;display:flex;align-items:center;justify-content:center;font:700 150px/1 var(--fd);letter-spacing:-.06em;opacity:0}
+.cap .tx{min-width:0}
+.cap .kick{margin-bottom:20px}
+.cap .hd{font-size:96px;margin:0}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="barra" id="br"></div>
+  <div class="cap nb" id="cp"><div class="n nb cor-mk" id="n"></div><div class="tx"><div class="kick" id="k"></div><div class="hd" id="hd"></div></div></div>
+</div>
+<script>
+const dur = D.n('dur', '3.5'), t0 = D.n('t0', '0.2'), $ = id => document.getElementById(id);
+const caps = D.q('caps', 'Introdução;O webhook;O agente;A planilha;Publicar').split(';').filter(Boolean);
+const at = Math.max(1, Math.min(caps.length, Math.round(D.n('atual', '3'))));
+caps.forEach((c, i) => {
+  const cls = i < at - 1 ? 'feito' : i === at - 1 ? 'agora' : '';
+  $('br').insertAdjacentHTML('beforeend', `<div class="seg ${cls}">${i === at - 1 ? '<i></i>' : ''}<span>${String(i + 1).padStart(2, '0')} · ${c}</span></div>`);
+});
+$('n').textContent = String(at).padStart(2, '0');
+$('k').textContent = D.q('kick', 'capítulo ' + at + ' de ' + caps.length);
+$('hd').innerHTML = D.q('hd', caps[at - 1]);
+
+D.monta(tl => {
+  tl.fromTo('.seg', {opacity: 0, y: -40}, {opacity: 1, y: 0, duration: .42, ease: D.P.MOLA, stagger: .04}, D.at(t0));
+  D.cue(t0, 'whoosh');
+  tl.to('.seg i', {scaleX: 1, duration: .6, ease: 'power3.inOut'}, D.at(t0) + .4);
+  D.cue(t0 + .4, 'swish');
+  D.pousa('#cp', t0 + .1, {dy: -40});
+  D.heroi('#n', t0 + .22);
+  D.carimbo('#k', t0 + .3, 0);
+  D.titulo('#hd', t0 + .36, .06);
+  if (D.q('sai', '1') !== '0') {
+    D.sai('#cp', dur - .5);
+    tl.to('.seg', {opacity: 0, y: -40, duration: .25, ease: 'power2.in', stagger: .03}, dur - .4);
+  }
+  return dur;
+});
+</script>
+</body>
+</html>

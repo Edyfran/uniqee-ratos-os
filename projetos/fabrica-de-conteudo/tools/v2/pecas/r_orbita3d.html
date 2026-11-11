@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<!-- PROVA 3D — a órbita: um anel de cartões de vídeo girando em volta do peito (clone da ficha 10, "orbit", do anúncio De25fKeTRl7). three.js de verdade
+     (vendor/three): cada cartão é um corpo extrudado de cantos redondos com borda clara e as duas faces com imagem (a de fora e a de dentro), em
+     perspectiva, num anel inclinado pra câmera olhar de cima. Os da frente passam por cima da pessoa e os de trás por trás dela: o plano chama a
+     peça duas vezes, `camada=tras` (com "atras": true, o recorte da pessoa fura) e `camada=frente`. Seis cartões a 60° um do outro; o giro entra
+     rápido (uns 35°/quadro), freia (ease-out) até quase parar, e cada cartão vira de frente ou de borda conforme o lugar em que está (a ref gira
+     o cartão junto com o anel mas não radialmente: de frente no meio, de borda na direita); em f326 e f327 os cartões da frente ficam mais juntos (3 a uns 30° um do outro) e abrem a 60° em f328; o da direita sai por trás em f341. Os de trás somem
+     atrás do laptop (`lap`, o polígono do laptop na foto: o recorte da pessoa não o inclui). Em `qflip` o cartão da esquerda dá meia-volta em 2
+     quadros e mostra a outra face. O borrão é de verdade (média de 48 subquadros). A cena é alfa. Desenhada só pelo tempo (seek): o mesmo quadro
+     sai igual em qualquer render.
+     1080x1920, --alpha. t=0 é o quadro em que o 1º cartão aparece (f325 da ref); corte seco no fim (`dur`).
+     A lista padrão de capas NÃO existe aqui (a `r_orbita` traz o crachá, vetado): passe sempre `img`, uma captura 9:16 por cartão dos nossos efeitos
+     (a ref usa as capturas dos efeitos 02 a 09), e `rot`, o nome em português de cada um, que sai em amarelo na diagonal.
+       img  as capturas dos cartões, separadas por ; (5: o da esquerda no começo, a outra face dele (depois da meia-volta), o da direita e os dois de trás; com 6 cartões o 6º repete uma) · rot os nomes, na mesma ordem
+       camada  tras | frente | todas (todas) · dur  a duração (0.833 = f325 a f349)
+       cx cy   onde a origem do anel cai na tela, em px; a ref tem (561, 1065) com os olhos em (552, 660): some o deslocamento da pessoa (dx dy, padrão 0)
+       dx dy   o deslocamento da pessoa em relação à ref · R o raio do anel (362) · cw ch o tamanho do cartão (240 x 390) · alfa a elevação da câmera (16°) · n os cartões (6, a 60° um do outro) · f o foco da câmera (2000)
+       ylag    quantos quadros a guinada de cada cartão anda atrás do giro do anel (0.7: mostra um pouco da face do cartão que passa de borda pela direita) · lap  o polígono do laptop em px do quadro, "x,y;x,y;..." (padrão 0 = desligado; `0` desliga): os cartões de trás não aparecem sobre ele
+       qflip  o quadro, depois de t=0, em que o cartão da esquerda termina a meia-volta (20 = f345, a capa nova já está de frente em f346) · k  o número de subquadros do borrão (48: borrão contínuo)
+     O three vem de ../vendor/three/three.min.js (global T3); sem CDN. O render abre a peça por file://, com --allow-file-access-from-files:
+     é ele que deixa a textura da imagem subir.
+       etiqueta: carrossel-3d, atras-da-pessoa, cartoes-de-video
+       ?camada=frente&dur=0.833&img=../../../docs/guia-de-estilos/pop.jpg;../../../docs/guia-de-estilos/retro.jpg;../../../docs/guia-de-estilos/tech.jpg;../../../docs/guia-de-estilos/editorial.jpg;../../../docs/guia-de-estilos/luxo.jpg&rot=mundo de interface;quebra de moldura;rabisco tremido;recorte de papel;zoom digital -->
+<html lang="pt-BR" class="alfa" data-qa="entra-seco fica">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<script src="../vendor/three/three.min.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block;position:relative;overflow:hidden}
+#gl{position:absolute;left:-4000px;top:0;width:1080px;height:1920px}
+#acc{position:absolute;left:0;top:0;width:1080px;height:1920px;display:block}
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="gl" width="1080" height="1920"></canvas><canvas id="acc" width="1080" height="1920"></canvas></div>
+<script>
+const dur = D.n('dur', '0.833'), CAM = D.q('camada', 'todas'), KSUB = Math.round(D.n('k', '48'));
+const DX = D.n('dx', '0'), DY = D.n('dy', '0'), CX = D.n('cx', '561') + DX, CY = D.n('cy', '1065') + DY;
+const RING = D.n('R', '362'), CW = D.n('cw', '240'), CH = D.n('ch', '390'), ALFA = D.n('alfa', '16'), QFLIP = D.n('qflip', '20'), N = Math.round(D.n('n', '6'));
+const LAP = (() => { const v = D.q('lap', '0'); return v === '0' ? null : v.split(';').map(p => p.split(',').map(Number)); })();
+const IMGS = D.q('img', '').split(';').filter(Boolean), ROTS = D.q('rot', '').split(';').filter(Boolean);
+const T = window.T3, W = 1080, H = 1920, F = D.n('f', '2000'), LC = F, FOV = 2 * Math.atan(960 / F) * 180 / Math.PI, RAD = Math.PI / 180;
+const clamp = (x, a, b) => Math.min(b, Math.max(a, x)), lerp = (a, b, t) => a + (b - a) * t, sm = t => t * t * (3 - 2 * t);
+const prog = (q, a, b) => clamp((q - a) / (b - a), 0, 1), eo = x => 1 - Math.pow(1 - x, 3);
+const css = v => { const g = document.createElement('canvas').getContext('2d'); g.fillStyle = getComputedStyle(document.documentElement).getPropertyValue(v).trim(); return g.fillStyle; };
+const INK = css('--ink'), MK = css('--mk');
+const FD = getComputedStyle(document.documentElement).getPropertyValue('--fd').trim() || 'sans-serif';
+const GR = {cm: css('--cod-cm'), tx: css('--cod-tx'), i4: css('--ink4'), i6: css('--ink6'), cod: css('--cod'), cod2: css('--cod2'), ln: css('--cod-ln'), i8: css('--ink8'), cine: css('--cine')};   // os cinzas do núcleo
+// Hermite com tangente de Catmull-Rom
+const spl = (K, q) => { const n = K.length; if (q <= K[0][0]) return K[0][1]; if (q >= K[n - 1][0]) return K[n - 1][1];
+  let i = 1; while (K[i][0] < q) i++;
+  const [q0, v0] = K[i - 1], [q1, v1] = K[i], h = q1 - q0, t = (q - q0) / h, t2 = t * t, t3 = t2 * t;
+  const m0 = i > 1 ? (v1 - K[i - 2][1]) / (q1 - K[i - 2][0]) : (v1 - v0) / h, m1 = i < n - 1 ? (K[i + 1][1] - v0) / (K[i + 1][0] - q0) : (v1 - v0) / h;
+  return (2 * t3 - 3 * t2 + 1) * v0 + (t3 - 2 * t2 + t) * h * m0 + (-2 * t3 + 3 * t2) * v1 + (t3 - t2) * h * m1; };
+
+// ---- o giro: o ângulo do cartão D (o 2º do anel, o da direita no fim) quadro a quadro, a cada quadro medido na ref (f331 a f349: o centro e as bordas
+// dele e dos vizinhos, com o anel a 60° e a câmera a 16°). Antes de f331 o giro é o de uma freada que vem de uns 35°/quadro. ----
+const PSI = [[0, -220], [1, -185], [2, -155], [3, -128], [4, -101], [5, -80], [6, -62.3], [7, -47.8], [8, -36.8], [9, -25.7], [10, -15], [11, -6.3], [12, 0], [13, 6.1], [14, 10.8], [15, 14.7], [16, 17.5], [17, 19.8], [18, 21.6], [19, 22.9], [20, 23.7], [21, 24.3], [22, 24.9], [23, 25.7], [24, 26.9], [25, 27.6], [30, 29]];
+const psiQ = q => spl(PSI, q);
+const YLAG = D.n('ylag', '0.7'), PASSO = 360 / N, ENT_Q = [3, 3, .7, .7, 0, 2].slice(0, N);   // ENT_Q: o quadro em que cada cartão entra (L D P Q Y Z); o Y é o 1º, de lado, à esquerda, em f325
+// a guinada de cada cartão (o quanto ele vira em torno do próprio eixo) depende de onde ele está no anel: de frente perto de 0°, de borda perto de 90°, e mais
+// aberto à esquerda que à direita; lida nas larguras de 3 cartões em 20 quadros. Atrás do anel (|θ| > 90°) o cartão leva a guinada do que está no lugar espelhado da frente.
+const wrap180 = a => ((a + 180) % 360 + 360) % 360 - 180;
+const YT = [[-90, -58], [-66, -42], [-45, -35], [-32, -30], [-20, -20], [-6, -6], [0, 24], [7, 42], [12, 44], [16, 47.5], [24, 52], [28, 58], [35, 62], [46, 70], [54, 75], [60, 77.5], [67, 79], [75, 80], [90, 80]];   // perto de 80° o cartão da borda fica de fio pra câmera (ela o vê a uns 10° do eixo)
+const baseYaw = t => { if (t <= YT[0][0]) return YT[0][1]; for (let i = 1; i < YT.length; i++) if (t <= YT[i][0]) return lerp(YT[i - 1][1], YT[i][1], (t - YT[i - 1][0]) / (YT[i][0] - YT[i - 1][0])); return YT[YT.length - 1][1]; };
+const guinada = th => { th = wrap180(th); return Math.abs(th) <= 90 ? baseYaw(th) : th > 90 ? baseYaw(180 - th) : baseYaw(-180 - th); };   // atrás o plano é o do espelho do da frente (a mesma linha pra câmera)
+
+// ---- three: renderer, câmera (de cima, quase ortográfica) ----
+const glc = document.getElementById('gl'), acc = document.getElementById('acc'), actx = acc.getContext('2d');
+const renderer = new T.WebGLRenderer({canvas: glc, antialias: true, alpha: true, premultipliedAlpha: true, preserveDrawingBuffer: true});
+renderer.setPixelRatio(1); renderer.setSize(W, H, false); renderer.setClearColor(0x000000, 0); renderer.toneMapping = T.NoToneMapping;
+const scene = new T.Scene(), camera = new T.PerspectiveCamera(FOV, W / H, 500, 20000);
+const a = ALFA * RAD; camera.position.set(0, LC * Math.sin(a), LC * Math.cos(a)); camera.lookAt(0, 0, 0);
+camera.setViewOffset(W, H, 540 - CX, 960 - CY, W, H);
+const maxAn = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+scene.add(new T.HemisphereLight(0xffffff, 0x9aa0ab, 1.3)); const luzK = new T.DirectionalLight(0xffffff, .9); luzK.position.set(-400, 700, 900); scene.add(luzK);
+
+function formaRR(w, h, r) { const s = new T.Shape(), x = -w / 2, y = -h / 2;
+  s.moveTo(x + r, y); s.lineTo(x + w - r, y); s.absarc(x + w - r, y + r, r, -Math.PI / 2, 0, false); s.lineTo(x + w, y + h - r); s.absarc(x + w - r, y + h - r, r, 0, Math.PI / 2, false);
+  s.lineTo(x + r, y + h); s.absarc(x + r, y + h - r, r, Math.PI / 2, Math.PI, false); s.lineTo(x, y + r); s.absarc(x + r, y + r, r, Math.PI, 1.5 * Math.PI, false); return s; }
+function geoPlano(w, h, r) { const g = new T.ShapeGeometry(formaRR(w, h, r), 20), p = g.attributes.position, uv = g.attributes.uv;
+  for (let i = 0; i < p.count; i++) uv.setXY(i, p.getX(i) / w + .5, p.getY(i) / h + .5); return g; }
+function carregaImg(url) { return new Promise(res => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = url; }); }
+
+// a face do cartão (2x): a captura em cobertura, o véu de vidro, a borda clara e o nome em amarelo na diagonal
+const TW = 540, TH_ = Math.round(540 * CH / CW);
+function faceCanvas(im, rot, corFundo) {
+  const cv = document.createElement('canvas'); cv.width = TW; cv.height = TH_; const g = cv.getContext('2d');
+  g.fillStyle = corFundo || GR.cod; g.fillRect(0, 0, TW, TH_);
+  if (im) { const s = Math.max(TW / im.naturalWidth, TH_ / im.naturalHeight); g.drawImage(im, TW / 2 - im.naturalWidth * s / 2, TH_ / 2 - im.naturalHeight * s / 2, im.naturalWidth * s, im.naturalHeight * s); }
+  const v = g.createLinearGradient(0, 0, TW, TH_); v.addColorStop(0, 'rgba(255,255,255,.16)'); v.addColorStop(.35, 'rgba(255,255,255,0)'); v.addColorStop(1, 'rgba(0,0,0,.22)'); g.fillStyle = v; g.fillRect(0, 0, TW, TH_);
+  if (rot) {                                                          // o nome em amarelo na diagonal; nome comprido quebra em 2 linhas, o corpo é o maior que cabe
+    const ps = rot.split(' '); let ln = [rot];
+    if (rot.length > 11 && ps.length > 1) { let best = 1, bd = 1e9; for (let k = 1; k < ps.length; k++) { const d = Math.abs(ps.slice(0, k).join(' ').length - ps.slice(k).join(' ').length); if (d < bd) { bd = d; best = k; } } ln = [ps.slice(0, best).join(' '), ps.slice(best).join(' ')]; }
+    const mx = Math.max(...ln.map(t => t.length)), fs = Math.min(116, 1.62 * TW / Math.max(6, mx));
+    g.save(); g.translate(TW * .06, TH_ * (ln.length > 1 ? .72 : .78)); g.rotate(-9 * RAD); g.font = '800 ' + fs + 'px ' + FD; g.textBaseline = 'alphabetic'; g.lineJoin = 'round';
+    ln.forEach((t, i) => { const y = i * fs * .98; g.lineWidth = 14; g.strokeStyle = 'rgba(11,13,18,.88)'; g.strokeText(t, 0, y); g.fillStyle = MK; g.fillText(t, 0, y); }); g.restore(); }
+  g.lineWidth = 7; g.strokeStyle = 'rgba(255,255,255,.85)'; g.beginPath(); g.roundRect(3.5, 3.5, TW - 7, TH_ - 7, 52); g.stroke();
+  const t = new T.CanvasTexture(cv); t.colorSpace = T.SRGBColorSpace; t.anisotropy = maxAn; return t;
+}
+
+const sombraTx = (() => { const c = document.createElement('canvas'); c.width = 256; c.height = 400; const g = c.getContext('2d'); g.filter = 'blur(22px)'; g.fillStyle = '#000'; g.beginPath(); g.roundRect(64, 72, 128, 256, 22); g.fill(); const t = new T.CanvasTexture(c); t.colorSpace = T.SRGBColorSpace; return t; })();
+const cartas = [];
+function criaCarta(i, texA, texB) {
+  const R_ = 24, E = 7;
+  const g = new T.Group(), gi = new T.Group(); g.add(gi);                                // g gira no anel; gi dá a meia-volta própria
+  const corpo = new T.ExtrudeGeometry(formaRR(CW, CH, R_), {depth: E - 3, bevelEnabled: true, bevelThickness: 1.5, bevelSize: 1.5, bevelSegments: 2, curveSegments: 14});
+  corpo.translate(0, 0, -(E - 3) / 2);
+  const mLado = new T.MeshStandardMaterial({color: 0xe9edf5, roughness: .35, emissive: 0x9aa0ab, emissiveIntensity: .4}), mTampa = new T.MeshBasicMaterial({color: 0x111318});
+  gi.add(new T.Mesh(corpo, [mTampa, mLado]));
+  const mA = new T.MeshBasicMaterial({map: texA, toneMapped: false}), mB = new T.MeshBasicMaterial({map: texB, toneMapped: false});
+  const pa = new T.Mesh(geoPlano(CW - 2, CH - 2, R_ - 1), mA); pa.position.z = E / 2 + .2; gi.add(pa);
+  const pb = new T.Mesh(geoPlano(CW - 2, CH - 2, R_ - 1), mB); pb.position.z = -E / 2 - .2; pb.rotation.y = Math.PI; gi.add(pb);
+  const sh = new T.Mesh(new T.PlaneGeometry(CW * 1.34, CH * 1.2), new T.MeshBasicMaterial({map: sombraTx, transparent: true, opacity: .55, depthWrite: false})); sh.position.set(0, -10, -E / 2 - 6); g.add(sh);   // a sombra suave: o halo escuro em volta do cartão
+  scene.add(g); cartas.push({g, gi, mA, mB, i, sh});
+}
+
+const IP = 2;                                                  // o cartão da direita (P): a ref o perde de f340 pra f341 (de fio, atrás do laptop); aqui ele passa por trás do anel e some
+// o leque abre em f326 a f328: os cartões da frente ficam mais juntos (a ref tem 3 a uns 30° um do outro em f326 e uns 46° em f327) e chegam aos 60° em f328.
+// DEL = quanto cada cartão fica adiante da posição do anel de 60°, em graus, por quadro (linear entre os pontos)
+const DEL = {2: [[0, 65], [1, 65], [2, 32], [3, 0]], 3: [[0, 35], [1, 35], [2, 18], [3, 0]], 4: [[0, 5], [1, 5], [2, 4], [3, 0]], 5: [[0, 0], [1, 0], [2, -10], [3, 0]]};
+const linK = (K, q) => { if (q <= K[0][0]) return K[0][1]; for (let i = 1; i < K.length; i++) if (q <= K[i][0]) return lerp(K[i - 1][1], K[i][1], (q - K[i - 1][0]) / (K[i][0] - K[i - 1][0])); return K[K.length - 1][1]; };
+const thetaCarta = (i, q) => psiQ(q) + (i - 1) * PASSO + (DEL[i] ? linK(DEL[i], q) : 0) + (i === IP ? 22 * sm(prog(q, 15, 15.6)) : 0);   // 0: L (esquerda), 1: D (direita), 2: P, 3: Q, 4: Y, 5: Z
+function estado(q) {
+  return cartas.map(c => { const th = thetaCarta(c.i, q), t = eo(prog(q, ENT_Q[c.i], ENT_Q[c.i] + 3)), r = RING, esc = .8 + .2 * t;
+    const flip = c.i === 0 ? Math.PI * sm(prog(q, QFLIP - .7, QFLIP + 1.0)) : 0;     // o cartão da esquerda dá meia-volta em 2 quadros e a capa nova já está na frente em f346
+    const x = r * Math.sin(th * RAD), z = r * Math.cos(th * RAD);
+    const cosCam = Math.cos(th * RAD), thw = wrap180(th);
+    const om = psiQ(q + .5) - psiQ(q - .5);                                      // graus por quadro: o cartão gira atrás do anel perto da borda direita/esquerda (a guinada vem do ângulo de YLAG quadros antes; no meio, não)
+    return {th, x, z, esc, flip, cosCam, yaw: guinada(th - YLAG * om * sm(prog(Math.abs(thw), 35, 65))) + (thw < 0 ? -22 * (1 - t) : 0), vis: q > ENT_Q[c.i] - .35 && !(c.i === IP && q > 15.6)}; });
+}
+function aplica(q, so) {
+  const st = estado(q);
+  cartas.forEach((c, k) => { const s = st[k]; const camada = s.z >= 0 ? 'frente' : 'tras';
+    c.g.visible = s.vis && (so === 'todas' || so === camada);
+    c.g.position.set(s.x, 0, s.z); c.g.rotation.y = s.yaw * RAD; c.g.scale.setScalar(s.esc); c.gi.rotation.y = s.flip;
+    // de trás pra frente: o cartão de costas pra câmera escurece; a face de dentro é a que aparece
+    const dim = lerp(.36, 1, sm(clamp((s.cosCam + .25) / 1, 0, 1)));
+    c.mA.color.setScalar(dim); c.mB.color.setScalar(dim);
+    c.mA.opacity = c.mB.opacity = 1;
+  });
+}
+// um quadro do GL desenhado em g; os de trás não passam por cima do laptop (o recorte da pessoa não o inclui: o polígono `lap` fura o que está atrás dele)
+function passe(q, camada, g) {
+  aplica(q, camada); renderer.render(scene, camera);
+  if (camada === 'tras' && LAP) { g.save(); g.beginPath(); g.rect(0, 0, W, H); LAP.forEach(([x, y], i) => g[i ? 'lineTo' : 'moveTo'](x, y)); g.closePath(); g.clip('evenodd'); g.drawImage(glc, 0, 0); g.restore(); }
+  else g.drawImage(glc, 0, 0);
+}
+const tmpc = document.createElement('canvas'); tmpc.width = W; tmpc.height = H; const tctx = tmpc.getContext('2d');
+function quadroQ(q) {                                                      // um instante: a camada pedida (as duas, juntas, em `todas`) sobre o acc
+  if (CAM !== 'todas') { passe(q, CAM, actx); return; }
+  tctx.globalCompositeOperation = 'source-over'; tctx.globalAlpha = 1; tctx.clearRect(0, 0, W, H); passe(q, 'tras', tctx); passe(q, 'frente', tctx); actx.drawImage(tmpc, 0, 0);
+}
+function quadro(t) {
+  const q = t * 30 + 1e-6, borrado = (q > -1 && q < 13.5) || (q > QFLIP - 1 && q < QFLIP + 2.4);
+  actx.globalCompositeOperation = 'source-over'; actx.globalAlpha = 1; actx.clearRect(0, 0, W, H);
+  if (!borrado || KSUB < 2) { quadroQ(q); return; }
+  const obt = q < 13.5 ? linK([[0, .22], [.8, .14], [1.2, .14], [1.9, .42], [3, .4], [4, .24]], q) : .3, K = KSUB;                 // o cartão do meio quase nítido: obturador curto no giro rápido, mais longo na entrada
+  actx.globalCompositeOperation = 'lighter'; actx.globalAlpha = 1 / K;
+  for (let k = 0; k < K; k++) quadroQ(q + (k / (K - 1) - .5) * obt);
+  actx.globalAlpha = 1; actx.globalCompositeOperation = 'source-over';
+}
+
+Promise.all([...Array(N).keys()].map(i => carregaImg(IMGS[i % Math.max(1, IMGS.length)] || '')), document.fonts.load('800 60px ' + FD)).then(([...ims]) => {
+  ims.pop();
+  const nome = i => ROTS.length ? ROTS[i % ROTS.length] : '';
+  // as faces: o cartão 0 (esquerda no fim) leva a 1ª captura na frente e a 2ª na outra face (a meia-volta); o da direita, a 3ª; os de trás, a 4ª, a 5ª e a 1ª de novo
+  const ORDEM = [0, 2, 3, 4, 0, 2];
+  for (let i = 0; i < N; i++) {
+    const k = ORDEM[i], ta = faceCanvas(ims[k], nome(k)), tb = i === 0 ? faceCanvas(ims[1 % N], nome(1)) : ta;
+    criaCarta(i, ta, tb);
+  }
+  D.monta(tl => {
+    tl.to({}, {duration: dur}, 0);
+    D.aoQuadro(() => quadro(tl.time()));
+    renderer.compile(scene, camera); quadro(0);
+    D.cue(0, 'whoosh'); D.cue(QFLIP / 30, 'swish');
+    return dur;
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<!-- ENSAIO — foto de arquivo em paralaxe. 1920x1080 ou 1080x1920 (?ar=), --alpha.
+     A foto chega como cópia impressa (margem branca, fita nos cantos) e deriva
+     devagar; dentro dela a imagem anda mais devagar que a moldura, e a data e o
+     rótulo andam mais rápido — três profundidades. Sem ?img=, mostra o marcador.
+     lado=esq|dir (16:9)
+       ?img=foto.jpg&leg=Porto Alegre, a primeira sala&data=mar 2019&kick=arquivo&lado=esq&t0=0.2&dur=5 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1920px;height:1080px}
+html.v,html.v body,html.v #stage{width:1080px;height:1920px}
+html,body{background:transparent}
+#stage{position:relative;overflow:hidden;background:none;padding:0;display:block}
+.dr{position:absolute;left:170px;top:140px;width:980px}
+html.dir .dr{left:770px}
+html.v .dr{left:90px;top:330px;width:900px}
+.pr{padding:26px 26px 0;background:#fff;opacity:0}
+.ft{position:relative;height:600px;overflow:hidden;border:4px solid var(--ink);background:var(--ink2)}
+html.v .ft{height:820px}
+.ft > *{position:absolute;left:-6%;top:-6%;width:112%;height:112%}
+.lg{padding:24px 6px 28px;font:600 34px/1.2 var(--fm);color:var(--ink);letter-spacing:.01em}
+.fi{position:absolute;width:220px;height:62px;background:rgba(242,199,68,.85);border:3px solid var(--ink);opacity:0}
+.fi.a{left:-70px;top:-10px}
+.fi.b{right:-70px;top:-10px}
+.dt{position:absolute;padding:16px 22px 12px;font:700 38px/1 var(--fm);letter-spacing:.08em;text-transform:uppercase;border-radius:var(--raio-s);white-space:nowrap;opacity:0}
+.kk{position:absolute;padding:14px 20px 12px;font:700 28px/1 var(--fm);letter-spacing:.14em;text-transform:uppercase;border-radius:var(--raio-s);white-space:nowrap;opacity:0}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="dr" id="dr">
+    <div class="pr nb" id="pr"><div class="ft" id="ft"></div><div class="lg" id="lg"></div></div>
+    <div class="fi a" id="fa"></div><div class="fi b" id="fb"></div>
+  </div>
+  <div class="kk nb cor-ink" id="kk"></div>
+  <div class="dt nb cor-mk" id="dt"></div>
+</div>
+<script>
+const R = document.documentElement, V = R.classList.contains('v'), $ = id => document.getElementById(id);
+if (!V && D.q('lado') === 'dir') R.classList.add('dir');
+const t0 = D.n('t0', '0.2'), dur = Math.max(t0 + 2.2, D.n('dur', '5'));
+D.midia('#ft', D.q('img'), 'foto de arquivo');
+$('lg').textContent = D.q('leg', 'Porto Alegre, a primeira sala');
+$('dt').textContent = D.q('data', 'mar 2019');
+$('kk').textContent = D.q('kick', 'arquivo');
+gsap.set('#fa', {rotation: -36}); gsap.set('#fb', {rotation: 36});
+D.monta(tl => {
+  // a data encosta no canto de cima à direita da foto; o rótulo, acima dela à esquerda
+  const dr = $('dr'), x0 = dr.offsetLeft, y0 = dr.offsetTop, w = dr.offsetWidth, h = $('pr').offsetHeight;
+  const dt = $('dt'), kk = $('kk'), W = V ? 1080 : 1920;
+  dt.style.left = Math.min(W - 40 - dt.offsetWidth, x0 + w - dt.offsetWidth + 40) + 'px'; dt.style.top = (y0 + h - 120) + 'px';
+  kk.style.left = Math.max(40, x0 - 10) + 'px'; kk.style.top = (y0 - 86) + 'px';
+  const a = D.at(t0), T = dur - a, img = document.querySelector('#ft > *');
+  // três profundidades: a imagem anda menos que a cópia, a data e o rótulo andam mais
+  tl.fromTo('#dr', {x: -24, rotation: -2.4}, {x: 36, rotation: -1.2, duration: T, ease: 'none'}, a);
+  if (img) tl.fromTo(img, {x: 18, scale: 1.06}, {x: -22, scale: 1.0, duration: T, ease: 'none'}, a);
+  tl.fromTo(['#dt', '#kk'], {x: -40}, {x: 90, duration: T, ease: 'none'}, a);
+  D.pousa('#pr', t0, {rot: 0, dr: -6, dy: -70, som: 'papel'});
+  tl.fromTo(['#fa', '#fb'], {opacity: 0, scale: 1.5}, {opacity: 1, scale: 1, duration: .28, ease: 'power3.out', stagger: .12}, a + .35);
+  D.carimbo('#kk', t0 + .15, D.P.ROT);
+  D.carimbo('#dt', t0 + .7, -5);
+  D.sai(['#dr', '#dt', '#kk'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

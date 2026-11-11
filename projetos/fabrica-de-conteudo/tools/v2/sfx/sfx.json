@@ -1,0 +1,230 @@
+{
+ "_origem": "Os 31 sons da raiz que vieram no pacote de 26/09 (commit 604e168) são sintetizados, sem amostra de terceiro: CUES.md, 'Os sons são sintetizados'. moeda, moeda-2, moeda-3, caixa e caixa-2 saíram do Sound Effects da ElevenLabs em 29/09 (plano pago, uso comercial liberado): CUES.md, linha do sinal. As subpastas heygen/ e avulsos/ também não têm origem. Som sem origem provada não vai para kit de aluno; os dois sons de menu com nome de Kingdom Hearts saíram em 30/09 por isso. Som novo entra com a origem escrita aqui. vine-boom: o dono mandou em 15/10 (~/Downloads/vine-boom-hq-longer.mp3, o meme 'vine boom'), origem de terceiro sem licença provada: só no canal, nunca no kit. oh-my-god (meme 'oh my god') e ai-que-delicia (Mickey, 'ai que delícia'): o dono mandou em 26/10 (~/Downloads/oh-my-god-meme.mp3, ai-que-delicia-mickey.mp3), meme de terceiro sem licença provada: só no canal, nunca no kit; ficam em avulsos/, que o SEM_ORIGEM do empacota_kit.py não leva.",
+ "_leia": "Um arquivo por tipo de cue. ganho_db é o equilíbrio entre eles (tudo foi normalizado a -1 dBFS); o nível final contra a voz fica no mix. Cue com `dur` é SEQUÊNCIA: monte repetindo `unidade` no padrão indicado, ou estique o `arquivo` de 1s (atempo) quando a duração for parecida. Cue com `ancora: fim` (riser, swell) TERMINA no instante do cue: o mix começa o arquivo `dur` segundos antes.",
+ "sr": 48000,
+ "sons": {
+  "pop": {
+   "arquivo": "pop.wav",
+   "ganho_db": -6,
+   "pico": 0.005
+  },
+  "click": {
+   "arquivo": "click.wav",
+   "ganho_db": -8,
+   "pico": 0.003
+  },
+  "stamp": {
+   "arquivo": "stamp.wav",
+   "ganho_db": -4,
+   "pico": 0.004
+  },
+  "impact": {
+   "arquivo": "impact.wav",
+   "ganho_db": -3,
+   "pico": 0.006
+  },
+  "whoosh": {
+   "arquivo": "whoosh.wav",
+   "ganho_db": -9
+  },
+  "whoosh-out": {
+   "arquivo": "whoosh-out.wav",
+   "ganho_db": -11
+  },
+  "swish": {
+   "arquivo": "swish.wav",
+   "ganho_db": -10
+  },
+  "ding": {
+   "arquivo": "ding.wav",
+   "ganho_db": -8,
+   "pico": 0.007
+  },
+  "tick-roll": {
+   "arquivo": "tick-roll.wav",
+   "ganho_db": -12,
+   "unidade": "tick.wav",
+   "padrao": "expo.out: t_i = dur * 0.92 * (1 - (1 - i/18)^0.35), i = 0..17"
+  },
+  "type": {
+   "arquivo": "type.wav",
+   "ganho_db": -10,
+   "unidade": "key.wav",
+   "padrao": "uma tecla a cada 0.075s durante dur"
+  },
+  "riser": {
+   "arquivo": "riser.wav",
+   "ganho_db": -12,
+   "dur": 1.6,
+   "ancora": "fim",
+   "uso": "subida que termina no corte do title drop"
+  },
+  "boom": {
+   "arquivo": "boom.wav",
+   "ganho_db": -4,
+   "dur": 1.8,
+   "uso": "grave de cinema no title drop forte",
+   "pico": 0.013
+  },
+  "sub-drop": {
+   "arquivo": "sub-drop.wav",
+   "ganho_db": -6,
+   "dur": 1.2,
+   "uso": "queda de grave na virada",
+   "pico": 0.024
+  },
+  "hit": {
+   "arquivo": "hit.wav",
+   "ganho_db": -4,
+   "dur": 0.6,
+   "uso": "batida curta: número gigante, ato",
+   "pico": 0.003
+  },
+  "swell": {
+   "arquivo": "swell.wav",
+   "ganho_db": -14,
+   "dur": 2,
+   "ancora": "fim",
+   "uso": "crescendo suave (title drop quiet)"
+  },
+  "tom": {
+   "arquivo": "tom.wav",
+   "ganho_db": -16,
+   "dur": 1.8,
+   "uso": "nota de piano-pad, cartela quiet",
+   "pico": 0.348
+  },
+  "shimmer": {
+   "arquivo": "shimmer.wav",
+   "ganho_db": -18,
+   "dur": 1.3,
+   "uso": "brilho: o título sai do desfoque",
+   "pico": 0.022
+  },
+  "tape-stop": {
+   "arquivo": "tape-stop.wav",
+   "ganho_db": -10,
+   "dur": 0.8,
+   "uso": "a cena congela"
+  },
+  "glitch": {
+   "arquivo": "glitch.wav",
+   "ganho_db": -12,
+   "dur": 0.36,
+   "uso": "emenda com glitch, erro digital",
+   "pico": 0.089
+  },
+  "thud": {
+   "arquivo": "thud.wav",
+   "ganho_db": -6,
+   "dur": 0.35,
+   "uso": "cartão pesado aterrissando",
+   "pico": 0.008
+  },
+  "papel": {
+   "arquivo": "papel.wav",
+   "ganho_db": -12,
+   "dur": 0.5,
+   "uso": "recorte / print deslizando"
+  },
+  "marca": {
+   "arquivo": "marca.wav",
+   "ganho_db": -16,
+   "dur": 0.5,
+   "uso": "marcador amarelo passando (use pouco)"
+  },
+  "mouse": {
+   "arquivo": "mouse.wav",
+   "ganho_db": -8,
+   "dur": 0.12,
+   "uso": "clique de mouse no tutorial",
+   "pico": 0.002
+  },
+  "notif": {
+   "arquivo": "notif.wav",
+   "ganho_db": -10,
+   "dur": 0.7,
+   "uso": "notificação chegando",
+   "pico": 0.117
+  },
+  "venda": {
+   "arquivo": "venda.wav",
+   "ganho_db": -10,
+   "dur": 1,
+   "uso": "venda aprovada",
+   "pico": 0.004
+  },
+  "certo": {
+   "arquivo": "certo.wav",
+   "ganho_db": -10,
+   "dur": 0.55,
+   "uso": "passo concluído, ✓",
+   "pico": 0.148
+  },
+  "erro": {
+   "arquivo": "erro.wav",
+   "ganho_db": -12,
+   "dur": 0.45,
+   "uso": "errado, ✕, mito",
+   "pico": 0.286
+  },
+  "obturador": {
+   "arquivo": "obturador.wav",
+   "ganho_db": -10,
+   "dur": 0.3,
+   "uso": "print / captura entrando",
+   "pico": 0.003
+  },
+  "zoom-in": {
+   "arquivo": "zoom-in.wav",
+   "ganho_db": -12,
+   "dur": 0.75,
+   "uso": "câmera aproximando da tela"
+  },
+  "moeda": {
+   "arquivo": "moeda.wav",
+   "ganho_db": -8,
+   "uso": "dinheiro entrando: o valor de uma carta aparece. moeda, moeda-2 e moeda-3 alternam, para doze cartas seguidas não soarem iguais",
+   "pico": 0.022
+  },
+  "moeda-2": {
+   "arquivo": "moeda-2.wav",
+   "ganho_db": -8,
+   "uso": "variação da moeda",
+   "pico": 0.058
+  },
+  "moeda-3": {
+   "arquivo": "moeda-3.wav",
+   "ganho_db": -8,
+   "uso": "variação da moeda",
+   "pico": 0.119
+  },
+  "caixa": {
+   "arquivo": "caixa.wav",
+   "ganho_db": -8,
+   "uso": "caixa registradora: carta que vale (rara pra cima, foil, R$ 5 ou mais). caixa e caixa-2 alternam",
+   "pico": 0.113
+  },
+  "caixa-2": {
+   "arquivo": "caixa-2.wav",
+   "ganho_db": -8,
+   "uso": "variação da caixa",
+   "pico": 0.018
+  },
+  "vine-boom": {
+   "arquivo": "vine-boom.wav",
+   "ganho_db": -6,
+   "pico": 0.1
+  },
+  "oh-my-god": {
+   "arquivo": "avulsos/oh-my-god.wav",
+   "ganho_db": -10,
+   "pico": 0.27
+  },
+  "ai-que-delicia": {
+   "arquivo": "avulsos/ai-que-delicia.wav",
+   "ganho_db": -2,
+   "pico": 0.779
+  }
+ }
+}

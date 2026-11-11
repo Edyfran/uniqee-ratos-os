@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<!-- INTERFACE — o editor falso em vidro: a prévia do vídeo, o pedido em português digitando, a lista do que o
+     agente faz se marcando e a linha do tempo andando. 1080x1920, --alpha, tema neon.
+     A mecânica do anúncio de edição do concorrente (videos/fabrica/avatar-camadas/REF.md, 9,5–12,8 s). A prévia
+     é um FURO transparente: quem compõe põe o vídeo ali por baixo (ou por cima, recortado no mesmo retângulo).
+       arq     o nome do arquivo na barra (gravacao.mp4) · pede  o pedido · t_pede  quando começa a digitar
+       passo   segundos por letra (.045) · t_envia  o clique no enviar (fim da digitação + .2)
+       itens   "Corte@t;Legenda@t;…" o que o agente faz; cada um se marca no t e põe o clipe na trilha EDIÇÃO
+       t_pronto  o selo "● EDITANDO" vira "✓ PRONTO" · furo  "x,y,l,a" da prévia (90,360,310,551)
+       topo    o topo da janela (280) · dur · sai=0
+     ?arq=gravacao.mp4&pede=faz um anúncio com o meu avatar, nesse estilo&t_pede=0.8&itens=Corte@2.9;Legenda@3.1;Camadas@3.3;Título@3.5&t_pronto=3.8&dur=4.4&tema=neon -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block;position:relative}
+#jan{position:absolute;left:60px;width:960px;height:830px;border-radius:var(--raio);opacity:0;
+  background:var(--painel);border:2px solid var(--painel-borda);box-shadow:var(--painel-brilho),0 30px 80px rgba(0,0,0,.55)}
+/* o furo da prévia: a janela é desenhada em volta dele com uma máscara, pra o vídeo de baixo aparecer */
+#barra{position:absolute;left:28px;right:28px;top:20px;height:40px;display:flex;align-items:center;gap:12px;font:700 26px/1 var(--fm);color:var(--ink6)}
+#barra i{width:16px;height:16px;border-radius:50%;background:#FF6B8A}#barra i+i{background:#FFC857}#barra i+i+i{background:#4ADE80}
+#barra .arq{margin-left:14px;letter-spacing:.02em}
+#selo{margin-left:auto;padding:9px 16px;border-radius:999px;font:800 22px/1 var(--fm);letter-spacing:.12em;color:#fff;
+  background:rgba(124,92,255,.28);border:2px solid var(--painel-borda)}
+#selo.ok{background:rgba(74,222,128,.22);border-color:rgba(74,222,128,.7)}
+.mold{position:absolute;border-radius:22px;border:2px solid rgba(230,222,255,.55);box-shadow:0 0 30px rgba(124,92,255,.4)}
+.kk{position:absolute;font:800 24px/1 var(--fm);letter-spacing:.18em;color:var(--ac2);text-transform:uppercase}
+#pede{position:absolute;border-radius:var(--raio-s);background:rgba(10,6,24,.55);border:2px solid var(--painel-borda);padding:26px 26px 70px}
+#pede .tx{font:700 40px/1.22 var(--fd);letter-spacing:-.015em;color:#fff}
+#pede .tx .w{display:inline-block;white-space:nowrap}
+#pede .cur{display:inline-block;width:4px;height:40px;margin-left:3px;vertical-align:-6px;background:var(--ac2)}
+#env{position:absolute;right:20px;bottom:18px;width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(180deg,#9474FF,#6A3FF0);box-shadow:0 0 24px rgba(124,92,255,.7)}
+#env svg{width:30px;height:30px;stroke:#fff;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+#lista{position:absolute;display:grid;grid-template-columns:1fr 1fr;gap:16px 18px}
+.it{display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:var(--raio-s);background:rgba(10,6,24,.45);border:2px solid rgba(210,198,255,.18);
+  font:700 36px/1 var(--fd);color:var(--ink4)}
+.it .ck{flex:none;width:36px;height:36px;border-radius:50%;border:3px solid var(--ink4);display:flex;align-items:center;justify-content:center}
+.it .ck svg{width:22px;height:22px;stroke:#0A0614;fill:none;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;opacity:0}
+#tl{position:absolute;left:28px;right:28px;height:200px;border-radius:var(--raio-s);background:rgba(8,5,20,.6);border:2px solid rgba(210,198,255,.16);overflow:hidden}
+.rg{position:absolute;left:150px;right:16px;top:12px;display:flex;justify-content:space-between;font:600 17px/1 var(--fm);color:var(--ink4)}
+.tr{position:absolute;left:16px;right:16px;height:30px;display:flex;align-items:center}
+.tr b{width:130px;flex:none;font:800 17px/1 var(--fm);letter-spacing:.12em;color:var(--ink4)}
+.tr .pista{position:relative;flex:1;height:100%}
+.tr .pista span{position:absolute;top:2px;bottom:2px;border-radius:7px}
+.tv span{background:linear-gradient(90deg,#3B2A86,#5B45C9);border:1px solid rgba(255,255,255,.25)}
+.tlg span{background:#8F78FF}
+.ted span{background:linear-gradient(180deg,#B6A2FF,#7C5CFF);font:800 15px/26px var(--fm);letter-spacing:.08em;color:#120A2C;padding-left:8px;overflow:hidden;white-space:nowrap}
+.tau span{background:#6FD3FF;opacity:.85;top:auto;bottom:50%;transform-origin:50% 100%}
+#agulha{position:absolute;top:8px;bottom:8px;width:3px;background:#fff;box-shadow:0 0 12px #fff}
+#agulha::before{content:"";position:absolute;top:-2px;left:-8px;width:19px;height:12px;border-radius:4px;background:#fff}
+</style>
+</head>
+<body>
+<div id="stage"><div id="jan">
+  <div id="barra"><i></i><i></i><i></i><span class="arq"></span><span id="selo">● EDITANDO</span></div>
+</div></div>
+<script>
+const dur = D.n('dur', '4.4');
+const esc = s => String(s).replace(/[&<>]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;'}[c]));
+const topo = D.n('topo', '280');
+const jan = document.getElementById('jan');
+jan.style.top = topo + 'px';
+const [fx, fy, fl, fa] = D.q('furo', '90,360,310,551').split(',').map(Number);
+// tudo dentro da janela é medido a partir do canto dela
+const X = fx - 60, Y = fy - topo;
+// a máscara do furo: um retângulo de cantos redondos recortado (SVG em data URL)
+const furo = `<svg xmlns='http://www.w3.org/2000/svg' width='960' height='830'><defs><mask id='m'><rect width='960' height='830' fill='white'/><rect x='${X}' y='${Y}' width='${fl}' height='${fa}' rx='22' fill='black'/></mask></defs><rect width='960' height='830' fill='white' mask='url(%23m)'/></svg>`;
+jan.style.webkitMaskImage = jan.style.maskImage = `url("data:image/svg+xml;utf8,${furo}")`;
+jan.querySelector('.arq').textContent = 'Editor · ' + D.q('arq', 'gravacao.mp4');
+const C = X + fl + 26, CW = 960 - C - 28;   // a coluna da direita
+jan.insertAdjacentHTML('beforeend', `
+  <div class="mold" style="left:${X}px;top:${Y}px;width:${fl}px;height:${fa}px"></div>
+  <div class="kk" style="left:${C}px;top:${Y + 6}px">Você pede</div>
+  <div id="pede" style="left:${C}px;top:${Y + 44}px;width:${CW}px;height:${Math.round(fa * .42)}px"><div class="tx"><span id="dig">${esc(D.q('pede', 'faz um anúncio com o meu avatar, nesse estilo'))}</span><i class="cur"></i></div>
+    <div id="env"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div></div>
+  <div class="kk" id="kk2" style="left:${C}px">O agente edita</div>
+  <div id="lista" style="left:${C}px;width:${CW}px"></div>
+  <div id="tl" style="top:${Y + fa + 22}px"></div>`);
+const pede = document.getElementById('pede');
+const kk2 = document.getElementById('kk2'), lista = document.getElementById('lista');
+const yl = Y + 44 + pede.offsetHeight + 26;
+kk2.style.top = yl + 'px'; lista.style.top = (yl + 38) + 'px';
+const itens = D.itens('itens', 'Corte@2.9;Legenda@3.1;Camadas@3.3;Título@3.5', ['nome']);
+itens.forEach((s, i) => lista.insertAdjacentHTML('beforeend',
+  `<div class="it" id="it${i}"><span class="ck"><svg viewBox="0 0 24 24"><path d="M5 12.5 10 17l9-10"/></svg></span>${esc(s.nome)}</div>`));
+// a linha do tempo: régua, 4 trilhas e a agulha
+const tl0 = document.getElementById('tl');
+jan.style.height = (Y + fa + 22 + 200 + 26) + 'px';
+tl0.innerHTML = `<div class="rg">${['00:00', '00:05', '00:10', '00:15', '00:20', '00:25', '00:30'].map(s => `<span>${s}</span>`).join('')}</div>`
+  + ['VÍDEO|tv', 'LEGENDA|tlg', 'EDIÇÃO|ted', 'ÁUDIO|tau'].map((s, i) => {
+    const [n, c] = s.split('|');
+    return `<div class="tr ${c}" style="top:${44 + i * 38}px"><b>${n}</b><div class="pista" id="p${c}"></div></div>`;
+  }).join('') + '<div id="agulha"></div>';
+const pista = c => document.getElementById('p' + c);
+for (let i = 0; i < 9; i++) pista('tv').insertAdjacentHTML('beforeend', `<span style="left:${i * 11.2}%;width:10.6%"></span>`);
+for (let i = 0; i < 34; i++) pista('tlg').insertAdjacentHTML('beforeend', `<span style="left:${i * 2.95}%;width:${1.6 + (i * 7 % 5) * .25}%"></span>`);
+for (let i = 0; i < 60; i++) pista('tau').insertAdjacentHTML('beforeend',
+  `<span style="left:${i * 1.66}%;width:1%;height:${20 + Math.abs(Math.sin(i * 1.7) * 70 + Math.sin(i * .6) * 20)}%"></span>`);
+const cores = [[2, 16], [20, 18], [41, 26], [70, 22]];
+itens.forEach((s, i) => { const [l, w] = cores[i % 4]; pista('ted').insertAdjacentHTML('beforeend', `<span id="cl${i}" style="left:${l}%;width:${w}%">${esc(s.nome.toUpperCase())}</span>`); });
+
+D.monta(tl => {
+  // a janela entra de longe, em leve perspectiva
+  tl.fromTo(jan, {opacity: 0, scale: .9, rotationX: 10, y: 40, filter: 'blur(12px)'},
+    {opacity: 1, scale: 1, rotationX: 0, y: 0, filter: 'blur(0px)', duration: .45, ease: 'expo.out'}, 0);
+  D.cue(0, 'whoosh');
+  // as trilhas se preenchem: vídeo, legenda e áudio entram da esquerda
+  ['tv', 'tlg', 'tau'].forEach((c, k) => tl.fromTo(`#p${c} span`, {scaleX: 0, opacity: 0, transformOrigin: '0 50%'},
+    {scaleX: 1, opacity: 1, duration: .25, ease: 'power2.out', stagger: {amount: .7}}, .25 + k * .12));
+  gsap.set('.ted span', {opacity: 0, scaleX: 0, transformOrigin: '0 50%'});
+  // o pedido digita, com o cursor piscando antes
+  const t0 = D.n('t_pede', '0.8'), passo = D.n('passo', '.045');
+  const cur = pede.querySelector('.cur');
+  for (let t = .3; t < t0; t += .5) tl.to(cur, {opacity: 0, duration: .01, yoyo: true, repeat: 1, repeatDelay: .24}, t);
+  // o D.digita quebra a linha no meio da palavra; aqui cada palavra é um bloco que não quebra
+  const dig = document.getElementById('dig'), tx = dig.textContent, ls = [];
+  dig.textContent = '';
+  tx.split(/(\s+)/).filter(Boolean).forEach(p => {
+    const pai = /^\s+$/.test(p) ? dig : dig.appendChild(Object.assign(document.createElement('span'), {className: 'w'}));
+    [.../^\s+$/.test(p) ? ' ' : p].forEach(ch => { const s = document.createElement('span'); s.textContent = ch; s.style.display = 'none'; pai.appendChild(s); ls.push(s); });
+  });
+  ls.forEach((s, i) => tl.set(s, {display: 'inline'}, t0 + i * passo));
+  D.cue(t0, 'type', {dur: +(ls.length * passo).toFixed(3)});
+  const t1 = t0 + ls.length * passo;
+  const tEnv = D.n('t_envia', t1 + .2);
+  tl.to(cur, {opacity: 0, duration: .01}, tEnv);
+  tl.fromTo('#env', {scale: 1}, {scale: .82, duration: .08, yoyo: true, repeat: 1, ease: 'power2.out'}, tEnv);
+  tl.fromTo('#env', {boxShadow: '0 0 24px rgba(124,92,255,.7)'}, {boxShadow: '0 0 60px rgba(180,160,255,1)', duration: .2, yoyo: true, repeat: 1}, tEnv);
+  D.cue(tEnv, 'mouse');
+  // cada item se marca e o clipe dele cai na trilha EDIÇÃO
+  itens.forEach((s, i) => {
+    const el = document.getElementById('it' + i), ck = el.querySelector('.ck');
+    tl.to(ck, {backgroundColor: '#A78BFA', borderColor: '#A78BFA', duration: .12}, s.t);
+    tl.fromTo(ck.querySelector('svg'), {opacity: 0, scale: .4}, {opacity: 1, scale: 1, duration: .25, ease: D.P.HEROI}, s.t);
+    tl.to(el, {color: '#fff', borderColor: 'rgba(167,139,250,.7)', backgroundColor: 'rgba(124,92,255,.22)', duration: .15}, s.t);
+    tl.fromTo('#cl' + i, {opacity: 0, scaleX: 0}, {opacity: 1, scaleX: 1, duration: .3, ease: 'expo.out', immediateRender: false}, s.t);
+    D.cue(s.t, 'certo');
+  });
+  // a agulha anda o tempo todo
+  const pw = tl0.offsetWidth - 166;
+  tl.fromTo('#agulha', {left: 150}, {left: 150 + pw * .92, duration: dur, ease: 'none'}, 0);
+  const tP = D.n('t_pronto', '3.8');
+  const selo = document.getElementById('selo');
+  tl.set(selo, {className: 'ok', textContent: '✓ PRONTO'}, tP);
+  tl.fromTo(selo, {scale: 1.25}, {scale: 1, duration: .3, ease: 'expo.out', immediateRender: false}, tP);
+  D.cue(tP, 'ding');
+  if (D.q('sai', '1') !== '0') {
+    tl.to(jan, {opacity: 0, scale: 1.04, filter: 'blur(10px)', duration: .26, ease: D.P.SAI}, dur - .28);
+    D.cue(dur - .28, 'whoosh-out');
+  }
+  return dur;
+});
+</script>
+</body>
+</html>

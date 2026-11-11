@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<!-- CAPA YT — a capa (thumbnail) de um vídeo longo do YouTube, no molde que funciona: o rosto no terço direito e
+     dois ou três desenhos inteiros à esquerda, sem manchete. 1920x1080, opaca, parada: sai como JPEG (capa.py, capa_yt).
+     O título do YouTube já fica embaixo da imagem; palavra aqui só entra como parte de um desenho (o termo com a parte
+     que importa grifada, o rótulo de um objeto). Nada encosta no canto de baixo à direita, onde o YouTube põe a duração.
+       itens     um a três desenhos, separados por ";", cada um "tipo|valor":
+                   img|<endereço>   uma imagem inteira num cartão (logo, print de tela, foto do objeto), sem recorte
+                   termo|<texto>    o termo escrito no cartão; "/" quebra a linha e *trecho* vai grifado de amarelo
+                   num|<texto>      um número grande no bloco azul ("3x", "R$ 0", "7 dias")
+                   ic|<nome>        um ícone: mic | onda | claquete | play | cel | rec
+       seta      o número do desenho (1, 2 ou 3) que a seta aponta, saindo de perto do rosto; 0 = sem seta (0). Desenho
+                 colado no rosto não ganha seta (sem 250 px de vão ela vira um risco solto), nem a seta que
+                 passaria por cima de outro desenho
+       rosto     PNG com alfa, topo da cabeça no topo e tronco comprido (o recorte do capa.py)
+       cx        o meio do rosto no PNG, em fração da largura (.5) · larg  largura do PNG na capa, em px (820)
+       ry        onde começa o cabelo, em px (70) · rx  onde cai o meio do rosto, em px (1490)
+     O chão é o do sistema: ?tema=tinta.
+     ?itens=termo|Application/Programming/*Interface*;img|../midia/capa-exemplo.jpg;num|4 min&seta=1 -->
+<html lang="pt-BR" data-qa="entra-seco fica">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1920px;height:1080px}
+#stage{width:1920px;height:1080px;padding:0;display:block;position:relative;overflow:hidden}
+/* o rosto: sombra dura no contorno, a mesma dos objetos */
+.rosto{position:absolute;width:var(--rl);filter:drop-shadow(14px 14px 0 var(--sombra,var(--ink)))}
+/* os desenhos: objetos neobrutais, cada um inteiro dentro do cartão */
+.it{position:absolute;display:flex;align-items:center;justify-content:center;overflow:hidden;--sh:16px;--bw:6px;--raio:22px}
+.it.img{padding:22px}
+.it.img img{width:100%;height:100%;object-fit:contain;display:block}
+.it.termo{flex-direction:column;align-items:flex-start;padding:30px 44px}
+.it.termo div{font:800 120px/1.02 var(--fd);letter-spacing:var(--ls);color:var(--ink);white-space:nowrap}
+.it.termo b{font-weight:inherit;padding:0 .08em;background:var(--mk);border-radius:8px}
+.it.num b{font:900 260px/1 var(--fd);letter-spacing:-.05em;white-space:nowrap;color:#fff}
+.it.ic svg{width:62%;height:62%;color:var(--ac)}
+.seta{position:absolute;inset:0;width:1920px;height:1080px;overflow:visible}
+.seta path{fill:none;stroke:var(--ac);stroke-width:18;stroke-linecap:round;stroke-linejoin:round}
+.seta path.fio{stroke:var(--ink);stroke-width:30}
+html.tinta .seta path{stroke:var(--mk)}
+html.tinta .seta path.fio{stroke:var(--ink)}
+html.tinta .rosto{filter:none}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const st = document.getElementById('stage');
+const add = (tag, cls, html = '') => { const e = document.createElement(tag); e.className = cls; e.innerHTML = html; st.appendChild(e); return e; };
+
+const ONDA = [16, 30, 52, 72, 44, 64, 28, 48, 20];
+const ICONES = {
+  mic: '<svg viewBox="0 0 100 100"><rect x="35" y="8" width="30" height="52" rx="15" fill="currentColor"/><path d="M24 46a26 26 0 0 0 52 0M50 72v14M34 90h32" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round"/></svg>',
+  onda: '<svg viewBox="0 0 100 100">' + ONDA.map((h, k) => `<line x1="${14 + k * 9}" x2="${14 + k * 9}" y1="${50 - h / 2}" y2="${50 + h / 2}" stroke="currentColor" stroke-width="6.5" stroke-linecap="round"/>`).join('') + '</svg>',
+  claquete: '<svg viewBox="0 0 100 100"><rect x="10" y="42" width="80" height="48" rx="7" fill="currentColor"/><g transform="rotate(-14 10 36)"><rect x="10" y="22" width="80" height="16" rx="4" fill="currentColor"/>' +
+    [0, 1, 2, 3].map(k => `<path d="M${18 + k * 19} 22h9l-8 16h-9z" style="fill:var(--sur)"/>`).join('') + '</g></svg>',
+  play: '<svg viewBox="0 0 100 100"><rect x="6" y="20" width="88" height="60" rx="16" fill="currentColor"/><path d="M42 36l22 14-22 14z" style="fill:var(--sur)"/></svg>',
+  cel: '<svg viewBox="0 0 100 100"><rect x="24" y="4" width="52" height="92" rx="10" fill="none" stroke="currentColor" stroke-width="7"/><path d="M36 52l10 10 19-22" fill="none" style="stroke:var(--mk)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  rec: '<svg viewBox="0 0 100 100"><rect x="6" y="26" width="62" height="48" rx="9" fill="currentColor"/><path d="M68 44l26-14v40L68 56z" fill="currentColor"/><circle cx="24" cy="42" r="8" style="fill:var(--no)"/></svg>',
+};
+
+// onde cada desenho mora, pelo número deles: tudo à esquerda do rosto e acima de y 880 (a duração fica embaixo à direita)
+const LUGARES = {
+  1: [[90, 120, 1080, 720, -2]],
+  2: [[80, 90, 640, 470, -4], [610, 400, 600, 440, 3]],
+  3: [[70, 70, 560, 390, -4], [650, 150, 540, 370, 3], [210, 500, 600, 360, -2]],
+};
+const itens = D.q('itens', 'termo|Application/Programming/*Interface*;num|4 min').split(';').map(s => s.trim()).filter(Boolean).slice(0, 3);
+const els = itens.map((s, i) => {
+  const k = s.indexOf('|'), tipo = s.slice(0, k).trim(), valor = s.slice(k + 1).trim();
+  const [x, y, w, h, rot] = LUGARES[itens.length][i];
+  const e = add('div', 'it nb ' + tipo + (tipo === 'num' ? ' cor-ac' : ''));
+  Object.assign(e.style, {left: x + 'px', top: y + 'px', width: w + 'px', height: h + 'px', transform: `rotate(${rot}deg)`});
+  if (tipo === 'img') e.innerHTML = `<img src="${esc(valor)}" alt="">`;
+  else if (tipo === 'termo') e.innerHTML = valor.split('/').map(l => `<div>${esc(l).replace(/\*([^*]+)\*/g, '<b>$1</b>')}</div>`).join('');
+  else if (tipo === 'num') e.innerHTML = `<b>${esc(valor)}</b>`;
+  else e.innerHTML = ICONES[valor] || ICONES.play;
+  return e;
+});
+
+// o rosto por cima de tudo: o meio dele (`cx`) cai em `rx`; o tronco passa da borda de baixo
+const RL = D.n('larg', '820');
+document.documentElement.style.setProperty('--rl', RL + 'px');
+const ro = add('img', 'rosto');
+ro.dataset.qa = 'ignora';   // o tronco desce até o pé de propósito
+ro.src = D.q('rosto', '../midia/rosto-estudio.png');
+ro.style.left = (D.n('rx', '1490') - D.n('cx', '.5') * RL) + 'px';
+ro.style.top = D.n('ry', '70') + 'px';
+
+window.__folha = document.fonts.load('800 100px ' + D.css('--fd').split(',')[0]).catch(() => null);
+
+D.monta(tl => {
+  els.forEach((e, i) => {
+    const im = e.querySelector('.img > img, img');
+    if (im && im.naturalWidth) {
+      // o cartão toma a proporção da imagem dentro do lugar dele, sem sair do centro: a imagem vai inteira e grande
+      const [x, y, w, h] = LUGARES[els.length][i], a = im.naturalWidth / im.naturalHeight, pad = 44;
+      const [cw, ch] = a > (w - pad) / (h - pad) ? [w, (w - pad) / a + pad] : [(h - pad) * a + pad, h];
+      Object.assign(e.style, {left: x + (w - cw) / 2 + 'px', top: y + (h - ch) / 2 + 'px', width: cw + 'px', height: ch + 'px'});
+    }
+    if (e.classList.contains('termo')) {
+      // cada linha cabe na largura do cartão, todas no mesmo corpo (o da linha mais larga)
+      const linhas = [...e.querySelectorAll('div')], larg = e.clientWidth - 88, alt = e.clientHeight - 60;
+      let fs = 120;
+      linhas.forEach(l => { l.style.fontSize = fs + 'px'; });
+      const maior = Math.max(...linhas.map(l => l.scrollWidth));
+      fs = Math.min(fs * larg / maior, fs * alt / (linhas.length * fs * 1.02), 220);
+      linhas.forEach(l => { l.style.fontSize = Math.max(56, fs) + 'px'; });
+    }
+    if (e.classList.contains('num')) {
+      const b = e.querySelector('b'), w = e.clientWidth - 70;
+      if (b.scrollWidth > w) b.style.fontSize = 260 * w / b.scrollWidth + 'px';
+    }
+  });
+  const alvo = els[D.n('seta', '0') - 1], r = alvo && alvo.getBoundingClientRect();
+  const x0 = parseFloat(ro.style.left) + RL * .18;
+  // colado no rosto, a seta vira um risco solto: sem vão de 250 px entre o desenho e o ombro, ela não entra
+  if (alvo && x0 - r.right > 250) {
+    // a seta sai da altura do ombro e pousa na borda direita do desenho, numa curva à mão
+    const y0 = Math.min(820, r.bottom + 60);
+    const x1 = r.right + 26, y1 = r.top + r.height * .55, cx = (x0 + x1) / 2, cy = Math.max(y0, y1) + 70;
+    const ang = Math.atan2(y1 - cy, x1 - cx), p = (a, l) => `${x1 - l * Math.cos(ang + a)} ${y1 - l * Math.sin(ang + a)}`;
+    // a seta que passa por cima de outro desenho esconde o desenho: nesse caso ela não entra
+    const outros = els.filter(e => e !== alvo).map(e => e.getBoundingClientRect());
+    const cruza = Array.from({length: 40}, (_, i) => i / 40).some(s => {
+      const x = (1 - s) ** 2 * x0 + 2 * (1 - s) * s * cx + s * s * x1, y = (1 - s) ** 2 * y0 + 2 * (1 - s) * s * cy + s * s * y1;
+      return outros.some(o => x > o.left - 12 && x < o.right + 12 && y > o.top - 12 && y < o.bottom + 12);
+    });
+    if (!cruza) add('div', '', `<svg class="seta" viewBox="0 0 1920 1080">${['fio', ''].map(c => `<path class="${c}" d="M${x0} ${y0} Q${cx} ${cy} ${x1} ${y1}"/><path class="${c}" d="M${p(.5, 58)} L${x1} ${y1} L${p(-.5, 58)}"/>`).join('')}</svg>`);
+  }
+  tl.set('#stage', {opacity: 1}, 0);   // parada: a capa é um quadro só
+  return D.n('dur', '1');
+});
+</script>
+</body>
+</html>

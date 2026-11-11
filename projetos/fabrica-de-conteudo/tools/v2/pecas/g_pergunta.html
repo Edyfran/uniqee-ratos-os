@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<!-- GANCHO — o cartão que se escreve na frente do vídeo: a pergunta (ou o pensamento) de quem assiste,
+     e o carimbo que responde apontando pro que vem. 1080x1920, papel claro (opaca; ?alfa=1 tira o papel).
+     No quadro 0 o cartão já está na tela, com a aba e o cursor; a frase se digita linha a linha e o
+     carimbo amarelo bate embaixo. Sem nome nem foto de quem perguntou: a frase não é atribuída a ninguém.
+       rot      a aba do cartão (PERGUNTA; PENSAMENTO pro pensamento de quem assiste)
+       l        a frase, "|" quebra a linha (a quebra é do plano, nunca no meio de um termo)
+       carimbo  o que bate embaixo ("" sem carimbo) · t_carimbo  quando ele está na tela
+       passo    o tempo de cada letra (0.02) · tam  a letra da frase (88) · y  o alto do cartão (520) · dur
+     ?rot=PERGUNTA&l=dá pra fazer|um vídeo|sem gravar nada?&carimbo=ESSE AQUI.&t_carimbo=1.15&dur=1.6 -->
+<html lang="pt-BR" data-qa="entra-seco fica">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px}
+#stage{width:1080px;height:1920px;display:block;padding:0}
+.cartao{position:absolute;left:90px;width:900px;padding:56px 50px 50px}
+.aba{position:absolute;left:-4px;top:-58px;font:700 34px/1 var(--fm);letter-spacing:.14em;color:#fff;
+  background:var(--ink);border-radius:var(--raio-s) var(--raio-s) 0 0;padding:12px 22px 14px}
+.fr{font:700 1em/1.08 var(--fd);letter-spacing:var(--ls);color:var(--ink);white-space:nowrap;min-height:1.08em}
+.fr .l{white-space:pre}
+.cur{display:inline-block;width:.08em;height:.9em;margin-left:.06em;background:var(--ac);vertical-align:-.08em}
+.car{position:absolute;left:50%;top:0;font:700 120px/1 var(--fd);letter-spacing:var(--ls);text-transform:uppercase;
+  padding:18px 34px 14px;white-space:nowrap;opacity:0}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="cartao nb" id="cartao"><div class="aba" id="aba"></div><div id="frase"></div></div>
+  <div class="car nb cor-mk" id="car"></div>
+</div>
+<script>
+const dur = D.n('dur', '1.6'), passo = D.n('passo', '0.02'), tC = D.n('t_carimbo', '1.15');
+const $ = id => document.getElementById(id);
+const LS = D.q('l', 'dá pra fazer|um vídeo|sem gravar nada?').split('|');
+$('aba').textContent = D.q('rot', 'PERGUNTA');
+$('frase').innerHTML = LS.map((l, i) => `<div class="fr" id="f${i}"><span class="tx">${l}</span><span class="cur" id="c${i}"></span></div>`).join('');
+$('frase').style.fontSize = D.n('tam', '88') + 'px';
+$('cartao').style.top = D.n('y', '520') + 'px';
+const CAR = D.q('carimbo', 'ESSE AQUI.');
+$('car').textContent = CAR;
+
+D.monta(tl => {
+  D.cabe('.fr', 48, ['.cartao', 1]);
+  D.cabe('.car', 64, .86);
+  // o cartão está na tela no quadro 0 e assenta; a frase se digita, o cursor na linha da vez
+  tl.fromTo('#cartao', {scale: 1.04, rotation: -1.5}, {scale: 1, rotation: -1, duration: .25, ease: 'back.out(2)'}, 0);
+  let t = .05;
+  LS.forEach((_, i) => {
+    gsap.set('#c' + i, {opacity: i ? 0 : 1});
+    if (i) tl.set('#c' + (i - 1), {opacity: 0}, t).set('#c' + i, {opacity: 1}, t);
+    t = D.digita(`#f${i} .tx`, t, passo);
+  });
+  if (CAR) {
+    // o carimbo bate embaixo do cartão, dentro da zona do Reels
+    const yc = $('cartao').offsetTop + $('cartao').offsetHeight + 70;
+    gsap.set('#car', {xPercent: -50, y: yc});
+    D.carimbo('#car', tC, -5);
+  }
+  return dur;
+});
+</script>
+</body>
+</html>

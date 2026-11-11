@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<!-- PROVA — notificações que chegam. 1080x1920, --alpha.
+     Cada uma cai no topo e EMPURRA as anteriores pra baixo com mola; a partir
+     da quarta, a mais velha some. Genérica: ícone quadrado, título, corpo e
+     hora — não imita o sistema de nenhum aparelho.
+       ?n=Venda aprovada|R$ 197,00|agora@0.3;Venda aprovada|R$ 197,00|agora@1.0&ic=R$&kick=hoje&dur=4 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+.zona{position:absolute;left:48px;right:62px;top:var(--y,150px)}
+.zona .kick{margin-bottom:24px}
+.pilha{position:relative}
+.nt{position:absolute;left:0;right:0;top:0;display:flex;align-items:center;gap:24px;padding:22px 28px 22px 22px;opacity:0}
+.nt .ap{flex:none;width:96px;height:96px;border:var(--bw) solid var(--ink);border-radius:var(--raio-s);background:var(--ac);color:#fff;
+  display:flex;align-items:center;justify-content:center;font:700 38px/1 var(--fd);letter-spacing:-.02em}
+.nt .tx{flex:1;min-width:0}
+.nt .l1{display:flex;align-items:baseline;gap:14px}
+.nt b{font:700 42px/1.05 var(--fd);letter-spacing:var(--ls);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nt .hr{margin-left:auto;flex:none;font:600 26px/1 var(--fm);color:var(--ink4)}
+.nt p{font:700 50px/1.1 var(--fd);letter-spacing:var(--ls);color:var(--ink);margin-top:6px;white-space:nowrap}
+</style>
+</head>
+<body>
+<div id="stage"><div class="zona" id="z"><div class="kick" id="k"></div><div class="pilha" id="pl"></div></div></div>
+<script>
+const dur = D.n('dur', '4');
+if (D.q('y')) document.documentElement.style.setProperty('--y', D.q('y') + 'px');
+document.getElementById('k').textContent = D.q('kick', '');
+const ns = D.itens('n', 'Venda aprovada|R$ 197,00|agora@0.3;Venda aprovada|R$ 197,00|agora@1.0;Venda aprovada|R$ 197,00|agora@1.5;Venda aprovada|R$ 197,00|agora@1.9;Venda aprovada|R$ 197,00|agora@2.2', ['t1', 'corpo', 'hr']);
+const ic = D.q('ic', 'R$');
+const pl = document.getElementById('pl');
+ns.forEach((n, i) => {
+  pl.insertAdjacentHTML('beforeend', `<div class="nt nb" id="n${i}"><span class="ap">${ic}</span><span class="tx"><span class="l1"><b>${n.t1}</b><span class="hr">${n.hr || ''}</span></span>${n.corpo ? `<p>${n.corpo}</p>` : ''}</span></div>`);
+});
+
+D.monta(tl => {
+  D.cabe('.nt p', 30, '.tx');
+  const h = document.getElementById('n0').offsetHeight, passo = h + 24, MAX = 4;
+  pl.style.height = (Math.min(MAX, ns.length) * passo) + 'px';
+  if (D.q('kick')) D.carimbo('#k', .05);
+  ns.forEach((n, k) => {
+    D.pousa('#n' + k, n.t, {dy: -90, s: 1.03, dr: 0});
+    D.cue(n.t, D.q('som', 'notif'));   // som=venda pra venda aprovada
+    // as anteriores descem um degrau; a quinta mais velha some
+    for (let j = 0; j < k; j++) {
+      const deg = k - j;
+      tl.to('#n' + j, {y: deg * passo, scale: 1 - Math.min(deg, 3) * .015, duration: .45, ease: D.P.MOLA}, D.at(n.t));
+      if (deg === MAX) tl.to('#n' + j, {opacity: 0, duration: .25}, D.at(n.t));
+    }
+  });
+  D.sai(['#k', '.nt'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

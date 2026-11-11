@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<!-- OFERTA — a pilha: tudo que vem no pacote, um item por batida, com a prova de cada um. 1080x1920
+     (ou 1080x1350 pelo ?ar=), --alpha.
+     A lista no papel: no alto, o título e o placar N/total; embaixo, uma linha por item (a janela
+     quadrada da prova, o nome e o ✓), separadas pelos rótulos dos grupos. No quadro 0 a lista inteira
+     já está lá, apagada: é o gancho. Cada item sai da janela dele num cartão grande (a mesma conta da
+     t_semana: a janela 9:16 à esquerda, o rótulo à direita), a tampa amarela sobe e a prova aparece;
+     depois o cartão volta, a linha acende, o ✓ bate e o placar conta. Com tudo cheio, o fecho pousa
+     embaixo. As janelas são buracos: quem põe o vídeo nelas é a composição (deriva.py, modo
+     janelas), nos mesmos retângulos e tempos. Com pronto=1 é o estado final parado (o estático):
+     a miniatura `img` de cada item na janela, tudo aceso, o fecho e a chamada na tela.
+       itens   "tampa|rótulo|abre|fecha|nome|tag|det|img;…" (/ quebra o rótulo, *grifo*): em `abre` a
+               tampa sobe; em `fecha` ela já desceu e a linha acendeu
+       cel     "x,y,w,h;…" a janela de cada linha · dir  a borda direita das linhas (1015)
+       win     "x,y,w,h" a janela do cartão · cab  "x,y,w,h" a linha do título
+       titulo  (TUDO QUE VEM) · marca (na Fábrica) · grupos "rótulo@índice;…" (o rótulo vai acima da linha)
+       fecho   "linha|linha" (*grifo*) · rod "x,y,w,h" · t_fim (-1: não entra) · t_sai (-1) · dur
+       cta     a chamada (só aparece com pronto=1) · cta_r "x,y,w,h" · logo (imagem) · logo_r "x,y,w,h"
+       destaque  "0,1" as linhas em amarelo (a frase que a pilha quer que fique) · placar  0: sem o N/total
+       pronto  1: o estado final, sem cartões (o estático)
+     ?itens=01|as *skills*/da fábrica|1.2|2.6|Skills da fábrica|NO PACOTE|Claude Code ou Codex;02|Fábrica de/*Capas*|3.6|5.0|Fábrica de Capas|BÔNUS 1|de uma foto sua&grupos=NO PACOTE@0;BÔNUS@1&t_fim=5.6&t_sai=7.4&dur=8 -->
+<html lang="pt-BR" class="alfa" data-qa="entra-seco">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:100vh;background:transparent}
+#stage{width:1080px;height:100vh;background:none;padding:0;display:block;position:relative;overflow:hidden}
+html.pronto,html.pronto body{background:var(--pp)}
+html.pronto #stage{background:var(--tex),var(--pp)}
+.ab{position:absolute}
+.cab{display:flex;align-items:center;gap:20px}
+.cab .tt{padding:10px 22px 14px;font:700 60px/1 var(--fd);letter-spacing:var(--ls);white-space:nowrap}
+.cab .mc{font:700 60px/1 var(--fd);letter-spacing:var(--ls);color:var(--ink);white-space:nowrap}
+.cab .pl{margin-left:auto;padding:12px 20px;font:700 50px/1 var(--fm);color:var(--ink);white-space:nowrap}
+.cab .pl:empty{display:none}
+.gr{font:700 44px/1 var(--fm);letter-spacing:.08em;color:var(--ink);white-space:nowrap}
+.cel{border:var(--bw) solid var(--ink);border-radius:var(--raio-s);box-shadow:calc(var(--sh)*.6) calc(var(--sh)*.6) 0 var(--ink);overflow:hidden}
+.cel img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.vz{position:absolute;inset:0;background:var(--pp2);display:flex;align-items:center;justify-content:center;
+  font:700 44px/1 var(--fm);color:var(--ink4)}
+.ln{display:flex;align-items:center;gap:18px;padding:0 18px 0 26px}
+.ln .nm{flex:1;min-width:0;font:700 48px/1.02 var(--fd);letter-spacing:var(--ls);color:var(--ink4)}
+.ln.cor-mk b{background:none;color:inherit}
+html.pronto .ln.cor-mk b{color:var(--ac)}
+.ln .ok{flex:none;width:60px;height:60px;border-radius:50%;background:var(--ok);border:var(--bw) solid var(--ink);
+  color:#fff;display:flex;align-items:center;justify-content:center;font:700 30px/1 var(--fd);opacity:0}
+.card{overflow:hidden;border:var(--bw) solid var(--ink);border-radius:var(--raio);background:transparent;opacity:0;
+  box-shadow:var(--shx,var(--sh)) var(--shx,var(--sh)) 0 var(--ink);transform-origin:0 0}
+.jan{position:absolute;border:var(--bw) solid var(--ink);border-radius:var(--raio-s);box-shadow:0 0 0 2400px var(--sur)}
+.tampa{position:absolute;inset:-2px;background:var(--mk);display:flex;align-items:center;justify-content:center;
+  font:700 150px/1 var(--fd);letter-spacing:var(--ls);color:var(--ink);transform-origin:50% 0}
+.tx{position:absolute;display:flex;flex-direction:column;align-items:flex-start;gap:26px}
+.tx .tg{padding:10px 16px;font:700 44px/1 var(--fm);letter-spacing:.06em;white-space:nowrap}
+.tx .r{font:700 64px/1.06 var(--fd);letter-spacing:var(--ls);color:var(--ink)}
+.tx .r b{background-size:0% 86%}
+.tx .dt{font:600 44px/1.12 var(--fd);color:var(--ink6)}
+.tx .i{margin-top:auto;font:700 44px/1 var(--fm);color:var(--ink6)}
+b{font-weight:inherit;padding:0 .08em;margin:0 -.03em;background:linear-gradient(var(--mk),var(--mk)) no-repeat 0 62%/100% 86%;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone}
+.rod{display:flex;align-items:center;justify-content:center;opacity:0}
+.rod .f{font:700 68px/1.08 var(--fd);letter-spacing:var(--ls);color:var(--ink);text-align:center}
+.cta{display:flex;align-items:center;justify-content:center;gap:18px;font:700 52px/1 var(--fd);letter-spacing:var(--ls);white-space:nowrap}
+.logo{object-fit:contain;object-position:left center}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="ab cab" id="folha-topo"><span class="tt nb cor-ac" id="tt"></span><span class="mc" id="mcw"><b id="mc"></b></span>
+    <span class="pl nb" id="pl"></span></div>
+  <div class="ab" id="lista" style="inset:0"></div>
+</div>
+<script>
+const dur = D.n('dur', '8'), tFim = D.n('t_fim', '5.6'), tSai = D.n('t_sai', '7.4'), PRONTO = D.q('pronto', '') === '1';
+if (PRONTO) document.documentElement.classList.add('pronto');
+const $ = id => document.getElementById(id);
+const rect = s => s.split(',').map(Number);
+const grifo = s => s.replace(/\*([^*]+)\*/g, '<b>$1</b>');
+const IT = D.q('itens', '01|as *skills*/da fábrica|1.2|2.6|Skills da fábrica|NO PACOTE|Claude Code ou Codex;02|Fábrica de/*Capas*|3.6|5.0|Fábrica de Capas|BÔNUS 1|de uma foto sua')
+  .split(';').filter(Boolean).map(s => { const [tp, r, a, f, nm, tg, dt, img] = s.split('|');
+    return {tp, r, a: +a, f: +f, nm: nm || '', tg: tg || '', dt: dt || '', img: img || ''}; });
+const N = IT.length;
+const CEL = D.q('cel', '65,560,96,96;65,830,96,96').split(';').filter(Boolean).map(rect);
+const DIR = D.n('dir', '1015');
+const [wx, wy, ww, wh] = rect(D.q('win', '89,424,446,792'));
+const [hx, hy, hw, hh] = rect(D.q('cab', '65,280,950,92'));
+const tc = $('folha-topo');
+Object.assign(tc.style, {left: hx + 'px', top: hy + 'px', width: hw + 'px', height: hh + 'px'});
+$('tt').textContent = D.q('titulo', 'TUDO QUE VEM');
+$('mc').textContent = D.q('marca', 'na Fábrica');
+if (!D.q('marca', 'na Fábrica')) $('mcw').remove();
+$('pl').innerHTML = D.q('placar', '1') === '0' ? '' : `<span id="pn">${PRONTO ? N : 0}</span>/${N}`;
+const L = $('lista');
+D.q('grupos', 'NO PACOTE@0;BÔNUS@1').split(';').filter(Boolean).forEach(g => {
+  const [rot, i] = g.split('@'), c = CEL[+i];
+  if (c) L.insertAdjacentHTML('beforeend', `<div class="ab gr" style="left:${c[0]}px;top:${c[1] - 58}px">${rot}</div>`);
+});
+const DEST = D.q('destaque', '').split(',').filter(Boolean).map(Number);
+IT.forEach((o, i) => {
+  const [x, y, w, h] = CEL[i] || CEL[0];
+  L.insertAdjacentHTML('beforeend', `<div class="ab cel" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px">` +
+    (o.img ? `<img src="${o.img}" alt="">` : '') + `<div class="vz" id="vz${i}">${i + 1}</div></div>` +
+    `<div class="ab ln nb${DEST.includes(i) ? ' cor-mk' : ''}" id="ln${i}" style="left:${x + w + 16}px;top:${y}px;width:${DIR - x - w - 16}px;height:${h}px">` +
+    `<span class="nm" id="nm${i}">${grifo(o.nm)}</span><span class="ok" id="ok${i}">✓</span></div>`);
+});
+const fe = D.q('fecho', 'Garantia de *7 dias*|e acesso na hora');
+if (fe) {
+  const [x, y, w, h] = rect(D.q('rod', '65,1040,950,190'));
+  $('stage').insertAdjacentHTML('beforeend', `<div class="ab rod nb cor-mk" id="fim" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px">` +
+    `<div class="f" id="ff">${fe.split('|').map(grifo).join('<br>')}</div></div>`);
+}
+if (PRONTO && D.q('cta', '')) {
+  const [x, y, w, h] = rect(D.q('cta_r', '65,1180,950,90'));
+  $('stage').insertAdjacentHTML('beforeend', `<div class="ab cta nb cor-ac" id="cta" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px">${D.q('cta')} →</div>`);
+}
+if (D.q('logo', '')) {
+  const [x, y, w, h] = rect(D.q('logo_r', '65,180,300,78'));
+  $('stage').insertAdjacentHTML('beforeend', `<img class="ab logo" src="${D.q('logo')}" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px" alt="">`);
+}
+// o cartão grande: a janela da prova à esquerda, o rótulo à direita (a conta da t_semana)
+const cx = wx - 24, cy = wy - 24, cw = DIR - cx, ch = wh + 48;
+if (!PRONTO) IT.forEach((o, k) => {
+  $('stage').insertAdjacentHTML('beforeend', `<div class="ab card" id="c${k}" style="left:${cx}px;top:${cy}px;width:${cw}px;height:${ch}px">` +
+    `<div class="jan" style="left:20px;top:20px;width:${ww + 8}px;height:${wh + 8}px"><div class="tampa" id="tp${k}">${o.tp}</div></div>` +
+    `<div class="tx" style="left:${ww + 72}px;right:36px;top:40px;bottom:36px">` +
+    (o.tg ? `<span class="tg nb cor-mk">${o.tg}</span>` : '') +
+    `<span class="r">${o.r.split('/').map(grifo).join('<br>')}</span>` +
+    (o.dt ? `<span class="dt">${o.dt.split('/').join('<br>')}</span>` : '') + `<span class="i">${k + 1}/${N}</span></div></div>`);
+});
+
+D.monta(tl => {
+  D.cabe('.ln .nm', 44, ['.ln', 1]);
+  D.cabe('.tx .r', 48, ['.tx', 1]);
+  D.cabe('.tx .dt', 44, ['.tx', 1]);
+  D.cabe('#ff', 44, ['.rod', 1]);
+  D.cabe('.cab .mc', 44, ['.cab', .45]);
+  if (PRONTO) {
+    // o estático: tudo aceso no quadro 0, sem cartão
+    gsap.set('.vz', {opacity: 0});
+    gsap.set('.ln .ok', {opacity: 1});
+    gsap.set('.ln .nm', {color: '#0B0D12'});
+    gsap.set('#fim', {opacity: 1, rotation: -1});
+    gsap.set('#cta', {rotation: 1});
+    return dur;
+  }
+  // a lista está no quadro 0 (o gancho é tudo que vem, ainda apagado); o grifo da marca varre logo
+  D.marca('#mc', .25);
+  const n = {v: 0};
+  IT.forEach((o, k) => {
+    const c = CEL[k] || CEL[0];
+    // o cartão sai da janela do item: começa do tamanho dela e cresce até o lugar dele
+    const s = Math.min(c[2] / cw, c[3] / ch), x0 = c[0] + c[2] / 2 - cw * s / 2 - cx, y0 = c[1] + c[3] / 2 - ch * s / 2 - cy;
+    const voa = .3, el = '#c' + k;
+    tl.fromTo(el, {x: x0, y: y0, scale: s, '--shx': '0px'},
+      {x: 0, y: 0, scale: 1, '--shx': D.SH + 'px', duration: voa, ease: D.P.EASE}, o.a - voa - .03);
+    tl.set(el, {opacity: 1}, o.a - voa - .03);
+    D.cue(o.a - voa - .03, 'whoosh');
+    // por baixo do cartão a lista some; quem segura a tela é ele
+    tl.set('#lista', {opacity: 0}, o.a - .02);
+    tl.fromTo('#tp' + k, {scaleY: 1}, {scaleY: 0, duration: .15, ease: 'power3.in'}, o.a);
+    D.cue(o.a, 'swish');
+    if (o.tg) tl.fromTo(el + ' .tg', {opacity: 0, scale: .6}, {opacity: 1, scale: 1, duration: .25, ease: D.P.MOLA}, o.a + .02);
+    D.palavras(el + ' .r', o.a + .05, .06);
+    D.marca(el + ' .r b', o.a + .4);
+    if (o.dt) D.palavras(el + ' .dt', o.a + .3, .04);
+    tl.fromTo('#tp' + k, {scaleY: 0, transformOrigin: '50% 100%'}, {scaleY: 1, duration: .12, ease: 'power3.out', immediateRender: false}, o.f - .12);
+    tl.set('#lista', {opacity: 1}, o.f);
+    tl.set('#vz' + k, {opacity: 0}, o.f);
+    tl.to(el, {x: x0, y: y0, scale: s, '--shx': '0px', duration: .15, ease: D.P.SAI}, o.f);
+    tl.set(el, {opacity: 0}, o.f + .15);
+    // a linha acende: o nome escurece, o ✓ bate e o placar conta
+    tl.to('#nm' + k, {color: '#0B0D12', duration: .15}, o.f + .05);
+    if (DEST.includes(k)) tl.to('#nm' + k + ' b', {color: '#0640fb', duration: .15}, o.f + .05);
+    tl.fromTo('#ok' + k, {opacity: 0, scale: 1.8}, {opacity: 1, scale: 1, duration: .25, ease: 'back.out(2.4)'}, o.f + .1);
+    D.cue(o.f + .12, 'certo');
+    if ($('pn')) {
+      tl.to(n, {v: k + 1, duration: .01, onUpdate: () => { $('pn').textContent = Math.round(n.v); }}, o.f + .12);
+      tl.fromTo('#pl', {scale: 1}, {scale: 1.12, duration: .12, yoyo: true, repeat: 1, ease: 'power2.out'}, o.f + .12);
+    }
+  });
+  if (fe && tFim >= 0 && tFim < dur) {
+    D.pousa('#fim', tFim, {rot: -1, som: 'stamp'});
+    D.marca('#ff b', tFim + .35);
+  }
+  if (tSai >= 0 && tSai < dur) {
+    tl.to(['#folha-topo', '#lista', '#fim'], {opacity: 0, y: -60, duration: .3, ease: D.P.SAI, stagger: .05}, tSai);
+    D.cue(tSai, 'whoosh-out');
+  }
+  return dur;
+});
+</script>
+</body>
+</html>

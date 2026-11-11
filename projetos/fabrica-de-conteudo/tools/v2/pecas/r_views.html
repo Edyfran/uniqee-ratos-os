@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<!-- param x: o lado esquerdo do celular (589) · CLONE — celular com o Reel e o contador de views (Deps_-cz-Fg, efeito 07). 1080x1920, --alpha, por cima da pessoa.
+     Celular x 589-958 y 785-1406 (369x621), borda branca 4 px, canto 28 px. Entra de uma vez (pop de 0,1 s). Topo: texto
+     pequeno amarelo; meio: a capa; rodapé: play + número. O número fica em 0, sobe até `n` em 0,75 s e chega 0,18 s antes do fim com
+     ease-out forte e vira amarelo ao chegar. Saída: o celular inclina em 3D e fica translúcido, depois corte seco.
+       img  a capa do Reel · n  o número final (67627 = views do anúncio Demo Motion, Meta, 20/10) · l1 l2  o texto de cima · t0 (0.05) · t_conta  quando começa a subir (padrão: chega ao número 0,18 s antes do fim do dur; fica em 0 por ~0,57 s)
+       sobe  quanto leva (0.75) · dur (1.55)
+       ?img=../../../../.reels-assets/reels/fabrica-quanto-custou-capa.jpg&n=67627&dur=1.55 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;900&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px;background:transparent}
+#stage{padding:0;display:block;overflow:hidden;background:none;perspective:1400px}
+#f{position:absolute;left:var(--px,589px);top:785px;width:369px;height:621px;box-sizing:border-box;border:4px solid #F3F3F3;
+  border-radius:28px;background:var(--ink);overflow:hidden;opacity:0;box-shadow:8px 8px 0 var(--ink)}
+#f img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#f .som{position:absolute;left:0;right:0;top:0;bottom:0;background:linear-gradient(rgba(11,13,18,.7),transparent 22%,transparent 72%,rgba(11,13,18,.82))}
+#tp{position:absolute;left:0;right:0;top:20px;text-align:center;font:700 20px/1.15 var(--fd);color:var(--mk);letter-spacing:-.01em}
+#bx{position:absolute;left:20px;bottom:26px;display:flex;align-items:center;gap:10px;font:900 36px/1 var(--fd);color:#fff;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+#bx svg{width:20px;height:20px}
+</style>
+</head>
+<body>
+<div id="stage"><div id="f"><img id="im"><div class="som"></div><div id="tp"></div>
+<div id="bx"><svg viewBox="0 0 20 20"><path d="M3 1.5v17l15-8.5z" fill="#fff"/></svg><span id="num">0</span></div></div></div>
+<script>
+const dur = D.n('dur', '1.55'), t0 = D.n('t0', '0.05'), sobe = D.n('sobe', '0.75'), tc = D.n('t_conta', String(+(D.n('dur', '1.55') - .18 - D.n('t0', '0.05') - D.n('sobe', '0.75')).toFixed(3))), N = D.n('n', '67627');
+document.documentElement.style.setProperty('--px', D.n('x', '589') + 'px');
+document.getElementById('im').src = D.q('img', '../../../../.reels-assets/reels/fabrica-quanto-custou-capa.jpg');
+document.getElementById('tp').innerHTML = D.q('l1', 'Feito pela Fábrica') + (D.q('l2', '') ? '<br>' + D.q('l2', '') : '');
+const num = document.getElementById('num'), fmt = v => Math.round(v).toLocaleString('pt-BR');
+D.monta(tl => {
+  const o = {v: 0};
+  tl.set('#f', {opacity: 1}, t0);
+  tl.fromTo('#f', {scale: .86}, {scale: 1, duration: .1, ease: 'power3.out'}, t0);
+  tl.to(o, {v: N, duration: sobe, ease: 'power3.out', onUpdate: () => { num.textContent = fmt(o.v); }}, t0 + tc);
+  tl.set(num, {color: 'var(--mk)'}, t0 + tc + sobe);
+  D.cue(t0, 'pop');
+  // saída: inclina em 3D e fica translúcido; depois corte seco
+  tl.to('#f', {rotationY: -38, x: 14, opacity: .5, duration: .1, ease: 'power2.in', transformOrigin: '100% 50%'}, dur - .12);
+  tl.set('#f', {opacity: 0}, dur - .01);
+  return dur;
+});
+</script>
+</body>
+</html>

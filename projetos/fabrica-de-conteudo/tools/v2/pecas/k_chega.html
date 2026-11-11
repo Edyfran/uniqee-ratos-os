@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<!-- TIPOGRAFIA — "o mundo de madrugada que estilhaça": a dor de noite, a palavra que quebra o vidro e o dia por baixo.
+     1080x1920, opaca. Abre no chão tinta: o celular (objeto 3D, `midia/objeto-celular.png`, 748 px de largura, sobe do
+     pé do quadro) com a edição travada (anel girando, linha do tempo cheia de bloco e de ✕, "Faltam 3 h 40 min"), a
+     lua, o relógio de mesa (objeto 3D, `midia/objeto-relogio.png`, com os ponteiros desenhados aqui, que giram rápido e
+     freiam em 1:12), estrelas, e a frase da dor palavra a palavra. As duas imagens vêm do gpt-image, recortadas pelo
+     Vision (`videos/fabrica/chega-motion/objetos/`). A
+     palavra de impacto (`hero`, Anton cheia no amarelo, borda e sombra de tinta) vem de trás do celular, desfocada,
+     chegando; em `t_hit` ela bate: soco de câmera, onda amarela, duas quadros parados (o vidro trinca de dentro
+     pra fora) e o mundo de noite se parte em cacos (uns 40, em anéis, com a borda amarela) que saem por cascata, os de
+     dentro primeiro, cada um girando e caindo pro seu lado: poucos (32), e os de dentro saem rápido, então a palavra
+     fica com ar em volta. Por baixo está o MESMO celular, de dia, no mesmo lugar: a tela toca o vídeo editado (`ve`).
+     A palavra sobe pro topo, e a linha de apoio (`apoio`) cai num bloco azul com a palavra grifada. O celular é grande
+     e passa do pé do quadro (a composição enche; a zona segura é só do TEXTO): tudo que se lê fica em x 65–1015,
+     y 270–1250.
+     Os cacos são o retrato do mundo de noite (`snap`, PNG 1080×1920): `v2.py render k_chega mundo=1 dur=0.2`
+     e um quadro dele. Sem `snap`, os cacos saem de tinta lisa (a peça abre no catálogo e no qa sem nada).
+     Movimento do núcleo (pesquisa/animacao-principios/ESTUDO.md): antecipação e soco, cascata de 2–3 quadros
+     (irmãos a 1–3 quadros), peso (caco grande dura mais e gira menos), arco (x e y em curvas diferentes), saída
+     acelerando, a sombra dura é da luz (um filtro só no grupo: girar o caco não gira a sombra), nada passa do
+     ponto. Quem ia se mexer espera o herói: a palavra é a única coisa parada enquanto o resto voa (Lasseter 2.4).
+       setup  as linhas da dor, `|` entre elas, `*palavra*` no amarelo (Gravou rapidinho.|Editou a *noite* toda.)
+       hero   a palavra de impacto (CHEGA.) · apoio  a linha que cai depois (Você *grava.*)
+       t_hit  o instante da batida (1.65)
+       entra  1: o mundo se monta no começo (celular sobe, lua e relógio pulam) · hora  a hora que o relógio para (1:12)
+       ve  o vídeo da tela do celular de dia (all-intra, 1080×1920) · tv  quando ele começa (t_hit + 0.45) · v0  o segundo dele em que começa (0)
+       snap  o retrato do mundo de noite · mundo  1: só o mundo de noite parado (pra tirar o `snap`) · dur
+       ts, ps  quando cada linha da dor entra e o passo entre as palavras dela, separados por ; (0.15;1.5 e .22;.26)
+       ?ar=1080x1350  o 4:5 de verdade: a composição é outra (celular, relógio, lua, título e palavra nos lugares do quadro dele), não o 9:16 cortado
+       d_sobe  quanto a palavra espera antes de subir (0.55) · d_apoio  o bloco do apoio, depois que ela assenta (0.05)
+       solo  1: só a palavra e o apoio, em fundo transparente (a batida seguinte, a k_pedido, parte deste quadro final)
+       ?setup=Gravou rapidinho.|Editou a *noite* toda.&hero=CHEGA.&apoio=Você *grava.*&t_hit=1.65&dur=4 -->
+<html lang="pt-BR" data-qa="entra-seco">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/editorial.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<script>if ((new URLSearchParams(location.search).get('ar') || '').indexOf('1080x1350') === 0) document.write('<style>html,body,#stage,#mundo,.cm{height:1350px!important}</style>');</script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+#stage{padding:0;display:block;overflow:hidden;background:var(--pp)}
+#mundo{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:50% 50%}
+.cm{position:absolute;left:0;top:0;width:1080px;height:1920px}
+#papel{position:absolute;left:0;top:0}
+
+/* o celular: a imagem 3D (748×1554, passa do pé do quadro) e a tela dentro dela (a mesma de noite e de dia) */
+.ph{position:absolute;left:120px;top:720px;width:748px;height:1554px}
+.ph .sc{position:absolute;left:0;top:0;width:748px;height:1554px;transform-origin:0 0}
+.ph .corpo{position:absolute;left:0;top:0;width:748px;height:1554px;display:block}
+.ph .tela{position:absolute;left:21px;top:17px;width:690px;height:1518px;border-radius:66px;overflow:hidden;background:var(--ink8)}
+.ph .cam{position:absolute;left:359px;top:56px;width:30px;height:30px;border-radius:50%;background:var(--cine);z-index:4;
+  box-shadow:0 0 0 4px #0b0d12,inset 3px 3px 0 rgba(120,150,255,.28)}
+#dia{filter:drop-shadow(16px 16px 0 var(--ink))}
+#nt{filter:drop-shadow(0 0 80px color-mix(in srgb,var(--ac) 75%,transparent))}
+#dia .tela{background:var(--ink)}
+.mid{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;display:block}
+
+/* a noite */
+#noite{background:var(--ink);overflow:hidden}
+#fundo-n{background-image:radial-gradient(circle,color-mix(in srgb,var(--pp) 9%,transparent) 2px,transparent 2.6px);background-size:36px 36px}
+#brilho{position:absolute;left:-60px;top:760px;width:1200px;height:1200px;
+  background:radial-gradient(closest-side,color-mix(in srgb,var(--ac) 55%,transparent),color-mix(in srgb,var(--ac) 0%,transparent))}
+.est{position:absolute;background:var(--pp);clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%)}
+.est.am{background:var(--mk)}
+#lua{position:absolute;overflow:visible}
+#rel{position:absolute;left:-10px;top:1500px;width:360px;height:418px;filter:drop-shadow(12px 12px 0 var(--mk))}
+#rel img{display:block;width:360px;height:418px}
+#rel svg{position:absolute;left:0;top:0;width:360px;height:418px;overflow:visible;filter:drop-shadow(4px 5px 0 rgba(11,13,18,.28))}
+#setup{position:absolute;left:0;top:455px;width:1080px;text-align:center;font:700 88px/1.14 var(--fd);letter-spacing:var(--ls);color:var(--pp)}
+#setup .s1{color:var(--ink4)}
+#setup b{color:var(--mk);font-weight:700}
+
+/* a edição travada: barra, anel, linha do tempo, progresso parado (px da tela de 690×1518) */
+.bar{position:absolute;left:34px;right:34px;top:112px;height:56px;display:flex;justify-content:space-between;align-items:center;
+  font:600 30px/1 var(--fm);color:var(--cod-tx);letter-spacing:.02em}
+.bar i{font-style:normal;background:var(--mk);color:var(--ink);padding:9px 16px;border-radius:10px}
+#anel{position:absolute;left:230px;top:215px;width:230px;height:230px;border-radius:50%;box-sizing:border-box;
+  border:23px solid var(--ink6);border-top-color:var(--mk)}
+.rot{position:absolute;left:0;right:0;top:482px;text-align:center;font:500 30px/1 var(--fm);color:var(--cod-cm)}
+#linha{position:absolute;left:26px;right:26px;top:560px;height:400px}
+.fx{position:absolute;left:0;right:0;height:56px}
+.bl{position:absolute;top:0;height:56px;border:3px solid var(--ink);border-radius:9px;box-sizing:border-box}
+.bl.ac{background:var(--ac)} .bl.pp{background:var(--pp)} .bl.mk{background:var(--mk)} .bl.n{background:var(--ink4)}
+.bl u{position:absolute;right:-7px;top:-12px;width:26px;height:26px;border-radius:50%;background:var(--no);border:3px solid var(--ink);
+  color:var(--pp);font:700 18px/20px var(--fm);text-align:center;text-decoration:none}
+#agulha{position:absolute;top:-18px;width:5px;height:408px;margin-left:-2px;background:var(--pp)}
+#agulha::before{content:"";position:absolute;left:-10px;top:-7px;width:25px;height:25px;background:var(--mk);border:3px solid var(--ink);
+  border-radius:7px;box-sizing:border-box}
+#prog{position:absolute;left:34px;right:34px;top:1000px;height:30px;border:3px solid var(--ink6);border-radius:15px;box-sizing:border-box}
+#prog i{display:block;width:12%;height:100%;border-radius:12px;background:var(--mk)}
+#falta{position:absolute;left:0;right:34px;top:1052px;text-align:right;font:600 34px/1 var(--fm);color:var(--cod-cm)}
+
+/* a palavra: Anton cheia no amarelo, borda e sombra de tinta (a voz `gigante`) */
+.gg{position:absolute;white-space:nowrap;font:400 100px/1 var(--ed-gig);font-style:normal;text-transform:uppercase;color:var(--mk);
+  -webkit-text-stroke:12px var(--ink);paint-order:stroke fill}
+#hero{filter:drop-shadow(12px 12px 0 var(--ink));opacity:0}
+#hb{opacity:0}
+
+/* o apoio: o bloco azul, a palavra grifada */
+#apoio{position:absolute;left:0;top:560px;opacity:0;background:var(--ac);color:var(--pp);font:700 78px/1 var(--fd);
+  letter-spacing:var(--ls);padding:20px 38px 24px;white-space:nowrap}
+#apoio b{background:linear-gradient(var(--mk),var(--mk)) no-repeat 0 62%/0% 80%;color:var(--ink);padding:0 10px;margin:0 -6px;font-weight:700}
+
+/* os cacos: um filtro só no grupo (a luz é fixa), a borda amarela de cada um */
+#cacos{visibility:hidden;filter:drop-shadow(13px 13px 0 var(--ink))}
+.p{position:absolute}
+.p .f{position:absolute;left:0;top:0;width:100%;height:100%;background-color:var(--ink)}
+.p svg{position:absolute;left:0;top:0;overflow:visible}
+#onda{position:absolute;left:0;top:0;width:1800px;height:1800px;border-radius:50%;box-sizing:border-box;border:16px solid var(--mk);
+  box-shadow:0 0 0 4px var(--ink),inset 0 0 0 4px var(--ink);opacity:0}
+</style>
+</head>
+<body>
+<div id="stage"><div id="mundo">
+  <svg id="papel" width="1080" height="1920"></svg>
+  <!-- o dia, por baixo: o mesmo celular, no mesmo lugar, a tela toca o vídeo editado -->
+  <div class="ph" id="dia"><div class="sc"><img class="corpo" alt="" src="../midia/objeto-celular.png"><div class="tela" id="tela-dia"></div><i class="cam"></i></div></div>
+  <!-- a noite: tudo que vira caco -->
+  <div class="cm" id="noite">
+    <div class="cm" id="fundo-n"></div>
+    <div id="brilho"></div>
+    <div class="cm" id="estrelas"></div>
+    <div class="gg" id="hb" data-qa="ignora"></div>
+    <svg id="lua" width="170" height="170" viewBox="-85 -85 170 170" style="left:880px;top:290px"></svg>
+    <div class="ph" id="nt"><div class="sc"><img class="corpo" alt="" src="../midia/objeto-celular.png"><div class="tela">
+      <div class="bar"><span>Exportando…</span><i>12%</i></div>
+      <div id="anel"></div>
+      <div class="rot">travou de novo</div>
+      <div id="linha"><div id="agulha"></div></div>
+      <div id="prog"><i></i></div>
+      <div id="falta">Faltam 3 h 40 min</div>
+    </div><i class="cam"></i></div></div>
+    <div id="rel"><img alt="" src="../midia/objeto-relogio.png"><svg id="relogio" viewBox="-179.4 -232.9 360 418" style="width:360px;height:418px"></svg></div>
+    <div id="setup"></div>
+  </div>
+  <div class="cm" id="cacos"></div>
+  <div id="onda"></div>
+  <div class="gg" id="hero"></div>
+  <div class="nb" id="apoio"></div>
+</div></div>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const marca = s => esc(s).replace(/\*([^*]+)\*/g, '<b>$1</b>');
+const W = 1080, H = innerHeight, Q = D.QD;
+const MUNDO = D.q('mundo', '0') === '1', ENTRA = D.q('entra', '0') === '1', SOLO = D.q('solo', '0') === '1';
+const T = D.n('t_hit', '1.65'), dur = D.n('dur', MUNDO ? '0.2' : '4');
+// O 9:16 e o 4:5 são duas composições (nunca a mesma cortada): o celular tem o mesmo tamanho (840 de largura), mas o lugar, o título, a
+// lua, o relógio e a palavra são de cada quadro. A zona segura do texto: 9:16 y 270–1250 · 4:5 inteiro (y 54–1296).
+const A45 = innerHeight < 1500;
+const L = A45 ? {ps: 1.123, px: 120, py: 420, setup: 168, setupPx: 70, lua: [905, 40], rel: [-10, 955], brilho: 560, CY: 560, CYT: 195, ESC: .85,
+                 apTop: 305, apPx: 80, ui: 1}
+              : {ps: 1.123, px: 120, py: 720, setup: 430, setupPx: 78, lua: [880, 270], rel: [-10, 1500], brilho: 760, CY: 700, CYT: 415, ESC: .85,
+                 apTop: 580, apPx: 84, ui: 0};
+const SNAP = D.q('snap', ''), VE = D.q('ve', '');
+const HERO = D.q('hero', 'CHEGA.'), HORA = D.q('hora', '1:12').split(':').map(Number);
+let semente = 11;                                    // sequência fixa, sem Math.random: cada quadro igual
+const rnd = () => (semente = (semente * 16807) % 2147483647) / 2147483647;
+
+// ---------- o papel por baixo (a luz suave da bancada) ----------
+$('papel').innerHTML = `<defs>
+  <pattern id="pt" width="36" height="36" patternUnits="userSpaceOnUse"><circle cx="18" cy="18" r="2.2" fill="rgba(11,13,18,.07)"/></pattern>
+  <radialGradient id="la"><stop offset="0" style="stop-color:var(--mk);stop-opacity:.42"/><stop offset=".55" style="stop-color:var(--mk);stop-opacity:.14"/><stop offset="1" style="stop-color:var(--mk);stop-opacity:0"/></radialGradient>
+  <radialGradient id="lb2"><stop offset="0" style="stop-color:var(--ac);stop-opacity:.16"/><stop offset="1" style="stop-color:var(--ac);stop-opacity:0"/></radialGradient>
+  <radialGradient id="lc"><stop offset="0" style="stop-color:var(--mk);stop-opacity:.30"/><stop offset="1" style="stop-color:var(--mk);stop-opacity:0"/></radialGradient></defs>
+  <rect width="${W}" height="${H}" style="fill:var(--pp)"/>
+  <circle id="luz-a" cx="860" cy="520" r="760" fill="url(#la)"/>
+  <circle id="luz-b" cx="120" cy="1180" r="640" fill="url(#lb2)"/>
+  <circle id="luz-c" cx="170" cy="280" r="520" fill="url(#lc)"/>
+  <rect width="${W}" height="${H}" fill="url(#pt)"/>`;
+
+// ---------- a noite: estrelas, lua, relógio, celular ----------
+const ESTR = A45 ? [[70, 120, 20, 0], [1000, 160, 26, 1], [190, 330, 14, 0], [860, 330, 16, 0], [40, 560, 18, 1], [1040, 560, 14, 0], [60, 900, 16, 0],
+  [1030, 880, 22, 1], [30, 1180, 14, 0], [1050, 1150, 18, 0], [560, 60, 14, 0], [330, 1300, 12, 0], [760, 1310, 16, 1], [520, 1290, 12, 0],
+  [250, 60, 12, 0], [700, 130, 16, 1], [100, 700, 12, 0], [980, 720, 14, 0]]
+  : [[88, 330, 22, 0], [960, 300, 30, 1], [70, 690, 16, 0], [180, 560, 26, 0], [980, 880, 20, 0], [1010, 1150, 28, 1],
+  [60, 1010, 18, 1], [100, 880, 14, 0], [1010, 1430, 22, 0], [960, 1640, 18, 0], [450, 1790, 14, 0], [1040, 1790, 24, 1],
+  [330, 1790, 12, 0], [30, 1480, 16, 0], [1000, 700, 14, 0], [620, 640, 12, 0], [150, 420, 14, 1], [840, 430, 16, 0],
+  [60, 1250, 20, 0], [1030, 990, 14, 0], [520, 380, 18, 0], [300, 330, 12, 0], [760, 340, 14, 1], [1040, 480, 12, 0]];
+const estrelas = ESTR.map(([x, y, s, am]) => {
+  const e = document.createElement('div'); e.className = 'est' + (am ? ' am' : '');
+  Object.assign(e.style, {left: (x - s) + 'px', top: (y - s) + 'px', width: 2 * s + 'px', height: 2 * s + 'px'});
+  $('estrelas').appendChild(e); return e;
+});
+$('lua').innerHTML = `<defs><mask id="mlua"><rect x="-85" y="-85" width="170" height="170" style="fill:var(--pp)"/><circle cx="36" cy="-20" r="58" style="fill:var(--ink)"/></mask>
+  <radialGradient id="glua" cx=".3" cy=".28" r=".85"><stop offset="0" style="stop-color:color-mix(in srgb,var(--mk) 35%,var(--pp))"/><stop offset=".5" style="stop-color:var(--mk)"/><stop offset="1" style="stop-color:color-mix(in srgb,var(--mk) 68%,var(--ink))"/></radialGradient></defs>
+  <g transform="translate(11,11)"><circle r="66" mask="url(#mlua)" style="fill:var(--ink)"/></g>
+  <circle r="66" mask="url(#mlua)" fill="url(#glua)"/>`;
+// o relógio é a imagem 3D (a face branca, só as marcas); os ponteiros são nossos e giram (centro da face em 179,233 da caixa)
+$('relogio').innerHTML = `<g id="hr"><line x1="0" y1="8" x2="0" y2="-62" style="stroke:var(--ink)" stroke-width="11" stroke-linecap="round"/></g>
+  <g id="mn"><line x1="0" y1="9" x2="0" y2="-96" style="stroke:var(--ink)" stroke-width="7" stroke-linecap="round"/></g>
+  <circle r="11" style="fill:var(--ac);stroke:var(--ink)" stroke-width="4"/>`;
+// a linha do tempo travada: 6 faixas de blocos de largura irregular, e uns ✕ (vermelho é sinal: deu erro)
+const COR = ['ac', 'pp', 'mk', 'n', 'ac', 'pp'], LT = 638;
+for (let f = 0; f < 6; f++) {
+  const fx = document.createElement('div'); fx.className = 'fx'; fx.style.top = f * 68 + 'px';
+  let x = f % 2 ? 0 : 34;
+  while (x < LT) {
+    const w = Math.min(LT - x, 40 + Math.floor(rnd() * 112));
+    if (w >= 28) {
+      const b = document.createElement('div'); b.className = 'bl ' + COR[Math.floor(rnd() * COR.length)];
+      Object.assign(b.style, {left: x + 'px', width: w - 6 + 'px'});
+      if (rnd() < .13 && w > 62) b.innerHTML = '<u>×</u>';
+      fx.appendChild(b);
+    }
+    x += w + 4;
+  }
+  $('linha').appendChild(fx);
+}
+// o texto da dor: cada linha é uma <div>; as palavras sobem pela máscara do núcleo
+const linhas = D.q('setup', 'Gravou rapidinho.|Editou a *noite* toda.').split('|');
+$('setup').innerHTML = linhas.map((l, i) => `<div class="s${i + 1}">${marca(l)}</div>`).join('');
+// o vídeo da tela de dia
+$('hero').textContent = HERO; $('hb').textContent = HERO;   // já no DOM: a Anton carrega antes da medida
+const mv = D.midia('#tela-dia', VE, 'editado');
+// a palavra e o apoio
+$('apoio').innerHTML = `<span id="ap-tx">${marca(D.q('apoio', 'Você *grava.*'))}</span>`;
+
+['dia', 'nt'].forEach(i => { Object.assign($(i).style, {left: L.px + 'px', top: L.py + 'px'}); $(i).querySelector('.sc').style.transform = `scale(${L.ps})`; });
+Object.assign($('setup').style, {top: L.setup + 'px', fontSize: L.setupPx + 'px'});
+Object.assign($('lua').style, {left: L.lua[0] + 'px', top: L.lua[1] + 'px'});
+Object.assign($('rel').style, {left: L.rel[0] + 'px', top: L.rel[1] + 'px'});
+$('brilho').style.top = L.brilho + 'px';
+$('apoio').style.top = L.apTop + 'px';
+$('apoio').style.fontSize = L.apPx + 'px';
+if (A45) {     // no 4:5 a tela do celular mostra 828 de 1518: a UI da edição travada se arruma pra caber
+  Object.assign($('anel').style, {top: '170px', left: '245px', width: '200px', height: '200px', borderWidth: '20px'});
+  Object.assign(document.querySelector('.rot').style, {top: '392px'});
+  Object.assign($('linha').style, {top: '450px'});
+  [...$('linha').querySelectorAll('.fx')].forEach((f, i) => { f.style.top = i * 62 + 'px'; });
+  $('prog').style.display = 'none'; $('falta').style.display = 'none';
+}
+// a linha de apoio cabe na largura do texto (950): a fonte encolhe até caber
+(() => { const a = $('apoio'); let px = L.apPx; while (a.offsetWidth > 930 && px > 40) { px -= 2; a.style.fontSize = px + 'px'; } })();
+
+if (SOLO) {    // só a palavra e o apoio, sobre nada: a k_pedido parte deste quadro final
+  ['dia', 'noite', 'cacos', 'onda', 'papel'].forEach(i => $(i).style.display = 'none');
+  ['stage', 'mundo'].forEach(i => $(i).style.background = 'none');
+  document.documentElement.style.background = 'none'; document.body.style.background = 'none';
+}
+if (MUNDO) {   // ---------- o retrato: só o mundo de noite, parado, na pose em que a batida o pega ----------
+  ['dia', 'cacos', 'onda', 'hero', 'apoio', 'hb', 'papel'].forEach(i => $(i).style.display = 'none');
+  D.monta(tl => {
+    D.divide($('setup'));
+    gsap.set('#hr', {rotation: (HORA[0] % 12) * 30 + HORA[1] * .5, svgOrigin: '0 0'});
+    gsap.set('#mn', {rotation: HORA[1] * 6, svgOrigin: '0 0'});
+    gsap.set('#anel', {rotation: 40});
+    gsap.set('#agulha', {x: 418});
+    return dur;
+  });
+} else {
+D.monta(tl => {
+  const PADRAO = {hr: (HORA[0] % 12) * 30 + HORA[1] * .5, mn: HORA[1] * 6, anel: 40, cab: 418};
+  const FIM_N = T - .16;           // o mundo de noite para aqui: o retrato dele é o que a batida parte
+
+  // ---- a palavra: o tamanho sai da medida da tinta (a largura da peça, 880), não do olho ----
+  const FZ = D.css('--ed-gig').split(',')[0];
+  const cx = document.createElement('canvas').getContext('2d');
+  cx.font = '400 100px ' + FZ;
+  const m = cx.measureText(HERO.toUpperCase()), HW = 880, k = HW / m.width, F = 100 * k;
+  const larg = m.width * k, alt = (m.actualBoundingBoxAscent + m.actualBoundingBoxDescent) * k;
+  const topo = (50 + (m.fontBoundingBoxAscent - m.fontBoundingBoxDescent) / 2 - m.actualBoundingBoxAscent) * k;
+  const CY = L.CY, CYT = L.CYT, ESC_T = L.ESC;       // onde bate, e onde assenta (centro da tinta)
+  [$('hero'), $('hb')].forEach(el => {
+    Object.assign(el.style, {left: (540 - larg / 2) + 'px', top: (CY - topo - alt / 2) + 'px', width: larg + 'px', height: F + 'px',
+      font: `400 ${F}px/1 ${D.css('--ed-gig')}`, transformOrigin: `${larg / 2}px ${topo + alt / 2}px`});
+  });
+  const ap = $('apoio');
+  ap.style.left = '0px';
+  gsap.set(ap, {x: 540 - ap.offsetWidth / 2});
+
+  // ---- a câmera e o chão por baixo ----
+  D.camera(dur, 1.0, 1.02);
+  tl.to('#luz-a', {attr: {cx: 820, cy: 560}, duration: dur, ease: 'sine.inOut'}, 0);
+  tl.to('#luz-c', {attr: {cx: 200, cy: 320}, duration: dur, ease: 'sine.inOut'}, 0);
+
+  // ---- a noite (até FIM_N): o mundo gira, trava e fica parado, que é a pose do retrato ----
+  const TLN = D.q('ts', '0.15;1.5').split(';').map(Number), PLN = D.q('ps', '.22;.26').split(';').map(Number);
+  const ritmo = ENTRA ? .45 : 0;
+  if (ENTRA) {
+    // o 1º quadro já tem o mundo (brilho, estrelas, o celular subindo pela borda): só lua, relógio e a dor entram depois
+    tl.fromTo('#brilho', {opacity: .35}, {opacity: 1, duration: .8, ease: 'sine.out'}, 0);
+    tl.fromTo('#nt', {y: 300}, {y: 0, duration: .65, ease: 'power3.out'}, 0);
+    tl.fromTo('#lua', {scale: .4, opacity: 0, transformOrigin: '50% 50%'}, {scale: 1, opacity: 1, duration: .4, ease: 'power3.out'}, .3);
+    tl.fromTo('#rel', {scale: .5, opacity: 0, transformOrigin: '50% 100%'}, {scale: 1, opacity: 1, duration: .45, ease: 'back.out(1.6)'}, .42);
+    D.cue(.3, 'pop'); D.cue(.42, 'pop');
+  }
+  estrelas.forEach((e, i) => tl.fromTo(e, {opacity: .3, scale: ENTRA ? .5 : .9},
+    {opacity: 1, scale: 1, duration: .5, ease: 'power2.out'}, (ENTRA ? .15 : 0) + (i % 6) * .11));
+  // o relógio gira rápido e freia na hora (a hora passa: o minuteiro dá 5 voltas, o das horas anda um quarto)
+  tl.fromTo('#mn', {rotation: PADRAO.mn - 360 * 5, svgOrigin: '0 0'}, {rotation: PADRAO.mn, svgOrigin: '0 0', duration: FIM_N - ritmo, ease: 'power3.out'}, ritmo);
+  tl.fromTo('#hr', {rotation: PADRAO.hr - 150, svgOrigin: '0 0'}, {rotation: PADRAO.hr, svgOrigin: '0 0', duration: FIM_N - ritmo, ease: 'power3.out'}, ritmo);
+  // o anel da exportação gira e freia; a cabeça da linha do tempo anda e para no meio do nada
+  tl.fromTo('#anel', {rotation: 40 - 360 * 2}, {rotation: 40, duration: FIM_N - ritmo, ease: 'power3.out'}, ritmo);
+  tl.fromTo('#agulha', {x: 48}, {x: PADRAO.cab, duration: FIM_N - ritmo, ease: 'power2.out'}, ritmo);
+  D.cue(0, 'tick-roll', {dur: Math.max(.5, FIM_N - .1)});
+  // a dor, palavra a palavra: a 1ª linha já está (t1 < 0) ou entra; a 2ª entra e é o foco
+  const LN = [...$('setup').children];
+  LN.forEach((ln, i) => { D.palavras(ln, TLN[i] ?? TLN[TLN.length - 1], PLN[i] ?? .22); gsap.set(ln, {opacity: 1}); });
+
+  // ---- a palavra vem de trás do celular, desfocada, chegando; nos 2 últimos quadros passa pra frente e bate ----
+  const Ta = T - .62, Tsw = T - 2 * Q, S_SW = 1.14, B_SW = 6;
+  tl.fromTo('#hb', {opacity: 0, scale: 1.9, filter: 'blur(26px)'}, {opacity: 1, scale: S_SW, filter: `blur(${B_SW}px)`, duration: Tsw - Ta, ease: 'power2.in'}, Ta);
+  tl.fromTo('#hero', {opacity: 1, scale: S_SW, filter: `blur(${B_SW}px) drop-shadow(12px 12px 0 var(--ink))`},
+    {scale: 1, filter: 'blur(0px) drop-shadow(12px 12px 0 var(--ink))', duration: 2 * Q, ease: 'power2.in', immediateRender: false}, Tsw);
+  tl.set('#hero', {opacity: 0}, 0);
+  tl.set('#hero', {opacity: 1}, Tsw);
+  D.cue(T, 'riser');
+
+  // ---- a batida: soco, onda, vidro trincando de dentro pra fora, mundo de noite vira caco ----
+  tl.set('#noite', {autoAlpha: 0}, T);
+  tl.set('#cacos', {autoAlpha: 1}, T);
+  D.soco('#mundo', T, 1.06, 1, {cauda: .5});
+  D.reage(T, 26);
+  tl.fromTo('#mundo', {x: 16}, {x: 0, duration: D.mola(.6, 6).dur, ease: D.mola(.6, 6).ease, immediateRender: false}, T + Q);
+  const onda = $('onda');
+  gsap.set(onda, {x: 540 - 900, y: CY - 900, transformOrigin: '50% 50%'});
+  tl.fromTo(onda, {scale: .04, opacity: 1}, {scale: 1.3, opacity: 0, duration: .55, ease: 'power2.out', immediateRender: false}, T);
+  D.cue(T, 'impact'); D.cue(T, 'boom');
+
+  // ---- os cacos: pedaços em 5 anéis em volta do ponto da batida ----
+  const C = [540, CY], R = [0, 170, 430, 820, 1500], N = 10, HOLD = 2 * Q;
+  const V = R.map((r, i) => Array.from({length: N}, (_, j) => {
+    const th = (j + (i ? (rnd() - .5) * .5 : 0)) / N * 2 * Math.PI + .3, rr = i ? r * (1 + (rnd() - .5) * .26) : 0;
+    return [C[0] + rr * Math.cos(th), C[1] + rr * Math.sin(th)];
+  }));
+  const polis = [];
+  for (let i = 0; i < R.length - 1; i++) for (let j = 0; j < N; j++) {
+    const j2 = (j + 1) % N;
+    polis.push({i, pts: i === 0 ? [C, V[1][j], V[1][j2]] : [V[i][j], V[i][j2], V[i + 1][j2], V[i + 1][j]]});
+  }
+  const snapUrl = SNAP ? `url('${SNAP.startsWith('/') ? 'file://' + SNAP : SNAP}')` : '';
+  const area = pts => Math.abs(pts.reduce((a, [x, y], n) => a + x * pts[(n + 1) % pts.length][1] - pts[(n + 1) % pts.length][0] * y, 0)) / 2;
+  const borda = [], trincas = [];
+  polis.forEach(p => {
+    if (p.i >= 2 && rnd() < .2) return;                                    // um buraco no vidro: o papel aparece antes
+    const xs = p.pts.map(a => a[0]), ys = p.pts.map(a => a[1]);
+    const x0 = Math.floor(Math.min(...xs)) - 8, y0 = Math.floor(Math.min(...ys)) - 8;
+    const x1 = Math.ceil(Math.max(...xs)) + 8, y1 = Math.ceil(Math.max(...ys)) + 8;
+    if (x1 < 0 || x0 > W || y1 < 0 || y0 > H) return;                       // fora do quadro: nem nasce
+    const loc = p.pts.map(([x, y]) => [x - x0, y - y0]), pt = loc.map(a => a.join(',')).join(' ');
+    const mx = loc.reduce((a, b) => a + b[0], 0) / loc.length, my = loc.reduce((a, b) => a + b[1], 0) / loc.length;
+    const el = document.createElement('div'); el.className = 'p';
+    Object.assign(el.style, {left: x0 + 'px', top: y0 + 'px', width: x1 - x0 + 'px', height: y1 - y0 + 'px', transformOrigin: `${mx}px ${my}px`});
+    el.innerHTML = `<div class="f" style="clip-path:polygon(${loc.map(([x, y]) => `${x}px ${y}px`).join(',')});` +
+      (snapUrl ? `background-image:${snapUrl};background-size:${W}px ${H}px;background-repeat:no-repeat;background-position:${-x0}px ${-y0}px` : '') +
+      `"></div><svg width="${x1 - x0}" height="${y1 - y0}"><polygon points="${pt}" fill="none" style="stroke:var(--mk)" stroke-width="5" stroke-linejoin="round" opacity="0"/></svg>`;
+    $('cacos').appendChild(el);
+    const gx = x0 + mx, gy = y0 + my, dist = Math.hypot(gx - C[0], gy - C[1]), ang = Math.atan2(gy - C[1], gx - C[0]);
+    const peso = Math.min(1, area(p.pts) / 110000), sinal = rnd() < .5 ? -1 : 1, perto = dist < 520;
+    // a cascata: os de dentro primeiro (até .07 s depois do mais perto), cada um 0–1 quadro fora do compasso
+    const tr = T + HOLD + (dist / 1500) * .07 + Math.floor(rnd() * 2) * Q;
+    const dd = (perto ? .26 : .32) + peso * .08 + rnd() * .04;              // o pesado demora mais; o de dentro sai correndo
+    trincas.push({pol: el.querySelector('polygon'), i: p.i, n: trincas.length});
+    tl.to(el, {scale: .985, duration: 2 * Q, ease: 'power2.out'}, tr - 2 * Q);                        // reúne antes de soltar
+    if (perto) {
+      // o vidro em volta da palavra estoura pra fora (sai do ponto da batida, com a queda por cima): é o que abre o ar
+      const L = 900 + rnd() * 500;
+      tl.to(el, {x: Math.cos(ang) * L + (rnd() - .5) * 120, duration: dd, ease: 'power2.out'}, tr);
+      tl.to(el, {y: Math.sin(ang) * L * .8 + 320 + rnd() * 160, duration: dd, ease: 'power2.out'}, tr);
+    } else {
+      const Lx = (420 + 1300 / (1 + dist / 300)) * (.85 + rnd() * .4);
+      const dx = Math.cos(ang) * Lx + (rnd() - .5) * 140, dy = Math.sin(ang) * Lx * .35 + (H - gy) + (y1 - y0) * 1.1 + 240 + rnd() * 300;   // sai pelo pé
+      tl.to(el, {x: dx, duration: dd, ease: 'power1.out'}, tr);                                          // o caminho: sai e freia
+      tl.to(el, {y: dy, duration: dd, ease: 'power2.in'}, tr);                                           // o tempo: cai acelerando
+    }
+    // o grande gira menos e com a lente mais longe (pedaço de 1500 px com a lente a 900 passa atrás da câmera e o
+    // caco vira um borrão de 12 mil px); e todo caco some nos últimos 25 % da queda, se ainda sobrar ponta no quadro
+    const g3 = 160 * (1 - peso * .75);
+    tl.to(el, {rotation: sinal * (90 + rnd() * 300) * (1 - peso * .6), rotationX: (rnd() - .5) * g3, rotationY: (rnd() - .5) * g3,
+      scale: 1.04 + rnd() * .16, transformPerspective: 1300 + peso * 2800, duration: dd, ease: 'power1.out'}, tr);
+    tl.to(el, {opacity: 0, duration: dd * .4, ease: 'power1.in'}, tr + dd * .6);
+    borda.push(tr);
+  });
+  // as trincas correm de dentro pra fora num tween só (um por anel, sem 18 entrando no mesmo quadro)
+  const pr = {u: 0};
+  tl.fromTo(pr, {u: 0}, {u: 1, duration: 7 * Q, ease: 'power1.out', immediateRender: false, onUpdate: () => trincas.forEach(c =>
+    c.pol.setAttribute('opacity', Math.max(0, Math.min(1, pr.u * 6 - c.i * .9 - (c.n % 3) * .12))))}, T);
+  D.cue(T + HOLD + .06, 'whoosh-out'); D.cue(T + HOLD + .2, 'swish');
+
+  // ---- o dia por baixo: a tela do mesmo celular toca o editado, e a palavra sobe, assenta e abre o apoio ----
+  const TV = D.n('tv', T + .45);
+  if (mv) mv.dataset.off = String(D.n('v0', '0') - TV + Q / 2);   // v0: o segundo do vídeo em que ele começa
+  const TS = T + D.n('d_sobe', .55), DS = .45;
+  D.arco('#hero', TS, [0, 0], [0, CYT - CY], {dur: DS, flecha: 26, lado: 1, ease: 'power3.inOut'});
+  tl.to('#hero', {scale: ESC_T, duration: DS, ease: 'power3.inOut'}, TS);
+  D.cue(TS + DS - .05, 'pop');
+  // o bloco do apoio cai embaixo da palavra; a palavra dele é grifada depois que o bloco assenta
+  const TA = TS + DS + D.n('d_apoio', .05);
+  tl.fromTo('#apoio', {opacity: 0, y: 46}, {opacity: 1, y: 0, duration: D.T.peso.medio, ease: 'power3.out'}, D.at(TA));
+  D.palavras('#ap-tx', TA + .02, .12);
+  D.marca([...ap.querySelectorAll('b')], TA + .45);
+  D.cue(TA, 'papel'); D.cue(TA + .3, 'pop');
+  return dur;
+});
+}
+</script>
+</body>
+</html>

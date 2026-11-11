@@ -1,0 +1,9 @@
+<!doctype html>
+<!-- O quadro de um estilo na biblioteca.html: a imagem ou o vídeo de ?src= (caminho a partir desta pasta), do tamanho do quadro, em laço e sem som. -->
+<html lang="pt-BR"><head><meta charset="utf-8">
+<style>html,body{margin:0;height:100%;overflow:hidden;background:#0B0D12}img,video{display:block;width:100%;height:100%;object-fit:contain}</style>
+</head><body><script>
+const s=new URLSearchParams(location.search).get('src')||'',v=/\.(mp4|webm|mov)$/i.test(s),e=document.createElement(v?'video':'img');
+if(v){e.muted=e.loop=e.autoplay=e.playsInline=true}
+e.src=s;document.body.append(e);
+</script></body></html>

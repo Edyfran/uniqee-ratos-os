@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Suas animações prontas</title>
+<!-- Molde da biblioteca.html. NÃO abra este arquivo: `v2.py biblioteca` troca os marcadores duplos e grava a página na raiz da fábrica. -->
+<link rel="stylesheet" href="{{CSS}}">
+{{MARCA_LINK}}
+<style>
+*{box-sizing:border-box}
+:root{--sobre-ac:{{SOBRE_AC}};--sobre-mk:{{SOBRE_MK}}}
+/* o núcleo trava a rolagem (a peça é um quadro fixo); a biblioteca é página e rola */
+html,body{overflow:auto}
+html.trava,html.trava body{overflow:hidden}
+/* o html é quem rola: se o body também fosse caixa de rolagem, o filtro fixo (sticky) não grudaria */
+body{overflow:visible;margin:0;background:var(--pp);background-image:var(--tex);color:var(--ink);font-family:var(--fd);letter-spacing:var(--ls);line-height:1.25}
+button{font-family:inherit;letter-spacing:inherit}
+:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+.cx{max-width:1480px;margin:0 auto;padding:28px 20px 80px}
+h1{font-size:clamp(34px,6vw,64px);margin:0 0 10px;line-height:1}
+h1 mark{background:var(--mk);color:var(--sobre-mk);padding:0 .12em}
+.topo{display:flex;flex-wrap:wrap;gap:0 36px;align-items:flex-start;margin:0 0 4px}
+.sub{flex:1 1 380px;font-size:clamp(16px,2.2vw,20px);max-width:46em;margin:0 0 22px;color:var(--ink6)}
+.dir{flex:0 1 560px;margin:4px 0 22px;padding:14px 18px 14px 40px;border:var(--bw) solid var(--ink);box-shadow:var(--sh) var(--sh) 0 var(--ink);background:var(--sur);border-radius:var(--raio-s);font-size:16px;line-height:1.5;max-width:760px}
+.dica{margin:0 0 8px;font-size:14px;font-weight:700}
+/* filtro de tipo: fica no alto enquanto a página rola */
+nav{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:8px;padding:10px 0;background:var(--pp);border-bottom:2px solid var(--ink)}
+.ch{font:700 14px var(--fd);letter-spacing:var(--ls);color:var(--ink);background:var(--sur);border:2px solid var(--ink);border-radius:999px;padding:6px 12px;cursor:pointer}
+.ch small{font:400 12px var(--fm);margin-left:6px;color:var(--ink6)}
+.ch:hover{background:var(--mk);color:var(--sobre-mk)}
+.ch:hover small{color:inherit}
+.ch[aria-pressed=true]{background:var(--ac);color:var(--sobre-ac);box-shadow:3px 3px 0 var(--ink)}
+.ch[aria-pressed=true] small{color:inherit}
+.cab{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 18px;margin:18px 0 0}
+.cab .dica{margin:0}
+h2{font-size:clamp(22px,3.5vw,30px);margin:0}
+h2 small{font-family:var(--fm);font-size:.5em;font-weight:400;color:var(--ink6);margin-left:8px}
+.gr{display:grid;grid-template-columns:repeat(auto-fill,minmax(285px,1fr));gap:24px 22px;align-items:start;grid-auto-flow:dense;margin-top:14px}
+.c{background:var(--sur);border:var(--bw) solid var(--ink);box-shadow:var(--sh) var(--sh) 0 var(--ink);border-radius:var(--raio);overflow:hidden;display:flex;flex-direction:column;cursor:pointer}
+.c[hidden]{display:none}
+.c.l{grid-column:span 2}
+.pv{position:relative;background:var(--pp);background-image:var(--tex);border-bottom:var(--bw) solid var(--ink);overflow:hidden}
+.pv iframe{position:absolute;left:0;top:0;border:0;transform-origin:0 0;pointer-events:none;background:transparent}
+.tx{padding:10px 12px 12px;display:flex;flex-direction:column;gap:8px}
+.tx b{font-size:17px;line-height:1.1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.bt{display:flex;gap:8px}
+.bt button,.fr button{flex:1;font:700 13px var(--fm);border:2px solid var(--ink);background:var(--sur);color:var(--ink);border-radius:999px;padding:6px 10px;cursor:pointer;white-space:nowrap}
+.bt button:hover,.fr button:hover{background:var(--mk);color:var(--sobre-mk)}
+.bt .cp,.fr button{background:var(--mk);color:var(--sobre-mk)}
+.bt .cp:hover,.fr button:hover{background:var(--ac);color:var(--sobre-ac)}
+/* a janela: a animação grande, tocando em laço */
+dialog{margin:auto;padding:0;border:var(--bw) solid var(--ink);border-radius:var(--raio);background:var(--sur);color:var(--ink);box-shadow:var(--sh) var(--sh) 0 var(--mk);max-width:none;max-height:none;overflow:hidden}
+dialog::backdrop{background:rgba(11,13,18,.78)}
+.jn{display:grid;grid-template-areas:"hd" "pa" "tx";grid-template-rows:auto 1fr auto;width:var(--aw)}
+.jn-hd{grid-area:hd;display:flex;gap:12px;align-items:flex-start;justify-content:space-between;padding:12px 14px;border-bottom:var(--bw) solid var(--ink)}
+.jn-hd h3{margin:4px 0 0;font-size:clamp(22px,3vw,30px);line-height:1.05}
+.tp{display:inline-block;font:700 12px var(--fm);letter-spacing:0;background:var(--mk);color:var(--sobre-mk);border:2px solid var(--ink);border-radius:999px;padding:2px 10px}
+.x{flex:none;width:44px;height:44px;font:700 20px var(--fm);line-height:1;border:2px solid var(--ink);background:var(--sur);color:var(--ink);border-radius:var(--raio-s);cursor:pointer}
+.x:hover{background:var(--mk);color:var(--sobre-mk)}
+.jn-palco{grid-area:pa;position:relative;width:var(--pw);height:var(--ph);margin:auto;overflow:hidden;background:var(--pp);background-image:var(--tex)}
+.jn-palco iframe{position:absolute;left:0;top:0;border:0;transform-origin:0 0;pointer-events:none;background:transparent}
+.jn-tx{grid-area:tx;display:flex;flex-direction:column;gap:12px;padding:12px 14px 14px;border-top:var(--bw) solid var(--ink)}
+.jn-tx .ln{margin:0;font-size:16px;line-height:1.35;color:var(--ink6)}
+.fr{display:flex;gap:10px;align-items:center;background:var(--sur);color:var(--ink);border:2px solid var(--ink);box-shadow:inset 8px 0 0 var(--mk);border-radius:var(--raio-s);padding:8px 10px 8px 20px;font-size:14px;font-weight:700}
+.fr q{flex:1;quotes:none}
+.fr button{flex:none;padding:8px 14px}
+/* computador, animação em pé: ela fica à esquerda, o texto à direita */
+.jn.lado{grid-template-areas:"pa hd" "pa tx";grid-template-columns:var(--pw) 340px;grid-template-rows:auto 1fr;width:auto}
+.jn.lado .jn-hd,.jn.lado .jn-tx{border-left:var(--bw) solid var(--ink)}
+.jn.lado .jn-tx{border-top:0}
+@media(max-width:600px){
+  .cx{padding:20px 12px 60px}
+  .gr{grid-template-columns:repeat(2,1fr);gap:16px 12px;--sh:5px;--bw:3px}
+  .c.l{grid-column:1/-1}
+  nav{flex-wrap:nowrap;overflow-x:auto;gap:6px;margin:0 -12px;padding:8px 12px;scrollbar-width:none}
+  .ch{flex:none}
+  .ch{font-size:13px;padding:5px 10px}
+  .tx{padding:8px 8px 10px;gap:6px}
+  .tx b{font-size:15px}
+  .bt{gap:6px}.bt button{font-size:12px;padding:7px 4px}
+  dialog{width:100vw;height:100vh;height:100dvh;max-width:100vw;max-height:100vh;max-height:100dvh;margin:0;border:0;border-radius:0;box-shadow:none;overflow:auto}
+  .jn{min-height:100%}
+}
+</style></head><body><div class="cx">
+<h1>Suas <mark>animações</mark> prontas</h1>
+<div class="topo"><p class="sub">Esta página é da sua Fábrica de Conteúdo. Aqui estão as {{N}} animações que ela já coloca nos seus vídeos (um título, um gráfico, um destaque), nas suas cores e na sua letra, e {{NE}} estilos, que desenham o vídeo inteiro. Todas as animações vêm na Fábrica que você comprou.</p>
+<ol class="dir"><li>Escolha uma animação.</li><li>Clique em <b>copiar</b>, embaixo da animação.</li><li>Volte pro Claude Code ou pro Codex, na conversa que abriu esta página, e cole. Ele tira o texto da sua fala; se quiser um texto certo, escreva qual depois de colar.</li></ol></div>
+<p class="dica">Clique num tipo pra ver só as animações dele. Clique numa animação pra ver grande.</p>
+<nav>{{NAV}}</nav>
+<div class="cab"><h2 id="tit">Todas<small>{{TOTAL}}</small></h2>
+<p class="dica">Onde aparece um boneco cinza escrito SEU VÍDEO, o boneco é você: a animação entra por cima da sua gravação.</p></div>
+<div class="gr">{{CARTOES}}</div>
+</div>
+<dialog id="jn" aria-label="Animação grande"><div class="jn">
+<div class="jn-hd"><div><span class="tp"></span><h3></h3></div><button type="button" class="x" aria-label="Fechar">&#x2715;</button></div>
+<div class="jn-palco"><iframe></iframe></div>
+<div class="jn-tx"><p class="ln"></p><div class="fr"><q></q><button type="button">copiar</button></div></div>
+</div></dialog>
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+function toca(pv){pv.querySelector('iframe').src=pv.dataset.src;}
+function para(pv){pv.querySelector('iframe').src='about:blank';}
+function ajusta(pv){const f=pv.querySelector('iframe'),k=pv.clientWidth/+pv.dataset.w;f.style.transform='scale('+k+')';pv.style.height=(+pv.dataset.h*k)+'px';}
+const ro=new ResizeObserver(es=>es.forEach(e=>ajusta(e.target)));
+// só toca o que está na tela: sair da vista (ou ficar escondido pelo filtro) descarrega o quadro
+const io=new IntersectionObserver(es=>es.forEach(e=>{e.isIntersecting?toca(e.target):para(e.target)}),{rootMargin:'120px'});
+$$('.pv').forEach(pv=>{const f=pv.querySelector('iframe');f.width=pv.dataset.w;f.height=pv.dataset.h;ajusta(pv);ro.observe(pv);io.observe(pv)});
+async function copia(b,t){
+  try{await navigator.clipboard.writeText(t)}catch(e){const a=document.createElement('textarea');a.value=t;document.body.append(a);a.select();document.execCommand('copy');a.remove()}
+  const o=b.textContent;b.textContent='copiado';setTimeout(()=>b.textContent=o,1400)}
+// filtro por tipo
+const cards=$$('.c'),chips=$$('.ch'),tit=$('#tit'),dica=$('.cab .dica'),dica0=dica.textContent;
+const DICAS={'Estilos':'Um estilo muda o vídeo inteiro: a letra, a cor e a borda. Copie, cole no agente e ele aplica o estilo nas suas cores.',
+  'Estilos do Pack':'Os estilos prontos do Pack de Estilos de Edição, cada um com um vídeo de exemplo. Copie, cole no agente e o próximo vídeo sai nele.'};
+chips.forEach(b=>b.onclick=()=>{const t=b.dataset.t;
+  chips.forEach(x=>x.setAttribute('aria-pressed',x===b));
+  cards.forEach(c=>c.hidden=t!==''&&c.dataset.t!==t);
+  tit.replaceChildren(b.firstChild.cloneNode(),b.querySelector('small').cloneNode(true));
+  dica.textContent=DICAS[t]??dica0;   // o estilo é um vídeo pronto, não tem boneco
+  // o resultado novo começa logo abaixo do filtro fixo
+  const n=$('nav').offsetHeight,t0=$('.cab').getBoundingClientRect().top;if(t0<n)scrollBy(0,t0-n-8);});
+// janela com a animação grande
+const jn=$('#jn'),box=jn.firstElementChild,jf=jn.querySelector('iframe');let atual=null;
+function ajustaJn(){
+  if(!atual)return;const pv=atual.querySelector('.pv'),w=+pv.dataset.w,h=+pv.dataset.h,W=innerWidth,H=innerHeight;
+  const mob=W<=600,lado=!mob&&W>=900&&h>w,m=mob?0:24+2*parseFloat(getComputedStyle(jn).borderTopWidth);
+  box.classList.toggle('lado',lado);
+  let k;
+  if(lado)k=Math.min((H-m)/h,(W-m-340)/w);
+  else{const aw=mob?W:Math.min(W-m,1000);box.style.setProperty('--aw',aw+'px');
+    k=Math.min(aw/w,(H-m-box.querySelector('.jn-hd').offsetHeight-box.querySelector('.jn-tx').offsetHeight)/h)}
+  box.style.setProperty('--pw',w*k+'px');box.style.setProperty('--ph',h*k+'px');jf.style.transform='scale('+k+')';}
+function abre(c){atual=c;const pv=c.querySelector('.pv');
+  $('.jn-hd .tp').textContent=c.dataset.t;$('.jn-hd h3').textContent=c.dataset.nome;
+  $('.jn-tx .ln').textContent=c.dataset.linha;$('.jn-tx q').textContent=c.dataset.frase;
+  jf.width=pv.dataset.w;jf.height=pv.dataset.h;jf.title=c.dataset.nome;
+  document.documentElement.classList.add('trava');jn.showModal();ajustaJn();jf.src=pv.dataset.src;}
+jn.onclose=()=>{jf.src='about:blank';atual=null;document.documentElement.classList.remove('trava')};
+jn.onclick=e=>{if(e.target===jn)jn.close()};
+jn.querySelector('.x').onclick=()=>jn.close();
+jn.querySelector('.jn-tx button').onclick=e=>copia(e.target,atual.dataset.frase);
+addEventListener('resize',ajustaJn);
+cards.forEach(c=>{c.onclick=e=>{if(!e.target.closest('.cp'))abre(c)};
+  c.querySelector('.cp').onclick=e=>copia(e.target,c.dataset.frase)});
+</script></body></html>

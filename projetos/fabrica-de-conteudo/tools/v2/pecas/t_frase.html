@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<!-- TIPO — frase de tela, v2. Uma frase, nada em volta. O ar ainda é a batida.
+     A linha em destaque vira LAJE: bloco azul, borda e sombra dura, que cai
+     e assenta. As palavras sobem por máscara, uma a uma.
+       ?l1=Você precisa programar&l2=pra ter isso?&ac=2&dur=5&dir=a -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+#stage{align-items:center;text-align:center;padding:0 100px}
+.fr{font:900 var(--tam,132px)/1.04 var(--fd);font-stretch:var(--fx);letter-spacing:var(--ls);color:var(--ink)}
+.fr .ln{opacity:0}
+.fr .ac{text-transform:uppercase;margin-top:.16em}
+.slab{display:inline-block;padding:.02em .22em .1em}
+.tr{width:0;height:34px;margin-top:92px;opacity:0;border-radius:var(--raio-s)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="fr" id="f"></div>
+  <div class="tr nb cor-mk" id="t"></div>
+</div>
+<script>
+const l1 = D.q('l1', 'Você precisa programar');
+const l2 = D.q('l2', 'pra ter isso?');
+const ac = parseInt(D.q('ac', '2'), 10);
+const dur = D.n('dur', '5');
+document.documentElement.style.setProperty('--tam', D.q('tam', '132') + 'px');
+const linha = (tx, on, id) => `<div class="ln${on ? ' ac' : ''}" id="${id}">${on ? `<span class="slab nb cor-ac">${tx}</span>` : tx}</div>`;
+document.getElementById('f').innerHTML = linha(l1, ac === 1, 'a') + (l2 ? linha(l2, ac === 2, 'b') : '');
+
+D.monta(tl => {
+  D.cabe('.fr .ln', 48);
+  D.camera(dur, 1.0, 1.035);
+  const ts = [['#a', .25], ['#b', .25 + D.PASSO]];
+  ts.forEach(([s, t]) => {
+    const el = document.querySelector(s); if (!el) return;
+    const slab = el.querySelector('.slab');
+    if (slab) D.pousa(slab, t, {rot: D.P.ROT});
+    D.palavras(el, t + (slab ? .08 : 0));
+  });
+  const tt = (l2 ? ts[1][1] : ts[0][1]) + .55;
+  tl.fromTo('#t', {width: 0, opacity: 0}, {width: 240, opacity: 1, duration: .55, ease: D.P.MOLA}, tt);
+  D.sai(['#a', '#b', '#t'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

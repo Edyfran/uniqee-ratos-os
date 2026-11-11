@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<!-- ENSAIO — a tese ao lado do rosto. 1920x1080, --alpha, EM CAMADAS (ver ensaio.js).
+     Um painel de papel abre do lado livre e entra ATRÁS da pessoa (passa do
+     ombro dela), e a tese sobe por palavra com a <b> grifada.
+     layout=cartao (o Joba, pesquisa/referencias-conteudo/joba-esqueca-consistencia.md, proposta 3): o rosto
+       encolhe num cartão de cantos redondos no alto (window.__video "cartao", cantos=todos), sobre o fundo
+       do tema, com a borda do núcleo (ouro no tinteiro); a tese sobe embaixo, acima da faixa do player.
+       Entra e sai por corte seco, como no Joba (o cartão é do compor, não anima). Pouco: 1,5 a 11 s.
+       int=contida|media|ousada: o cartão (escala do take .5 / .6 / .7), a letra (64 / 80 / 92 px) e a
+       entrada: seca / a borda se desenha / um risco ouro de 3 quadros cobre o corte.
+       ?hd=Ninguém precisa <b>aprender a programar</b> pra usar IA.&kick=a tese&lado=dir&t0=0.2&dur=5
+       ?hd=A Úrsula é <b>melhor</b> do que o Tod&kick=contra Circle of Life&layout=cartao&int=media&t0=0.2&th=0.5&dur=6 -->
+<html lang="pt-BR" class="h alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/direcao-h.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<script src="../nucleo/ensaio.js"></script>
+<style>
+.pn{position:absolute;top:110px;bottom:110px;background:var(--tex),var(--pp);border:var(--bw) solid var(--ink);box-shadow:var(--sh) var(--sh) 0 var(--ink)}
+.tx{position:absolute;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:flex-start}
+.tx .hd{font-size:92px;margin:0}
+/* layout=cartao */
+.cf{position:absolute;inset:0;background:var(--pp);opacity:0}
+.ca{position:absolute;border:var(--bw) solid var(--mk);box-sizing:border-box;opacity:0}
+.ct{position:absolute;left:160px;right:160px;bottom:calc(var(--yt-pe) + 30px);display:flex;flex-direction:column;align-items:center;text-align:center}
+.ct .kick{align-self:center;font-size:44px;opacity:0}
+.ct .hd{font-size:var(--pt);margin:0}
+.rs{position:absolute;top:-10%;bottom:-10%;width:420px;background:var(--mk);transform:skewX(-18deg);left:-600px}
+</style>
+</head>
+<body>
+<div id="stage"><div class="pn" id="pn" data-c="tras"></div><div class="tx" id="tx" data-c="tras"><div class="kick" id="k"></div><div class="hd" id="hd"></div></div></div>
+<script>
+const dur = D.n('dur', '5'), t0 = D.n('t0', '0.2'), $ = id => document.getElementById(id);
+if (D.q('layout', '') === 'cartao') {
+  // o fundo e o cartão moram na camada tras (o compor põe o take reduzido por cima dela);
+  // a borda e a tese, na frente. Sem __pessoa: o take não desliza.
+  const I = {contida: {s: .5, x: 700, y: 90, w: 520, h: 400, topo: 40, pt: 64},
+             media: {s: .6, x: 640, y: 70, w: 640, h: 470, topo: 10, pt: 80},
+             ousada: {s: .7, x: 580, y: 50, w: 760, h: 520, topo: -30, pt: 92}}[D.q('int', 'media')];
+  const raio = 48, t1 = dur - .02, th = D.n('th', String(t0 + .3));
+  $('stage').innerHTML = `<div class="cf" id="cf" data-c="tras" data-qa="fundo"></div>
+    <div class="ca" id="ca" data-c="frente"></div><div class="rs" id="rs" data-c="frente"></div>
+    <div class="ct" id="ct" data-c="frente"><div class="kick" id="k"></div><div class="hd" id="hd"></div></div>`;
+  Object.assign($('ca').style, {left: I.x + 'px', top: I.y + 'px', width: I.w + 'px', height: I.h + 'px', borderRadius: raio + 'px'});
+  document.documentElement.style.setProperty('--pt', I.pt + 'px');
+  $('k').textContent = D.q('kick', '');
+  $('hd').innerHTML = D.q('hd', 'A Úrsula é <b>melhor</b> do que o Tod');
+  E.video(t0, t1, 'cartao', {x: I.x, y: I.y, w: I.w, h: I.h, raio, escala: I.s, topo: I.topo, cantos: 'todos'});
+  D.monta(tl => {
+    D.cabe('#hd', 44, '#ct');
+    tl.set(['#cf', '#ca'], {opacity: 1}, t0);
+    if (D.q('int') === 'media') tl.fromTo('#ca', {clipPath: 'inset(0 100% 0 0)'}, {clipPath: 'inset(0 0% 0 0)', duration: .3, ease: 'power3.out'}, t0);
+    if (D.q('int') === 'ousada') { tl.fromTo('#rs', {x: 0}, {x: 3000, duration: .1, ease: 'none'}, t0 - .05); D.cue(t0, 'swish'); }
+    if ($('k').textContent) D.carimbo('#k', t0 + .15, 0);
+    // a palavra grifada nasce no ouro (a letra escura do grifo sumiria no fundo antes do marcador
+    // passar) e escurece quando o marcador já cobriu metade dela
+    tl.set('#hd b', {color: 'var(--mk)'}, 0);
+    tl.set('#hd b', {color: 'var(--ink9)'}, D.titulo('#hd', th, .1) + .25);
+    if (D.q('sai', '1') !== '0') tl.to(['#k', '#hd'], {opacity: 0, y: -10, duration: .2, ease: 'power3.in'}, t1 - .25);
+    tl.set(['#cf', '#ca'], {opacity: 0}, t1);
+    return dur;
+  });
+} else {
+const p = E.pessoa('dir'), daEsq = p.lado !== 'esq', pn = $('pn'), tx = $('tx');
+if (daEsq) { Object.assign(pn.style, {left: '-20px', width: (p.l + 160) + 'px', borderRadius: '0 16px 16px 0'}); Object.assign(tx.style, {left: '120px', width: (p.l - 180) + 'px'}); }
+else { Object.assign(pn.style, {left: (p.r - 160) + 'px', right: '-20px', borderRadius: '16px 0 0 16px'}); Object.assign(tx.style, {left: (p.r + 60) + 'px', width: (1800 - p.r - 60) + 'px'}); }
+$('k').textContent = D.q('kick', 'a tese');
+$('hd').innerHTML = D.q('hd', 'Ninguém precisa <b>aprender a programar</b> pra usar IA.');
+D.monta(tl => {
+  const fechado = daEsq ? 'inset(-30px 100% -30px -30px)' : 'inset(-30px -30px -30px 100%)', aberto = 'inset(-30px -30px -30px -30px)';
+  tl.fromTo(pn, {clipPath: fechado}, {clipPath: aberto, duration: .6, ease: 'power3.inOut'}, D.at(t0));
+  D.cue(t0, 'swish');
+  D.carimbo('#k', t0 + .35, 0);
+  D.titulo('#hd', t0 + .45, .07);
+  if (D.q('sai', '1') !== '0') { D.sai(['#k', '#hd'], dur - .65); tl.to(pn, {clipPath: fechado, duration: .4, ease: 'power3.in'}, dur - .42); }
+  return dur;
+});
+}  // fim do else (a tese ao lado do rosto)
+</script>
+</body>
+</html>

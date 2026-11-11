@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<!-- AULA — o pareamento do torneio, rodada a rodada. 1920x1080, --alpha.
+     Uma coluna num lado do quadro (o rosto fica livre no meio): o título cai, a linha de regra
+     embaixo dele, e cada rodada pousa no instante em que a fala chega nela — o rótulo em bloco
+     amarelo, VOCÊ com a campanha, o × e o oponente com a dele, e a nota da rodada embaixo. No fim
+     o carimbo fecha a coluna. Só desenha o que a fala diz: a regra entra como texto, não inventa.
+       titulo  "texto" (*grifo* vira marcador) · sub  "texto@t" (a regra, embaixo do título)
+       rodadas "rótulo|eu|ele|nota@t;…" — `eu` e `ele` são os chips (ex.: VOCÊ 1-0 · 1-0)
+       fim     "carimbo|nota@t" · lado  esq|dir · x  a margem do lado (80) · y  o topo (60)
+       t0 · dur
+     ?titulo=Como funciona o *pareamento*&sub=depois: quem tem a mesma campanha@1.2&rodadas=RODADA 1|VOCÊ|?|aleatório@0.8;RODADA 2|VOCÊ 1-0|1-0|quem ganhou a 1ª@2.2;RODADA 3|VOCÊ 2-0|2-0|quem ganhou duas@3.4&fim=3-0|o semanal tem só 3 rodadas@4.6&t0=0.2&dur=6.5 -->
+<html lang="pt-BR" class="h alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/direcao-h.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+.col{position:absolute;width:680px;display:flex;flex-direction:column;gap:18px}
+.tit{padding:22px 28px;opacity:0}
+.tit .hd{font-size:60px;margin:0;line-height:1.05}
+.tit .sub{margin-top:12px;font:600 32px/1.2 var(--fm);opacity:0}
+.rod{display:flex;flex-direction:column;gap:10px;padding:16px 20px;opacity:0}
+.rod .lin{display:flex;align-items:center;gap:14px}
+.rod .r{flex:none;padding:8px 12px;font:700 26px/1 var(--fm);letter-spacing:.08em}
+.rod .eu,.rod .ele{padding:8px 14px;font:700 38px/1 var(--fd);white-space:nowrap}
+.rod .x{font:700 40px/1 var(--fd)}
+.rod .nota{font:600 32px/1.2 var(--fm)}
+.fim{align-self:flex-start;display:flex;align-items:center;gap:18px;opacity:0}
+.fim .c{padding:12px 20px;font:700 46px/1 var(--fd)}
+.fim .nota{font:600 32px/1.2 var(--fm);padding:12px 18px}
+</style>
+</head>
+<body>
+<div id="stage"><div class="col" id="col"></div></div>
+<script>
+const dur = D.n('dur', '6.5'), t0 = D.n('t0', '0.2'), $ = id => document.getElementById(id);
+const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const grifo = s => esc(s).replace(/\*([^*]+)\*/g, '<b>$1</b>');
+const tempo = s => { const i = s.lastIndexOf('@'); return i < 0 ? [s, null] : [s.slice(0, i), +s.slice(i + 1)]; };
+const col = $('col');
+const lado = D.q('lado', 'esq'), mx = D.n('x', '80');
+col.style.top = D.n('y', '60') + 'px';
+col.style[lado === 'dir' ? 'right' : 'left'] = mx + 'px';
+
+const [sub, tSub] = tempo(D.q('sub', ''));
+col.insertAdjacentHTML('beforeend', `<div class="tit nb" id="tit"><div class="hd" id="hd">${grifo(D.q('titulo', 'Como funciona o *pareamento*'))}</div>${sub ? `<div class="sub" id="sub">${esc(sub)}</div>` : ''}</div>`);
+const rods = D.q('rodadas', '').split(';').filter(Boolean).map((r, i) => {
+  const [tx, t] = tempo(r), [rot, eu, ele, nota] = tx.split('|');
+  col.insertAdjacentHTML('beforeend', `<div class="rod nb" id="r${i}"><div class="lin"><span class="r nb cor-mk">${esc(rot || '')}</span><span class="eu nb cor-ac">${esc(eu || '')}</span><span class="x">×</span><span class="ele nb">${esc(ele || '')}</span></div>${nota ? `<div class="nota">${esc(nota)}</div>` : ''}</div>`);
+  return t ?? t0 + .6 + i * .8;
+});
+const [fim, tFim] = tempo(D.q('fim', ''));
+if (fim) {
+  const [c, nota] = fim.split('|');
+  col.insertAdjacentHTML('beforeend', `<div class="fim" id="fim"><span class="c nb cor-ink">${esc(c)}</span>${nota ? `<span class="nota nb">${esc(nota)}</span>` : ''}</div>`);
+}
+
+D.monta(tl => {
+  // a coluna inteira acima da faixa do player (D.PE): se não couber, encolhe a partir do topo
+  const cabe = innerHeight - D.PE - 24 - col.offsetTop;
+  if (col.offsetHeight > cabe) Object.assign(col.style, {transform: `scale(${cabe / col.offsetHeight})`, transformOrigin: `top ${lado === 'dir' ? 'right' : 'left'}`});
+  D.pousa('#tit', t0, {som: 'whoosh'});
+  D.titulo('#hd', t0 + .12);
+  if (sub) tl.fromTo('#sub', {opacity: 0, y: 12}, {opacity: 1, y: 0, duration: .35, ease: D.P.EASE}, D.at(tSub ?? t0 + .6));
+  rods.forEach((t, i) => D.pousa('#r' + i, t, {dy: -30, som: 'swish'}));
+  if (fim) D.carimbo('#fim', tFim ?? t0 + .6 + rods.length * .8);
+  D.sai(['#tit', ...rods.map((_, i) => '#r' + i), ...(fim ? ['#fim'] : [])], dur - .5);
+  return dur;
+});
+</script>
+</body>
+</html>

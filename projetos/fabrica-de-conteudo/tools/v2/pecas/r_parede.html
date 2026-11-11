@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<!-- PROVA — a parede: os vídeos que saíram da fábrica numa grade, a varredura e os escolhidos. 1080x1920.
+     Os cartões 9:16 (imagem ou vídeo) entram em cascata até encher a parede. Em `t_varre` a linha
+     amarela desce de cima a baixo e cada cartão que ela cruza pisca. Os `escolhe` ficam: ganham a
+     moldura amarela e a etiqueta, e sobem um pouco; os outros apagam. Com `t_enche`, o primeiro
+     escolhido toma a tela: o vídeo segue dali. Da referência (Skillry #225, #410, a parede de clipes
+     reais com a linha de varredura e três vencedores) saiu só o movimento.
+       img      "url;url;…" repete até encher a grade · col (4) · lin (3)
+       escolhe  "n|ETIQUETA;…" o número do cartão (a contar do 1, linha por linha) e a etiqueta dele
+       hd       a frase de cima (<b> grifa; vazio: nenhuma) · t0 · t_varre · varre  quanto a linha leva (1.1)
+       t_enche  o primeiro escolhido toma a tela (-1: não) · dur
+       ?img=../midia/vitrine-semana.jpg;../midia/vitrine-cracha.jpg;../midia/vitrine-a-pergunta.jpg;../midia/vitrine-rotulo.jpg;../midia/vitrine-camadas.jpg;../midia/vitrine-quanto-custou.jpg&col=4&lin=3&escolhe=2|SEG;7|QUA;12|SEX&hd=A semana sai <b>daqui</b>&t0=0.2&t_varre=1.3&varre=1.1&t_enche=-1&dur=4.6 -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+#stage{padding:0;display:block;overflow:hidden}
+#hd{position:absolute;left:var(--marg);right:var(--marg);top:220px;text-align:center;font-size:84px;margin:0}
+#grade{position:absolute;left:70px;right:70px}
+.cd{position:absolute;opacity:0}
+.cd .jan{position:absolute;inset:0;overflow:hidden;border-radius:calc(var(--raio) - var(--bw))}
+.cd .fl{position:absolute;inset:0;background:var(--mk);opacity:0;border-radius:calc(var(--raio) - var(--bw))}
+.cd .an{position:absolute;inset:-14px;border:8px solid var(--mk);border-radius:calc(var(--raio) + 10px);opacity:0;
+  box-shadow:0 0 0 3px var(--ink),inset 0 0 0 3px var(--ink)}
+.cd .kick{position:absolute;left:-10px;top:-34px;margin:0;font-size:28px;white-space:nowrap;z-index:2}
+#linha{position:absolute;left:40px;right:40px;height:14px;background:var(--mk);border:3px solid var(--ink);border-radius:7px;opacity:0;z-index:3}
+#rastro{position:absolute;left:40px;right:40px;height:150px;background:var(--mk);opacity:0;z-index:3}
+</style>
+</head>
+<body>
+<div id="stage"><h1 class="hd" id="hd"></h1><div id="grade"></div><div id="rastro"></div><div id="linha"></div></div>
+<script>
+const $ = id => document.getElementById(id);
+const dur = D.n('dur', '4.6'), t0 = D.n('t0', '0.2'), tVarre = D.n('t_varre', '1.3'), varre = D.n('varre', '1.1'),
+      tEnche = D.n('t_enche', '-1');
+const col = Math.max(2, Math.round(D.n('col', '4'))), lin = Math.max(1, Math.round(D.n('lin', '3'))), N = col * lin;
+const imgs = D.q('img', ['semana', 'cracha', 'a-pergunta', 'rotulo', 'camadas', 'quanto-custou'].map(n => `../midia/vitrine-${n}.jpg`).join(';'))
+  .split(';').filter(Boolean);
+const esc = D.q('escolhe', '2|SEG;7|QUA;12|SEX').split(';').filter(Boolean).map(s => {
+  const [n, tag] = s.split('|'); return {i: Math.round(+n) - 1, tag: (tag || '').trim()};
+}).filter(e => e.i >= 0 && e.i < N);
+$('hd').innerHTML = D.q('hd', 'A semana sai <b>daqui</b>');
+if (!$('hd').textContent.trim()) $('hd').remove();
+// o cartão: 9:16, o maior que cabe em 940 de largura e 1260 de altura
+const G = 22, CW = Math.min((940 - (col - 1) * G) / col, (1260 - (lin - 1) * G) / lin * 9 / 16), CH = CW * 16 / 9;
+const GW = col * CW + (col - 1) * G, GH = lin * CH + (lin - 1) * G, TOPO = Math.max(430, 1020 - GH / 2);
+Object.assign($('grade').style, {top: TOPO + 'px', height: GH + 'px'});
+const cds = [];
+for (let i = 0; i < N; i++) {
+  const r = Math.floor(i / col), c = i % col, e = document.createElement('div');
+  e.className = 'cd nb';
+  Object.assign(e.style, {left: (940 - GW) / 2 + c * (CW + G) + 'px', top: r * (CH + G) + 'px', width: CW + 'px', height: CH + 'px'});
+  e.innerHTML = '<div class="jan"></div><i class="fl"></i>';
+  $('grade').appendChild(e);
+  // a lista volta girada a cada linha: o mesmo vídeo não fica embaixo dele mesmo
+  D.midia(e.querySelector('.jan'), imgs.length ? imgs[(i + r * 2) % imgs.length] : '', 'vídeo ' + (i + 1));
+  cds.push(e);
+}
+esc.forEach(e => {
+  cds[e.i].insertAdjacentHTML('beforeend', '<i class="an"></i>' + (e.tag ? `<span class="kick">${e.tag}</span>` : ''));
+});
+
+D.monta(tl => {
+  if ($('hd')) D.titulo('#hd', t0 + .1);
+  // a cascata vem do canto de cima, na diagonal: o cartão k pousa em t0 + (linha + coluna) × 0,05
+  cds.forEach((e, i) => D.pousa(e, t0 + (Math.floor(i / col) + i % col) * .05, {dy: -24, rot: 0, s: 1.06}));
+  D.cue(t0, 'pop');
+  D.cue(t0 + (lin + col - 2) * .05, 'pop');
+  // a varredura: a linha atravessa a grade em ritmo constante, então o instante em que ela cruza
+  // cada cartão sai da altura dele
+  const y0 = TOPO - 40, y1 = TOPO + GH + 40, quando = y => tVarre + varre * (y - y0) / (y1 - y0);
+  tl.set(['#linha', '#rastro'], {top: y0}, 0);
+  tl.fromTo('#linha', {opacity: 0}, {opacity: 1, duration: .12}, tVarre - .12);
+  tl.fromTo('#rastro', {opacity: 0}, {opacity: .22, duration: .12}, tVarre - .12);
+  tl.fromTo('#linha', {y: 0}, {y: y1 - y0, duration: varre, ease: 'none'}, tVarre);
+  tl.fromTo('#rastro', {y: -150}, {y: y1 - y0 - 150, duration: varre, ease: 'none'}, tVarre);
+  tl.to(['#linha', '#rastro'], {opacity: 0, duration: .15}, tVarre + varre);
+  D.cue(tVarre, 'swish');
+  D.cue(tVarre + varre * .5, 'swish');
+  cds.forEach(e => {
+    const t = quando(TOPO + e.offsetTop + CH / 2);
+    tl.fromTo(e.querySelector('.fl'), {opacity: 0}, {opacity: .5, duration: .06, yoyo: true, repeat: 1, immediateRender: false}, t - .06);
+  });
+  // os escolhidos ficam, os outros apagam; cada escolhido carimba no seu turno
+  const tEsc = tVarre + varre + .1;
+  cds.forEach((e, i) => { if (!esc.some(x => x.i === i)) tl.to(e, {opacity: .22, scale: .97, duration: .3, ease: 'power2.out'}, tEsc); });
+  esc.forEach((x, k) => {
+    const e = cds[x.i], t = tEsc + k * .18;
+    tl.set(e, {zIndex: 5}, t);
+    tl.to(e, {scale: 1.1, duration: .32, ease: D.P.POUSA}, t);
+    tl.fromTo(e.querySelector('.an'), {opacity: 0, scale: 1.12}, {opacity: 1, scale: 1, duration: .3, ease: D.P.POUSA}, t);
+    if (x.tag) D.carimbo(e.querySelector('.kick'), t + .08, -4);
+    else D.cue(t, 'stamp');
+  });
+  if (tEnche >= 0 && esc.length) {
+    // o primeiro escolhido cresce até cobrir a tela: o centro dele vai pro centro do quadro
+    const e = cds[esc[0].i], cx = 70 + e.offsetLeft + CW / 2, cy = TOPO + e.offsetTop + CH / 2;
+    const cobre = Math.max(1080 / CW, 1920 / CH) * 1.04, tc = D.at(tEnche) - .3;
+    tl.to(e, {x: 540 - cx, y: 960 - cy, scale: cobre, rotation: 0, duration: .55, ease: 'power3.in'}, tc);
+    tl.to(e.querySelectorAll('.an, .kick'), {opacity: 0, duration: .15}, tc);
+    tl.to(cds.filter(c => c !== e), {opacity: 0, duration: .25}, tc);
+    if ($('hd')) tl.to('#hd', {opacity: 0, duration: .2}, tc);
+    D.cue(tc, 'zoom-in');
+  } else {
+    D.sai(['#hd', ...cds], dur - .45);
+  }
+  return dur;
+});
+</script>
+</body>
+</html>

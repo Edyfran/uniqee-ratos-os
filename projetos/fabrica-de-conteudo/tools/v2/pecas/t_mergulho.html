@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<!-- TIPO — o mergulho: zoom contínuo por escalas, com régua. 1080x1920 ou 1920x1080 (?ar=).
+     Cada nível é uma folha inteira com o rótulo, a frase e uma porta amarela; dentro da porta já
+     está o nível seguinte, pequeno. A câmera entra na porta sem corte até ela virar a tela, e o
+     nível novo grifa a palavra dele. Zoom exponencial em volta do ponto fixo da porta, com a
+     mesma velocidade em todo mergulho (a duração de cada trecho é a do log do zoom, e as portas
+     têm a mesma escala). A régua do lado diz quanto a câmera já aproximou (×1, ×3, ×11…): o
+     número é o zoom de verdade. Da referência (Skillry #99, #195: da mesa ao átomo, a régua
+     medindo) saiu só o movimento.
+       n         "RÓTULO|frase (<b> grifa)|detalhe@t;…" — t é quando o nível ENCHE a tela
+       s         a escala da porta (0.3) · py  o centro da porta na altura, em fração (0.62; deitado, 0.6)
+       mergulho  quanto dura cada mergulho, em s (1.1) · regua  0: sem a régua · dur
+       ?n=O VÍDEO|Um reel <b>pronto</b>|9:16 · com legenda@0.2;A LEGENDA|Duas letras, a palavra <b>grifada</b>|uma camada do vídeo@2.0;A SKILL|Quem sabe fazer é <b>uma skill</b>|legendas@3.6;A REGRA|Uma <b>ênfase</b> por frase|escrita em português@5.2&s=0.3&mergulho=1.1&dur=6.4 -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+html.h,html.h body,html.h #stage{width:1920px;height:1080px}
+#stage{padding:0;display:block;overflow:hidden;position:relative}
+.nv{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:0 0;background:var(--tex),var(--pp);overflow:hidden}
+html.h .nv{width:1920px;height:1080px}
+.nv .kick{position:absolute;left:var(--marg);top:200px;opacity:1;margin:0;font-size:44px}
+.nv .fr{position:absolute;left:var(--marg);right:240px;top:300px;font:800 92px/1.04 var(--fd);letter-spacing:var(--ls);color:var(--ink)}
+.nv .fr b{font-weight:inherit;padding:0 .1em;margin:0 -.04em;background:linear-gradient(var(--mk),var(--mk)) no-repeat 0 60%/0% 88%}
+.nv .dt{position:absolute;left:var(--marg);right:240px;font:600 44px/1.2 var(--fm);color:var(--ink6)}
+html.h .nv .kick{top:110px} html.h .nv .fr{top:206px;right:300px;font-size:84px}
+.porta{position:absolute;border:14px solid var(--mk);box-shadow:0 0 0 var(--bw) var(--ink),inset 0 0 0 var(--bw) var(--ink),var(--sh) var(--sh) 0 var(--bw) var(--ink)}
+#rg{position:absolute;right:46px;width:150px;opacity:0}
+#rg .eixo{position:absolute;right:30px;top:0;bottom:0;width:0;border-left:var(--bw) solid var(--ink)}
+#rg .tk{position:absolute;right:30px;width:36px;height:0;border-top:var(--bw) solid var(--ink)}
+#rg .tk span{position:absolute;right:48px;top:-17px;font:600 34px/1 var(--fm);color:var(--ink6);white-space:nowrap}
+#cur{position:absolute;right:0;margin-top:-34px;padding:12px 14px 10px;font:700 40px/1 var(--fm);white-space:nowrap}
+</style>
+</head>
+<body>
+<div id="stage"><div id="mundo"></div><div id="rg"><i class="eixo"></i><span class="nb cor-mk" id="cur"></span></div></div>
+<script>
+const R = document.documentElement, HZ = D.q('ar', '1080x1920').startsWith('1920');
+if (HZ) R.classList.add('h');
+const W = HZ ? 1920 : 1080, H = HZ ? 1080 : 1920;
+const dur = D.n('dur', '6.4'), S = D.n('s', '0.3'), PY = D.n('py', HZ ? '0.6' : '0.62'), MG = D.n('mergulho', '1.1');
+const nv = D.itens('n', 'O VÍDEO|Um reel <b>pronto</b>|9:16 · com legenda@0.2;A LEGENDA|Duas letras, a palavra <b>grifada</b>|uma camada do vídeo@2.0;A SKILL|Quem sabe fazer é <b>uma skill</b>|legendas@3.6;A REGRA|Uma <b>ênfase</b> por frase|escrita em português@5.2', ['rot', 'fr', 'dt']);
+const N = nv.length;
+// a porta de todo nível: o mesmo formato da tela, então o nível de dentro cabe nela inteiro
+const P = {x: (1 - S) / 2 * W, y: (PY - S / 2) * H};
+const F = {x: P.x / (1 - S), y: P.y / (1 - S)};   // o ponto que não se mexe no mergulho
+const mundo = document.getElementById('mundo');
+const els = nv.map((n, k) => {
+  const el = document.createElement('div');
+  el.className = 'nv';
+  el.innerHTML = `<span class="kick">${n.rot || ''}</span><div class="fr">${n.fr || ''}</div><div class="dt">${n.dt || ''}</div>` +
+    (k < N - 1 ? `<i class="porta" style="left:${P.x - 14}px;top:${P.y - 14}px;width:${S * W + 28}px;height:${S * H + 28}px"></i>` : '');
+  mundo.appendChild(el);
+  return el;
+});
+const zoom = k => Math.pow(1 / S, k);
+const fmt = z => '×' + (z < 10 ? (Math.round(z * 10) / 10).toLocaleString('pt-BR') : Math.round(z).toLocaleString('pt-BR'));
+
+D.monta(tl => {
+  // o detalhe vai embaixo da frase, e a frase não desce até a porta
+  els.forEach(el => {
+    const fr = el.querySelector('.fr'), dt = el.querySelector('.dt');
+    dt.style.top = fr.offsetTop + fr.offsetHeight + 24 + 'px';
+  });
+  // a régua: um traço por nível, na distância do log do zoom (com portas iguais, igual)
+  const rg = document.getElementById('rg'), y0 = HZ ? 160 : 330, y1 = HZ ? 740 : 1330;
+  Object.assign(rg.style, {top: y0 + 'px', height: y1 - y0 + 'px'});
+  nv.forEach((_, k) => rg.insertAdjacentHTML('beforeend',
+    `<i class="tk" style="top:${(N > 1 ? k / (N - 1) : 0) * (y1 - y0)}px"><span>${fmt(zoom(k))}</span></i>`));
+  if (D.q('regua', '1') === '0') rg.remove();
+
+  const Z = {z: 0}, cur = document.getElementById('cur');
+  D.aoQuadro(() => {
+    const i = Math.min(N - 1, Math.floor(Z.z)), u = Z.z - i, m = Math.pow(1 / S, u);
+    els.forEach((el, k) => {
+      // o nível k visto de dentro do nível i, e o nível i aproximando em volta de F
+      const a = Math.pow(S, k - i), o = {x: 0, y: 0};
+      for (let j = i; j < k; j++) { const f = Math.pow(S, j - i); o.x += P.x * f; o.y += P.y * f; }
+      for (let j = k; j < i; j++) { const f = Math.pow(S, j - i); o.x -= P.x * f; o.y -= P.y * f; }
+      const c = a * m, dx = (o.x - F.x) * m + F.x, dy = (o.y - F.y) * m + F.y;
+      // o de fora fica inteiro atrás do de dentro, que cobre a tela; o pequeno demais não se vê
+      const some = k < i || c * W < 6;
+      el.style.display = some ? 'none' : '';
+      if (!some) el.style.transform = `translate(${dx}px,${dy}px) scale(${c})`;
+      // maior que a tela, ele sangra pela borda de propósito: o qa não conta como texto fora
+      if (c > 1.001) el.dataset.qa = 'ignora'; else delete el.dataset.qa;
+    });
+    cur.textContent = fmt(Math.pow(1 / S, Z.z));
+    cur.style.top = (N > 1 ? Z.z / (N - 1) : 0) * (y1 - y0) + 'px';
+  });
+
+  const t0 = nv[0].t;
+  D.palavras(els[0].querySelector('.fr'), t0);
+  D.carimbo(els[0].querySelector('.kick'), t0 + .1);
+  D.marca([...els[0].querySelectorAll('.fr b')], t0 + .6);
+  if (rg.parentNode) tl.fromTo(rg, {opacity: 0, x: 40}, {opacity: 1, x: 0, duration: .4, ease: D.P.EASE}, D.at(t0) + .3);
+  for (let k = 1; k < N; k++) {
+    const ini = Math.max(nv[k - 1].t + .3, nv[k].t - MG);
+    // começa e termina parado; no meio, a mesma velocidade no log do zoom
+    tl.to(Z, {z: k, duration: nv[k].t - ini, ease: 'sine.inOut'}, ini);
+    D.cue(ini, 'zoom-in');
+    D.marca([...els[k].querySelectorAll('.fr b')], nv[k].t);
+    tl.fromTo(els[k].querySelector('.kick'), {scale: 1.15, rotation: -4}, {scale: 1, rotation: -1.2, duration: .38, ease: D.P.POUSA}, D.at(nv[k].t));
+    D.cue(nv[k].t, 'stamp');
+  }
+  return dur;
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<!-- GANCHO — a lista escondida em tarjas. 1080x1920, --alpha.
+     No quadro 0 a lista inteira já está lá, numerada e coberta: dá pra contar quantos itens são,
+     não dá pra ler nenhum. É o gancho. Cada tarja azul recolhe no instante em que o item é dito, o
+     texto sobe e a linha fica amarela até o próximo item abrir (o marcador é de um só). O `selo` bate num item (o que a fala elege). Embaixo
+     da grade, a linha da fala (a frase dita, inteira) e, por cima da cena, os rótulos (ANTES, DEPOIS).
+     A peça fica até o fim: a lista toda aberta é o último quadro. O vídeo embaixo é da composição
+     (deriva.py, modo lista).
+       titulo  "bloco|resto" (*grifo*) · itens  "rótulo@t;…" na ordem da lista (sem @t: fica coberta)
+       cols  2 · y  o topo da grade (380) · lin  a altura da linha (84) · gap  (14) · margem  (65)
+       selo  "texto@índice@t" (o índice começa em 1) · falas  "frase@t0@t1;…" (/ quebra a linha)
+       y_fala  (744) · rotulos  "texto@t0@t1;…" · rot_xy  "x,y" do rótulo (65,820)
+       jan  "x,y,w,h" a moldura da janela (um buraco: o vídeo é da composição) · pausa  "t0@t1": a lista
+            e a moldura saem em t0 (a cena vai pra tela cheia) e voltam em t1, já abertas · dur
+     ?titulo=8 pedidos|que a Fábrica *entende*&itens=faz a capa@0.6;gera as cenas@1.2;narra com a minha voz@1.8;me põe falando@2.4&selo=COMECE POR AQUI@4@2.8&falas=Você não precisa saber editar.@0@1.6;Só pedir.@1.7@3.2&rotulos=ANTES · 29 s@3.4@4.4;DEPOIS · 22 s@4.4@5.2&dur=5.5 -->
+<html lang="pt-BR" class="alfa" data-qa="entra-seco fica">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block;position:relative;overflow:hidden}
+.ab{position:absolute}
+.cab{display:flex;align-items:center;gap:20px;top:270px}
+.cab .tt{padding:10px 22px 14px;font:700 60px/1 var(--fd);letter-spacing:var(--ls);white-space:nowrap}
+.cab .rs{font:700 52px/1 var(--fd);letter-spacing:var(--ls);color:var(--ink);white-space:nowrap}
+.cab .rs b{background:linear-gradient(var(--mk),var(--mk)) 0 60%/0% 88% no-repeat;padding:0 .08em}
+.grade{display:grid;column-gap:20px}
+.tj{position:relative;z-index:1;display:flex;align-items:center;gap:16px;padding:0 20px 0 12px;overflow:hidden}
+.tj .n{flex:none;width:64px;height:58px;display:flex;align-items:center;justify-content:center;
+  background:var(--ac);color:#fff;border-radius:var(--raio-s);font:700 34px/1 var(--fm)}
+.tj .tx{flex:1;min-width:0;font:700 46px/1 var(--fd);letter-spacing:var(--ls);color:var(--ink);white-space:nowrap}
+.tj .cv{position:absolute;top:0;bottom:0;left:88px;right:0;background:var(--ac);transform-origin:100% 50%}
+.selo{padding:10px 18px;font:700 30px/1 var(--fm);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;opacity:0;z-index:3}
+.fala{left:65px;right:65px;display:flex;justify-content:center;opacity:0}
+.fala span{padding:12px 24px 16px;font:700 46px/1.12 var(--fd);letter-spacing:var(--ls);color:var(--ink);text-align:center}
+.jan{border:var(--bw) solid var(--ink);border-radius:var(--raio);box-shadow:var(--sh) var(--sh) 0 var(--ink)}
+.rot{padding:12px 22px;font:700 44px/1 var(--fm);letter-spacing:.06em;white-space:nowrap;opacity:0}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="ab cab" id="tp"><span class="tt nb cor-ac" id="tt"></span><span class="rs" id="rs"></span></div>
+  <div class="ab grade" id="gr"></div>
+  <div class="ab jan" id="jn"></div>
+</div>
+<script>
+const dur = D.n('dur', '5.5'), M = D.n('margem', '65'), cols = Math.max(1, D.n('cols', '2'));
+const lin = D.n('lin', '84'), gap = D.n('gap', '14');
+const grifo = s => s.replace(/\*([^*]+)\*/g, '<b>$1</b>');
+const [tt, rs] = D.q('titulo', '8 pedidos|que a Fábrica *entende*').split('|');
+const $ = id => document.getElementById(id);
+$('tt').textContent = tt || '';
+$('rs').innerHTML = grifo(rs || '');
+$('tp').style.left = M + 'px';
+const its = D.q('itens', 'faz a capa@0.6;gera as cenas@1.2;narra com a minha voz@1.8;me põe falando@2.4')
+  .split(';').filter(Boolean).map((s, i) => { const [tx, t] = s.split('@'); return {i, tx, t: t === undefined || t === '' ? -1 : parseFloat(t)}; });
+const gr = $('gr');
+Object.assign(gr.style, {left: M + 'px', right: M + 'px', top: D.n('y', '380') + 'px', rowGap: gap + 'px',
+  gridTemplateColumns: `repeat(${cols},1fr)`, gridAutoRows: lin + 'px', gridAutoFlow: 'column',
+  gridTemplateRows: `repeat(${Math.ceil(its.length / cols)},${lin}px)`});
+its.forEach(x => gr.insertAdjacentHTML('beforeend',
+  `<div class="tj nb" id="j${x.i}"><span class="n">${String(x.i + 1).padStart(2, '0')}</span><span class="tx" id="x${x.i}">${x.tx}</span><span class="cv" id="c${x.i}"></span></div>`));
+const stage = $('stage');
+const jan = D.q('jan', '65,800,950,620').split(',').map(Number);
+if (jan.length === 4) Object.assign($('jn').style, {left: jan[0] - 4 + 'px', top: jan[1] - 4 + 'px', width: jan[2] + 8 + 'px', height: jan[3] + 8 + 'px'});
+else $('jn').remove();
+const [pa, pb] = D.q('pausa', '').split('@').map(parseFloat);
+const [selTx, selI, selT] = D.q('selo', 'COMECE POR AQUI@4@2.8').split('@');
+if (selTx) stage.insertAdjacentHTML('beforeend', `<div class="ab selo nb cor-mk" id="se">${selTx}</div>`);
+const falas = D.q('falas', 'Você não precisa saber editar.@0@1.6;Só pedir.@1.7@3.2').split(';').filter(Boolean)
+  .map(s => { const [tx, a, b] = s.split('@'); return {tx, a: parseFloat(a), b: parseFloat(b)}; });
+const yf = D.n('y_fala', '744');
+falas.forEach((f, k) => stage.insertAdjacentHTML('beforeend',
+  `<div class="ab fala" id="f${k}" style="top:${yf}px"><span class="nb">${f.tx.split('/').join('<br>')}</span></div>`));
+const rots = D.q('rotulos', 'ANTES · 29 s@3.4@4.4;DEPOIS · 22 s@4.4@5.2').split(';').filter(Boolean)
+  .map(s => { const [tx, a, b] = s.split('@'); return {tx, a: parseFloat(a), b: parseFloat(b)}; });
+const [rx, ry] = D.q('rot_xy', '65,820').split(',').map(Number);
+rots.forEach((r, k) => stage.insertAdjacentHTML('beforeend',
+  `<div class="ab rot nb ${k % 2 ? 'cor-ok' : 'cor-ink'}" id="r${k}" style="left:${rx}px;top:${ry}px">${r.tx}</div>`));
+
+D.monta(tl => {
+  D.cabe('.tj .tx', 34, '.tj');
+  // no quadro 0 a grade já está na tela, coberta (entra-seco): o título varre o grifo logo depois
+  D.marca('#rs b', .25);
+  const abertas = its.filter(x => x.t >= 0 && x.t < dur).sort((a, b) => a.t - b.t);
+  abertas.forEach(x => {
+    gsap.set('#x' + x.i, {opacity: 0});
+    tl.to('#c' + x.i, {scaleX: 0, duration: .32, ease: 'power3.inOut'}, D.at(x.t));
+    tl.set('#x' + x.i, {opacity: 1}, D.at(x.t) + .06);
+    D.palavras('#x' + x.i, x.t + .06, .045);
+    D.cue(x.t, 'swish');
+  });
+  // o marcador é de um só: a linha que acabou de abrir fica amarela, e a anterior volta pro papel
+  abertas.forEach((x, k) => {
+    tl.to('#j' + x.i, {backgroundColor: D.css('--mk'), duration: .18, ease: 'none'}, D.at(x.t) + .1);
+    const prox = abertas[k + 1];
+    if (prox) tl.to('#j' + x.i, {backgroundColor: D.css('--sur'), duration: .18, ease: 'none'}, D.at(prox.t) + .1);
+  });
+  // o selo pousa no canto de cima, à direita, do item eleito
+  const se = $('se'), alvo = $('j' + (parseInt(selI, 10) - 1));
+  if (se && alvo && parseFloat(selT) < dur) {
+    const g = gr.getBoundingClientRect(), b = alvo.getBoundingClientRect();
+    Object.assign(se.style, {left: Math.min(1080 - M - se.offsetWidth, b.right - se.offsetWidth + 12) + 'px', top: (b.top - g.top + gr.offsetTop - 30) + 'px'});
+    D.carimbo('#se', parseFloat(selT), -3);
+  }
+  // a fala: a frase entra quando começa e sai quando acaba (a próxima não espera a saída)
+  falas.forEach((f, k) => {
+    if (f.a >= dur) return;
+    D.entra('#f' + k, f.a, 14);
+    if (f.b < dur - .05) tl.to('#f' + k, {opacity: 0, duration: .14, ease: D.P.SAI}, Math.max(D.at(f.a) + .2, f.b - .14));
+  });
+  rots.forEach((r, k) => {
+    if (r.a >= dur) return;
+    D.carimbo('#r' + k, r.a, k % 2 ? 2 : -2);
+    if (r.b < dur - .05) tl.to('#r' + k, {opacity: 0, scale: .9, duration: .16, ease: D.P.SAI}, r.b - .16);
+  });
+  // a pausa: a cena vai pra tela cheia, a lista e a moldura saem e voltam no lugar
+  if (pa < dur) {
+    const lista = ['#tp', '#gr', '#jn', '#se'].filter(s => document.querySelector(s));
+    tl.to(lista, {opacity: 0, duration: .16, ease: D.P.SAI}, pa - .16);
+    if (pb < dur) tl.to(lista, {opacity: 1, duration: .2, ease: 'power2.out'}, pb);
+  }
+  return dur;
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<!-- AULA — zoom + contorno numa área da tela. 1920x1080, tela cheia.
+     A captura aproxima até a área, o contorno amarelo aterrissa em volta, o resto
+     escurece e a etiqueta diz o que é. No fim, abre de volta pelo mesmo caminho.
+     A área é em fração da tela: x,y,largura,altura.
+       ?img=captura.png&area=0.785,0.075,0.18,0.1&rot=clica aqui&z=&t0=0.3&dur=4
+     Sem img, usa a tela de exemplo. z vazio = automático (a área ocupa ~55%, até 2,4×). -->
+<html lang="pt-BR" class="h">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/direcao-h.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<script src="../nucleo/h-exemplo.js"></script>
+<style>
+#stage{overflow:hidden;background:var(--cod2)}
+#tela{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0}
+.alvo{position:absolute;border:6px solid var(--mk);border-radius:12px;box-shadow:0 0 0 3px var(--ink),0 0 0 4000px rgba(11,13,18,var(--veu,0));opacity:0}
+.rot{position:absolute;padding:12px 18px 10px;font:700 26px/1 var(--fm);letter-spacing:.06em;text-transform:uppercase;border-radius:var(--raio-s);white-space:nowrap;opacity:0}
+.rot:empty{display:none}
+</style>
+</head>
+<body>
+<div id="stage"><div id="tela"></div><div class="alvo" id="al"></div><div class="rot nb cor-mk" id="rt"></div></div>
+<script>
+const dur = D.n('dur', '4'), t0 = D.n('t0', '0.3'), $ = id => document.getElementById(id);
+const img = D.q('img', '');
+if (img) D.midia('#tela', img, 'tela'); else telaExemplo($('tela'));
+const [fx, fy, fw, fh] = D.q('area', '0.785,0.075,0.18,0.1').split(',').map(Number);
+const ax = fx * 1920, ay = fy * 1080, aw = fw * 1920, ah = fh * 1080;
+const z = D.n('z', '0') || Math.min(1920 * .55 / aw, 1080 * .55 / ah, 2.4);
+let tx = 960 - z * (ax + aw / 2), ty = 540 - z * (ay + ah / 2);
+tx = Math.min(0, Math.max(1920 - 1920 * z, tx)); ty = Math.min(0, Math.max(1080 - 1080 * z, ty));
+const pad = 14, box = {l: tx + z * ax - pad, t: ty + z * ay - pad, w: z * aw + pad * 2, h: z * ah + pad * 2};
+Object.assign($('al').style, {left: box.l + 'px', top: box.t + 'px', width: box.w + 'px', height: box.h + 'px'});
+$('rt').textContent = D.q('rot', 'clica aqui');
+
+D.monta(tl => {
+  const rt = $('rt'), baixo = box.t + box.h + 90 < 1060;
+  rt.style.left = Math.max(40, Math.min(1880 - rt.offsetWidth, box.l)) + 'px';
+  rt.style.top = (baixo ? box.t + box.h + 24 : box.t - 24 - rt.offsetHeight) + 'px';
+  tl.fromTo('#tela', {x: 0, y: 0, scale: 1}, {x: tx, y: ty, scale: z, duration: .8, ease: 'power3.inOut'}, D.at(t0));
+  D.cue(t0, 'zoom-in');
+  const ta = t0 + .65;
+  tl.fromTo('#al', {opacity: 0, scale: 1.25, '--veu': 0}, {opacity: 1, scale: 1, '--veu': .45, duration: .45, ease: D.P.MOLA}, D.at(ta));
+  D.cue(ta, 'pop');
+  if (rt.textContent) D.carimbo('#rt', ta + .2, 0);
+  if (D.q('sai', '1') !== '0') {
+    const ts = dur - .75;
+    tl.to(['#al', '#rt'], {opacity: 0, duration: .2, ease: 'power2.in'}, ts);
+    tl.to('#al', {'--veu': 0, duration: .2}, ts);
+    tl.to('#tela', {x: 0, y: 0, scale: 1, duration: .6, ease: 'power3.inOut'}, ts + .1);
+    D.cue(ts + .1, 'whoosh-out');
+  }
+  return dur;
+});
+</script>
+</body>
+</html>

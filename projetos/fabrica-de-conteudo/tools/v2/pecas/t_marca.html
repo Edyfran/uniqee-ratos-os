@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<!-- TIPO — a marca se monta. 1080x1920 ou 1920x1080 (?ar=).
+     Primeiro o desenho em traço: o contorno e as facetas, riscados um a um. Depois os cacos (cada
+     faceta com o seu pedaço da marca, e uma cor chapada de apoio que deixa ver o caco no ar) voam de
+     fora, um por um, e encaixam no traço. Montada, o traço e as cores de apoio somem, a placa do ícone
+     pousa atrás e o nome se escreve embaixo. Abertura de aula, fecho de vídeo, a marca do aluno no
+     ?tema=marca. Da referência (Skillry #283, #211, o logo em wireframe que os fragmentos low-poly
+     montam) saiu só o movimento: o caco é chapado, sem brilho nem reflexo.
+       img    a marca, quadrada (svg ou png transparente) · nome · sub  a linha mono de baixo (vazio: nenhuma)
+       placa  sur|ac|mk|ink (sur) · grade  facetas por lado (4) · t0 · t_cacos · t_placa · t_nome · dur
+       ?img=../midia/marca-fabrica.svg&nome=Fábrica de Conteúdo&sub=com IA&placa=sur&grade=4&t0=0.2&t_cacos=0.9&t_placa=2.35&t_nome=2.7&dur=4.6 -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+html.h,html.h body,html.h #stage{width:1920px;height:1080px}
+#stage{padding:0;display:block;overflow:hidden}
+#placa{position:absolute;opacity:0}
+#marca{position:absolute}
+.caco{position:absolute;inset:0;opacity:0}
+.caco i{position:absolute;inset:0}
+.caco img,#inteira{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+#fio{position:absolute;inset:-6px;width:calc(100% + 12px);height:calc(100% + 12px);overflow:visible}
+#fio line,#fio rect{stroke:var(--ink);stroke-linecap:round;fill:none}
+#tx{position:absolute;left:var(--marg);right:var(--marg);display:flex;flex-direction:column;align-items:center;gap:22px}
+#nome{font:800 96px/1 var(--fd);letter-spacing:var(--ls);color:var(--ink);white-space:nowrap}
+#sub{font:700 36px/1 var(--fm);letter-spacing:.14em;text-transform:uppercase;color:var(--ink);background:var(--mk);
+  border:var(--bw) solid var(--ink);border-radius:var(--raio-s);padding:12px 18px 10px;opacity:0}
+#sub:empty{display:none}
+#nome .l{white-space:pre}
+html.tinta #nome{color:#fff}
+</style>
+</head>
+<body>
+<div id="stage"><div class="nb" id="placa"></div><div id="marca"></div><div id="tx"><div id="nome"></div><div id="sub"></div></div></div>
+<script>
+const $ = id => document.getElementById(id), R = document.documentElement, HZ = D.q('ar', '1080x1920').startsWith('1920');
+if (HZ) R.classList.add('h');
+const W = HZ ? 1920 : 1080, H = HZ ? 1080 : 1920, S = HZ ? 400 : D.n('s', '600'), CX = W / 2, CY = HZ ? 400 : D.n('cy', '820');   // 16:9: o nome para acima da faixa do player (y 896)
+const dur = D.n('dur', '4.6'), t0 = D.n('t0', '0.2'), tCacos = D.n('t_cacos', '0.9'), tPlaca = D.n('t_placa', '2.35'), tNome = D.n('t_nome', '2.7');
+const G = Math.min(6, Math.max(2, Math.round(D.n('grade', '4')))), img = D.q('img', '../midia/marca-fabrica.svg');
+$('nome').textContent = D.q('nome', 'Fábrica de Conteúdo');
+$('sub').textContent = D.q('sub', 'com IA');
+const placa = ['sur', 'ac', 'mk', 'ink'].includes(D.q('placa')) ? D.q('placa') : 'sur';
+if (placa !== 'sur') $('placa').classList.add('cor-' + placa);
+Object.assign($('marca').style, {left: CX - S / 2 + 'px', top: CY - S / 2 + 'px', width: S + 'px', height: S + 'px'});
+const P0 = S / 2 + 46;
+Object.assign($('placa').style, {left: CX - P0 + 'px', top: CY - P0 + 'px', width: 2 * P0 + 'px', height: 2 * P0 + 'px'});
+$('tx').style.top = CY + P0 + (HZ ? 50 : 80) + 'px';
+// a malha: os vértices da grade, os de dentro mexidos (o sorteio é fixo: todo render sai igual)
+let sem = 11;
+const sorte = () => (sem = (sem * 16807) % 2147483647) / 2147483647;
+const V = [];
+for (let j = 0; j <= G; j++) for (let i = 0; i <= G; i++) {
+  const borda = i === 0 || j === 0 || i === G || j === G, mexe = () => borda ? 0 : (sorte() - .5) * .55 / G;
+  V.push([i / G + mexe(), j / G + mexe()]);
+}
+const v = (i, j) => V[j * (G + 1) + i];
+const tris = [];
+for (let j = 0; j < G; j++) for (let i = 0; i < G; i++) {
+  const a = v(i, j), b = v(i + 1, j), c = v(i + 1, j + 1), d = v(i, j + 1);
+  if ((i + j) % 2) tris.push([a, b, c], [a, c, d]); else tris.push([a, b, d], [b, c, d]);
+}
+const APOIO = ['var(--ac2)', 'var(--act)', 'var(--pp2)', 'var(--mk)'];
+const cacos = tris.map((t, k) => {
+  const c = document.createElement('div');
+  c.className = 'caco';
+  c.style.clipPath = 'polygon(' + t.map(([x, y]) => `${(x * 100).toFixed(2)}% ${(y * 100).toFixed(2)}%`).join(',') + ')';
+  c.innerHTML = `<i style="background:${APOIO[k % APOIO.length]}"></i>` + (img ? `<img src="${img}" alt="">` : '');
+  $('marca').appendChild(c);
+  return c;
+});
+// a marca inteira, sem costura: entra no lugar dos cacos quando eles assentam
+if (img) $('marca').insertAdjacentHTML('beforeend', `<img id="inteira" src="${img}" alt="" style="opacity:0">`);
+// o traço: o contorno e as arestas da malha, cada aresta uma vez
+const ar = new Set(), linhas = [];
+tris.forEach(t => t.forEach((p, k) => {
+  const q = t[(k + 1) % 3], ch = [p, q].map(x => x.join()).sort().join('|');
+  if (!ar.has(ch)) { ar.add(ch); linhas.push([p, q]); }
+}));
+const px = x => (6 + x * S).toFixed(1);
+$('marca').insertAdjacentHTML('beforeend', `<svg id="fio" viewBox="0 0 ${S + 12} ${S + 12}">` +
+  linhas.map(([p, q]) => `<line x1="${px(p[0])}" y1="${px(p[1])}" x2="${px(q[0])}" y2="${px(q[1])}" stroke-width="3" opacity=".55"/>`).join('') +
+  `<rect x="6" y="6" width="${S}" height="${S}" rx="6" stroke-width="5"/></svg>`);
+
+D.monta(tl => {
+  D.cabe('#nome', 40, '#tx');
+  // o traço se risca de fora pra dentro: o contorno primeiro, as arestas em cascata
+  const fios = [...document.querySelectorAll('#fio rect, #fio line')].reverse();
+  fios.forEach((f, k) => {
+    const L = f.getTotalLength();
+    gsap.set(f, {strokeDasharray: L, strokeDashoffset: L});
+    tl.to(f, {strokeDashoffset: 0, duration: k ? .3 : .5, ease: 'power2.inOut'}, D.at(t0) + (k ? .15 + k * .5 / fios.length : 0));
+  });
+  D.cue(t0, 'swish');
+  // os cacos voam de fora, em ordem embaralhada, e encaixam sem passar do ponto
+  const ordem = cacos.map((c, k) => [sorte(), c]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+  const passo = .95 / ordem.length;
+  ordem.forEach((c, k) => {
+    const ang = sorte() * Math.PI * 2, d = 520 + sorte() * 380;
+    tl.fromTo(c, {x: Math.cos(ang) * d, y: Math.sin(ang) * d, rotation: (sorte() - .5) * 240, scale: .7, opacity: 0},
+      {x: 0, y: 0, rotation: 0, scale: 1, opacity: 1, duration: .5, ease: 'power3.out', immediateRender: false}, D.at(tCacos) + k * passo);
+  });
+  D.cue(tCacos, 'tick-roll', {dur: 1.0});
+  // montada: o traço e as cores de apoio somem, a marca fica limpa
+  const tMont = D.at(tCacos) + .95 + .4;
+  tl.to('#fio', {opacity: 0, duration: .25}, tMont);
+  tl.to('.caco i', {opacity: 0, duration: .3}, tMont);
+  if (img) { tl.set('#inteira', {opacity: 1}, tMont + .3); tl.set(cacos, {opacity: 0}, tMont + .3); }
+  tl.to('#marca', {scale: 1.04, duration: .12, yoyo: true, repeat: 1, ease: 'power2.out'}, tMont);
+  D.cue(tMont, 'stamp');
+  D.pousa('#placa', tPlaca, {s: 1.06, som: 'thud', rot: 0});
+  const fim = D.digita('#nome', D.at(tNome) + .05, .045);
+  if ($('sub').textContent) D.carimbo('#sub', fim + .2, -2);
+  D.sai(['#placa', '#marca', '#tx'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

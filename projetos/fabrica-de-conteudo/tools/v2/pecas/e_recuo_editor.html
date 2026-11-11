@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<!-- EFEITO 3D — o recuo que revela (clone da ficha 15, "pull-back reveal", do anúncio De25fKeTRl7). A câmera recua a partir do vídeo e revela que ele era o monitor
+     de um editor: um plano inclinado em perspectiva (rolagem de uns 4°, guinada leve, o lado direito mais longe) com o título "reel de efeitos", o painel
+     da lista de tarefas que marca 1, 2 e 3, o painel dos efeitos com o da vez em amarelo e, embaixo, a linha do tempo de verdade: régua com os segundos,
+     as miniaturas do vídeo (quadros em pé, 9:16, de instantes diferentes: cada pedaço da régua mostra o quadro do instante dele), os clipes com o nome de cada efeito e a forma de onda DA VOZ do próprio vídeo. A linha do tempo fica parada e a cabeça de reprodução anda pra direita enquanto o vídeo toca (como na ref). O monitor lê o vídeo-base
+     como textura. three.js de verdade (vendor/three): a câmera é de verdade (recua de 1,00 a 0,45 em 6 quadros, desacelerando, e segue a 0,43 devagar, com um giro leve: os painéis andam pra dentro, o monitor fica no lugar), então o
+     borrão radial do recuo é a média de subquadros, e a perspectiva do editor aparece grande e borrada e assenta em 3 a 4 quadros.
+     1080x1920, OPACA (fundo preto: substitui o plano durante o efeito; o selo vai por cima, no plano). Pede o vídeo-base (`v`, com a voz: dele sai a forma de onda).
+     t=0 é o quadro em que a câmera começa a recuar (f491 da ref); corte seco no fim (`dur`). O âncora do recuo é o rosto: a escala mexe em torno de (575, 585); na deriva lenta de f503 a f527 o ponto fixo anda pra (400, 920), então uma parte da deriva é escala e outra é giro da câmera.
+       v     o vídeo-base, com a voz (a peça lê o quadro como textura e o áudio pra forma de onda) · voff  o instante dele em que t=0 cai, em s (0)
+       onda  outro arquivo de áudio, se a voz não estiver no `v` · tv  o tempo mostrado na régua em t=0, em s (por padrão, voff)
+       clips os clipes da linha do tempo, "nome@t0@t1;..." com t em s do vídeo, um por efeito já dito e o desta peça; nome CURTO (uma palavra, até ~9 letras: verde, celular, zoom, papel, interface...), senão o corpo encolhe até caber
+       lista os efeitos do painel, separados por ; (corte;zoom;legenda;...) · onda_h a meia altura máxima da onda em px de projeto (112: só as falas fortes chegam lá)
+       ativa o número (de 0) do efeito da vez, em amarelo (5) · tit o título (meu vídeo) · ck os quadros em que a lista marca 1, 2 e 3 (12,17,22)
+       tl1 tl2 tl3  os três itens da lista de tarefas (cortar pausas;pôr efeitos;exportar)
+       dur   a duração (1.233 = f491 a f527) · k o número de subquadros do borrão (14) · yaw rol pit  a inclinação do editor em graus (6, 2, 0)
+     O three vem de ../vendor/three/three.min.js (global T3); sem CDN. O render abre a peça por file://, com --allow-file-access-from-files.
+       etiqueta: editor-de-video, recuo-de-camera, linha-do-tempo, forma-de-onda
+       ?v=../../onboarding/previa/previa.mp4&dur=1.233 -->
+<html lang="pt-BR" class="alfa" data-qa="entra-seco fica">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<script src="../vendor/three/three.min.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block;position:relative;overflow:hidden}
+#gl{position:absolute;left:-4000px;top:0;width:1080px;height:1920px}
+#acc{position:absolute;left:0;top:0;width:1080px;height:1920px;display:block}
+.vv{position:absolute;left:-4000px;top:0;width:8px;height:14px}
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="gl" width="1080" height="1920"></canvas><canvas id="acc" width="1080" height="1920"></canvas></div>
+<script>
+const dur = D.n('dur', '1.233'), KSUB = Math.round(D.n('k', '14')), SRC = D.q('v', ''), VOFF = D.n('voff', '0'), ONDA = D.q('onda', SRC), TV = D.n('tv', String(VOFF));
+const LISTA = D.q('lista', 'corte;zoom;legenda;música;transição;este efeito;cor').split(';'), ATIVA = D.n('ativa', '5');
+const TIT = D.q('tit', 'meu vídeo'), TL = ['tl1', 'tl2', 'tl3'].map((k, i) => D.q(k, ['cortar pausas', 'pôr efeitos', 'exportar'][i]));
+const CK = D.q('ck', '12,17,22').split(',').map(Number);
+const YAW = D.n('yaw', '6'), ROL = D.n('rol', '2'), PIT = D.n('pit', '0'), HH = D.n('onda_h', '112');   // HH: a meia altura máxima da onda, em px de projeto
+const CLIPS = D.q('clips', 'corte@9.7@10.6;zoom@10.85@11.9;legenda@12.3@13.1;música@13.3@14.2;título@14.5@15.6;cor@15.9@16.5;som@16.7@17.6;cena@17.8@18.6;texto@18.85@19.7;transição@19.95@20.9;recuo@21.1@22.2')
+  .split(';').filter(Boolean).map(s => { const [n, a, b] = s.split('@'); return {n, a: +a, b: +b}; });
+const T = window.T3, W = 1080, H = 1920, FOCAL = D.n('f', '1500'), FOV = 2 * Math.atan(960 / FOCAL) * 180 / Math.PI, RAD = Math.PI / 180;
+const clamp = (x, a, b) => Math.min(b, Math.max(a, x)), lerp = (a, b, t) => a + (b - a) * t, sm = t => t * t * (3 - 2 * t);
+const prog = (q, a, b) => clamp((q - a) / (b - a), 0, 1);
+const lin = (K, q) => { const n = K.length; if (q <= K[0][0]) return K[0][1]; if (q >= K[n - 1][0]) return K[n - 1][1]; let i = 1; while (K[i][0] < q) i++;
+  return lerp(K[i - 1][1], K[i][1], (q - K[i - 1][0]) / (K[i][0] - K[i - 1][0])); };
+const css = v => { const g = document.createElement('canvas').getContext('2d'); g.fillStyle = getComputedStyle(document.documentElement).getPropertyValue(v).trim(); return g.fillStyle; };
+const MK = css('--mk'), INK = css('--ink');
+const FD = getComputedStyle(document.documentElement).getPropertyValue('--fd').trim() || 'sans-serif';
+const GR = {cm: css('--cod-cm'), tx: css('--cod-tx'), i4: css('--ink4'), i6: css('--ink6'), cod: css('--cod'), cod2: css('--cod2'), ln: css('--cod-ln'), i8: css('--ink8'), cine: css('--cine')};   // os cinzas do núcleo
+
+// a escala do monitor a cada quadro (q=0 é f491). O recuo forte são os 5 primeiros quadros (f491 a f495, medidos pelos olhos (Vision) na ref); de f496 em diante a curva
+// segue o deslocamento por quadro dos painéis da ref (correlação de fase: 8,3, 4,8, 2,1, 1,0 e 0,1 px de meia escala em f496 a f500, 0 em f501 e f502) e a deriva lenta
+// que sobe de 0 a 0,8 px por quadro até f514 e volta a 0 em f527, sem degrau. A deriva da ref não é só escala: os painéis andam pra dentro (esquerdo +0,3 px, direito -0,85, linha do tempo -0,5 na vertical, monitor 0,0 por quadro no pico), o que dá 78% de escala (o ponto fixo cai em x 352, y 886, não na âncora do recuo) e um giro da câmera de uns -0,6 px em x e +1,2 em y por quadro no pico (a mesma curva)
+const ESC0 = [[-1, 1], [0, .9], [1, .64], [2, .59], [3, .52], [4, .493], [5, .470], [6, .4576], [7, .4516], [8, .449], [9, .4486], [10, .4486], [11, .4486], [12, .4483], [13, .4479], [14, .4474], [15, .4467], [16, .4458], [17, .4446], [18, .4428],
+  [19, .4414], [20, .4398], [21, .4381], [22, .4363], [23, .4343], [24, .4325], [25, .4307], [26, .429], [27, .4273], [28, .4257], [29, .4243], [30, .423], [31, .4218], [32, .421], [33, .4205], [34, .4201], [35, .4199], [36, .4199], [37, .4198], [60, .41]];
+const Q11 = lin(ESC0, 11), DERIVA = .78, esc0 = q => lin(ESC0, q);
+const ESC = ESC0.map(([q, s]) => [q, q <= 11 ? s : Q11 + DERIVA * (s - Q11)]);     // 70% da deriva é escala; o resto é o giro abaixo
+const giro = q => Math.max(0, Q11 - esc0(q)) / .002;                               // a deriva acumulada em unidades do pico (1 por quadro no pico)
+const esc = q => lin(ESC, q);
+const AX = 35, AY = 376;                                          // o ponto do plano (em px de projeto, do centro do monitor) por onde o eixo da câmera passa: o rosto, a âncora do recuo
+const PXS = 575, PYS = 585;                                       // onde o eixo cai na tela
+
+// ---- as fontes: o vídeo (textura do monitor) e o áudio (forma de onda) ----
+const stage = document.getElementById('stage');
+let vid = null; if (SRC) { vid = document.createElement('video'); vid.className = 'vv'; vid.src = SRC; vid.muted = true; vid.playsInline = true; vid.preload = 'auto'; vid.dataset.off = VOFF; stage.appendChild(vid); D._videos.push(vid); }
+const cv2 = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+const vcv = cv2(W, H), vg = vcv.getContext('2d');
+const TWT = 129, THT = 230, TS = TWT / 220;                                          // a miniatura em px de projeto (9:16, o quadro inteiro do vídeo em pé) e quantos segundos ela cobre na régua (220 px por s)
+const NJ0 = Math.floor((TV - 12) / TS), NJ1 = Math.ceil((TV + 9) / TS);               // os pedaços da régua que aparecem: do 12 s antes ao 9 s depois do instante da cabeça
+const SW = 136, SH = 242, folha = cv2(SW * (NJ1 - NJ0 + 1), SH), fg = folha.getContext('2d');   // a folha de miniaturas: um quadro do vídeo por pedaço, tirado do instante do pedaço
+function atualizaVideo() {
+  vg.clearRect(0, 0, W, H); if (vid && vid.readyState >= 2) vg.drawImage(vid, 0, 0, W, H); else { vg.fillStyle = GR.cod2; vg.fillRect(0, 0, W, H); }
+}
+// as miniaturas vêm de instantes diferentes: um <video> à parte (fora do D._videos, que o núcleo move a cada quadro) busca cada instante da régua, uma vez, antes de a timeline começar
+function carregaMiniaturas() {
+  return new Promise(res => {
+    if (!SRC) return res();
+    const v = document.createElement('video'); v.className = 'vv'; v.src = SRC; v.muted = true; v.playsInline = true; v.preload = 'auto'; stage.appendChild(v);
+    const vai = j => { if (j > NJ1) return res();
+      const alvo = Math.max(0, (j + .5) * TS), ok = () => { fg.drawImage(v, 0, 0, v.videoWidth || W, v.videoHeight || H, (j - NJ0) * SW, 0, SW, SH); vai(j + 1); };
+      let feito = false; const fim = () => { if (feito) return; feito = true; ok(); };
+      v.addEventListener('seeked', fim, {once: true}); setTimeout(fim, 4000); v.currentTime = alvo + 1 / 120; };
+    const inicio = () => vai(NJ0); if (v.readyState >= 2) inicio(); else { v.addEventListener('loadeddata', inicio, {once: true}); setTimeout(() => { if (v.readyState < 2) res(); }, 9000); }
+  });
+}
+// os picos da voz: 100 por segundo, do áudio do arquivo (se não decodificar, um envelope sintético só pra a peça não quebrar)
+let PICOS = null;
+function carregaAudio(url) {
+  return new Promise(res => {
+    if (!url) return res(null);
+    const x = new XMLHttpRequest(); x.open('GET', url); x.responseType = 'arraybuffer';
+    x.onload = () => { try { const ac = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, 44100, 44100);
+        ac.decodeAudioData(x.response, b => { const c = b.getChannelData(0), n = Math.floor(b.duration * 100), p = new Float32Array(n), sp = Math.floor(b.sampleRate / 100);
+          for (let i = 0; i < n; i++) { let m = 0; for (let j = i * sp; j < (i + 1) * sp && j < c.length; j++) { const v = Math.abs(c[j]); if (v > m) m = v; } p[i] = m; } res(p); }, () => res(null)); } catch (e) { res(null); } };
+    x.onerror = () => res(null); x.send();
+  });
+}
+const pico = tt => { if (!PICOS) { const r = Math.abs(Math.sin(tt * 7.3) * Math.sin(tt * 2.1 + 1)); return r * r * .6; } const i = Math.floor(tt * 100); return i >= 0 && i < PICOS.length ? PICOS[i] : 0; };
+
+// ---- o editor: três telas de 2D (título, painéis, linha do tempo) coladas num plano inclinado; o monitor com o vídeo na frente ----
+const PRIM = (w, h) => ({c: cv2(w, h)});
+const OX = 700;                                                   // x de projeto -> x da tela de 2D: +700
+const cvTit = cv2(2400, 240), cvPan = cv2(2400, 980), cvTime = cv2(2400, 880);
+const rr = (g, x, y, w, h, r) => { g.beginPath(); g.roundRect(x, y, w, h, r); };
+const FONTE = FD;
+function desenhaTitulo() {
+  const g = cvTit.getContext('2d'); g.clearRect(0, 0, 2400, 240); g.fillStyle = GR.cm; g.font = `700 50px ${FONTE}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(TIT, 500 + OX, 110);
+  g.fillStyle = MK; rr(g, 1629 + OX, 78, 70, 64, 32); g.fill(); g.fillStyle = INK; g.beginPath(); g.arc(1664 + OX, 110, 12, 0, 7); g.fill();
+}
+function desenhaPaineis(q) {                                      // origem da tela: (−700, 900) de projeto
+  const g = cvPan.getContext('2d'); g.clearRect(0, 0, 2400, 980); const X0 = OX, Y0 = -900;
+  const vidro = (x, y, w, h) => { g.fillStyle = 'rgba(30,34,42,.78)'; rr(g, x + X0, y + Y0, w, h, 34); g.fill(); g.strokeStyle = 'rgba(255,255,255,.07)'; g.lineWidth = 3; g.stroke(); };
+  // a lista de tarefas
+  vidro(-650, 1050, 650, 640); g.textAlign = 'left'; g.textBaseline = 'alphabetic';
+  g.fillStyle = GR.i4; g.font = `600 52px ${FONTE}`; g.fillText('checklist', -600 + X0, 1160 + Y0);
+  g.fillStyle = 'rgba(255,255,255,.1)'; rr(g, -166 + X0, 1112 + Y0, 140, 62, 31); g.fill(); g.fillStyle = GR.tx; g.font = `700 34px ${FONTE}`; g.textAlign = 'center'; g.fillText('claude', -96 + X0, 1155 + Y0);
+  g.textAlign = 'left';
+  TL.forEach((t, i) => { const y = 1292 + i * 142, ok = q >= CK[i] - .05; const sc = ok ? 1 + .22 * Math.exp(-Math.max(0, q - CK[i]) * .9) * Math.cos(Math.max(0, q - CK[i]) * 1.2) : 1;
+    g.save(); g.translate(-566 + X0, y + Y0); g.scale(sc, sc);
+    if (ok) { g.fillStyle = MK; g.beginPath(); g.arc(0, 0, 34, 0, 7); g.fill(); g.strokeStyle = INK; g.lineWidth = 8; g.lineCap = 'round'; g.lineJoin = 'round'; g.beginPath(); g.moveTo(-14, 2); g.lineTo(-4, 13); g.lineTo(15, -11); g.stroke(); }
+    else { g.strokeStyle = GR.i6; g.lineWidth = 6; g.beginPath(); g.arc(0, 0, 33, 0, 7); g.stroke(); }
+    g.restore(); g.fillStyle = q >= CK[i] + 1 - .05 ? '#fff' : GR.ln; g.font = `700 58px ${FONTE}`; g.fillText(t, -508 + X0, y + 20 + Y0); });
+  // a lista dos efeitos
+  vidro(1085, 960, 605, 740); g.fillStyle = GR.i4; g.font = `600 46px ${FONTE}`; g.fillText('efeitos', 1128 + X0, 1052 + Y0);
+  LISTA.forEach((n, i) => { const y = 1150 + i * 78, on = i === ATIVA;
+    if (on) { g.fillStyle = 'rgba(242,199,68,.1)'; rr(g, 1103 + X0, y - 50 + Y0, 569, 68, 16); g.fill(); }
+    g.fillStyle = on ? MK : GR.i4; g.font = `600 32px ${FONTE}`; g.fillText(String(9 + i).padStart(2, '0'), 1128 + X0, y + Y0);
+    g.fillStyle = on ? MK : GR.tx; g.font = `700 42px ${FONTE}`; g.fillText(n, 1192 + X0, y + 4 + Y0); });
+}
+const PAL = ['hsl(158 62% 72%)', 'hsl(174 62% 68%)', MK, 'hsl(255 100% 80%)', 'hsl(30 100% 73%)', 'hsl(76 55% 62%)'];
+const PXS_ = 220, XP = 1455;                                      // px de projeto por segundo e o x da cabeça de reprodução
+function desenhaTempo(tt) {                                       // origem da tela: (−700, 1900) de projeto; tt = o tempo do vídeo sob a cabeça. A linha do tempo fica PARADA (a ref não rola: régua, miniaturas, clipes e onda a 0,0 px por quadro de f504 a f523) e a cabeça de reprodução anda pra direita (+16 px de meia escala de f499 a f526, uns 70% do tempo real)
+  const g = cvTime.getContext('2d'); g.clearRect(0, 0, 2400, 880); const xp = XP + OX - 85, tt0 = TV, xm = xp + (tt - tt0) * PXS_ * .7, X = t => xp + (t - tt0) * PXS_;
+  g.fillStyle = 'rgba(14,16,20,.9)'; g.fillRect(0, 40, 2400, 840);
+  g.strokeStyle = 'rgba(255,255,255,.07)'; g.lineWidth = 3; g.beginPath(); g.moveTo(0, 42); g.lineTo(2400, 42); g.stroke();
+  // régua
+  g.font = `600 36px "IBM Plex Mono",monospace`; g.textAlign = 'center'; g.textBaseline = 'alphabetic'; g.fillStyle = GR.i4; g.strokeStyle = GR.i6; g.lineWidth = 3;
+  for (let s = Math.floor(tt0 - 10); s <= tt0 + 6; s++) { const x = X(s); if (x < -80 || x > 2480 || s < 0) continue; const m = Math.floor(s / 60), r = s % 60; g.fillText(`${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}`, x, 112);
+    g.beginPath(); g.moveTo(x, 128); g.lineTo(x, 150); g.stroke(); g.beginPath(); g.moveTo(x + PXS_ / 2, 138); g.lineTo(x + PXS_ / 2, 150); g.stroke(); }
+  // miniaturas do vídeo: cada pedaço da régua mostra o quadro do instante dele (em pé, 9:16)
+  for (let j = NJ0; j <= NJ1; j++) { const x = X(j * TS); if (x > 2400 || x + TWT < 0) continue; g.drawImage(folha, (j - NJ0) * SW, 0, SW, SH, x, 160, TWT - 3, THT); }
+  // clipes
+  CLIPS.forEach((c, i) => { const x0 = X(c.a), x1 = X(c.b); if (x1 < -50 || x0 > 2450) return; const w = Math.max(190, x1 - x0);
+    g.fillStyle = PAL[i % PAL.length]; rr(g, x0, 345, w - 6, 104, 20); g.fill(); g.fillStyle = GR.cod; g.textAlign = 'left'; g.textBaseline = 'middle';
+    g.font = `800 40px ${FONTE}`; const tw = g.measureText(c.n).width, fs = clamp(40 * (w - 6 - 36) / Math.max(1, tw), 24, 40);   // o nome inteiro: o corpo encolhe até caber (mín. 24)
+    g.font = `800 ${fs}px ${FONTE}`; g.save(); rr(g, x0, 345, w - 6, 104, 20); g.clip(); g.fillText(c.n, x0 + 18, 398); g.restore(); });
+  // forma de onda da voz
+  const hh = HH, cy = 530; g.fillStyle = 'hsl(122 62% 70%)';                    // sem faixa atrás: a ref tem a onda direto no escuro; quase só picos (a conversa fraca fica baixa, a forte chega a hh)
+  for (let x = 0; x < 2400; x += 3) { const t0 = tt0 + (x - xp) / PXS_; let m = 0; for (let k = 0; k < 3; k++) { const v = pico(t0 + k / PXS_); if (v > m) m = v; }
+    const a = Math.min(1, Math.pow(Math.max(0, m - .04) * 1.7, 2.1)) * hh; if (a > 1.5) g.fillRect(x, cy - a, 3.2, a * 2); }
+  // a cabeça de reprodução
+  g.fillStyle = MK; g.fillRect(xm - 3, 60, 6, 760); g.beginPath(); g.moveTo(xm - 26, 40); g.lineTo(xm + 26, 40); g.lineTo(xm, 84); g.closePath(); g.fill();
+}
+
+// ---- three ----
+const glc = document.getElementById('gl'), acc = document.getElementById('acc'), actx = acc.getContext('2d');
+const renderer = new T.WebGLRenderer({canvas: glc, antialias: true, alpha: true, premultipliedAlpha: true, preserveDrawingBuffer: true});
+renderer.setPixelRatio(1); renderer.setSize(W, H, false); renderer.setClearColor(0x000000, 0); renderer.toneMapping = T.NoToneMapping;
+const scene = new T.Scene(), camera = new T.PerspectiveCamera(FOV, W / H, 100, 40000);
+camera.setViewOffset(W, H, 540 - PXS, 960 - PYS, W, H);
+const maxAn = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+const tex = (cv, mip) => { const t = new T.CanvasTexture(cv); t.colorSpace = T.SRGBColorSpace; t.anisotropy = maxAn; t.generateMipmaps = true; t.minFilter = T.LinearMipmapLinearFilter; return t; };
+const plano = new T.Group(); plano.rotation.order = 'YXZ'; scene.add(plano);
+const texTit = tex(cvTit), texPan = tex(cvPan), texTime = tex(cvTime), texVid = tex(vcv);
+const mk = (map, w, h, cx, cy, z, op) => { const m = new T.Mesh(new T.PlaneGeometry(w, h), new T.MeshBasicMaterial({map, transparent: true, toneMapped: false, opacity: op == null ? 1 : op, depthWrite: false})); m.position.set(cx, cy, z); plano.add(m); return m; };
+// projeto (u, v do vídeo, v pra baixo) -> mundo: x = u − 540, y = 960 − v
+const wx = u => u - 540, wy = v => 960 - v;
+mk(texTit, 2400, 240, wx(500), wy(-380 + 0), 0);
+mk(texPan, 2400, 980, wx(500), wy(900 + 490), 0);
+mk(texTime, 2400, 880, wx(500), wy(1900 + 440), 0);
+// o monitor: moldura preta fina, sombra funda e o vídeo. Tudo na fila transparente, na ordem do renderOrder (sombra, painéis, moldura, vídeo): com o vídeo
+// opaco e a sombra transparente, o three desenhava a sombra POR CIMA do vídeo e ele ficava com um terço do brilho (juiz 1)
+const sv = cv2(1400, 2240); { const g = sv.getContext('2d'); g.filter = 'blur(46px)'; g.fillStyle = '#000'; g.fillRect(160, 190, 1080, 1920); }
+const sombraM = mk(tex(sv), 1400, 2240, 0, -34, -2, .75); sombraM.renderOrder = -2;
+const mold = new T.Mesh(new T.PlaneGeometry(1080 + 28, 1920 + 28), new T.MeshBasicMaterial({color: 0x050608, transparent: true, depthWrite: false})); mold.position.set(0, 0, 1); mold.renderOrder = 1; plano.add(mold);
+const telaV = new T.Mesh(new T.PlaneGeometry(1080, 1920), new T.MeshBasicMaterial({map: texVid, transparent: true, toneMapped: false, depthWrite: false})); telaV.position.set(0, 0, 2); telaV.renderOrder = 2; plano.add(telaV);
+
+function quadroQ(q) {
+  const s = esc(q), d = FOCAL / s;
+  const gi = giro(q); camera.position.set(AX + 1.35 * gi, AY + 2.7 * gi, d); camera.rotation.set(0, 0, 0);
+  telaV.position.x = mold.position.x = sombraM.position.x = 1.2 * gi;      // o monitor não anda pro lado na ref (0,0 px por quadro): ele cancela 90% do giro em x; em y e na escala acompanha o resto
+  plano.rotation.set(PIT * RAD, YAW * RAD, ROL * RAD);
+  renderer.render(scene, camera);
+}
+function dinamicos(q, t) {
+  atualizaVideo(); desenhaPaineis(q); desenhaTempo(TV + Math.max(0, q) / 30);
+  texPan.needsUpdate = true; texTime.needsUpdate = true; texVid.needsUpdate = true;
+}
+function quadro(t) {
+  const q = t * 30 + 1e-6;
+  dinamicos(q, t);
+  actx.globalCompositeOperation = 'source-over'; actx.globalAlpha = 1; actx.clearRect(0, 0, W, H); actx.fillStyle = GR.cine; actx.fillRect(0, 0, W, H);
+  const rapido = q < 7.4;
+  if (!rapido || KSUB < 2) { quadroQ(q); actx.drawImage(glc, 0, 0); return; }
+  const tmp = quadro.tmp || (quadro.tmp = cv2(W, H)), tx = tmp.getContext('2d'); tx.globalCompositeOperation = 'source-over';
+  const obt = q < 3 ? 1.0 : .7;
+  tx.clearRect(0, 0, W, H); tx.globalCompositeOperation = 'lighter';
+  actx.globalCompositeOperation = 'source-over'; actx.fillStyle = GR.cine; actx.fillRect(0, 0, W, H);
+  // a média dos subquadros: a câmera anda dentro do obturador (borrão radial de verdade); o fundo preto vai por baixo, depois da média
+  tx.clearRect(0, 0, W, H); tx.globalAlpha = 1 / KSUB;
+  for (let i = 0; i < KSUB; i++) { quadroQ(q + (i / (KSUB - 1) - .5) * obt); tx.drawImage(glc, 0, 0); }
+  tx.globalAlpha = 1; tx.globalCompositeOperation = 'source-over';
+  const desf = 7 * (1 - prog(q, 1.2, 5.2));                                 // o editor chega fora de foco e assenta em 3 a 4 quadros
+  actx.filter = desf > .3 ? `blur(${desf.toFixed(1)}px)` : 'none'; actx.drawImage(tmp, 0, 0); actx.filter = 'none';
+}
+
+Promise.all([carregaAudio(ONDA), carregaMiniaturas(), document.fonts.load('700 50px ' + FD), document.fonts.load('800 40px ' + FD), document.fonts.load('600 36px "IBM Plex Mono"')]).then(([p]) => {
+  PICOS = p; desenhaTitulo();
+  D.monta(tl => {
+    tl.to({}, {duration: dur}, 0);
+    D.aoQuadro(() => quadro(tl.time()));
+    if (vid) vid.addEventListener('seeked', () => quadro(tl.time()));
+    renderer.compile(scene, camera); quadro(0);
+    D.cue(0, 'whoosh'); CK.forEach(q => D.cue(q / 30, 'pop'));
+    return dur;
+  });
+});
+</script>
+</body>
+</html>

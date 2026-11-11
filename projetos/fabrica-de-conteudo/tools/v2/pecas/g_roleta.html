@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<!-- GANCHO — a roleta: a lista gira rápido e para numa. 1080x1920, --alpha.
+     Em cima, a frase que a lista completa. Embaixo, o tambor: as tarefas passam rápido demais pra
+     ler (cada uma com o número dela), freiam e param na que importa; ela ganha o marcador e o
+     `fim` bate do lado ("?"). A roleta é o gancho de dor com uma ideia nova a cada batida, e o
+     suspense da parada segura o olho. Da referência (Skillry #432, a lista que roda e pousa
+     devagar) saiu só o movimento.
+       hd      a frase de cima (<b> grifa) · it  "TAREFA;TAREFA;…" · para  em qual ela para (a última)
+       voltas  quantas vezes a lista passa antes de parar (2) · t0 · t_para  quando ela está parada
+       fim     o que bate depois da parada ("?"; vazio: nada) · y  o centro do tambor (1000) · dur
+       ?hd=Pra postar <b>um vídeo</b>, você:&it=ROTEIRIZA;GRAVA;CORTA AS PAUSAS;LEGENDA;ACHA A TRILHA;FAZ A CAPA;EDITA;POSTA&para=EDITA&voltas=2&t0=0.2&t_para=2.2&fim=?&dur=3.6 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+#hdc{position:absolute;left:70px;right:70px;padding:26px 34px 30px;opacity:0}
+#hd{font:800 64px/1.08 var(--fd);letter-spacing:var(--ls);color:var(--ink);opacity:1;margin:0}
+#tb{position:absolute;left:70px;right:70px;height:480px;overflow:hidden;opacity:0;--lin:160px}
+#col{position:absolute;left:0;right:0;top:0}
+#jan{position:absolute;inset:0;overflow:hidden;
+  -webkit-mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent);mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent)}
+.ln{height:var(--lin);display:flex;align-items:center;gap:30px;padding:0 44px}
+.ln u{flex:none;width:86px;font:700 40px/1 var(--fm);color:var(--ink4);text-decoration:none}
+.ln b{font:800 92px/1 var(--fd);letter-spacing:var(--ls);color:var(--ink);white-space:nowrap}
+#mk{position:absolute;left:150px;right:150px;top:50%;height:var(--lin);margin-top:calc(var(--lin)/-2);background:var(--mk);transform-origin:left center;opacity:0}
+.reg{position:absolute;left:0;right:0;top:50%;height:0;border-top:var(--bw) solid var(--ink)}
+#fim{position:absolute;right:30px;top:50%;font:900 200px/1 var(--fd);color:var(--ac);opacity:0;transform:translateY(-55%)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="nb" id="hdc"><div id="hd" class="hd"></div></div>
+  <div class="nb" id="tb">
+    <div id="mk"></div>
+    <i class="reg" style="margin-top:calc(var(--lin)/-2)"></i><i class="reg" style="margin-top:calc(var(--lin)/2)"></i>
+    <div id="jan"><div id="col"></div></div>
+    <span id="fim"></span>
+  </div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const dur = D.n('dur', '3.6'), t0 = D.n('t0', '0.2'), tPara = D.n('t_para', '2.2'), Y = D.n('y', '1000');
+const it = D.q('it', 'ROTEIRIZA;GRAVA;CORTA AS PAUSAS;LEGENDA;ACHA A TRILHA;FAZ A CAPA;EDITA;POSTA').split(';').map(s => s.trim()).filter(Boolean);
+const voltas = Math.max(1, Math.round(D.n('voltas', '2')));
+const alvo = Math.max(0, it.indexOf(D.q('para', 'EDITA').trim()));
+$('hd').innerHTML = D.q('hd', 'Pra postar <b>um vídeo</b>, você:');
+if (!$('hd').textContent.trim()) $('hdc').remove();
+$('fim').textContent = D.q('fim', '?');
+// o tambor: a lista repetida `voltas` vezes e mais uma até o alvo; a linha do meio é a da vez
+const seq = [];
+for (let v = 0; v <= voltas; v++) it.forEach((s, i) => { if (v < voltas || i <= alvo + 1) seq.push(i); });
+const col = $('col');
+seq.forEach(i => col.insertAdjacentHTML('beforeend', `<div class="ln"><u>${String(i + 1).padStart(2, '0')}</u><b>${it[i]}</b></div>`));
+const pos = voltas * it.length + alvo;   // a linha em que ele para
+
+D.monta(tl => {
+  const tb = $('tb'), lin = parseFloat(getComputedStyle(tb).getPropertyValue('--lin'));
+  tb.style.top = Y - tb.offsetHeight / 2 + 'px';
+  const hdc = $('hdc');
+  if (hdc) hdc.style.top = Y - tb.offsetHeight / 2 - 60 - hdc.offsetHeight + 'px';
+  // a tarefa mais larga cabe: todas encolhem junto, como no o_estados
+  const lim = tb.clientWidth - 44 * 2 - 86 - 30 - ($('fim').textContent ? 120 : 0);
+  const pior = Math.max(...[...col.querySelectorAll('b')].map(b => b.scrollWidth));
+  if (pior > lim) col.querySelectorAll('b').forEach(b => b.style.fontSize = Math.floor(92 * lim / pior) + 'px');
+  const meio = tb.clientHeight / 2 - lin / 2;
+  const R = {p: 0};
+  D.aoQuadro(() => { col.style.transform = `translateY(${meio - R.p * lin}px)`; });
+
+  if (hdc) { D.pousa('#hdc', Math.max(.05, t0 - .1), {rot: -1}); D.titulo('#hd', t0); }
+  D.pousa('#tb', t0, {som: 'pop'});
+  // freia em expo.out: corre no começo e chega devagar, o mesmo desenho do tick-roll
+  tl.to(R, {p: pos, duration: tPara - D.at(t0), ease: 'expo.out'}, D.at(t0));
+  D.cue(D.at(t0), 'tick-roll', {dur: +(tPara - D.at(t0)).toFixed(3)});
+  const pousou = col.children[pos];
+  tl.fromTo('#mk', {opacity: 1, scaleX: 0}, {scaleX: 1, duration: .32, ease: 'power3.out', immediateRender: false}, tPara);
+  tl.to(pousou, {scale: 1.06, duration: .12, ease: 'power2.out', yoyo: true, repeat: 1, transformOrigin: 'left center'}, tPara);
+  D.cue(tPara, 'stamp');
+  if ($('fim').textContent) {
+    tl.fromTo('#fim', {opacity: 0, scale: 1.6, rotation: -12}, {opacity: 1, scale: 1, rotation: -6, duration: .4, ease: D.P.HEROI}, tPara + .3);
+    D.cue(tPara + .3, 'pop');
+  }
+  D.flutua('#tb', tPara + .8, dur - .5, 1);
+  D.sai(['#hdc', '#tb'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

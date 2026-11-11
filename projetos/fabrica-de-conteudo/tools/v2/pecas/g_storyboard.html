@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<!-- GANCHO — storyboard: cinco cartas inclinadas em fileira na faixa de baixo (x 43–942, y 1145–1475). A carta-documento
+     entra pela esquerda, as outras voam inclinadas de baixo e assentam uma a uma (~0,1 s cada, 0,06 s entre vizinhas),
+     a fileira para, a carta-documento vira a carta escura com a palavra grande (corte) e, no fim, tudo some num corte.
+     Três cartas levam um quadro (imagens), a última leva a frase em serifa. Clone do efeito "Storyboard deck" de referência.
+       img   três imagens (caminhos separados por ;) · t1 a palavra da primeira carta (ENORME) · t5 a frase da última (EU NÃO EDITEI)
+       y     o topo das cartas (1145) · t0 quando entra (0.05) · dur (1.5; as pausas esticam, o movimento não)
+       ?img=../midia/vitrine-cracha.jpg;../midia/vitrine-rotulo.jpg;../midia/vitrine-semana.jpg&t1=ENORME&t5=EU N%C3%83O EDITEI&dur=1.5 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/editorial.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px;background:transparent}
+#stage{padding:0;display:block;overflow:hidden;background:none}
+.ct{position:absolute;width:148px;height:283px;background:#fff;border:4px solid var(--ink);border-radius:10px;
+  box-shadow:8px 8px 0 var(--ink);overflow:hidden;opacity:0}
+.ct img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ct .leg{position:absolute;left:0;right:0;bottom:0;height:40px;background:var(--ink)}
+.ct .leg i{position:absolute;left:10px;right:10px;top:12px;height:6px;border-radius:3px;background:var(--mk)}
+.ct .leg i+i{top:26px;right:40px;background:#fff}
+.doc{padding:18px 12px}
+.doc i{display:block;height:7px;border-radius:4px;background:var(--cod-cm);margin-bottom:12px}
+.doc i:nth-child(3n){width:70%}
+.doc b{display:block;height:34px;width:56%;background:var(--mk);border:3px solid var(--ink);border-radius:6px;margin:6px 0 22px}
+.hug{position:absolute;inset:0;background:var(--ink);display:none}
+.hug img{opacity:.55}
+.hug span,.fim span{position:absolute;left:0;right:0;text-align:center;font:400 36px/.95 var(--ed-serif);color:#fff;
+  letter-spacing:.01em;text-transform:uppercase}
+.hug span{top:96px;color:var(--mk)}
+.fim{background:var(--mk)}
+.fim span{top:84px;padding:0 8px;color:var(--ink);font-size:37px}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const dur = D.n('dur', '1.5'), t0 = D.n('t0', '0.05'), y0 = D.n('y', '1145');
+const imgs = D.q('img', '../midia/vitrine-cracha.jpg;../midia/vitrine-rotulo.jpg;../midia/vitrine-semana.jpg').split(';').filter(Boolean);
+const im = i => imgs[i % imgs.length];
+const t1 = D.q('t1', 'ENORME'), t5 = D.q('t5', 'EU NÃO EDITEI');
+// x de cada carta (a referência: 43, 225, 420, 605, 790) e a inclinação em repouso
+const X = [53, 235, 430, 615, 800], R = [-6, 5, -5, 6, -5];   // x do centro da referência, cartas 12% menores
+const html = [
+  `<div class="doc">${'<i></i>'.repeat(6)}<b></b>${'<i></i>'.repeat(8)}<div class="hug" id="hug"><img src="${esc(im(0))}"><span>${esc(t1)}</span></div></div>`,
+  `<img src="${esc(im(0))}"><div class="leg"><i></i><i></i></div>`,
+  `<img src="${esc(im(1))}"><div class="leg"><i></i><i></i></div>`,
+  `<img src="${esc(im(2))}"><div class="leg"><i></i><i></i></div>`,
+  `<div class="fim"><span>${esc(t5).replace(/ (?=[^ ]*$)/, '<br>')}</span></div>`
+];
+const st = $('stage');
+html.forEach((h, i) => {
+  const c = document.createElement('div'); c.className = 'ct' + (i === 4 ? ' fim' : ''); c.id = 'c' + i;
+  c.style.left = X[i] + 'px'; c.style.top = (y0 + 19) + 'px'; c.style.transform = `rotate(${R[i]}deg)`; c.innerHTML = h; st.appendChild(c);
+});
+document.fonts.load('400 54px "Instrument Serif"').catch(() => null).then(() => D.monta(tl => {
+  const extra = Math.max(0, dur - 1.3);
+  // ordem de chegada da referência: documento, última, miolo, segunda, quarta
+  const ordem = [0, 4, 2, 1, 3];
+  ordem.forEach((i, k) => {
+    const t = t0 + k * .06, c = $('c' + i), de = i === 0 ? {x: -190, y: 0, rotation: R[i] - 6} : {x: -40 + (i - 2) * 30, y: 420, rotation: R[i] + (i % 2 ? 9 : -9)};
+    tl.fromTo(c, {opacity: 0}, {opacity: 1, duration: .05, ease: 'none'}, t);
+    tl.fromTo(c, de, {x: 0, y: 0, rotation: R[i], duration: .26, ease: 'power3.out'}, t);
+    tl.fromTo(c, {boxShadow: '0px 0px 0 #0B0D12'}, {boxShadow: '8px 8px 0 #0B0D12', duration: .2, ease: 'power2.out'}, t + .12);
+  });
+  D.cue(t0, 'swish');
+  // a carta-documento vira a carta escura
+  const tv = t0 + .62 + extra * .4;
+  tl.set('#hug', {display: 'block'}, tv);
+  D.cue(tv, 'click');
+  // saída: corte em 3 quadros
+  const ts = Math.max(tv + .4, dur - .05);
+  tl.to('.ct', {opacity: 0, y: 30, duration: .04, ease: "none", stagger: 0}, ts);
+  return dur;
+}));
+</script>
+</body>
+</html>

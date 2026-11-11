@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<!-- AULA — callout de atalho de teclado. 1920x1080, --alpha. Embaixo, no centro.
+     As teclas caem, são APERTADAS em sequência (afundam, a base some, acendem
+     amarelo) e soltam com mola. A etiqueta diz o que o atalho faz.
+       ?teclas=⌘;K&rot=abre a paleta de comandos&y=660&t0=0.2&dur=3
+     Tecla com mais de 2 letras (Ctrl, Shift, Enter) vira tecla larga em mono. -->
+<html lang="pt-BR" class="h alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/direcao-h.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+.at{position:absolute;left:0;right:0;top:var(--y,660px);display:flex;flex-direction:column;align-items:center;gap:30px}
+.ks{display:flex;align-items:center;gap:18px}
+.tc{min-width:118px;height:118px;padding:0 28px;display:flex;align-items:center;justify-content:center;background:#fff;border:var(--bw) solid var(--ink);border-radius:16px;box-shadow:0 var(--kh,12px) 0 var(--ink);font:700 58px/1 var(--fd);color:var(--ink);opacity:0}
+.tc.lg{font:700 34px/1 var(--fm);letter-spacing:.04em}
+.mais{width:52px;height:52px;border-radius:50%;background:var(--ink);color:var(--mk);display:flex;align-items:center;justify-content:center;font:700 36px/1 var(--fd);opacity:0}
+.rt{padding:12px 20px 10px;font:700 26px/1 var(--fm);letter-spacing:.06em;text-transform:uppercase;border-radius:var(--raio-s);opacity:0}
+.rt:empty{display:none}
+</style>
+</head>
+<body>
+<div id="stage"><div class="at"><div class="ks" id="ks"></div><div class="rt nb cor-mk" id="rt"></div></div></div>
+<script>
+const dur = D.n('dur', '3'), t0 = D.n('t0', '0.2'), $ = id => document.getElementById(id);
+if (D.q('y')) document.documentElement.style.setProperty('--y', D.q('y') + 'px');
+const ts = D.q('teclas', '⌘;K').split(';').filter(Boolean);
+$('ks').innerHTML = ts.map(k => `<div class="tc${[...k].length > 2 ? ' lg' : ''}">${k}</div>`).join('<div class="mais">+</div>');
+$('rt').textContent = D.q('rot', 'abre a paleta de comandos');
+
+D.monta(tl => {
+  const tcs = [...document.querySelectorAll('.tc')], ms = [...document.querySelectorAll('.mais')];
+  tcs.forEach((k, i) => D.pousa(k, t0 + i * .1, {dy: -44, s: 1.08}));
+  ms.forEach((m, i) => tl.fromTo(m, {opacity: 0, scale: .3}, {opacity: 1, scale: 1, duration: .3, ease: D.P.MOLA}, D.at(t0) + .06 + i * .1));
+  D.cue(t0, 'pop');
+  const tp = t0 + .3 + tcs.length * .1;
+  tcs.forEach((k, i) => {
+    tl.to(k, {y: 9, '--kh': '3px', backgroundColor: D.css('--mk'), duration: .07, ease: 'power2.out'}, tp + i * .07);
+    tl.to(k, {y: 0, '--kh': '12px', backgroundColor: '#FFFFFF', duration: .32, ease: D.P.MOLA}, tp + .45);
+  });
+  D.cue(tp, 'click');
+  if ($('rt').textContent) D.carimbo('#rt', tp + .28, 0);
+  D.sai(['.tc', '.mais', '#rt'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

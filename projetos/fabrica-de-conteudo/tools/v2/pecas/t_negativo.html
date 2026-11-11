@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<!-- TIPO — o que você NÃO precisa fazer, v2. 1440x1028 (painel 40%) ou ?ar=1080x1920.
+     O item cai inteiro, é lido, e é RISCADO por um marcador vermelho — depois
+     ele afunda: perde a sombra e desbota. O que sobra fecha em bloco azul.
+       ?hd=Você não precisa&it=Escrever código@0.4;Abrir uma integração@1.5
+        &fica=Você conversa. Ele faz.&t_fica=3.2&dur=5 -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1440px;height:1028px}
+#stage{padding:44px var(--marg);justify-content:center}
+.hd{font-size:76px;margin-bottom:30px}
+.itens{display:flex;flex-direction:column;gap:20px}
+.ng{position:relative;display:flex;align-items:center;padding:22px 30px;opacity:0}
+.ng .nm{font:800 58px/1.06 var(--fd);color:var(--ink);letter-spacing:var(--ls);white-space:nowrap}
+.ng .risco{position:absolute;left:18px;top:50%;height:16px;margin-top:-8px;background:var(--no);
+  border:3px solid var(--ink);border-radius:4px;transform-origin:left center}
+.fica{display:flex;align-items:center;gap:24px;margin-top:40px;padding:24px 30px;opacity:0}
+.fica .ic{width:64px;height:64px;font:900 30px/1 var(--fd)}
+.fica b{font:900 58px/1.06 var(--fd);color:#fff;letter-spacing:var(--ls);white-space:nowrap}
+html.v,html.v body,html.v #stage{width:1080px;height:1920px}
+html.v #stage{padding:0 90px}
+html.v .hd{font-size:96px;margin-bottom:44px}
+html.v .itens{gap:26px}
+html.v .ng{padding:30px 34px}
+html.v .ng .nm{font-size:66px;white-space:normal}
+html.v .fica{margin-top:54px;padding:32px 36px}
+html.v .fica b{font-size:66px;white-space:normal}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="kick" id="k"></div>
+  <div class="hd" id="h"></div>
+  <div class="itens" id="li"></div>
+  <div class="fica nb cor-ac" id="fc"><span class="ic">✓</span><b id="fb"></b></div>
+</div>
+<script>
+const dur = D.n('dur', '5');
+document.getElementById('k').textContent = D.q('kick', '');
+document.getElementById('h').innerHTML = D.q('hd', 'Você não precisa');
+document.getElementById('fb').textContent = D.q('fica', '');
+const its = D.itens('it', 'Escrever código@0.4', ['nome']);
+const li = document.getElementById('li');
+its.forEach((x, i) => {
+  const d = document.createElement('div');
+  d.className = 'nb ng'; d.id = 'ng' + i;
+  d.innerHTML = `<span class="nm">${x.nome}</span><span class="risco" id="rc${i}"></span>`;
+  li.appendChild(d);
+});
+
+D.monta(tl => {
+  D.cabe('.hd', 44);
+  D.cabe('.ng .nm', 34, '.ng');
+  // a linha do .fica divide espaço com o selo de 64px e o vão de 24
+  D.cabe('.fica b', 34, ['.fica', .88]);
+  its.forEach((_, i) => {
+    const nm = document.querySelector('#ng' + i + ' .nm');
+    const r = document.getElementById('rc' + i);
+    r.style.width = (nm.offsetWidth + 24) + 'px';
+    gsap.set(r, {scaleX: 0, rotation: -1.5 + D.inclina(i) * .5});
+  });
+  D.camera(dur, 1.0, 1.025);
+  if (D.q('kick')) D.carimbo('#k', .06);
+  D.titulo('#h', .18);
+  its.forEach((x, i) => {
+    D.pousa('#ng' + i, x.t, {rot: D.inclina(i) * .6, dx: -30});
+    // o risco vem DEPOIS de dar tempo de ler; depois a peça afunda no papel
+    tl.to('#rc' + i, {scaleX: 1, duration: .3, ease: 'power2.inOut'}, x.t + .34);
+    tl.to('#ng' + i, {x: D.SH, y: D.SH, '--shx': '0px', duration: .22, ease: 'power2.out'}, x.t + .64);
+    tl.to('#ng' + i + ' .nm', {color: D.css('--ink4'), duration: .22}, x.t + .64);
+  });
+  if (D.q('fica')) {
+    const tf = D.n('t_fica', its[its.length - 1].t + 1.2);
+    D.pousa('#fc', tf, {rot: D.P.ROT, s: 1.1});
+    D.palavras('#fb', tf + .1);
+  }
+  D.sai(['#k', '#h', '.ng', '#fc'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

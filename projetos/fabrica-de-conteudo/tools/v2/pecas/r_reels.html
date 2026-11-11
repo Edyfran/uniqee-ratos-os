@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<!-- PROVA — feed de Reels em tela cheia: três Reels 9:16, um por vez, com a interface de um feed genérico (voltar e lupa
+     no alto, comentar/repostar/enviar/salvar à direita, avatar, nome e Seguir embaixo). Entre um e outro vem o swipe:
+     o quadro sobe com borrão vertical forte e para seco. O último swipe mostra `fim` (o avatar) borrado, que se firma e
+     sai. 1080x1920, --alpha, tela cheia (o painel passa por cima). Não imita app nenhum.
+       img  "url;url;url" os Reels, um por tela · fim  o quadro de chegada (o avatar; sem ele, o último some em fade)
+       user  o nome embaixo (ninja.automacoes) · n  as 4 contagens "a;b;c;d" · seguir  o botão (Seguir)
+       cada Reel dura 0,17 s (troca seca) e só o último swipe borra (0,09 s), fixos; o que sobra de dur fica vazio
+       t0  quando entra (0) · dur  (1.0)
+       ?img=../../../videos/reels/fabrica-chega-de-editar-capa.jpg;../../../videos/reels/fabrica-edita-o-meu-assim-capa.jpg;../../../videos/reels/fabrica-mesmo-video-capa.jpg&fim=../midia/rosto-estudio.png&dur=1 -->
+<html lang="pt-BR" class="alfa" data-qa="fundo">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;padding:0;display:block;overflow:hidden;background:none}
+#cl{position:absolute;inset:0}
+.rl{position:absolute;inset:0;background:var(--ink);overflow:hidden}
+.rl>img.cv{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.rl svg{position:absolute;overflow:visible;filter:drop-shadow(0 2px 6px rgba(0,0,0,.55))}
+.ct{position:absolute;width:120px;margin-left:-60px;text-align:center;font:600 22px/1 var(--fd);color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.6)}
+.av{position:absolute;left:45px;top:1788px;width:84px;height:84px;border-radius:50%;border:3px solid #fff;object-fit:cover;box-sizing:border-box}
+.nm{position:absolute;left:148px;top:1812px;font:700 28px/1 var(--fd);color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.6)}
+.sg{position:absolute;left:418px;top:1805px;padding:11px 24px;border:2px solid #fff;border-radius:12px;font:700 24px/1 var(--fd);color:#fff}
+</style>
+</head>
+<body>
+<div id="stage"><div id="cl"></div>
+<svg width="0" height="0"><filter id="mb" x="-5%" y="-30%" width="110%" height="160%"><feGaussianBlur id="gb" stdDeviation="0 0"/></filter></svg></div>
+<script>
+const $ = id => document.getElementById(id);
+const dur = D.n('dur', '1'), t0 = D.n('t0', '0'), S = .09, TAIL = .035, HOLD = .17;   // original: cada Reel fica ~4 quadros e o swipe tem ~4 de borrão (a 30 qps)
+const imgs = D.q('img', '../../../videos/reels/fabrica-chega-de-editar-capa.jpg;../../../videos/reels/fabrica-edita-o-meu-assim-capa.jpg;../../../videos/reels/fabrica-mesmo-video-capa.jpg').split(';').filter(Boolean);
+const fim = D.q('fim', '../midia/rosto-estudio.png');
+const user = D.q('user', 'ninja.automacoes'), seguir = D.q('seguir', 'Seguir');
+const ns = D.q('n', '2,3 mil;340;1,8 mil;4,2 mil').split(';');
+const st = 'fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"';
+const ico = [
+  `<path d="M2 18a16 16 0 1 1 6 12L0 34z" ${st}/>`,                                   // comentar
+  `<path d="M6 20V16a8 8 0 0 1 8-8h22m0 0-6-6m6 6-6 6M38 18v4a8 8 0 0 1-8 8H8m0 0 6-6m-6 6 6 6" ${st}/>`, // repostar
+  `<path d="M36 4 4 16l12 6 6 12zM16 22 36 4" ${st}/>`,                               // enviar
+  `<path d="M6 2h26v34l-13-9-13 9z" ${st}/>`];                                         // salvar
+const ys = [1240, 1413, 1586, 1758];
+const rls = imgs.map((u, i) => {
+  const d = document.createElement('div'); d.className = 'rl';
+  d.innerHTML = `<img class="cv" src="${u}" alt="" style="filter:hue-rotate(${[0, 150, 250][i % 3]}deg) saturate(${[1, 1.15, 1][i % 3]})">
+    <svg style="left:46px;top:62px" width="22" height="34"><path d="M20 2 4 17l16 15" ${st}/></svg>
+    <svg style="left:972px;top:56px" width="44" height="44"><circle cx="19" cy="19" r="13" ${st}/><path d="m29 29 12 12" ${st}/></svg>
+    ${ico.map((p, k) => `<svg style="left:${1000 - 21}px;top:${ys[k] - 38}px" width="42" height="40" viewBox="-2 -2 44 40">${p}</svg><div class="ct" style="left:1000px;top:${ys[k] + 8}px">${ns[k] || ''}</div>`).join('')}
+    <img class="av" src="../midia/perfil-avatar.png" alt=""><div class="nm">${user}</div><div class="sg">${seguir}</div>`;
+  $('cl').appendChild(d); return d;
+});
+let fm = null;
+if (fim) { fm = document.createElement('div'); fm.className = 'rl'; fm.innerHTML = `<img class="cv" src="${fim}" alt="">`; $('cl').appendChild(fm); }
+const n = rls.length;
+D.monta(tl => {
+  const d = HOLD;
+  const sw = i => t0 + (i + 1) * d;                            // quando o corte i acontece; o último ganha swipe borrado
+  const all = fm ? [...rls, fm] : rls;
+  all.forEach((el, i) => { if (i) gsap.set(el, {y: 1920}); });
+  for (let i = 0; i < n; i++) {
+    const s = sw(i);
+    if (i + 1 < n) { tl.set(rls[i], {y: -1920}, s); tl.set(rls[i + 1], {y: 0}, s); }   // troca seca
+    else if (fm) { tl.to(rls[i], {y: -1920, duration: S, ease: 'power3.in'}, s); tl.fromTo(fm, {y: 1920}, {y: 0, duration: S, ease: 'power3.out', immediateRender: false}, s); }
+    D.cue(s, 'swish');
+  }
+  const fimT = sw(n - 1) + S;                                  // o avatar firma e a peça some
+  if (fm) tl.to(fm, {opacity: 0, duration: TAIL, ease: 'none'}, fimT);
+  // o borrão é função do tempo: seno no meio de cada swipe; o do fim desce de 22 a 0
+  D.aoQuadro(() => {
+    const t = D.tl.time(); let sd = 0;
+    for (let i = n - 1; i < n; i++) { const u = (t - sw(i)) / S; if (u > 0 && u < 1) sd = Math.max(sd, 70 * Math.sin(Math.PI * u)); }
+    $('gb').setAttribute('stdDeviation', '0 ' + sd.toFixed(1));
+    $('cl').style.filter = sd > .5 ? 'url(#mb)' : 'none';
+  });
+  return dur;
+});
+</script>
+</body>
+</html>

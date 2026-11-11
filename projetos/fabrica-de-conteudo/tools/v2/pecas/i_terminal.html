@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<!-- INTERFACE — terminal digitando: a janela de comando e os comandos sendo digitados, um depois do outro. É DEMONSTRAÇÃO do que a fala
+     conta (mostra o pedido, não o resultado): só entra o comando que você passar em `cmd`. Saída, número ou resultado que a fala não
+     disse nunca entram. Com `n`, embaixo uma grade de n itens é desligada um a um e o contador sobe junto até n (o n vem da fala).
+     1080x1920 (tela cheia) e 920x730 (o painel da e_dividida). --alpha. O cartão já está na tela no quadro 0; o que anda é a digitação.
+       cmd   os comandos, separados por ;  cada um `texto@segundo` (o segundo em que começa a digitar; sem ele vem logo depois do anterior)
+       rot   o nome na barra da janela (Claude Code) · n  quantos itens a grade desliga (0 = sem grade) · nrot  o rótulo do contador (pacotes desativados)
+       t0    quando começa a digitar (0.4) · dur  duração
+     etiqueta: terminal, demonstracao, digita
+       ?cmd=claude "ache a minha TV no Wi-Fi"@0.4;claude "desative os pacotes inúteis dela"@2.4&n=25&nrot=pacotes desativados&dur=6 -->
+<html lang="pt-BR" class="alfa" data-qa="entra-seco fica">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+html.pn,html.pn body,html.pn #stage{width:920px;height:730px}
+#stage{position:relative;overflow:hidden;padding:0;display:block;--f:38px}
+html.pn #stage{--f:29px}
+.cx{position:absolute;left:60px;top:300px;width:960px;height:880px;display:flex;flex-direction:column;background:var(--sur)}
+html.pn .cx{left:0;top:0;width:920px;height:730px;border:0;border-radius:0;box-shadow:none!important}
+.jan{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;background:var(--cod)}
+.bar{flex:none;display:flex;align-items:center;gap:12px;height:62px;padding:0 20px;background:var(--mk);border-bottom:var(--bw) solid var(--ink)}
+html.pn .bar{height:54px}
+.bar i{width:18px;height:18px;border:3px solid var(--ink9);border-radius:50%}
+.bar span{margin-left:8px;font:700 24px/1 var(--fm);letter-spacing:.1em;text-transform:uppercase;color:var(--ink9);white-space:nowrap}
+.cor{flex:1;min-height:0;padding:26px 30px;overflow:hidden;font:600 var(--f)/1.45 var(--fm);color:var(--cod-tx)}
+.ln{display:flex;align-items:baseline;gap:.6em;margin-bottom:.5em;opacity:0}
+.ln b{flex:none;color:var(--cod-kw);font-weight:700}
+.ln .tx{white-space:pre-wrap;word-break:break-word}
+.ln .l{display:none}
+.ln .car{display:inline-block;width:.55em;height:1.05em;margin-left:.08em;background:var(--cod-tx);vertical-align:-.15em;opacity:0}
+.pk{flex:none;display:flex;gap:36px;align-items:center;padding:30px 40px;border-top:var(--bw) solid var(--ink);background:var(--sur)}
+html.pn .pk{padding:18px 30px;gap:28px}
+.pk .gd{display:grid;grid-template-columns:repeat(var(--c),1fr);gap:12px;flex:1}
+.ch{position:relative;aspect-ratio:1.55;border:calc(var(--bw)*.75) solid var(--ink);border-radius:var(--raio-s);background:var(--ac2)}
+.ch.off{background:var(--ink2)}
+.ch u{position:absolute;inset:14% 30%;opacity:0;transform:scale(0)}
+.ch u:before,.ch u:after{content:"";position:absolute;left:0;right:0;top:calc(50% - 4px);height:8px;border-radius:4px;background:var(--no)}
+.ch u:before{transform:rotate(45deg)}.ch u:after{transform:rotate(-45deg)}
+.ct{flex:none;display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-width:250px}
+.ct .vl{font:700 150px/.9 var(--fd);letter-spacing:-.05em;color:var(--ink);font-variant-numeric:tabular-nums}
+html.pn .ct .vl{font-size:120px}
+.ct .rt{font:700 28px/1.1 var(--fm);letter-spacing:.08em;text-transform:uppercase;color:var(--ink6)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="cx nb" id="cx">
+    <div class="jan"><div class="bar"><i></i><i></i><i></i><span id="rt"></span></div><div class="cor" id="cor"></div></div>
+    <div class="pk" id="pk"><div class="gd" id="gd"></div><div class="ct"><span class="vl" id="vl">0</span><span class="rt" id="nrt"></span></div></div>
+  </div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const dur = D.n('dur', '6'), T0 = D.n('t0', '0.4'), N = Math.round(D.n('n', '0')) || 0;
+$('rt').textContent = D.q('rot', 'Claude Code');
+$('nrt').textContent = D.q('nrot', '');
+const cmds = D.q('cmd', 'claude "tire os anúncios da minha TV"').split(';').filter(s => s.trim()).map(s => {
+  const m = s.match(/^(.*)@([\d.]+)\s*$/); return m ? {tx: m[1].trim(), a: +m[2]} : {tx: s.trim(), a: null}; });
+cmds.forEach((c, i) => {
+  $('cor').insertAdjacentHTML('beforeend', `<div class="ln" id="ln${i}"><b>$</b><span class="tx" id="c${i}"></span><i class="car" id="k${i}"></i></div>`);
+  $('c' + i).textContent = c.tx;
+});
+const COLS = N > 20 ? 5 : N > 8 ? 4 : Math.max(1, N);
+$('gd').style.setProperty('--c', Math.max(5, COLS));
+for (let i = 0; i < N; i++) $('gd').insertAdjacentHTML('beforeend', '<div class="ch" id="ch' + i + '"><u></u></div>');
+if (!N) $('pk').remove();
+D.monta(tl => {
+  let t = T0, fim = T0;
+  cmds.forEach((c, i) => {
+    const a = c.a == null ? t : c.a;
+    tl.set('#ln' + i, {opacity: 1}, a);
+    tl.set('#k' + i, {opacity: 1}, a);
+    fim = D.digita('#c' + i, a, .05);
+    if (i < cmds.length - 1) tl.set('#k' + i, {opacity: 0}, fim + .05);   // o cursor segue pra linha de baixo
+    t = fim + .55;
+  });
+  if (N) {
+    const t1 = fim + .45, passo = Math.max(.06, Math.min(.4, (dur - t1 - .8) / N));   // o contador usa o tempo que sobra da batida
+    const o = {v: 0};
+    tl.to(o, {v: N, duration: passo * N, ease: 'none', onUpdate: () => { $('vl').textContent = Math.round(o.v); }}, t1);
+    for (let i = 0; i < N; i++) {
+      const a = t1 + i * passo;
+      tl.set('#ch' + i, {className: 'ch off'}, a);
+      tl.fromTo('#ch' + i + ' u', {scale: 0, opacity: 1}, {scale: 1, opacity: 1, duration: .14, ease: 'back.out(2.2)', immediateRender: false}, a);
+      if (i % 4 === 0) D.cue(a, 'tick');
+    }
+    fim = t1 + passo * N;
+    D.cue(fim, 'certo');
+  }
+  return Math.max(dur, fim + .8);
+});
+</script>
+</body>
+</html>

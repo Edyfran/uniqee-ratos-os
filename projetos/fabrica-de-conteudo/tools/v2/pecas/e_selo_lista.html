@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<!-- EFEITO — selo fixo "16 efeitos de vídeo / que o Claude cria": o título no alto e a lista inteira em DUAS colunas de 8 em vidro escuro, uma de
+     cada lado da cabeça. Clone do selo do De25fKeTRl7, medido quadro a quadro: da ref saiu a mecânica, a letra e a cor são as nossas.
+     A linha da vez NÃO tem barra: o rótulo vira amarelo, o número branco e a linha anda 6 px pra direita, numa rampa de 1,6 quadro; apaga de uma vez.
+     Fica na tela do quadro 0 ao fim, sem entrada; sai com desfoque que cresce em 5 quadros (`sai`) e volta com desfoque que some em 4 (`volta`).
+     `vazia` esvazia uma linha enquanto outra peça a usa (a etiqueta do texto adesivo, ficha 13) e a devolve acesa por 1 quadro.
+     1080x1920, --alpha, fica por cima de tudo e nunca recebe o zoom da câmera.
+       etiqueta: lista-fixa, cartao-de-lista, selo-fixo
+       it     os nomes, separados por | (um por linha; 16 dão 8 + 8)
+       ts     os segundos em que cada linha acende (o primeiro quadro em que ela já é amarela), separados por vírgula; a que não tem tempo nunca acende
+       fim    os segundos em que cada linha apaga, na mesma ordem de `ts` (vazio: 1 quadro antes de a próxima acender; a última, na saída)
+       ini    o número (de 1) da linha que já nasce acesa (0: nenhuma)
+       n  l1  l2   o título: o número em amarelo, o resto da primeira linha e a segunda linha (16 · efeitos de vídeo · que o Claude cria)
+       ty  a base da linha 1 do título (314; a da linha 2 fica 65 px abaixo) · tam  o corpo do título (72)
+       y  o topo dos painéis (399) · ph  a altura deles (302) · y0  o centro da 1ª linha (425) · lh  o passo da linha (36)
+       xe  xd  a esquerda de cada painel (35, 740) · w  a largura (305) · c  o corpo do rótulo (28; encolhe só o que não cabe, até 20)
+       quieto  1 = já na tela no quadro 0, sem entrada (1) · t0  quando entra, se quieto=0 (0.1)
+       sai  quando começa a sair, 5 quadros (-1: fica até o fim) · volta  quando começa a voltar, 4 quadros (-1: não volta) · vazia  linha@de-ate em s (ex.: 12@13.99-14.97) · dur
+       fundo  a imagem do que fica atrás dos painéis (um quadro do vídeo de base, sem efeito; sem ele, o vidro fica chapado): o painel mostra um recorte DESFOCADO e escurecido dela, o vidro fosco da ref.
+              A peça não enxerga o vídeo de baixo, então o fundo é embutido; `fundo=` vazio volta ao vidro chapado
+       luz  o mapa de luz de cada trecho (JSON): [{"d": "e"|"d"|"" (o painel: esquerdo, direito ou os dois), "cor": "#000" (cor lisa) ou "img": o PNG com alfa (o mapa, 1080x1920),
+            "k": [[segundos, opacidade 0 a 1], ...]}]. O painel mostra um fundo desfocado embutido, que não vê o vídeo de baixo; cada camada escurece (preto) ou clareia (branco) esse fundo
+            enquanto uma cena passa por baixo: a opacidade vale a partir do segundo dado, até o próximo. Os trechos que a família 3 manda: o palco do 09 (img) e a vinheta do 02 (cor); as outras
+            famílias põem o delas (o clarão do 03, a quebra de moldura, o recuo) na montagem
+       ?it=parede de manchetes|zoom que atravessa|vertigem|tela verde|mockup de celular|zoom digital|recorte de papel|mundo de interface|órbita|quebra de moldura|rabisco tremido|texto adesivo|antes e depois|recuo que revela|profundidade|balão de comentário&ts=1.633,3.033,4.2,5.1,6.2,7.433,8.633,9.667,10.833,11.733,12.733,13.9,15.1,16.3,17.667,21.7&sai=18.867&volta=21.233&dur=23.667 -->
+<html lang="pt-BR" class="alfa tinta" data-qa="fica">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+#sel{position:absolute;inset:0}
+/* o título: branco, pesado, o número no marcador; a sombra é a do núcleo (dura embaixo, mais um halo escuro pra ler sobre qualquer parede) */
+.tt{position:absolute;left:0;width:1080px;text-align:center;white-space:nowrap;font-weight:700;letter-spacing:-.04em;color:#fff;
+  text-shadow:0 3px 0 rgba(11,13,18,.55),0 0 22px rgba(11,13,18,.6);-webkit-text-stroke:1.2px currentColor}
+.tt b{color:var(--mk);font-weight:700}
+/* o vidro: um fio claro que numa parede escura é o que dá o contorno */
+.pn{position:absolute;border-radius:24px;overflow:hidden;background:rgba(8,10,14,.28);border:1.5px solid rgba(255,255,255,.16);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.pn.plano{background:rgba(8,10,14,.58)}
+/* o vidro fosco: o que está atrás, desfocado e a 0,54 da luz, mais o véu do painel (a ref deixa o fundo a 0,41 a 0,67 e sem ripas nítidas) */
+.pn .vd{position:absolute;inset:-34px;filter:blur(15px) brightness(.54)}
+.pn .vd i{position:absolute;inset:0;background-repeat:no-repeat;background-size:1080px 1920px}
+.pn .vd i.lz{background-size:1080px 1920px}
+.ln{position:absolute;display:flex;align-items:center;white-space:nowrap;height:36px}
+.ln i{flex:none;width:27px;font:500 17px/1 var(--fd);font-style:normal;letter-spacing:.02em;color:var(--n0)}
+.ln b{font:700 28px/1 var(--fd);letter-spacing:-.035em;color:var(--l0);-webkit-text-stroke:.6px currentColor}
+html.tinta{--n0:#8A8F9A;--l0:#9AA0AD}
+</style>
+</head>
+<body>
+<div id="stage"><div id="sel"></div></div>
+<script>
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const $ = id => document.getElementById(id);
+const FR = 1 / 30, pad2 = n => String(n).padStart(2, '0');
+const lista = s => String(s).split(',').map(x => x.trim()).map(x => (x === '' ? null : Number(x)));
+const nomes = D.q('it', 'parede de manchetes|zoom que atravessa|vertigem|tela verde|mockup de celular|zoom digital|recorte de papel|mundo de interface|órbita|quebra de moldura|rabisco tremido|texto adesivo|antes e depois|recuo que revela|profundidade|balão de comentário')
+  .split('|').map(s => s.trim()).filter(Boolean);
+const N = nomes.length, M = Math.ceil(N / 2), lh = D.n('lh', '36'), y0 = D.n('y0', '425');
+const ts = lista(D.q('ts', '')), fim = lista(D.q('fim', ''));
+const ini = D.n('ini', '0') - 1, sai = D.n('sai', '-1'), volta = D.n('volta', '-1');
+const quieto = D.n('quieto', '1') >= 1, t0 = D.n('t0', '0.1');
+const ultimo = Math.max(0, ...ts.filter(x => x !== null));
+const dur = D.n('dur', String(Math.round((ultimo + 1.3) * 100) / 100));
+const vz = (D.q('vazia', '').match(/^(\d+)@([\d.]+)-([\d.]+)$/) || []).slice(1).map(Number);   // [linha, de, ate]
+
+const raiz = $('sel');
+const tam = D.n('tam', '72'), ty = D.n('ty', '314');
+// a base de cada linha do título fica no lugar da ref (314 e 379); o `top` é a base menos o corpo, e o ajuste fino sai da medida
+raiz.insertAdjacentHTML('beforeend',
+  `<div class="tt" id="t1" style="top:${ty - tam * .86}px;font-size:${tam}px;line-height:1"><b>${esc(D.q('n', '16'))}</b> ${esc(D.q('l1', 'efeitos de vídeo'))}</div>` +
+  `<div class="tt" id="t2" style="top:${ty + 65 - tam * .86}px;font-size:${tam}px;line-height:1">${esc(D.q('l2', 'que o Claude cria'))}</div>`);
+const w = D.n('w', '305'), yp = D.n('y', '399'), ph = D.n('ph', '302'), xe = D.n('xe', '35'), xd = D.n('xd', '740');
+const fundo = D.q('fundo', '');
+let luz = [];
+try { luz = JSON.parse(D.q('luz', '[]')); } catch (e) { console.error('luz: JSON inválido', e); }
+[[xe, 'pe'], [xd, 'pd']].forEach(([x, id]) => {
+  const pos = `background-position:${-(x - 34)}px ${-(yp - 34)}px`, lado = id === 'pe' ? 'e' : 'd';
+  const camadas = luz.map((l, k) => (l.d || lado) !== lado ? '' :
+    `<i class="lz" id="${id}lz${k}" style="${l.img ? `background-image:url('${l.img}');${pos}` : `background:${l.cor || '#000'}`};opacity:0"></i>`).join('');
+  const vd = fundo ? `<div class="vd"><i style="background-image:url('${fundo}');${pos}"></i>${camadas}</div>` : '';
+  raiz.insertAdjacentHTML('beforeend', `<div class="pn${fundo ? '' : ' plano'}" id="${id}" style="left:${x}px;top:${yp}px;width:${w}px;height:${ph}px">${vd}</div>`);
+});
+nomes.forEach((n, i) => {
+  const col = i < M ? 0 : 1, x = col ? xd : xe, k = col ? i - M : i;
+  raiz.insertAdjacentHTML('beforeend',
+    `<div class="ln" id="l${i}" style="left:${x + (col ? 17 : 23)}px;top:${y0 + lh * k - lh / 2}px"><i>${pad2(i + 1)}</i><b>${esc(n)}</b></div>`);
+});
+// o rótulo que não cabe no vidro encolhe (a ref tem 13 letras na linha mais longa; o nome em português chega a 23)
+const corpo = D.n('c', '28');
+document.querySelectorAll('.ln b').forEach(b => {
+  const ln = b.parentElement, col = +ln.id.slice(1) < M ? 0 : 1, lim = (col ? xd : xe) + w - 16 - (ln.getBoundingClientRect().left + 27);
+  let px = corpo; b.style.fontSize = px + 'px';
+  if (b.getBoundingClientRect().width > lim) b.style.letterSpacing = '-.055em';     // primeiro fecha o espaço entre as letras, depois encolhe o corpo
+  while (px > 20 && b.getBoundingClientRect().width > lim) { px -= .5; b.style.fontSize = px + 'px'; }
+});
+
+D.monta(tl => {
+  const css = D.css, L = nomes.map((_, i) => $('l' + i));
+  const par = i => [L[i].querySelector('i'), L[i].querySelector('b')];
+  const lit = {num: '#ffffff', lab: css('--mk')}, off = {num: css('--n0'), lab: css('--l0')};
+  // `t` é o primeiro quadro em que a linha já é amarela. Na ref a cor sobe depressa e assenta: ~55% no quadro de `t`, ~97% no seguinte
+  const acende = (i, t) => {
+    const [n, b] = par(i), a = Math.max(0, t - .5 * FR), d = 1.6 * FR;
+    tl.fromTo(n, {color: off.num}, {color: lit.num, duration: d, ease: 'power2.out', immediateRender: false}, a);
+    tl.fromTo(b, {color: off.lab}, {color: lit.lab, duration: d, ease: 'power2.out', immediateRender: false}, a);
+    tl.fromTo(L[i], {x: 0}, {x: 6, duration: d, ease: 'power2.out', immediateRender: false}, a);
+  };
+  const apaga = (i, t) => { const [n, b] = par(i); tl.set(n, {color: off.num}, t); tl.set(b, {color: off.lab}, t); tl.set(L[i], {x: 0}, t); };
+  const fixa = i => { const [n, b] = par(i); tl.set(n, {color: lit.num}, 0); tl.set(b, {color: lit.lab}, 0); tl.set(L[i], {x: 6}, 0); };
+
+  // o mapa de luz de cada trecho: a opacidade de cada camada vale a partir do segundo dado (o 09: .54, .83, .91, .97 e 1 em 5 quadros; a vinheta do 02: a curva medida na ref)
+  if (fundo) luz.forEach((l, k) => ['pe', 'pd'].forEach(id => { const e = $(id + 'lz' + k); if (e) l.k.forEach(([t, o]) => tl.set(e, {opacity: o}, t)); }));
+  if (!quieto) {
+    tl.fromTo(raiz, {opacity: 0, y: -30}, {opacity: 1, y: 0, duration: .3, ease: 'power3.out', immediateRender: false}, t0);
+    tl.set(raiz, {opacity: 0}, 0);
+  }
+  // as linhas, em ordem de tempo: cada uma acende em `ts`, e apaga no `fim` dela, 1 quadro antes de a seguinte acender, ou na saída
+  const ordem = ts.map((t, i) => ({t, i})).filter(o => o.t !== null && o.i < N).sort((a, b) => a.t - b.t);
+  if (ini >= 0 && ini < N) {
+    fixa(ini);
+    const prox = ordem[0];
+    apaga(ini, prox ? Math.max(.001, prox.t - FR) : (sai >= 0 ? sai : dur));
+  }
+  ordem.forEach((o, k) => {
+    const seguinte = ordem[k + 1], fimSai = sai >= 0 ? sai + 5 * FR : dur;
+    let f = fim[o.i] ?? (seguinte ? seguinte.t - FR : fimSai);
+    if (seguinte && f > seguinte.t) f = seguinte.t - FR;
+    if (sai >= 0 && o.t < sai && f > sai) f = sai + 5 * FR;      // some junto com o selo
+    acende(o.i, o.t);
+    if (f < dur) apaga(o.i, Math.max(f, o.t + FR));
+  });
+  // a linha cedida a outra peça: some inteira em `de`, volta acesa em `ate` e apaga um quadro depois (o resto de amarelo da ref)
+  if (vz.length === 3 && vz[0] >= 1 && vz[0] <= N) {
+    const i = vz[0] - 1;
+    tl.set(L[i], {opacity: 0}, vz[1]);
+    tl.set(L[i], {opacity: 1}, vz[2]);
+    tl.set(par(i)[0], {color: lit.num}, vz[2]); tl.set(par(i)[1], {color: lit.lab}, vz[2]); tl.set(L[i], {x: 6}, vz[2]);
+    apaga(i, vz[2] + FR);
+  }
+  // a saída e a volta (medidas na ref): sai em 5 quadros com desfoque e opacidade em ease-in (nítido, quase nítido, mole, borrado e fraco, borrado
+  // e quase nada, fora) e volta em 4, em ease-out, de um fantasma borrado até nítido; o selo inteiro, lista e título
+  if (sai >= 0) {
+    tl.fromTo(raiz, {filter: 'blur(0px)', opacity: 1}, {filter: 'blur(14px)', opacity: 0, duration: 5 * FR, ease: 'power2.in', immediateRender: false}, sai);
+    tl.set(raiz, {filter: 'blur(14px)', opacity: 0}, sai + 5 * FR);
+    if (volta >= 0)
+      tl.fromTo(raiz, {filter: 'blur(12px)', opacity: .3}, {filter: 'blur(0px)', opacity: 1, duration: 4 * FR, ease: 'power2.out', immediateRender: false}, volta);
+  }
+  return dur;
+});
+</script>
+</body>
+</html>

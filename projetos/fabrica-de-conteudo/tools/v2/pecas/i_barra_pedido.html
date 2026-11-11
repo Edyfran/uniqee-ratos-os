@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<!-- INTERFACE — barra de pedido: o rótulo PROMPT, o pedido digitado, o botão, e dois estados por corte: ENVIADO
+     (texto apagado, botão cheio, barra mais curta) e PRONTO (o texto vira serifa itálica, o botão vira check).
+     Clone do efeito 04 da referência Dej8homsIzp: sai por fade. 1080x1920, --alpha. Fica no lado esquerdo
+     (x 32-660), longe do painel lateral.
+       txt  o pedido · rot  o rótulo (PROMPT) · env  o estado ENVIADO · pro  o estado PRONTO
+       x  y  o canto superior esquerdo (32, 460) · w  a largura (628) · t0  quando entra (0.05) · dur (1.3)
+       ?txt=legenda esse vídeo&rot=PROMPT&env=ENVIADO&pro=PRONTO&y=460&t0=0.05&dur=1.3 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+@font-face{font-family:'Instrument Serif';font-style:italic;font-weight:400;src:url(../nucleo/fontes/InstrumentSerif-Italic.ttf) format('truetype')}
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+#bar{position:absolute;height:140px;border-radius:36px;opacity:0;overflow:visible}
+#rot{position:absolute;left:34px;top:24px;font:700 20px/1 var(--fm);letter-spacing:.14em;color:var(--ink4);white-space:nowrap}
+#rot b{font-weight:700}
+#lin{position:absolute;left:34px;right:110px;top:62px;height:56px;display:flex;align-items:center;white-space:nowrap;overflow:hidden}
+#pre,#tx{font:600 40px/1 var(--fd);letter-spacing:-.01em;color:var(--ink);white-space:pre}
+#tx .l,#rt .l{white-space:pre}
+#car{flex:none;width:4px;height:44px;margin-left:3px;background:var(--ac);opacity:0}
+#bt{position:absolute;right:26px;top:42px;width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font:700 36px/1 var(--fd);background:var(--navy);color:#fff;border:var(--bw) solid var(--ink)}
+html{--navy:color-mix(in srgb,var(--ac) 28%,var(--ink))}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="nb" id="bar">
+    <div id="rot"></div>
+    <div id="lin"><span id="pre"></span><span id="tx"></span><i id="car"></i></div>
+    <div id="bt">↑</div>
+  </div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const dur = D.n('dur', '1.3'), t0 = D.n('t0', '0.05'), W = D.n('w', '628');
+const txt = D.q('txt', 'legenda esse vídeo');
+$('pre').textContent = txt.slice(0, 2); $('tx').textContent = txt.slice(2); $('rot').textContent = D.q('rot', 'PROMPT');
+Object.assign($('bar').style, {left: D.n('x', '32') + 'px', top: D.n('y', '460') + 'px', width: W + 'px'});
+
+D.monta(tl => {
+  // a digitação é rápida (a referência escreve o pedido em ~0,4 s); a pausa até ENVIADO é que estica com o dur
+  const tIni = t0, tFim = tIni + Math.min(.32, .014 * txt.length + .06);
+  const tEnv = Math.max(tFim + .2, dur - .55), tPro = tEnv + .15, tSai = dur;
+  tl.set('#bar', {opacity: 1}, 0);
+  
+  const fim = D.digita('#tx', tIni, (tFim - tIni) / Math.max(1, txt.length - 2));
+  tl.set('#car', {opacity: 1}, tIni);
+  for (let t = fim; t < tEnv - .1; t += .16) tl.set('#car', {opacity: ((t - fim) / .16) % 2 < 1 ? 0 : 1}, t);
+  tl.set('#car', {opacity: 0}, tEnv);
+  // ENVIADO: rótulo com bolinha, texto apagado, botão cheio, barra um pouco mais curta
+  tl.set('#rot', {innerHTML: '● ' + D.q('env', 'ENVIADO')}, tEnv);
+  tl.set('#pre,#tx', {color: D.css('--ink4')}, tEnv);
+  tl.set('#bt', {backgroundColor: D.css('--ink'), innerHTML: '●', fontSize: '22px'}, tEnv);
+  tl.set('#bar', {width: W - 50}, tEnv);
+  D.cue(tEnv, 'click');
+  // PRONTO: serifa itálica, check, rótulo verde
+  tl.set('#rot', {innerHTML: '● ' + D.q('pro', 'PRONTO'), color: D.css('--ok')}, tPro);
+  tl.set('#pre,#tx', {fontFamily: "'Instrument Serif',serif", fontStyle: 'italic', fontWeight: 400, fontSize: '50px', color: D.css('--ink')}, tPro);
+  tl.set('#bt', {backgroundColor: D.css('--ok'), innerHTML: '✓', fontSize: '36px'}, tPro);
+  D.cue(tPro, 'certo');
+  tl.set('#bar', {opacity: 0}, dur * .9);   // corte seco, como a referência
+  return dur;
+});
+</script>
+</body>
+</html>

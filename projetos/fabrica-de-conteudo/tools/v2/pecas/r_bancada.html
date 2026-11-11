@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<!-- PROVA — a bancada de edição: o bruto e o editado em dois celulares, e a linha do tempo da edição embaixo.
+     1080x1920, tela cheia (papel com luz suave nas nossas cores). O bruto fica atrás, à esquerda, menor e inteiro;
+     o editado na frente, à direita, encostando de leve nele, e a sombra MACIA dele cai sobre o bruto. Sem moldura:
+     o vídeo de canto redondo, como nas referências. Os dois tocam juntos (`vb`, `ve`: vídeo ou imagem; o vídeo
+     segue a timeline). Embaixo, a linha do tempo de verdade (`tl`): uma trilha por passo, os blocos nos tempos do
+     plano, as marcas (corte, zoom, capa) dentro das trilhas, o cursor andando no tempo do vídeo e o bloco
+     acendendo enquanto ele passa. O selo "● Claude Code editando" fica no vão embaixo do bruto, dentro da área segura do anúncio
+     (tudo cabe em x 65–1015, y 270–1250). Da referência (pesquisa/referencias-criativos/motion-puro: o par do
+     oktamov e do motion_pet, a linha do tempo e a luz pêssego do andre1) saiu a composição; letra e cor são nossas.
+     O movimento segue o pesquisa/animacao-principios/ESTUDO.md, só nesta peça: no quadro 0 a linha do tempo já
+     está subindo (o gancho), as trilhas defasadas de 2 quadros; o editado é o herói seguinte (aparece, recua,
+     sobe em arco, esmaga de leve e assenta); o bruto anda 60 % da distância dele, 150 ms depois; rótulos e selo
+     entram defasados de 3 quadros; o feedback (bloco que acende, marca que aparece) é curto; a saída do
+     cabeçalho dura 45 % da entrada. O conjunto recua de 1,04 a 1 (câmera).
+       vb, ve      o take cru e o editado (vídeo ou imagem; vazio: o marcador listrado)
+       b, e        o retângulo do bruto e do editado, "x,y,w,h" (276,470,204,363 · 464,350,340,604)
+       rb, re      o raio dos cantos (20 · 30)
+       tb, te      as etiquetas (BRUTO · EDITADO) · selo  o texto do selo · xsel, ysel  onde ele fica (65 · 880: embaixo do bruto)
+       xtl, ytl, wtl, htl  a caixa da linha do tempo (65 · 976 · 950 · 274)
+       rot         os rótulos de dor resolvida (a bancada do anúncio que ENCHE): JSON [{t, tx}], `tx` com | quebrando a
+                   linha. Um por vez, na coluna do bruto, em cima da linha do tempo: xrot e yrot (o pé do rótulo, 1246: o fim da
+                   área segura) · frot, a letra (50 px; piso do celular, 44):
+                   o rótulo cai no instante `t` com o selo ✓ 4 quadros depois, e sai 2 quadros antes de o próximo cair
+                   (o último sai em t_rot_fim, dur − 0,4). Nada em cima do rosto: os dois celulares ficam livres
+       selo2, t_selo2  o selo vira "✓ <selo2>", verde, em t_selo2 (vazio: não vira)
+       cues        JSON [{t, tipo}] com os efeitos sonoros do que acontece no vídeo dos celulares
+       tl          JSON {faixas:[{nome, cor: ac|ink|mk|pp, onda?, blocos:[{a, b, tx?}],
+                   marcas:[{t, tx, cor: mk|pp|no, dx?, img?}]}], cortes:[{t, tx}], eventos:[{t, tx}],
+                   onda:[0..1, amostras no tempo todo]} · dur
+       ?vb=../midia/lupa-antes.jpg&ve=../midia/lupa-depois.jpg&tl={"faixas":[{"nome":"Corte","cor":"ac","onda":1,"blocos":[{"a":0,"b":2.5},{"a":2.5,"b":4}],"marcas":[{"t":2.5,"tx":"zoom","cor":"mk","dx":66}]},{"nome":"Legenda","cor":"ink","blocos":[{"a":0.1,"b":1},{"a":1.8,"b":2.5},{"a":2.6,"b":4}]},{"nome":"Motion","cor":"ac","blocos":[{"a":1.1,"b":2.5,"tx":"REFERÊNCIA"}],"marcas":[{"t":3.3,"tx":"capa","cor":"pp"}]}],"cortes":[{"t":2.5,"tx":"43 s"}],"eventos":[{"t":0,"tx":"Legenda: monte grifado"},{"t":2.5,"tx":"Corte: 43 s fora"}],"onda":[0.2,0.7,0.5,0.9,0.4,0.8,0.3,0.6]}&rot=[{"t":1.1,"tx":"Sem|CapCut"},{"t":2.4,"tx":"Legenda|que prende"}]&selo2=Pronto&t_selo2=3.4&cues=[{"t":0.3,"tipo":"whoosh"}]&dur=4 -->
+<html lang="pt-BR" data-qa="entra-seco">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<script>if ((new URLSearchParams(location.search).get('ar') || '').indexOf('1080x1350') === 0) document.write('<style>html,body,#stage,#mundo{height:1350px!important}</style>');</script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+#stage{padding:0;display:block;overflow:hidden;background:var(--pp)}
+#mundo{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:50% 40%}
+#papel{position:absolute;left:0;top:0}
+/* o celular: posição (arco) > escala do esmagar > a tela de canto redondo. Sem moldura; a sombra é a macia
+   das referências, não a dura do núcleo */
+.pos{position:absolute}
+.esm{position:absolute;inset:0;transform-origin:50% 100%}
+.cel{position:absolute;inset:0;overflow:hidden;background:var(--cine)}
+#pb .cel{box-shadow:0 22px 44px -14px rgba(11,13,18,.34),0 6px 14px -6px rgba(11,13,18,.18)}
+#pe .cel{box-shadow:0 38px 70px -18px rgba(11,13,18,.44),0 12px 26px -8px rgba(11,13,18,.22)}
+.rot{position:absolute;font:700 44px/1 var(--fm);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+#lb{color:var(--ink6)}
+#le{color:var(--ink);background:var(--mk);border:3px solid var(--ink);border-radius:var(--raio-s);padding:9px 16px 7px}
+#selo{position:absolute;display:flex;align-items:center;gap:14px;padding:13px 22px 13px 18px;background:#fff;
+  border:3px solid var(--ink);border-radius:999px;font:600 27px/1 var(--fd);letter-spacing:-.01em;color:var(--ink);
+  white-space:nowrap;box-shadow:0 12px 28px -10px rgba(11,13,18,.28)}
+#selo .pt{position:relative;width:20px;height:20px;flex:none}
+#selo .pt i{position:absolute;inset:0;border-radius:50%;background:var(--ac)}
+/* o rótulo de dor resolvida: marcador amarelo com borda e sombra dura (.nb), o ✓ verde no canto */
+.rotc{position:absolute;padding:12px 22px 10px;font:700 50px/1.02 var(--fd);letter-spacing:var(--ls);color:var(--ink);
+  white-space:nowrap;opacity:0;z-index:6}
+.rotc i{position:absolute;right:-18px;top:-24px;width:46px;height:46px;border-radius:50%;background:var(--ok);color:#fff;
+  border:3px solid var(--ink);font:800 28px/40px var(--fd);font-style:normal;text-align:center;opacity:0}
+#selo-tx2{display:none}
+/* a linha do tempo */
+#tl{position:absolute;background:#fff;border:2px solid var(--ink);border-radius:28px;overflow:hidden;
+  box-shadow:0 30px 60px -22px rgba(11,13,18,.30),0 8px 18px -8px rgba(11,13,18,.14)}
+.cab{position:absolute;left:24px;right:24px;top:12px;height:46px;overflow:hidden}
+.ev{position:absolute;left:0;top:0;font:700 36px/46px var(--fd);letter-spacing:var(--ls);color:var(--ink);white-space:nowrap;opacity:0}
+.ev b{color:var(--ac);font-weight:700;margin-right:12px}
+#rel{position:absolute;right:0;top:0;font:600 32px/46px var(--fm);color:var(--ink6);font-variant-numeric:tabular-nums;white-space:nowrap}
+.regua{position:absolute;left:0;top:0;width:100%;height:80px}
+.tq{position:absolute;width:2px;background:var(--ink2)}
+.fx{position:absolute;left:0;width:100%;height:60px}
+.nm{position:absolute;left:24px;top:0;font:600 44px/60px var(--fd);letter-spacing:var(--ls);color:var(--ink6);white-space:nowrap}
+.trilha{position:absolute;top:8px;height:44px;border-radius:11px;background:var(--pp2);opacity:.55}
+.bl{position:absolute;top:8px;height:44px;border-radius:11px;overflow:hidden;transform-origin:50% 50%}
+.bl .fan,.bl .ch{position:absolute;left:0;top:0;height:100%;border-radius:11px;display:flex;align-items:center;overflow:hidden}
+.bl .fan{width:100%;opacity:.3}
+.bl .enc{position:absolute;left:0;top:0;height:100%;width:0;overflow:hidden}
+.bl span{position:relative;padding:0 12px;font:700 28px/1 var(--fd);letter-spacing:-.01em;white-space:nowrap}
+.bl svg{position:absolute;left:0;top:0}
+/* a cor do bloco: aceso (.ch) inteiro, apagado (.fan) a 30 % */
+.ac{background:var(--ac);color:#fff} .ink{background:var(--ink);color:#fff} .mk{background:var(--mk);color:var(--ink)}
+.pp{background:#fff;color:var(--ink)} .no{background:var(--no);color:#fff}
+/* a marca: o que acontece num instante (o zoom, a capa), dentro da trilha */
+.mc{position:absolute;top:10px;height:40px;display:flex;align-items:center;gap:8px;padding:0 12px;border:3px solid var(--ink);
+  border-radius:10px;font:700 26px/1 var(--fm);white-space:nowrap;opacity:0;z-index:2}
+.mc img{height:30px;border-radius:4px;margin-left:-4px}
+#cur{position:absolute;left:0;width:4px;margin-left:-2px;background:var(--ink);z-index:3}
+#cur i{position:absolute;left:50%;top:-6px;width:24px;height:28px;margin-left:-12px;background:var(--mk);
+  border:3px solid var(--ink);border-radius:8px}
+.corte{position:absolute;top:8px;height:44px;width:4px;margin-left:-2px;background:var(--no);z-index:2}
+.corte span{position:absolute;left:50%;top:50%;margin-top:-20px;transform:translateX(-50%);padding:0 12px;height:40px;
+  display:flex;align-items:center;background:var(--no);color:#fff;border:3px solid var(--ink);border-radius:10px;
+  font:700 26px/1 var(--fm);white-space:nowrap}
+</style>
+</head>
+<body>
+<div id="stage"><div id="mundo">
+  <svg id="papel" width="1080" height="1920"></svg>
+  <div class="pos" id="pb"><div class="esm"><div class="cel" id="vb"></div></div></div>
+  <div class="pos" id="pe"><div class="esm"><div class="cel" id="ve"></div></div></div>
+  <div class="rot" id="lb"></div>
+  <div class="rot" id="le"></div>
+  <div id="selo"><span class="pt"><i id="anel"></i><i></i></span><span id="selo-tx"></span><span id="selo-tx2"></span></div>
+  <div id="tl"><div class="cab" id="cab"><div id="rel"></div></div><div class="regua" id="regua"></div><div id="cur"><i></i></div></div>
+</div></div>
+<script>
+const $ = id => document.getElementById(id);
+const poe0 = (pai, html) => { pai.insertAdjacentHTML('beforeend', html); return pai.lastElementChild; };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const ret = (k, d) => D.q(k, d).split(',').map(Number);
+const [bx, by, bw, bh] = ret('b', '276,470,204,363'), [ex, ey, ew, eh] = ret('e', '464,350,340,604');
+const rb = D.n('rb', '20'), re = D.n('re', '30'), dur = D.n('dur', '4');
+const dados = JSON.parse(D.q('tl', '{"faixas":[]}'));
+const W = 1080, H = innerHeight, Q = 1 / 30;   // um quadro (?ar=1080x1350: o 4:5 de verdade)
+
+// o papel pontilhado e a luz: três manchas grandes e macias nas nossas cores, andando devagar (ambiente)
+$('papel').innerHTML = `<defs>
+  <pattern id="pt" width="36" height="36" patternUnits="userSpaceOnUse"><circle cx="18" cy="18" r="2.2" fill="rgba(11,13,18,.08)"/></pattern>
+  <radialGradient id="la"><stop offset="0" style="stop-color:var(--mk);stop-opacity:.42"/><stop offset=".55" style="stop-color:var(--mk);stop-opacity:.14"/><stop offset="1" style="stop-color:var(--mk);stop-opacity:0"/></radialGradient>
+  <radialGradient id="lb2"><stop offset="0" style="stop-color:var(--ac);stop-opacity:.16"/><stop offset="1" style="stop-color:var(--ac);stop-opacity:0"/></radialGradient>
+  <radialGradient id="lc"><stop offset="0" style="stop-color:var(--mk);stop-opacity:.30"/><stop offset="1" style="stop-color:var(--mk);stop-opacity:0"/></radialGradient></defs>
+  <rect width="${W}" height="${H}" style="fill:var(--pp)"/>
+  <circle id="luz-a" cx="880" cy="430" r="760" fill="url(#la)"/>
+  <circle id="luz-b" cx="110" cy="1180" r="640" fill="url(#lb2)"/>
+  <circle id="luz-c" cx="160" cy="260" r="520" fill="url(#lc)"/>
+  <rect width="${W}" height="${H}" fill="url(#pt)"/>`;
+
+const caixa = (id, x, y, w, h, r) => {
+  Object.assign($(id).style, {left: x + 'px', top: y + 'px', width: w + 'px', height: h + 'px'});
+  $(id).querySelector('.cel').style.borderRadius = r + 'px';
+};
+caixa('pb', bx, by, bw, bh, rb);
+caixa('pe', ex, ey, ew, eh, re);
+// meio quadro adiante: a busca do vídeo cai no meio do quadro, não na borda (onde atrasava um)
+[['vb', 'bruto'], ['ve', 'editado']].forEach(([id, rot]) => {
+  const m = D.midia('#' + id, D.q(id, ''), rot);
+  if (m && m.tagName === 'VIDEO') m.dataset.off = String(Q / 2);
+});
+$('lb').textContent = D.q('tb', 'BRUTO');
+$('le').textContent = D.q('te', 'EDITADO');
+$('selo-tx').textContent = D.q('selo', 'Claude Code editando');
+$('selo-tx2').textContent = D.q('selo2', '');
+const rots = JSON.parse(D.q('rot', '[]')), cuesSom = JSON.parse(D.q('cues', '[]'));
+rots.forEach(r => poe0($('mundo'), `<div class="nb cor-mk rotc">${esc(r.tx).split('|').join('<br>')}<i>✓</i></div>`));
+
+// a linha do tempo
+const X = D.n('xtl', '65'), Y = D.n('ytl', '976'), LW = D.n('wtl', '950'), LH = D.n('htl', '274');
+Object.assign($('tl').style, {left: X + 'px', top: Y + 'px', width: LW + 'px', height: LH + 'px'});
+const T0 = 222, T1 = LW - 28, TW = T1 - T0, REG = 62, LIN = 80, ALT = 60;
+const px = t => T0 + Math.max(0, Math.min(1, t / dur)) * TW;
+const poe = (pai, html) => { pai.insertAdjacentHTML('beforeend', html); return pai.lastElementChild; };
+// a régua: um traço a cada meio segundo, maior no segundo inteiro (o tempo em número fica no cabeçalho)
+for (let s = 0; s <= dur + 1e-6; s += .5) {
+  const inteiro = Math.abs(s - Math.round(s)) < 1e-6;
+  poe($('regua'), `<div class="tq" style="left:${px(s) - 1}px;top:${REG + (inteiro ? 0 : 4)}px;height:${inteiro ? 12 : 8}px"></div>`);
+}
+const onda = dados.onda || [];
+const barras = (a, b, w) => {
+  if (!onda.length) return '';
+  let r = '';
+  for (let x = 4; x < w - 3; x += 7) {
+    const t = a + x / w * (b - a), v = onda[Math.min(onda.length - 1, Math.floor(t / dur * onda.length))] || 0;
+    const h = 5 + v * 28;
+    r += `<rect x="${x}" y="${((44 - h) / 2).toFixed(1)}" width="3.5" height="${h.toFixed(1)}" rx="1.75"/>`;
+  }
+  return `<svg width="${w}" height="44" fill="currentColor" opacity=".9">${r}</svg>`;
+};
+const blocos = [], linhas = [], marcas = [];
+(dados.faixas || []).forEach((f, i) => {
+  const fx = poe($('tl'), `<div class="fx" style="top:${LIN + i * ALT}px"><div class="nm">${esc(f.nome)}</div>
+    <div class="trilha" style="left:${T0}px;width:${TW}px"></div></div>`);
+  linhas.push(fx);
+  (f.blocos || []).forEach(k => {
+    const x0 = px(k.a), w = Math.max(14, px(k.b) - x0 - 4);
+    const dentro = (f.onda ? barras(k.a, k.b, w) : '') + (k.tx ? `<span>${esc(k.tx)}</span>` : '');
+    const el = poe(fx, `<div class="bl" style="left:${x0}px;width:${w}px">
+      <div class="fan ${f.cor}">${dentro}</div>
+      <div class="enc"><div class="ch ${f.cor}" style="width:${w}px">${dentro}</div></div></div>`);
+    blocos.push({el, a: k.a, b: k.b, w});
+  });
+  if (/corte/i.test(f.nome)) (dados.cortes || []).forEach(c => {
+    c.el = poe(fx, `<div class="corte" style="left:${px(c.t)}px;opacity:0">${c.tx ? `<span>✂ ${esc(c.tx)}</span>` : ''}</div>`);
+  });
+  // a marca encosta à direita do instante dela (dx desloca, pra não cair em cima do corte)
+  (f.marcas || []).forEach(m => {
+    const el = poe(fx, `<div class="mc ${m.cor || 'mk'}" style="left:${px(m.t) + (m.dx || 0)}px">
+      ${m.img ? `<img src="${esc(m.img)}">` : ''}${esc(m.tx || '')}</div>`);
+    marcas.push({el, t: m.t});
+  });
+});
+// o cursor fica por cima das trilhas
+$('tl').appendChild($('cur'));
+Object.assign($('cur').style, {top: REG - 4 + 'px', height: LIN + linhas.length * ALT - REG + 4 + 'px'});
+const evs = (dados.eventos || []).map(e => ({t: e.t, el: poe($('cab'), `<div class="ev"><b>✦</b>${esc(e.tx)}</div>`)}));
+const fmt = t => `0:0${Math.floor(t)},${Math.floor((t % 1) * 10 + 1e-6)}`;
+
+D.monta(tl => {
+  // cada etiqueta centrada sobre o seu celular; o selo no vão embaixo do bruto
+  Object.assign($('lb').style, {left: bx + (bw - $('lb').offsetWidth) / 2 + 'px', top: by - 44 - 22 + 'px'});
+  Object.assign($('le').style, {left: ex + (ew - $('le').offsetWidth) / 2 + 'px', top: ey - $('le').offsetHeight - 14 + 'px'});
+  Object.assign($('selo').style, {left: D.n('xsel', '65') + 'px', top: D.n('ysel', '880') + 'px'});
+
+  // a câmera: o conjunto recua de 1,04 a 1 (movimento de tela, ease-in-out)
+  tl.fromTo('#mundo', {scale: 1.04}, {scale: 1, duration: 1.1, ease: 'power3.inOut'}, 0);
+
+  // 1º MOMENTO, o gancho: a linha do tempo já está inteira na tela no quadro 0, um pouco baixa; recua 3 quadros e
+  // sobe; as trilhas entram atrás dela, 2 quadros entre uma e outra
+  const TY = 46;
+  gsap.set('#tl', {y: TY, scale: .97, transformOrigin: '50% 100%'});
+  tl.to('#tl', {y: TY + 5, duration: 3 * Q, ease: 'power1.inOut'}, 0);
+  tl.to('#tl', {y: 0, scale: 1, duration: .45, ease: 'power3.out'}, 3 * Q);
+  [$('cab'), $('regua'), ...linhas].forEach((el, i) =>
+    tl.fromTo(el, {x: -24, opacity: .55}, {x: 0, opacity: 1, duration: .28, ease: 'power3.out'}, i * 2 * Q));
+
+  // 2º MOMENTO, o herói: o editado aparece baixo e pequeno, recua 8 % (4 quadros), sobe em arco (x e y em curvas
+  // diferentes, giro junto) em 0,7 s, estica 3 % na subida, esmaga 3 % ao pousar e assenta
+  const T = 2 * Q, DX = 30, DY = 90, ROT = 2.5, S0 = .92, ANT = 4 * Q, HER = .7, ARR = T + ANT;
+  gsap.set('#pe', {x: DX, y: DY, rotation: ROT, scale: S0, opacity: 0, transformOrigin: '50% 100%'});
+  tl.to('#pe', {opacity: 1, duration: 3 * Q, ease: 'power1.out'}, T);
+  tl.to('#pe', {y: DY * 1.08, scale: S0 * .985, duration: ANT, ease: 'power1.inOut'}, T);
+  tl.to('#pe', {y: 0, duration: HER, ease: 'power3.out'}, ARR);
+  tl.to('#pe', {x: 0, duration: HER, ease: 'power2.inOut'}, ARR);
+  tl.to('#pe', {rotation: 0, duration: HER * .9, ease: 'power2.out'}, ARR);
+  tl.to('#pe', {scale: 1, duration: HER, ease: 'power3.out'}, ARR);
+  const esmE = '#pe .esm', pousa = ARR + HER * .78;
+  tl.fromTo(esmE, {scaleY: 1, scaleX: 1}, {scaleY: 1.03, scaleX: .985, duration: HER * .35, ease: 'power2.out'}, ARR);
+  tl.to(esmE, {scaleY: .97, scaleX: 1.02, duration: 3 * Q, ease: 'power2.in'}, pousa);
+  tl.to(esmE, {scaleY: 1, scaleX: 1, duration: 4 * Q, ease: 'power2.out'}, pousa + 3 * Q);
+
+  // coadjuvante: o bruto anda 60 % da distância do herói, 150 ms depois, mais curto (UI) e sem antecipação
+  const CO = ARR + .15, F = .6, UI = .45;
+  gsap.set('#pb', {x: -DX * F, y: DY * F, rotation: -ROT * F, scale: 1 - (1 - S0) * F, opacity: 0, transformOrigin: '50% 100%'});
+  tl.to('#pb', {opacity: 1, duration: 3 * Q, ease: 'power1.out'}, CO);
+  tl.to('#pb', {y: 0, duration: UI, ease: 'power3.out'}, CO);
+  tl.to('#pb', {x: 0, duration: UI, ease: 'power2.inOut'}, CO);
+  tl.to('#pb', {rotation: 0, scale: 1, duration: UI, ease: 'power3.out'}, CO);
+  // rótulos e selo: UI, defasados 3 quadros, quando o herói está a meio caminho
+  tl.fromTo('#le', {y: 20, opacity: 0}, {y: 0, opacity: 1, duration: .3, ease: 'power3.out'}, ARR + HER * .5);
+  tl.fromTo('#lb', {y: 16, opacity: 0}, {y: 0, opacity: 1, duration: .3, ease: 'power3.out'}, ARR + HER * .5 + 3 * Q);
+  tl.fromTo('#selo', {x: -24, opacity: 0}, {x: 0, opacity: 1, duration: .3, ease: 'power3.out'}, ARR + HER * .5 + 6 * Q);
+
+  // o tempo: cursor e preenchimento lineares (barra de progresso); acender e marcar são feedback curto
+  tl.fromTo('#cur', {x: px(0)}, {x: px(dur), duration: dur, ease: 'none'}, 0);
+  blocos.forEach(({el, a, b, w}) => {
+    tl.fromTo(el.querySelector('.enc'), {width: 0}, {width: w, duration: Math.max(.01, b - a), ease: 'none'}, a);
+    tl.fromTo(el, {scaleY: 1.22}, {scaleY: 1, duration: .15, ease: 'power2.out', immediateRender: false}, a);
+  });
+  (dados.cortes || []).forEach(c => {
+    if (!c.el) return;
+    tl.fromTo(c.el, {opacity: 0}, {opacity: 1, duration: 2 * Q, ease: 'none'}, c.t);
+    const s = c.el.querySelector('span');
+    if (s) tl.fromTo(s, {scale: .4}, {scale: 1, duration: .2, ease: 'back.out(2.2)'}, c.t);
+    D.cue(c.t, 'click');
+  });
+  marcas.forEach(({el, t}, i) => {
+    tl.fromTo(el, {opacity: 0, scale: .4}, {opacity: 1, scale: 1, duration: .2, ease: 'back.out(2.2)'}, t + 2 * Q);
+  });
+  // o cabeçalho troca: entra em 0,3 s, a anterior sai em 45 % disso
+  evs.forEach((e, i) => {
+    if (i === 0 && e.t <= 0) return;
+    tl.fromTo(e.el, {yPercent: 80, opacity: 0}, {yPercent: 0, opacity: 1, duration: .3, ease: 'power3.out'}, e.t);
+    if (i) tl.to(evs[i - 1].el, {yPercent: -80, opacity: 0, duration: .135, ease: 'power3.in'}, e.t);
+  });
+  if (evs.length && evs[0].t <= 0) gsap.set(evs[0].el, {opacity: 1});
+  // os rótulos, um foco por vez: cai (leve: acelera e amassa no chão), o ✓ vem 4 quadros depois em mola, e o
+  // rótulo recolhe 2 quadros e sai em 0,135 s (45 % da entrada) quando o próximo vai cair
+  const tS2 = D.n('t_selo2', '-1'), tFim = D.n('t_rot_fim', String(dur - .4));
+  [...document.querySelectorAll('.rotc')].forEach((el, i) => {
+    el.style.fontSize = D.n('frot', '50') + 'px';
+    Object.assign(el.style, {left: D.n('xrot', '60') + 'px', top: D.n('yrot', '1246') - el.offsetHeight + 'px'});
+    const t0 = rots[i].t, sai = (i + 1 < rots.length ? rots[i + 1].t : tFim) - 2 * Q;
+    D.pousa(el, t0, {dy: -70, som: 'pop'});
+    tl.fromTo(el.querySelector('i'), {scale: .3, opacity: 0}, {scale: 1, opacity: 1, duration: .3, ease: D.P.MOLA, immediateRender: false}, t0 + 4 * Q);
+    tl.to(el, {scale: 1.04, duration: 2 * Q, ease: 'power2.out'}, sai - 2 * Q);
+    tl.to(el, {y: -26, opacity: 0, scale: .96, duration: .135, ease: 'power3.in'}, sai);
+  });
+  cuesSom.forEach(c => D.cue(c.t, c.tipo));
+  // o selo vira "✓ Pronto" quando acaba
+  if (tS2 >= 0 && $('selo-tx2').textContent) {
+    const ok = D.css('--ok');
+    tl.set('#selo-tx', {display: 'none'}, tS2);
+    tl.set('#selo-tx2', {display: 'inline'}, tS2);
+    tl.set('#selo .pt i', {backgroundColor: ok}, tS2);
+    tl.fromTo('#selo', {scale: 1.1, transformOrigin: '0% 50%'}, {scale: 1, duration: .3, ease: D.P.MOLA, immediateRender: false}, tS2);
+  }
+  // ambiente: o anel do selo pulsa, a luz anda (abaixo de 5 % do herói)
+  D.pulsa('#anel', 0, tS2 >= 0 ? tS2 : dur, 1.0);
+  tl.to('#luz-a', {attr: {cx: 840, cy: 470}, duration: dur, ease: 'sine.inOut'}, 0);
+  tl.to('#luz-b', {attr: {cx: 150, cy: 1140}, duration: dur, ease: 'sine.inOut'}, 0);
+  tl.to('#luz-c', {attr: {cx: 190, cy: 300}, duration: dur, ease: 'sine.inOut'}, 0);
+  D.aoQuadro(() => { $('rel').textContent = `${fmt(Math.min(dur, tl.time()))} / ${fmt(dur)}`; });
+  return dur;
+});
+</script>
+</body>
+</html>

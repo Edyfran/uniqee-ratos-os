@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<!-- GANCHO — dois apps riscados com o ícone de verdade (arte oficial da App Store: midia/icone-capcut.jpg e icone-edits.jpg):
+     um no canto de cima à esquerda, outro no de cima à direita. O primeiro pula pequeno, cheio em seguida; o risco vermelho corre
+     da esquerda pra direita e o ícone escurece e fica cinza. O segundo entra já grande e leva o risco depois. Somem juntos num
+     corte. Clone do efeito 12 da referência Deps_-cz-Fg (medido a 30 qps). 1080x1920, --alpha.
+       y  o topo dos ícones (285) · dur (1.58)
+       ?y=285&dur=1.58 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px;background:transparent}
+#stage{padding:0;display:block;overflow:hidden;background:none;position:relative}
+.ap{position:absolute;width:233px;height:233px;opacity:0}
+.ap .q{position:absolute;inset:0;border-radius:52px;overflow:hidden;box-shadow:0 6px 22px rgba(0,0,0,.28)}
+.ap .q img{position:absolute;inset:-2px;width:237px;height:237px;display:block}
+.ap .velo{position:absolute;inset:0;background:#000;opacity:0}
+.ap .rk{position:absolute;left:-14px;top:112px;width:0;height:8px;background:#d6374b;border-radius:4px}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="ap" id="i1"><div class="q"><img src="../midia/icone-capcut.jpg" alt=""><div class="velo"></div></div><div class="rk"></div></div>
+  <div class="ap" id="i2"><div class="q"><img src="../midia/icone-edits.jpg" alt=""><div class="velo"></div></div><div class="rk"></div></div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const dur = D.n('dur', '1.58'), Y = D.n('y', '285');
+$('i1').style.cssText += 'left:53px;top:' + Y + 'px'; $('i2').style.cssText += 'left:790px;top:' + (Y + 11) + 'px';
+D.monta(tl => {
+  tl.fromTo('#i1', {opacity: 0, scale: .72}, {opacity: 1, scale: .78, duration: .05, ease: 'none'}, 0.13); D.cue(0.13, 'pop');
+  tl.to('#i1', {scale: 1, duration: .08, ease: 'power2.out'}, 0.18);
+  tl.to('#i1 .rk', {width: 262, duration: .1, ease: 'none'}, 0.43); D.cue(0.43, 'swish');
+  tl.fromTo('#i1 .velo', {opacity: 0}, {opacity: .88, duration: .03, ease: 'none'}, 0.46);
+  tl.to('#i1 .velo', {opacity: .27, duration: .1, ease: 'none'}, 0.53);
+  tl.fromTo('#i2', {opacity: 0, scale: .6}, {opacity: 1, scale: 1, duration: .08, ease: 'power2.out'}, 0.96); D.cue(0.96, 'pop');
+  tl.to('#i2 .rk', {width: 262, duration: .1, ease: 'none'}, 1.26); D.cue(1.26, 'swish');
+  tl.fromTo('#i2 .velo', {opacity: 0}, {opacity: .85, duration: .03, ease: 'none'}, 1.28);
+  tl.to('#i2 .velo', {opacity: .6, duration: .1, ease: 'none'}, 1.38);
+  tl.set('#i1,#i2', {opacity: 0}, dur - .04);
+  return dur;
+});
+</script>
+</body>
+</html>

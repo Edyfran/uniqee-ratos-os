@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<!-- FRASE — o título de vidro acima (ou atrás) da cabeça. 1080x1920, --alpha, tema neon.
+     A mecânica do anúncio de edição do concorrente (videos/fabrica/avatar-camadas/REF.md): o título em
+     sans pesada, branco com a linha do acento em degradê lilás, cada linha subindo de dentro do desfoque
+     na palavra falada; o número que conta ("100%"); a pílula roxa; e o cartão final com a marca.
+     Quem põe o título atrás da pessoa é o compositor (a pessoa recortada por cima).
+       l     "texto|cor|tam@t" de cima pra baixo, separados por ;
+             cor: br (branco) · ac (degradê lilás) · mono (sobretítulo pequeno) · pill (pílula roxa) ·
+             conta (o texto "0>100%" conta de 0 a 100 com o sufixo, em 0,8 s)
+       y     o topo do bloco (300) · x  o centro (540) · gap (6)
+       logo  imagem no topo do bloco, com o t em "arquivo@t" · chao=1  o fundo roxo escuro (cartão final)
+       seta=1  a seta que pulsa embaixo · dur · sai=0
+     ?l=5|ac|260@0.5;CAMADAS|br|150@0.62&y=300&dur=2&tema=neon
+     conta: ?l=0>100%|conta|230@0.2;FEITO POR UM AGENTE DE IA|pill|46@1.2&y=320&dur=2.6&tema=neon
+     fim: ?logo=../midia/logo-fabrica.svg@0.1&l=Gravou?|br|96@0.3;O agente edita.|ac|96@0.5&chao=1&seta=1&y=640&dur=1.6&tema=neon -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0 90px;display:block;position:relative}
+html.chao #stage{background:radial-gradient(120% 70% at 50% 40%,#2B1A66 0%,#120A2C 55%,#07040F 100%)}
+#bloco{position:absolute;left:0;right:0;display:flex;flex-direction:column;align-items:center;text-align:center}
+.ln{display:block;white-space:nowrap;opacity:0;font-family:var(--fd);font-weight:900;line-height:.9;letter-spacing:-.045em;text-transform:uppercase}
+.ln.br{color:#fff;text-shadow:0 0 34px rgba(150,120,255,.55),0 6px 24px rgba(5,0,20,.55)}
+.ln.ac{background:var(--gr-ac);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 26px rgba(124,92,255,.7)) drop-shadow(0 6px 18px rgba(5,0,20,.6))}
+.ln.mono{font:800 var(--tam)/1 var(--fm);letter-spacing:.22em;color:var(--ink6);text-shadow:0 2px 12px rgba(5,0,20,.8)}
+.ln.conta{font-variant-numeric:tabular-nums;color:#fff;text-shadow:0 0 40px rgba(150,120,255,.6),0 6px 24px rgba(5,0,20,.55)}
+.ln.pill{font:800 var(--tam)/1 var(--fd);letter-spacing:-.01em;color:#fff;padding:.36em .7em .4em;border-radius:999px;
+  background:linear-gradient(180deg,#9474FF,#6A3FF0);border:2px solid rgba(235,228,255,.6);
+  box-shadow:0 0 40px rgba(124,92,255,.65),inset 0 2px 0 rgba(255,255,255,.4)}
+#logo{opacity:0;max-width:640px;max-height:220px;margin-bottom:40px;filter:drop-shadow(0 0 30px rgba(124,92,255,.6))}
+#seta{position:absolute;left:50%;width:70px;height:70px;margin-left:-35px;opacity:0}
+#seta svg{width:100%;height:100%;stroke:#E4DAFF;fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 10px var(--ac))}
+</style>
+</head>
+<body>
+<div id="stage"><div id="bloco"></div><div id="seta"><svg viewBox="0 0 24 24"><path d="M12 4v15M6 13l6 6 6-6"/></svg></div></div>
+<script>
+const dur = D.n('dur', '2');
+if (D.q('chao', '0') === '1') document.documentElement.classList.add('chao');
+const bloco = document.getElementById('bloco');
+bloco.style.top = D.n('y', '300') + 'px';
+bloco.style.left = (D.n('x', '540') - 540) * 2 + 'px';
+const esc = s => String(s).replace(/[&<>]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;'}[c]));
+const [lgArq, lgT] = D.q('logo', '').split('@');
+if (lgArq) bloco.insertAdjacentHTML('beforeend', `<img id="logo" src="${esc(lgArq)}">`);
+const ls = D.itens('l', '5|ac|260@0.5;CAMADAS|br|150@0.62', ['tx', 'cor', 'tam']);
+ls.forEach((s, i) => {
+  const cor = s.cor || 'br', tam = +s.tam || 140;
+  const d = document.createElement('span');
+  d.className = 'ln ' + cor; d.id = 'ln' + i;
+  d.style.fontSize = tam + 'px'; d.style.setProperty('--tam', tam + 'px');
+  d.style.marginTop = (i ? D.n('gap', '6') + (cor === 'pill' ? 18 : 0) : 0) + 'px';
+  d.innerHTML = cor === 'conta' ? esc(s.tx.split('>')[0]) : esc(s.tx);
+  bloco.appendChild(d);
+});
+
+D.monta(tl => {
+  D.cabe('.ln.br,.ln.ac,.ln.conta', 60, 1);
+  ls.forEach((s, i) => {
+    const el = document.getElementById('ln' + i), t = D.at(s.t);
+    if (s.cor === 'pill') {
+      // a pílula estala: cresce do centro, passa um pouco e assenta
+      tl.fromTo(el, {opacity: 0, scale: .4}, {opacity: 1, scale: 1, duration: .42, ease: D.P.HEROI}, t);
+      D.cue(s.t, 'stamp');
+      return;
+    }
+    // a linha sobe de dentro do desfoque, com o brilho
+    tl.fromTo(el, {opacity: 0, yPercent: 55, scale: .9, filter: 'blur(16px)'},
+      {opacity: 1, yPercent: 0, scale: 1, filter: 'blur(0px)', duration: .42, ease: 'expo.out'}, t);
+    D.cue(s.t, s.cor === 'mono' ? 'click' : 'swish');
+    if (s.cor === 'conta') {
+      // "0>100%": o número conta junto com a entrada, na timeline (buscável)
+      const [de, para] = s.tx.split('>');
+      const a = parseFloat(de) || 0, b = parseFloat(para) || 0, suf = para.replace(/^[\d.,]+/, '');
+      const o = {v: a};
+      tl.fromTo(o, {v: a}, {v: b, duration: .8, ease: 'power2.out', onUpdate: () => { el.textContent = Math.round(o.v) + suf; }}, t + .05);
+      D.cue(s.t + .05, 'tick-roll', {dur: .8});
+      D.cue(s.t + .85, 'ding');
+    }
+  });
+  if (lgArq) {
+    const lg = document.getElementById('logo');
+    tl.fromTo(lg, {opacity: 0, scale: .85, filter: 'blur(18px)'}, {opacity: 1, scale: 1, filter: 'blur(0px)', duration: .5, ease: 'expo.out'}, D.at(parseFloat(lgT) || 0));
+    D.cue(parseFloat(lgT) || 0, 'shimmer');
+  }
+  if (D.q('seta', '0') === '1') {
+    const st = document.getElementById('seta');
+    st.style.top = (bloco.offsetTop + bloco.offsetHeight + 70) + 'px';
+    const t0 = Math.max(...ls.map(s => s.t)) + .3;
+    tl.fromTo(st, {opacity: 0, y: -20}, {opacity: 1, y: 0, duration: .3, ease: 'power2.out'}, t0);
+    if (dur - t0 > .9) tl.to(st, {y: 16, duration: .4, ease: 'sine.inOut', yoyo: true, repeat: Math.floor((dur - t0 - .4) / .4) - 1}, t0 + .3);
+  }
+  if (D.q('sai', '1') !== '0') {
+    tl.to('#bloco', {opacity: 0, scale: .96, filter: 'blur(10px)', duration: .26, ease: D.P.SAI}, dur - .28);
+    D.cue(dur - .28, 'whoosh-out');
+  }
+  return dur;
+});
+</script>
+</body>
+</html>

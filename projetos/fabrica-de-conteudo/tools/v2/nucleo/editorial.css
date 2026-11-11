@@ -1,0 +1,212 @@
+/* Voz editorial — a segunda voz do núcleo, medida no Nick Saraev (2026): o sistema, não a legenda.
+
+   NÃO é o mundo padrão. O mundo continua o da VSL (direcao-v2.css): borda grossa,
+   sombra dura, Space Grotesk. Esta voz é outra gramática, e só a peça que a pede
+   (e_editorial) importa este arquivo, DEPOIS do direcao-v2.css — as peças do mundo
+   (.nb, chip, cor) continuam valendo dentro dela, como gráfico do painel.
+
+   A gramática, em quatro vozes e um título:
+   - fala      sans em negrito, minúscula, tracking apertado; corte seco, 1–2 palavras
+   - rótulo    serifa itálica condensada em CAIXA ALTA; narra o que está no painel
+   - bloco     duas linhas SOBREPOSTAS, sans + serifa, degradê dentro da letra
+   - chamada   a mesma sobreposição, parada até o fim, em cromo
+   - título    caixa alta espaçada, degradê que some pra baixo
+   Nada de borda, caixa ou pílula na letra. Sombra só difusa, e só sobre o rosto.
+
+   Fontes livres (OFL), em nucleo/fontes/: Inter (eixo de tamanho óptico: acima de
+   32 px ela vira a Display, apertada como a do Nick) e Instrument Serif Italic.
+   SF Pro fica de fora: a licença da Apple não cobre vídeo de marketing. */
+
+@font-face{font-family:'Instrument Serif';font-style:italic;font-weight:400;
+  src:url(fontes/InstrumentSerif-Italic.ttf) format('truetype')}
+@font-face{font-family:'Inter';font-style:normal;font-weight:100 900;
+  src:url(fontes/Inter-opsz-wght.ttf) format('truetype')}
+/* o título gigante atrás da pessoa (voz `gigante`): condensada pesada, esticada na altura */
+@font-face{font-family:'Anton';font-style:normal;font-weight:400;
+  src:url(fontes/Anton-Regular.ttf) format('truetype')}
+
+:root{
+  --ed-sans:'Inter',system-ui,sans-serif; --ed-serif:'Instrument Serif',serif;
+  --ed-ls:-.04em;             /* fala: o apertado da Display */
+  --ed-ls-rot:-.01em;         /* rótulo */
+  --ed-ls-esp:.5em;           /* título espaçado: U S A G E */
+
+  /* chão do painel */
+  --ed-pp:#F1F0EC;            /* claro: papel quase branco (Nick mede #F0F0EF) */
+  --ed-pp-luz:#FBFAF7;        /* o miolo iluminado */
+  --ed-folha:rgba(52,78,92,.10);   /* sombra de planta que cai no papel */
+  --ed-pp-tinta:#0B0D12;      /* tinta: o mesmo --ink do mundo */
+  --ed-grao:.05;              /* grão do papel */
+
+  /* letra */
+  --ed-tx:#121316;            /* sobre claro */
+  --ed-br:#FFFFFF;            /* sobre tinta e sobre o rosto */
+  --ed-sombra:0 4px 22px rgba(0,0,0,.42),0 1px 3px rgba(0,0,0,.25);   /* só sobre o rosto */
+  
+  /* degradê DENTRO da letra, de cima pra baixo. O tom é o do produto em tela;
+     sem produto, ouro. No nosso mundo o produto é o azul, e o ouro é o amarelo. */
+  --ed-dg-ouro:linear-gradient(180deg,#FFF7CF 8%,#F2C744 58%,#D39A12 100%);
+  --ed-dg-azul:linear-gradient(180deg,#7E97FF 0%,#0640fb 70%);
+  --ed-dg-cromo:linear-gradient(180deg,#FFFFFF 30%,#D6D8DE 62%,#8E939D 100%);
+  --ed-dg-apaga:linear-gradient(180deg,#FFFFFF 0%,rgba(255,255,255,.82) 42%,rgba(255,255,255,.2) 95%);
+  --ed-dg-apaga-tx:linear-gradient(180deg,rgba(18,19,22,.95) 0%,rgba(18,19,22,.7) 42%,rgba(18,19,22,.15) 95%);
+  --ed-dg-some-azul:linear-gradient(180deg,#0640fb 0%,rgba(6,64,251,.55) 55%,rgba(6,64,251,.06) 100%);
+  --ed-dg-some-ouro:linear-gradient(180deg,#F2C744 0%,rgba(242,199,68,.55) 55%,rgba(242,199,68,.06) 100%);
+  --ed-leak:radial-gradient(75% 55% at 28% 36%,rgba(255,248,220,.97),rgba(255,214,120,.7) 40%,rgba(242,160,40,.18) 75%,rgba(242,160,40,0) 95%);
+
+  /* corpo (1080 de largura; o celular mostra ~40%: a fala dá ~38 px, acima do piso) */
+  --ed-t-fala:98px; --ed-t-rot:122px; --ed-t-b1:96px; --ed-t-b2:158px;
+  --ed-t-c1:118px; --ed-t-c2:150px; --ed-t-tit:156px;
+
+  /* a tela dividida: o cartão do rosto e onde a letra senta em cada cena */
+  --ed-cartao-x:18px; --ed-cartao-y:1240px; --ed-cartao-raio:130px;
+  --ed-y-costura:872px;       /* fala no split: entre o gráfico e o topo da cabeça */
+  --ed-y-rosto:1560px;        /* fala no rosto cheio: no escuro da roupa, abaixo do queixo */
+  --ed-y-tela:1150px;         /* tela só de gráfico */
+  --ed-g-split:480px;         /* centro do gráfico no split */
+  --ed-g-tela:640px;          /* centro do gráfico na tela cheia */
+}
+
+/* camadas (ensaio.js): tras = painel + gráfico; frente = letra */
+html.c-tras [data-c="frente"],html.c-frente [data-c="tras"]{visibility:hidden}
+
+/* o painel: papel com luz e sombra de planta, ou tinta */
+.ed-painel{position:absolute;inset:0;opacity:0;overflow:hidden}
+.ed-painel.claro{background:
+  radial-gradient(70% 50% at 55% 40%,var(--ed-pp-luz),transparent 75%),var(--ed-pp)}
+.ed-painel.tinta{background:radial-gradient(80% 55% at 50% 35%,#15181F,transparent 80%),var(--ed-pp-tinta)}
+.ed-painel .folha{position:absolute;border-radius:50%;background:var(--ed-folha);filter:blur(22px)}
+.ed-painel.tinta .folha{display:none}
+.ed-painel .grao{position:absolute;inset:0;opacity:var(--ed-grao);mix-blend-mode:multiply}
+.ed-painel.tinta .grao{mix-blend-mode:screen}
+
+/* as vozes: posição absoluta, centradas no x; o y vem da cena */
+.ed-v{position:absolute;left:60px;right:60px;display:flex;flex-direction:column;align-items:center;
+  text-align:center;opacity:0;transform:translateY(-50%);white-space:nowrap}
+.ed-fala{font:700 var(--ed-t-fala)/1 var(--ed-sans);letter-spacing:var(--ed-ls);color:var(--ed-tx)}
+.ed-rot{font:400 var(--ed-t-rot)/.95 var(--ed-serif);font-style:italic;letter-spacing:var(--ed-ls-rot);
+  text-transform:uppercase;color:var(--ed-tx)}
+.ed-b1{font:700 var(--ed-t-b1)/1 var(--ed-sans);letter-spacing:var(--ed-ls);color:var(--ed-br)}
+.ed-b2{font:400 var(--ed-t-b2)/1 var(--ed-serif);font-style:italic;letter-spacing:-.01em;
+  margin-top:-.36em;padding:0 .08em .06em}
+.ed-c1{font:400 var(--ed-t-c1)/1 var(--ed-serif);font-style:italic;letter-spacing:-.01em;padding:0 .1em}
+.ed-c2{font:700 var(--ed-t-c2)/1 var(--ed-sans);letter-spacing:-.045em;margin-top:-.2em;padding:0 .05em .06em}
+.ed-tit{font:800 var(--ed-t-tit)/.9 var(--ed-sans);letter-spacing:-.03em;text-transform:uppercase;padding-bottom:.06em}
+.ed-tit.esp{letter-spacing:var(--ed-ls-esp);margin-right:calc(-1 * var(--ed-ls-esp))}
+
+/* a cor segue o chão: tinta e rosto pedem branco; no rosto entra a sombra difusa */
+.ed-v.sobre-tinta .ed-fala,.ed-v.sobre-tinta .ed-rot{color:var(--ed-br)}
+.ed-v.sobre-rosto .ed-fala,.ed-v.sobre-rosto .ed-rot{color:var(--ed-br);text-shadow:var(--ed-sombra)}
+
+/* degradê dentro da letra */
+.ed-dg{-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+.ed-dg.ouro{background-image:var(--ed-dg-ouro)}
+.ed-dg.azul{background-image:var(--ed-dg-azul)}
+.ed-dg.cromo{background-image:var(--ed-dg-cromo)}
+.ed-dg.apaga{background-image:var(--ed-dg-apaga)}
+.ed-dg.apaga-tx{background-image:var(--ed-dg-apaga-tx)}
+.ed-dg.some-azul{background-image:var(--ed-dg-some-azul)}
+.ed-dg.some-ouro{background-image:var(--ed-dg-some-ouro)}
+/* texto recortado pelo degradê perde o text-shadow: a sombra vem do filtro, que segue o alfa da letra */
+.ed-sob{filter:drop-shadow(0 8px 26px rgba(0,0,0,.55)) drop-shadow(0 2px 4px rgba(0,0,0,.25))}
+
+/* fala cinética (r.cinetica): 1–3 palavras, preta 900 e maior, a palavra da vez no amarelo marcador; cada
+   palavra nova salta. Duas cores, uma família: a mistura de letra dentro da palavra o cliente lê como erro */
+:root{--ed-t-cin:132px; --ed-cin-ag:#F2C744;
+  --ed-sombra-cin:0 5px 0 rgba(12,8,34,.55),0 6px 34px rgba(0,0,0,.6)}
+.cinetica .ed-fala{font-weight:900;font-size:var(--ed-t-cin);letter-spacing:-.045em}
+.cinetica .ed-fala span{display:inline-block;transform-origin:50% 80%}
+.cinetica .ed-fala .ag{color:var(--ed-cin-ag)}
+.cinetica .ed-v.sobre-rosto .ed-fala{text-shadow:var(--ed-sombra-cin)}
+
+/* o título gigante (voz `gigante`): na camada tras, a pessoa recortada passa na frente dele (o 'O MELHOR
+   EDITOR' do Tiago). Letra a letra, o degradê de vidro claro que desce pro violeta do anel, e o brilho */
+:root{--ed-gig:'Anton',sans-serif;
+  --ed-dg-gig:linear-gradient(180deg,#FFFFFF 0%,#F4F0FF 34%,#C4B2FF 72%,#8A6BFF 100%);
+  --ed-gig-brilho:drop-shadow(0 0 34px rgba(150,120,255,.55)) drop-shadow(0 10px 30px rgba(0,0,0,.35))}
+.ed-gig{position:absolute;left:0;top:0;opacity:0;filter:var(--ed-gig-brilho)}
+.ed-gig .gs{width:max-content;white-space:nowrap}
+.ed-gig i{display:inline-block;font:400 100px/1 var(--ed-gig);font-style:normal;text-transform:uppercase;
+  background-image:var(--ed-dg-gig);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  color:transparent;transform-origin:50% 100%}
+.ed-chip{position:absolute;opacity:0;padding:.2em .45em .18em;border-radius:22px;font:900 96px/1 var(--ed-sans);
+  letter-spacing:-.02em;text-transform:uppercase;color:#fff;white-space:nowrap;
+  background:linear-gradient(180deg,#3B6BFF 0%,#0640fb 60%,#0433C9 100%);
+  box-shadow:0 14px 34px rgba(6,64,251,.45),inset 0 2px 0 rgba(255,255,255,.4),inset 0 -3px 0 rgba(0,0,0,.18)}
+
+/* o flash quente que abre a chamada */
+/* (a camada sai com alfa e o ffmpeg só sobrepõe: blend mode aqui não enxergaria o vídeo) */
+.ed-leak{position:absolute;inset:0;opacity:0;background:var(--ed-leak)}
+
+/* gráfico do painel: sombra macia (o painel do Nick não tem a sombra dura do mundo) */
+.ed-g{position:absolute;left:0;right:0;display:flex;flex-direction:column;align-items:center;
+  opacity:0;transform:translateY(-50%)}
+.ed-jan{border-radius:22px;overflow:hidden;box-shadow:0 30px 60px -20px rgba(11,13,18,.35),0 6px 18px rgba(11,13,18,.12)}
+.ed-term{width:860px;background:var(--cod);color:var(--cod-tx);font:500 32px/1.55 var(--fm)}
+.ed-term .bar{display:flex;align-items:center;gap:12px;padding:18px 22px;background:var(--cod2);
+  font:500 22px/1 var(--fm);color:var(--cod-cm)}
+.ed-term .bar i{width:16px;height:16px;border-radius:50%;display:inline-block}
+.ed-term .corpo{padding:26px 34px 34px;min-height:330px}
+.ed-term .ln{white-space:pre;opacity:0}
+.ed-term .ln b{font-weight:600;color:var(--ok)}
+.ed-term .car{display:inline-block;width:.55em;height:1.05em;vertical-align:-.18em;background:var(--cod-tx);opacity:0}
+.ed-term .ln em{font-style:normal;color:var(--cod-kw)}
+.ed-term .ln s{text-decoration:none;color:var(--cod-cm)}
+.ed-nav{width:820px;background:var(--pp)}
+.ed-nav .bar{display:flex;align-items:center;gap:12px;padding:16px 22px;background:var(--pp2);font:500 24px/1 var(--fm);color:var(--ink4)}
+.ed-nav .bar i{width:15px;height:15px;border-radius:50%;background:var(--ink2);display:inline-block}
+.ed-nav .url{flex:1;margin-left:10px;background:var(--pp);border-radius:10px;padding:10px 16px}
+.ed-play{position:relative;margin:26px;height:360px;border-radius:16px;background:var(--cod);overflow:hidden;
+  display:flex;align-items:center;justify-content:center}
+.ed-play .tri{width:0;height:0;border-left:78px solid var(--pp);border-top:46px solid transparent;border-bottom:46px solid transparent;margin-left:14px}
+.ed-play .barra{position:absolute;left:26px;right:26px;bottom:24px;height:10px;border-radius:5px;background:var(--ink8)}
+.ed-play .barra i{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:5px;background:var(--mk)}
+.ed-legenda-g{font:600 30px/1.2 var(--ed-sans);letter-spacing:-.01em;color:var(--ink4);margin-top:22px}
+.ed-painel.tinta ~ .ed-g .ed-legenda-g,.ed-g.sobre-tinta .ed-legenda-g{color:var(--cine-tx)}
+.ed-no{display:flex;flex-direction:column;align-items:center;gap:12px;font:600 38px/1.1 var(--ed-sans);letter-spacing:-.02em}
+.ed-g.sobre-tinta .ed-no{color:var(--ed-br)}
+.ed-pilula{font:700 28px/1 var(--fm);letter-spacing:.12em;text-transform:uppercase;padding:14px 22px;border-radius:999px;
+  background:var(--ink);color:var(--pp)}
+.ed-g.sobre-tinta .ed-pilula{background:var(--pp);color:var(--ink)}
+
+/* o grão do papel: ruído estático, sem imagem de fora */
+.ed-painel .grao{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+
+/* o mascote em pixel, nas cores do mundo; o desenho é o da `marca` do r (e_editorial) */
+.px-B{fill:var(--ac)} .px-Y{fill:var(--mk)} .px-W{fill:var(--pp)} .px-K{fill:var(--ink)}
+
+/* chip do mundo dentro do painel: o objeto neobrutal continua com a sombra dura */
+.ed-chip{display:inline-flex;align-items:center;gap:16px;padding:22px 30px;
+  font:700 46px/1 var(--fd);letter-spacing:var(--ls);color:var(--ink);white-space:nowrap}
+.ed-chip.cor-ok,.ed-chip.cor-ac{color:var(--pp)}
+
+/* os gráficos do painel (a peça monta; aqui só a aparência) */
+.ed-pilha{position:relative}
+.ed-pilha .nj-topo{position:absolute;left:70px;bottom:100%;margin-bottom:-4px;line-height:0}
+.ed-cf{position:absolute;left:50%;top:50%;width:22px;height:22px}
+.ed-cf.a{background:var(--ac)} .ed-cf.m{background:var(--mk)}
+.ed-fluxo{position:relative;width:900px;height:560px}
+.ed-fluxo svg.ln{position:absolute;inset:0;overflow:visible}
+.ed-fluxo svg.ln path{fill:none;stroke:var(--ink4);stroke-width:4;stroke-linecap:round}
+.ed-g.sobre-tinta .ed-fluxo svg.ln path{stroke:var(--ink6)}
+/* o centro (-50%) a peça põe pelo GSAP: transform no CSS brigaria com o y animado */
+.ed-fluxo .ed-no,.ed-fluxo .ed-pilula{position:absolute}
+.ed-lista{width:760px;padding:34px 40px 40px;display:flex;flex-direction:column;gap:22px}
+.ed-lista .kick{margin-bottom:6px}
+.ed-lista .it{display:flex;align-items:center;gap:22px;font:700 50px/1.1 var(--fd);letter-spacing:var(--ls);color:var(--ink);opacity:0}
+.ed-lista .ck{flex:none;position:relative;width:58px;height:58px;border:var(--bw) solid var(--ink);border-radius:var(--raio-s);background:var(--pp)}
+.ed-lista .ck i{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:var(--ok);color:var(--pp);font:700 38px/1 var(--fd);font-style:normal;opacity:0}
+.ed-mail{width:820px;padding:0;overflow:hidden}
+.ed-mail .cab{display:flex;align-items:center;justify-content:space-between;padding:24px 30px;border-bottom:var(--bw) solid var(--ink);
+  font:700 34px/1 var(--fd);letter-spacing:var(--ls);color:var(--ink)}
+.ed-mail .cab span{font:600 24px/1 var(--fm);color:var(--ink4);letter-spacing:.06em}
+.ed-mail .lin{display:flex;align-items:center;gap:20px;padding:24px 30px;border-bottom:2px solid var(--ink2);font:600 32px/1.15 var(--fd);color:var(--ink6)}
+.ed-mail .lin:last-child{border-bottom:0}
+.ed-mail .lin b{flex:none;width:18px;height:18px;border-radius:50%;background:var(--ink2)}
+.ed-mail .lin.novo{background:var(--ac2);color:var(--ink)}
+.ed-mail .lin.novo b{background:var(--ac)}
+.ed-mail .lin em{font-style:normal;margin-left:auto;font:700 22px/1 var(--fm);letter-spacing:.12em;text-transform:uppercase;
+  background:var(--mk);color:var(--ink);padding:8px 12px;border-radius:var(--raio-s)}
+.ed-cursor{position:absolute;width:0;height:0;border-left:0 solid transparent;opacity:0}
+.ed-cursor svg{display:block}
+.ed-marca{position:absolute;left:36px;top:36px;opacity:0}

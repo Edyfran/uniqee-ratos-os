@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<!-- TIPOGRAFIA CINÉTICA, A TIRA QUE CORTA — a irmã da k_tela pro verbo "cortar": duas ou três palavras, uma de cor, e uma
+     tira de vídeo grande, em azul, que atravessa o quadro de lado a lado. Um dos quadros dela é o erro (marcado com a
+     etiqueta ERRO): na palavra de cor ele é cortado e cai pra fora, e as duas metades se fecham com um thud e o soco de
+     câmera. 1080x1920, o mesmo papel e a mesma grade da k_tela (`?tema=tinta` vira o respiro preto), pra caber entre duas
+     telas dela em corte seco. A tira é HTML: `fita` é uma imagem com os quadros lado a lado (n quadros iguais, em ordem),
+     cada quadro mostra a sua fatia; furinhos de película em cima e embaixo, borda tinta e sombra dura. O que se lê
+     fica na área segura (x 65–1015, y 270–1250); a tira ocupa o terço de baixo e sangra pelos lados.
+       l1  a linha de apoio, palavra a palavra · l2  a palavra de cor · cor (ac | mk | ink | wh)
+       x (100) · y1 (330) · f1 (112) · y2 (440) · f2 (260) · t1 (0.05) · passo (0.3) · al  c centraliza · cod  o código miúdo
+       fita  a imagem dos quadros · n  quantos quadros (5) · erro  o índice (de 0) do quadro cortado (2)
+       fy  o centro da tira (1400) · fh  a altura (520) · frot  o giro (-4) · tin  quando a tira entra (0.05)
+       t2  o corte: a palavra de cor entra e o quadro cai (0.7) · t_fecha  as metades se fecham, depois do corte (0.22) · dur
+       ?l1=Corta os&l2=erros.&cor=ac&fita=../midia/tira-exemplo.jpg&n=5&erro=2&t2=0.7&dur=1.7 -->
+<html lang="pt-BR" data-qa="entra-seco">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+#stage{padding:0;display:block;overflow:hidden;background:var(--pp)}
+html.tinta{--gr:#fff}
+#mundo{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:50% 45%}
+#papel,#grade{position:absolute;left:0;top:0}
+html.tinta #luzes{opacity:.5}
+html.tinta #grade{opacity:.55}
+.l1{position:absolute;left:var(--x,100px);top:var(--y1,330px);font:700 var(--f1,112px)/1 var(--fd);letter-spacing:var(--ls);
+  color:var(--ink);white-space:nowrap;z-index:6}
+html.tinta .l1{color:#fff}
+.l1 .w{display:inline-block;margin-right:.24em;opacity:0}
+html.c .l1,html.c .l2{left:0;width:1080px;text-align:center}
+html.c .l1 .w:last-child{margin-right:0}
+html.c .l2{transform-origin:50% 100%}
+.l2{position:absolute;left:calc(var(--x,100px) - 12px);top:var(--y2,440px);font:700 var(--f2,260px)/.92 var(--fd);letter-spacing:-.05em;
+  white-space:nowrap;opacity:0;transform-origin:0 100%;z-index:6}
+.l2.ac{color:var(--ac)} .l2.ink{color:var(--ink)} .l2.wh{color:#fff}
+.l2.mk{color:var(--mk);-webkit-text-stroke:8px var(--ink);paint-order:stroke fill}
+#codigo{position:absolute;right:65px;top:var(--y1,330px);width:200px;text-align:right;z-index:5}
+#codigo svg{display:block;margin-left:auto;fill:var(--ink)}
+#codigo span{display:block;margin-top:10px;font:600 24px/1 var(--fm);letter-spacing:.12em;color:var(--ink6)}
+html.tinta #codigo svg{fill:#fff}
+html.tinta #codigo span{color:var(--ink4)}
+/* a tira: três pedaços (antes do erro, o erro, depois do erro) do mesmo comprimento de película */
+#tira{position:absolute;left:0;width:1080px;z-index:4;opacity:0}
+.seg{position:absolute;top:0;display:flex;align-items:center;gap:var(--g);padding:0 var(--g);box-sizing:border-box;
+  background:var(--ac);border:var(--bw) solid var(--ink);box-shadow:var(--sh) var(--sh) 0 var(--ink)}
+.seg:before,.seg:after{content:"";position:absolute;left:0;right:0;height:26px;
+  background:repeating-linear-gradient(90deg,var(--pp) 0 24px,transparent 24px 52px);background-position:14px 0}
+.seg:before{top:16px} .seg:after{bottom:16px}
+.q{flex:none;border:5px solid var(--ink);border-radius:10px;background-color:var(--ink);background-repeat:no-repeat;position:relative}
+#meio{z-index:2}
+#meio .q:after{content:"";position:absolute;inset:0;background:var(--no);opacity:.38;border-radius:5px}
+#etiqueta{position:absolute;left:0;top:-96px;width:100%;text-align:center;opacity:0;z-index:3}
+#etiqueta b{display:inline-block;padding:8px 24px 6px;font:700 52px/1 var(--fm);letter-spacing:.1em;color:var(--ink);
+  background:var(--mk);border:5px solid var(--ink);border-radius:var(--raio-s);box-shadow:8px 8px 0 var(--ink)}
+#cortina,#abertura{position:absolute;left:0;top:0;width:1080px;height:1920px;z-index:20;opacity:0}
+#cortina.ink,#abertura.ink{background:var(--ink)} #cortina.claro,#abertura.claro{background:#fff}
+</style>
+</head>
+<body>
+<div id="stage"><div id="mundo">
+  <svg id="papel" width="1080" height="1920"></svg>
+  <svg id="grade" width="1080" height="1920"></svg>
+  <div id="codigo"></div>
+  <div class="l1" id="l1"></div>
+  <div class="l2" id="l2"></div>
+  <div id="tira"><div class="seg" id="esq"></div><div class="seg" id="meio"><div id="etiqueta"></div></div><div class="seg" id="dir"></div></div>
+</div>
+<div id="cortina"></div><div id="abertura"></div></div>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const W = 1080, H = 1920, Q = D.QD, dur = D.n('dur', '1.7');
+const root = document.documentElement.style;
+root.setProperty('--x', D.n('x', '100') + 'px'); root.setProperty('--y1', D.n('y1', '330') + 'px');
+root.setProperty('--f1', D.n('f1', '112') + 'px'); root.setProperty('--y2', D.n('y2', '440') + 'px');
+root.setProperty('--f2', D.n('f2', '260') + 'px');
+const t1 = D.n('t1', '0.05'), passo = D.n('passo', '0.3'), T2 = D.n('t2', '0.7');
+
+// o papel com a luz suave e a grade fina: os mesmos da k_tela
+$('papel').innerHTML = `<defs>
+  <pattern id="pt" width="36" height="36" patternUnits="userSpaceOnUse"><circle cx="18" cy="18" r="2.2" style="fill:var(--dot)"/></pattern>
+  <radialGradient id="la"><stop offset="0" style="stop-color:var(--mk);stop-opacity:.42"/><stop offset=".55" style="stop-color:var(--mk);stop-opacity:.14"/><stop offset="1" style="stop-color:var(--mk);stop-opacity:0"/></radialGradient>
+  <radialGradient id="lb2"><stop offset="0" style="stop-color:var(--ac);stop-opacity:.16"/><stop offset="1" style="stop-color:var(--ac);stop-opacity:0"/></radialGradient></defs>
+  <rect width="${W}" height="${H}" style="fill:var(--pp)"/>
+  <g id="luzes"><circle id="luz-a" cx="860" cy="520" r="760" fill="url(#la)"/><circle id="luz-b" cx="120" cy="1180" r="640" fill="url(#lb2)"/></g>
+  <rect width="${W}" height="${H}" fill="url(#pt)"/>`;
+$('grade').innerHTML = `<defs>
+  <pattern id="gr" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M60 0H0V60" fill="none" style="stroke:var(--gr,var(--ink))" stroke-opacity=".2" stroke-width="1.6"/></pattern>
+  <radialGradient id="gm" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff"/><stop offset=".6" stop-color="#fff" stop-opacity=".85"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+  <mask id="gk"><rect x="-40" y="330" width="1160" height="1080" fill="url(#gm)"/></mask></defs>
+  <rect x="-40" y="330" width="1160" height="1080" fill="url(#gr)" mask="url(#gk)"/>`;
+
+const cod = D.q('cod', '');
+if (cod) {
+  const LARG = [3, 2, 5, 2, 2, 4, 3, 6, 2, 3, 4, 2, 5, 3, 2, 2, 6, 3, 4, 2, 3, 5, 2, 4, 3, 2, 2, 5, 3, 4, 2, 6, 2, 3, 3, 2];
+  let bx = 0, barras = '';
+  LARG.forEach((w, i) => { w = Math.round(w * 1.05); if (i % 2 === 0 && bx + w <= 200) barras += `<rect x="${bx}" y="0" width="${w}" height="60"/>`; bx += w; });
+  $('codigo').innerHTML = `<svg width="200" height="60" viewBox="0 0 200 60">${barras}</svg><span>${esc(cod)}</span>`;
+}
+$('l1').innerHTML = D.q('l1', '').split(' ').filter(Boolean).map(w => `<span class="w">${esc(w)}</span>`).join('');
+$('l2').textContent = D.q('l2', '');
+$('l2').classList.add(D.q('cor', 'ac'));
+if (D.q('al', '') === 'c') document.documentElement.classList.add('c');
+
+// a tira: n quadros iguais, cada um com a sua fatia da imagem; o erro vai pro meio, o resto pros lados
+const N = Math.max(3, D.n('n', '5')), ERRO = Math.min(N - 1, Math.max(0, D.n('erro', '2')));
+const FH = D.n('fh', '520'), FY = D.n('fy', '1400'), FROT = D.n('frot', '-4'), G = 12;
+const QH = FH - 112, QW = Math.round(QH * .75);
+root.setProperty('--g', G + 'px');
+const quadro = i => `<div class="q" style="width:${QW}px;height:${QH}px;background-image:url('${D.q('fita', '')}');` +
+  `background-size:${N * 100}% 100%;background-position:${N > 1 ? i / (N - 1) * 100 : 0}% 0"></div>`;
+const faixa = (a, b) => Array.from({length: b - a}, (_, k) => quadro(a + k)).join('');
+const LEN = (k) => k * QW + (k + 1) * G + 2 * 6;                       // quadros + vãos + borda do segmento
+const nE = ERRO, nD = N - ERRO - 1;
+$('esq').innerHTML = faixa(0, ERRO);
+$('meio').insertAdjacentHTML('afterbegin', faixa(ERRO, ERRO + 1));
+$('dir').innerHTML = faixa(ERRO + 1, N);
+$('etiqueta').innerHTML = '<b>ERRO</b>';
+const TOTAL = LEN(N), X0 = (W - TOTAL) / 2;                             // a tira inteira, centrada: sangra pelos lados
+const xE = X0, xM = X0 + LEN(nE) - 6 + 0, xD = xM + LEN(1) - 6;           // cada segmento colado no anterior (a borda se funde)
+Object.assign($('tira').style, {top: (FY - FH / 2) + 'px', height: FH + 'px'});
+[['esq', xE, LEN(nE)], ['meio', xM, LEN(1)], ['dir', xD, LEN(nD)]].forEach(([id, x, w]) =>
+  Object.assign($(id).style, {left: x + 'px', width: w + 'px', height: FH + 'px'}));
+if (D.q('fecha', '')) $('cortina').classList.add(D.q('fecha', ''));
+if (D.q('abre', '')) $('abertura').classList.add(D.q('abre', ''));
+
+D.monta(tl => {
+  D.camera(dur, 1.0, 1.03);
+  gsap.set('#tira', {rotation: FROT, transformOrigin: '50% 50%'});
+
+  // ── as palavras: a l1 desfocada ficando nítida; a de cor é o herói e cai com o corte ──
+  [...$('l1').children].forEach((w, i) => {
+    tl.fromTo(w, {opacity: 0, y: 30, filter: 'blur(14px)'}, {opacity: 1, y: 0, filter: 'blur(0px)', duration: .38, ease: 'power3.out'}, t1 + i * passo);
+    D.cue(t1 + i * passo + .12, 'click');
+  });
+  D.heroi('#l2', T2);
+  tl.fromTo('#l2', {filter: 'blur(10px)'}, {filter: 'blur(0px)', duration: .3, ease: 'power2.out', immediateRender: false}, D.at(T2) - .05);
+  tl.to('#l1', {y: -6, duration: .3, ease: 'power3.out'}, T2 + .15);
+
+  // ── 1. a tira atravessa de lado a lado e assenta (a película inteira, sem a lacuna) ──
+  const tin = D.n('tin', '.05'), qin = .4;
+  tl.fromTo('#tira', {x: 1100, opacity: 1}, {x: 0, duration: qin, ease: 'power4.out', immediateRender: true}, tin);   // já entrando no 1º quadro
+  D.cue(tin, 'whoosh');
+
+  // ── 2. o erro é marcado: a etiqueta ERRO pousa em cima dele e o quadro pisca no vermelho ──
+  const tm = Math.max(tin + qin + .02, T2 - .24);
+  D.pousa('#etiqueta', tm, {dy: -40, s: 1, som: 'click'});
+  tl.fromTo('#meio', {y: 0}, {y: -14, duration: .1, ease: 'power2.out', immediateRender: false}, tm);
+  tl.to('#meio', {y: 0, duration: .14, ease: 'power2.in'}, tm + .1);
+
+  // ── 3. o CORTE no instante da palavra: o quadro do erro sai caindo e girando; as metades se fecham no thud ──
+  tl.to('#meio', {y: 1250, x: -70, rotation: -22, duration: .46, ease: 'power2.in'}, T2);
+  tl.to('#etiqueta', {opacity: 0, duration: .08, ease: 'none'}, T2);
+  D.cue(T2, 'whoosh-out');
+  const tf = T2 + D.n('t_fecha', '.22'), gap = (LEN(1) - 6) / 2, qf = .2;
+  tl.to('#esq', {x: gap, duration: qf, ease: 'power3.in'}, tf);
+  tl.to('#dir', {x: -gap, duration: qf, ease: 'power3.in'}, tf);
+  const tc = tf + qf;                                                  // o encontro: thud, soco de câmera, a película amassa
+  D.cue(tc, 'thud');
+  D.soco('#mundo', tc, 1.045, 1);
+  D.reage(tc, 22);
+  D.amassa('#esq', tc, .012, 'z'); D.amassa('#dir', tc, .012, 'z');
+  // a tira não para: depois do encontro ela anda devagar pra esquerda (começa e termina parada)
+  tl.fromTo('#tira', {x: 0}, {x: -26, duration: Math.max(.2, dur - tc), ease: 'sine.inOut', immediateRender: false}, tc);
+
+  // ── a cortina que fecha a tela ──
+  if (D.q('fecha', '')) {
+    const fd = D.n('fd', '.13');
+    tl.fromTo('#cortina', {yPercent: -101, opacity: 1}, {yPercent: 0, duration: fd, ease: 'power2.in'}, dur - fd);
+    D.cue(dur - fd, 'whoosh');
+  }
+  if (D.q('abre', '')) {
+    tl.fromTo('#abertura', {yPercent: 0, opacity: 1}, {yPercent: -101, duration: D.n('ad', '.2'), ease: 'power2.out'}, 0);
+  }
+  return dur;
+});
+</script>
+</body>
+</html>

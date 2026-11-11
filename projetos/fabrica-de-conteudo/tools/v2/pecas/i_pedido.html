@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<!-- INTERFACE — o pedido: a palavra da dor vira a caixa de mensagem. 1080x1920, --alpha.
+     A palavra bate grande no meio, numa laje. Em `t_vira` a laje encolhe e vira o campo de
+     mensagem, sem corte: o contêiner muda de forma primeiro e o conteúdo troca dentro dele. Se o
+     pedido começa com a palavra, ela encolhe até virar a primeira palavra do pedido, e o resto se
+     escreve atrás dela; senão ela some e o pedido inteiro se escreve. O cursor vai até o botão e
+     envia: o pedido sobe num balão azul, e o `ok` carimba embaixo dele. Da referência (Skillry
+     #225, a palavra do gancho que vira a interface do produto) saiu só o movimento.
+       l       a palavra (LEGENDA.) · pedido  o que se escreve, do jeito que se manda mensagem
+       para    o rótulo em cima do campo (vazio: nenhum) · ok  o carimbo do feito (vazio: nenhum)
+       t0 · t_vira · t_envia  o clique no botão · t_ok · y  o topo do campo (1180) · m  a margem lateral (60) · dur
+       anexo   um arquivo que a seta arrasta pro campo antes do pedido (fabrica-de-conteudo.zip; vazio: nenhum): ele
+               pousa no canto do campo e sobe junto no balão · t_anexo  quando ele pousa. Com `l` vazio, o campo já
+               nasce campo, sem a laje (o Demo overdrive, 12/10: arrasta o .zip e escreve "instala")
+       ?l=LEGENDA.&pedido=legenda esse vídeo e grifa a palavra forte&para=para o seu agente&ok=legenda pronta&t0=0.15&t_vira=1.1&t_envia=3.6&t_ok=4.3&dur=5.4
+       anexo: ?l=&anexo=fabrica-de-conteudo.zip&t_anexo=0.9&pedido=instala&para=pro Claude Code ou o Codex&ok=&y=760&t0=0.1&t_envia=2.0&dur=3 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<script src="../nucleo/cursor.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+#laje{position:absolute;opacity:0;overflow:hidden}
+#pal{position:absolute;left:0;top:0;white-space:nowrap;font:800 200px/1 var(--fd);letter-spacing:-.04em;color:var(--ink);transform-origin:0 0}
+#tx{position:absolute;left:40px;right:132px;top:30px;font:600 50px/1.18 var(--fd);letter-spacing:-.01em;color:var(--ink)}
+#pri{visibility:hidden;font-weight:800;letter-spacing:-.04em}
+#car{display:inline-block;width:5px;height:1em;margin-left:3px;vertical-align:-.12em;background:var(--ac);opacity:0}
+#env{position:absolute;right:24px;bottom:24px;width:88px;height:88px;border-radius:50%;opacity:0;
+  display:flex;align-items:center;justify-content:center;font:800 54px/1 var(--fd)}
+#para{position:absolute;left:60px;font:700 40px/1 var(--fm);letter-spacing:.06em;color:var(--ink);background:var(--mk);
+  border:var(--bw) solid var(--ink);border-radius:var(--raio-s);padding:12px 16px 10px;opacity:0}
+#bal{position:absolute;right:60px;max-width:860px;padding:28px 34px 32px;border-radius:36px 36px 8px 36px;opacity:0;
+  font:600 50px/1.18 var(--fd);letter-spacing:-.01em}
+#arq{position:absolute;left:0;top:0;display:flex;align-items:center;gap:18px;padding:12px 26px 12px 12px;opacity:0;
+  font:700 48px/1 var(--fm);white-space:nowrap}
+#arq i{display:grid;place-items:center;width:70px;height:84px;font:700 24px/1 var(--fm);font-style:normal;color:var(--ink);
+  background:var(--pp);border:3px solid var(--ink);border-radius:8px}
+#bal .anx{display:block;margin-bottom:14px;font:700 34px/1 var(--fm);white-space:nowrap}
+#ok{position:absolute;left:60px;display:flex;align-items:center;gap:16px;padding:16px 24px 14px;opacity:0;
+  font:700 44px/1 var(--fm);letter-spacing:.04em;white-space:nowrap}
+</style>
+</head>
+<body>
+<div id="stage">
+  <span id="para"></span>
+  <div class="nb" id="laje"><span id="pal"><span id="palx"></span></span><div id="tx"><span id="pri"></span><span id="rest"></span><i id="car"></i></div><span class="nb cor-ac" id="env">↑</span></div>
+  <div class="nb cor-ac" id="arq"><i>ZIP</i><span id="arqn"></span></div>
+  <div class="nb cor-ac" id="bal"></div>
+  <div class="nb cor-ok" id="ok"></div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const dur = D.n('dur', '5.4'), t0 = D.n('t0', '0.15'), tVira = D.n('t_vira', '1.1'), tEnv = D.n('t_envia', '3.6'),
+      tOk = D.n('t_ok', '4.3'), Y = D.n('y', '1180'), MG = D.n('m', '60');
+const pal = D.q('l', 'LEGENDA.'), ped = D.q('pedido', 'legenda esse vídeo e grifa a palavra forte');
+$('palx').textContent = pal;
+// a palavra vira a primeira do pedido quando são a mesma (sem caixa nem pontuação)
+const limpa = s => s.toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
+const p1 = ped.split(/\s+/)[0] || '', casa = !!p1 && limpa(p1) === limpa(pal);
+$('pri').textContent = casa ? p1 : '';
+$('rest').textContent = casa ? ped.slice(p1.length) : ped;
+const anexo = D.q('anexo', ''), tAnx = D.n('t_anexo', '0.9');
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+$('bal').innerHTML = (anexo ? `<span class="anx">▣ ${esc(anexo)}</span>` : '') + esc(ped);
+if (anexo) $('arqn').textContent = anexo; else $('arq').remove();
+$('para').textContent = D.q('para', 'para o seu agente');
+$('ok').textContent = D.q('ok', 'legenda pronta') ? '✓ ' + D.q('ok', 'legenda pronta') : '';
+
+D.monta(tl => {
+  const laje = $('laje'), W = 1080, M = MG;
+  $('para').style.left = M + 'px'; $('bal').style.right = M + 'px'; $('ok').style.left = M + 'px';
+  // o campo: largura toda, altura do pedido escrito (mede com o texto inteiro e depois esvazia)
+  // com anexo, o pedido se escreve embaixo dele: o campo mede com esse espaço em cima
+  if (anexo) $('tx').style.paddingTop = $('arq').offsetHeight + 22 + 'px';
+  Object.assign(laje.style, {left: M + 'px', top: Y + 'px', width: W - 2 * M + 'px', height: 'auto'});
+  $('tx').style.position = 'relative'; $('tx').style.left = $('tx').style.top = '0';
+  laje.style.padding = '30px 132px 30px 40px';
+  const campo = {left: M, top: Y, width: W - 2 * M, height: Math.max(150, laje.offsetHeight), raio: 40};
+  laje.style.padding = ''; $('tx').style.position = ''; $('tx').style.left = ''; $('tx').style.top = '';
+  const priR = $('pri').getBoundingClientRect(), lajeR = laje.getBoundingClientRect();
+  // a laje da palavra: cabe na largura, no meio do terço de cima
+  const pr = $('pal');
+  const fs = Math.min(220, 200 * (W - 2 * M - 80) / pr.scrollWidth);
+  pr.style.fontSize = fs + 'px';
+  const lw = pr.scrollWidth + 80, lh = fs * 1.15 + 40;
+  const laje0 = {left: (W - lw) / 2, top: 700, width: lw, height: lh, borderRadius: 12};
+  gsap.set(pr, {x: 40, y: (lh - fs) / 2 - fs * .04});
+  gsap.set(laje, laje0);
+  // onde a letra começa dentro da caixa da palavra (a caixa tem entrelinha 1, a letra não)
+  const bw = parseFloat(getComputedStyle(laje).borderLeftWidth), prR = pr.getBoundingClientRect(), pxR = $('palx').getBoundingClientRect();
+  const d0 = {x: pxR.left - prR.left, y: pxR.top - prR.top};
+  gsap.set('#tx', {opacity: 0});
+
+  // 1. a palavra bate (sem palavra, o campo já nasce campo)
+  const tv = pal ? D.at(tVira) : D.at(t0) - .45;
+  if (pal) {
+    D.pousa(laje, t0, {s: 1.12, som: 'hit'});
+    // 2. a laje vira o campo: o contêiner primeiro, o conteúdo troca dentro dele
+    tl.to(laje, {left: campo.left, top: campo.top, width: campo.width, height: campo.height, borderRadius: campo.raio,
+      duration: .5, ease: 'power3.inOut'}, tv);
+    D.cue(tv, 'swish');
+  } else {
+    gsap.set(laje, {left: campo.left, top: campo.top, width: campo.width, height: campo.height, borderRadius: campo.raio});
+    gsap.set(pr, {opacity: 0});
+    D.pousa(laje, t0, {som: 'pop'});
+  }
+  if (!pal) tl.set('#tx', {opacity: 1}, tv + .5);
+  else if (casa) {
+    // a palavra encolhe até o lugar exato da primeira palavra do pedido
+    const k = 50 / fs;
+    tl.to(pr, {x: priR.left - lajeR.left - bw - d0.x * k, y: priR.top - lajeR.top - bw - d0.y * k, scale: k,
+      duration: .5, ease: 'power3.inOut'}, tv);
+    tl.set('#tx', {opacity: 1}, tv + .5);
+    tl.set('#pri', {visibility: 'visible'}, tv + .5);
+    tl.set(pr, {opacity: 0}, tv + .5);
+  } else {
+    tl.to(pr, {opacity: 0, scale: .5, duration: .2, ease: 'power2.in'}, tv);
+    tl.set('#tx', {opacity: 1}, tv + .5);
+  }
+  if ($('para').textContent) { gsap.set('#para', {top: campo.top - 76}); D.carimbo('#para', pal ? tVira + .45 : t0 + .2, -2); }
+  tl.fromTo('#env', {opacity: 0, scale: .4}, {opacity: 1, scale: 1, duration: .3, ease: D.P.MOLA}, tv + .45);
+  // 2b. o anexo: a seta arrasta o arquivo de fora do quadro e ele pousa no canto do campo
+  if (anexo) {
+    const a = $('arq'), fx = campo.left + 36, fy = campo.top + 26, x0 = 1120, y0 = campo.top - 460;
+    tl.fromTo(a, {x: x0, y: y0, rotation: 14, scale: 1.7, opacity: 1, '--shx': D.SH * 3 + 'px'},
+      {x: fx, y: fy, rotation: -1.5, scale: 1, '--shx': D.SH + 'px', duration: .7, ease: 'power3.inOut'}, tAnx - .7);
+    tl.set(a, {opacity: 0}, 0);
+    tl.set(a, {opacity: 1}, tAnx - .7);
+    // a ponta da seta segura o arquivo pelo ícone
+    D.cursor('#stage', [{x: x0 + 40, y: y0 + 50, t: tAnx - .7}, {x: fx + 44, y: fy + 52, t: tAnx, clica: true}], {sai: tAnx + .35});
+    D.cue(tAnx - .7, 'whoosh'); D.cue(tAnx, 'thud');
+    // no envio, o anexo sobe junto com o pedido (o balão traz a linha dele)
+    tl.to(a, {opacity: 0, y: fy - 140, duration: .25, ease: 'power2.in'}, tEnv + .05);
+  }
+  // 3. o pedido se escreve, com o cursor de texto andando junto
+  // por fatia, não letra a letra em caixa (o D.digita): assim o espaço fica e a linha quebra na palavra
+  const rest = $('rest'), txt = rest.textContent, td = Math.max(tv + .6, anexo ? tAnx + .15 : 0), N = {v: 0};
+  const passo = Math.min(.05, Math.max(.025, (tEnv - .9 - td) / Math.max(1, txt.length))), tFim = td + txt.length * passo;
+  D.aoQuadro(() => { rest.textContent = txt.slice(0, Math.round(N.v)); });
+  tl.to(N, {v: txt.length, duration: tFim - td, ease: 'none'}, td);
+  D.cue(td, 'type', {dur: +(tFim - td).toFixed(3)});
+  tl.fromTo('#car', {opacity: 0}, {opacity: 1, duration: .01}, td);
+  for (let t = tFim + .25; t < tEnv - .15; t += .5) tl.to('#car', {opacity: 0, duration: .01, yoyo: true, repeat: 1, repeatDelay: .25}, t);
+  // 4. a seta vem e envia: o pedido sobe num balão e o campo esvazia
+  const bx = campo.left + campo.width - 24 - 44, by = campo.top + campo.height - 24 - 44;
+  D.cursor('#stage', [{x: 780, y: campo.top + campo.height + 300, t: tEnv - .7}, {x: bx + 6, y: by + 8, t: tEnv, clica: true}], {sai: tEnv + .6});
+  tl.to('#env', {scale: .85, duration: .07, yoyo: true, repeat: 1}, tEnv);
+  const bal = $('bal');
+  gsap.set(bal, {top: campo.top - 40 - bal.offsetHeight - 90});
+  tl.set(['#tx', '#car'], {opacity: 0}, tEnv + .05);
+  tl.fromTo(bal, {opacity: 0, y: bal.offsetHeight + 130, scale: .92}, {opacity: 1, y: 0, scale: 1, duration: .45, ease: 'power3.out'}, tEnv + .05);
+  D.cue(tEnv + .05, 'whoosh');
+  if ($('para').textContent) tl.to('#para', {opacity: 0, duration: .15}, tEnv + .05);
+  // 5. o feito
+  if ($('ok').textContent) {
+    gsap.set('#ok', {top: campo.top - 110});
+    D.carimbo('#ok', tOk, -2);
+    D.cue(tOk + .02, 'certo');
+  }
+  D.sai(['#bal', '#ok', '#laje'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

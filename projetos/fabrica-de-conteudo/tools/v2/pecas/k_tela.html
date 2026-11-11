@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<!-- TIPOGRAFIA CINÉTICA, UMA TELA — o molde do Pinterest 15551561209923797 (pesquisa/referencias-criativos/motion-puro/):
+     duas ou três palavras por tela, uma delas de cor, um objeto de verdade que entra com peso, uma faixa grande que
+     cruza, e o chão que vira de papel pra tinta. Um anúncio inteiro são várias destas telas coladas em corte seco,
+     cada uma com a duração de um número de batidas da trilha. 1080x1920, papel (`?tema=tinta` vira o respiro preto).
+     A composição vem do k_objeto (a grade, o código de barras, a luz do papel); o movimento é do núcleo (os 12
+     princípios): o objeto CAI e amassa (D.amassa) ou ANDA em arco (D.arco), o palco acusa o soco (D.soco, D.reage),
+     as palavras entram desfocadas e a de cor em mola. Texto que se lê fica na área segura (x 65–1015, y 270–1250).
+     O objeto é um PNG recortado (`obj`, a proporção sai do arquivo). Se for o celular, `sr` diz onde fica a tela e ela
+     pode tocar um vídeo (`vid`, mudo) com a marca de gravação (`rec`) e, em `t_para`, congelar e virar arquivo parado
+     (`arq`, "nome|detalhe"). O despertador toca (`ring`: sacode e some). A tela termina numa cortina (`fecha`) que
+     entra na cor da tela seguinte, então o corte cai no quadro coberto.
+       l1  a linha de apoio, palavra a palavra · l2  a palavra de cor · cor (ac | mk | ink | wh)
+       x  a margem esquerda do texto (100) · y1  o topo da l1 (330) · f1 (112) · y2  o topo da l2 (440) · f2 (260)
+       t1  quando entra a 1ª palavra (0.05) · passo  entre as palavras (0.3) · t2  quando a l2 está na tela (0.6)
+       al  c centraliza o texto · cod  o código miúdo ao lado (vazio = sem)
+       faixa  mk | ac | ink (vazio = sem) · fy  o topo (470) · fh  a altura (340) · frot (-2) · tf  quando cruza (0.5) · fdir  esq | dir (esq)
+       obj  o PNG do objeto · h  a altura dele em px (1000) · pos  x,y,rot,ty,escala do assentado ("640,1300,-5,-10,1")
+       de  a pose de partida, se ele já estava na tela e ANDA até `pos` (sem `de` ele CAI) · t_obj  o instante em que assenta (0.3)
+       q_obj  a duração da queda ou da viagem (0.34 / 0.5) · ys  de quanto acima ele já vem no 1º quadro (520) · dd  a deriva (4)
+       sr  x,y,w,h da tela do celular, em fração do PNG · vid  o vídeo da tela · voff  de onde ele parte (0)
+       rec  1 mostra o ● e o tempo · rec0  o tempo em que a gravação começa · t_para  quando congela · arq  nome|detalhe
+       ring  t,dur,graus: o despertador toca em duas rajadas e acalma (vazio = quieto) · som  os sons que o objeto faz (1)
+       fecha  ink | claro (vazio = sem) · fd  a duração da cortina (0.13) · dur
+       abre  ink | claro (vazio = sem): a cortina da tela anterior (a `fecha` dela) já cobre o quadro 0 e sobe · ad  quanto leva (0.2)
+       marca  mk | ac (vazio = sem): o marcador que varre atrás da palavra de cor (o grifo da legenda), depois que ela assenta
+              · tm  quando varre (t2 + 0.14)
+       ?l1=Você&l2=grava.&cor=ac&cod=FC·0001·REC&obj=../midia/objeto-zip.png&h=900&pos=640,1300,-5,-10,1&t_obj=0.3&dur=1.25 -->
+<html lang="pt-BR" data-qa="entra-seco">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+#stage{padding:0;display:block;overflow:hidden;background:var(--pp)}
+html.tinta{--gr:#fff}
+#mundo{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:50% 45%}
+#papel,#grade{position:absolute;left:0;top:0}
+html.tinta #luzes{opacity:.5}
+html.tinta #grade{opacity:.55}
+.l1{position:absolute;left:var(--x,100px);top:var(--y1,330px);font:700 var(--f1,112px)/1 var(--fd);letter-spacing:var(--ls);
+  color:var(--ink);white-space:nowrap;z-index:6}
+html.tinta .l1{color:#fff}
+.l1 .w{display:inline-block;margin-right:.24em;opacity:0}
+html.c .l1,html.c .l2{left:0;width:1080px;text-align:center}
+html.c .l1 .w:last-child{margin-right:0}
+html.c .l2{transform-origin:50% 100%}
+.l2{position:absolute;left:calc(var(--x,100px) - 12px);top:var(--y2,440px);font:700 var(--f2,260px)/.92 var(--fd);letter-spacing:-.05em;
+  white-space:nowrap;opacity:0;transform-origin:0 100%;z-index:6}
+.l2.ac{color:var(--ac)} .l2.ink{color:var(--ink)} .l2.wh{color:#fff}
+.l2.mk{color:var(--mk);-webkit-text-stroke:8px var(--ink);paint-order:stroke fill}
+/* micro tipografia: o código de barras, parado desde o 1º quadro (como na referência) */
+#codigo{position:absolute;right:65px;top:var(--y1,330px);width:200px;text-align:right;z-index:5}
+#codigo svg{display:block;margin-left:auto;fill:var(--ink)}
+#codigo span{display:block;margin-top:10px;font:600 24px/1 var(--fm);letter-spacing:.12em;color:var(--ink6)}
+html.tinta #codigo svg{fill:#fff}
+html.tinta #codigo span{color:var(--ink4)}
+/* a faixa que cruza: bloco chapado com borda tinta e sombra dura, por baixo da palavra de cor */
+#faixa{position:absolute;left:-80px;width:1240px;border:var(--bw) solid var(--ink);z-index:3;
+  box-shadow:var(--sh) var(--sh) 0 var(--sombra,var(--ink));opacity:0}
+#faixa.mk{background:var(--mk)} #faixa.ac{background:var(--ac)} #faixa.ink{background:var(--ink)}
+/* o objeto, de fora pra dentro: pos (a viagem e o giro) > alonga > esm (esmaga no pouso, sacode no toque) > tilt
+   (vira de frente) > ob (o PNG e a tela), com a sombra dura do chão */
+.pos,.alonga,.esm,.tilt,.ob{position:absolute}
+.pos{left:0;top:0;width:var(--OW,500px);height:var(--OH,900px);margin:calc(var(--OH,900px) / -2) 0 0 calc(var(--OW,500px) / -2);z-index:4;opacity:0}
+.alonga,.esm,.tilt,.ob{inset:0}
+.esm{perspective:1500px}
+.ob{--sx:0px;--sy:0px;filter:drop-shadow(var(--sx) var(--sy) 0 var(--sombra,var(--ink)))}
+#face{display:block;width:100%;height:100%}
+#tela{position:absolute;overflow:hidden;background:var(--cine)}
+#tela video{display:block;width:100%;height:100%;object-fit:cover}
+#rec{position:absolute;left:22px;top:26px;display:flex;align-items:center;gap:12px;padding:8px 16px 8px 12px;
+  background:rgba(11,13,18,.62);border-radius:999px;font:600 34px/1 var(--fm);color:#fff;letter-spacing:.04em}
+#rec i{display:block;width:22px;height:22px;border-radius:50%;background:var(--no)}
+#cantos{position:absolute;inset:92px 30px 30px}
+#cantos b{position:absolute;width:44px;height:44px;border:0 solid rgba(255,255,255,.75)}
+#cantos b:nth-child(1){left:0;top:0;border-width:5px 0 0 5px} #cantos b:nth-child(2){right:0;top:0;border-width:5px 5px 0 0}
+#cantos b:nth-child(3){left:0;bottom:0;border-width:0 0 5px 5px} #cantos b:nth-child(4){right:0;bottom:0;border-width:0 5px 5px 0}
+#play{position:absolute;left:50%;top:62%;width:150px;height:150px;margin:-75px 0 0 -75px;border-radius:50%;
+  background:#fff;border:5px solid var(--ink);box-shadow:8px 8px 0 var(--ink);opacity:0}
+#play:after{content:"";position:absolute;left:56px;top:38px;border-style:solid;border-width:32px 0 32px 52px;
+  border-color:transparent transparent transparent var(--ink)}
+#arq{position:absolute;left:22px;right:22px;top:30px;padding:14px 18px 12px;background:var(--mk);border:5px solid var(--ink);
+  border-radius:var(--raio-s);box-shadow:8px 8px 0 var(--ink);font:700 44px/1.25 var(--fm);color:var(--ink);opacity:0}
+#arq small{display:block;font:600 34px/1.3 var(--fm);color:var(--ink)}
+#cortina,#abertura{position:absolute;left:0;top:0;width:1080px;height:1920px;z-index:20;opacity:0}
+#cortina.ink,#abertura.ink{background:var(--ink)} #cortina.claro,#abertura.claro{background:#fff}
+#marcador{position:absolute;z-index:5;opacity:0;transform-origin:0 50%;border-radius:12px}
+#marcador.mk{background:var(--mk)} #marcador.ac{background:var(--ac)}
+</style>
+</head>
+<body>
+<div id="stage"><div id="mundo">
+  <svg id="papel" width="1080" height="1920"></svg>
+  <svg id="grade" width="1080" height="1920"></svg>
+  <div id="codigo"></div>
+  <div id="faixa"></div>
+  <div class="l1" id="l1"></div>
+  <div id="marcador"></div>
+  <div class="l2" id="l2"></div>
+  <div class="pos" id="pos"><div class="alonga" id="alonga"><div class="esm" id="esm"><div class="tilt" id="tilt"><div class="ob" id="ob">
+    <div id="tela">
+      <div id="rec"><i id="pt"></i><span id="tc"></span></div>
+      <div id="cantos"><b></b><b></b><b></b><b></b></div>
+      <div id="play"></div>
+      <div id="arq"></div>
+    </div>
+  </div></div></div></div></div>
+</div>
+<div id="cortina"></div><div id="abertura"></div></div>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const W = 1080, H = 1920, Q = D.QD, dur = D.n('dur', '1.5');
+const root = document.documentElement.style;
+root.setProperty('--x', D.n('x', '100') + 'px'); root.setProperty('--y1', D.n('y1', '330') + 'px');
+root.setProperty('--f1', D.n('f1', '112') + 'px'); root.setProperty('--y2', D.n('y2', '440') + 'px');
+root.setProperty('--f2', D.n('f2', '260') + 'px');
+const t1 = D.n('t1', '0.05'), passo = D.n('passo', '0.3'), T2 = D.n('t2', '0.6');
+const pose = k => { const a = D.q(k, '').split(',').map(Number); return a.length >= 2 ? {x: a[0], y: a[1], rot: a[2] || 0, ty: a[3] || 0, s: a[4] || 1} : null; };
+
+// o papel com a luz suave (a do k_objeto), e a grade fina que some pras bordas
+$('papel').innerHTML = `<defs>
+  <pattern id="pt" width="36" height="36" patternUnits="userSpaceOnUse"><circle cx="18" cy="18" r="2.2" style="fill:var(--dot)"/></pattern>
+  <radialGradient id="la"><stop offset="0" style="stop-color:var(--mk);stop-opacity:.42"/><stop offset=".55" style="stop-color:var(--mk);stop-opacity:.14"/><stop offset="1" style="stop-color:var(--mk);stop-opacity:0"/></radialGradient>
+  <radialGradient id="lb2"><stop offset="0" style="stop-color:var(--ac);stop-opacity:.16"/><stop offset="1" style="stop-color:var(--ac);stop-opacity:0"/></radialGradient></defs>
+  <rect width="${W}" height="${H}" style="fill:var(--pp)"/>
+  <g id="luzes"><circle id="luz-a" cx="860" cy="520" r="760" fill="url(#la)"/><circle id="luz-b" cx="120" cy="1180" r="640" fill="url(#lb2)"/></g>
+  <rect width="${W}" height="${H}" fill="url(#pt)"/>`;
+$('grade').innerHTML = `<defs>
+  <pattern id="gr" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M60 0H0V60" fill="none" style="stroke:var(--gr,var(--ink))" stroke-opacity=".2" stroke-width="1.6"/></pattern>
+  <radialGradient id="gm" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff"/><stop offset=".6" stop-color="#fff" stop-opacity=".85"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+  <mask id="gk"><rect x="-40" y="330" width="1160" height="1080" fill="url(#gm)"/></mask></defs>
+  <rect x="-40" y="330" width="1160" height="1080" fill="url(#gr)" mask="url(#gk)"/>`;
+
+// o código de barras: larguras fixas (sem Math.random: cada quadro igual)
+const cod = D.q('cod', '');
+if (cod) {
+  const LARG = [3, 2, 5, 2, 2, 4, 3, 6, 2, 3, 4, 2, 5, 3, 2, 2, 6, 3, 4, 2, 3, 5, 2, 4, 3, 2, 2, 5, 3, 4, 2, 6, 2, 3, 3, 2];
+  let bx = 0, barras = '';
+  LARG.forEach((w, i) => { w = Math.round(w * 1.05); if (i % 2 === 0 && bx + w <= 200) barras += `<rect x="${bx}" y="0" width="${w}" height="60"/>`; bx += w; });
+  $('codigo').innerHTML = `<svg width="200" height="60" viewBox="0 0 200 60">${barras}</svg><span>${esc(cod)}</span>`;
+}
+
+$('l1').innerHTML = D.q('l1', '').split(' ').filter(Boolean).map(w => `<span class="w">${esc(w)}</span>`).join('');
+$('l2').textContent = D.q('l2', '');
+$('l2').classList.add(D.q('cor', 'ac'));
+if (D.q('al', '') === 'c') document.documentElement.classList.add('c');
+const FX = D.q('faixa', '');
+if (FX) {
+  const f = $('faixa'); f.classList.add(FX);
+  f.style.top = D.n('fy', '470') + 'px'; f.style.height = D.n('fh', '340') + 'px';
+  f.style.transform = `rotate(${D.n('frot', '-2')}deg)`;
+}
+const OBJ = D.q('obj', ''), SR = D.q('sr', '').split(',').map(Number), VID = D.q('vid', '');
+if (OBJ) { const im = new Image(); im.id = 'face'; im.alt = ''; im.src = OBJ; $('ob').insertBefore(im, $('ob').firstChild); }
+else $('pos').style.display = 'none';
+if (D.q('fecha', '')) $('cortina').classList.add(D.q('fecha', ''));
+if (D.q('abre', '')) $('abertura').classList.add(D.q('abre', ''));
+const MK = D.q('marca', '');
+if (MK) $('marcador').classList.add(MK);
+const ARQ = D.q('arq', '');
+if (ARQ) { const [n, d] = ARQ.split('|'); $('arq').innerHTML = `${esc(n)}${d ? `<small>${esc(d)}</small>` : ''}`; }
+
+D.monta(tl => {
+  D.camera(dur, 1.0, 1.03);
+  // ── as palavras: a l1 entra desfocada ficando nítida, a de cor em mola (o herói do quadro) ──
+  const ws = [...$('l1').children];
+  ws.forEach((w, i) => {
+    tl.fromTo(w, {opacity: 0, y: 30, filter: 'blur(14px)'}, {opacity: 1, y: 0, filter: 'blur(0px)', duration: .38, ease: 'power3.out'}, t1 + i * passo);
+    D.cue(t1 + i * passo + .12, 'click');
+  });
+  tl.fromTo('#l2', {opacity: 0, scale: .62, filter: 'blur(10px)'}, {opacity: 1, scale: 1, filter: 'blur(0px)', duration: .5, ease: D.P.MOLA}, T2);
+  D.cue(T2 + .1, 'pop');
+  tl.to('#l1', {y: -6, duration: .3, ease: 'power3.out'}, T2 + .15);      // a l1 cede 6 px pro herói
+
+  // ── o marcador varre atrás da palavra de cor (medido na palavra, que muda de largura com o texto) ──
+  if (MK) {
+    const l2 = $('l2'), m = $('marcador').style, tm = D.n('tm', T2 + .14);
+    m.left = (l2.offsetLeft - 16) + 'px'; m.top = (l2.offsetTop + l2.offsetHeight * .22) + 'px';
+    m.width = (l2.offsetWidth + 40) + 'px'; m.height = (l2.offsetHeight * .66) + 'px';
+    tl.fromTo('#marcador', {scaleX: 0, opacity: 1, rotation: -1.2}, {scaleX: 1, duration: .34, ease: 'power3.inOut'}, tm);
+    D.cue(tm, 'swish');
+  }
+
+  // ── a cortina da tela anterior sobe: o quadro 0 é o último quadro dela, coberto ──
+  if (D.q('abre', '')) {
+    tl.fromTo('#abertura', {yPercent: 0, opacity: 1}, {yPercent: -101, duration: D.n('ad', '.2'), ease: 'power2.out'}, 0);
+    D.cue(0, 'whoosh-out');
+  }
+
+  // ── a faixa cruza de um lado ao outro, sem passar do ponto, e a palavra de cor assenta em cima ──
+  if (FX) {
+    const tf = D.n('tf', '.5');
+    tl.fromTo('#faixa', {x: D.q('fdir', 'esq') === 'dir' ? 1320 : -1320, opacity: 1}, {x: 0, duration: .42, ease: 'power4.out'}, tf);
+    D.cue(tf, 'whoosh');
+  }
+
+  // ── o objeto ──
+  if (OBJ) {
+    const im = $('face'), hh = D.n('h', '1000'), OH = hh, OW = hh * im.naturalWidth / im.naturalHeight;
+    root.setProperty('--OW', OW + 'px'); root.setProperty('--OH', OH + 'px');
+    const P0 = pose('pos') || {x: 540, y: 1200, rot: 0, ty: 0, s: 1}, DE = pose('de');
+    const tO = D.n('t_obj', '.3'), qO = D.n('q_obj', DE ? '.5' : '.34'), som = D.q('som', '1') === '1';
+    const dd = D.n('dd', '4');
+    if (SR.length === 4) {
+      const t = $('tela').style;
+      t.left = SR[0] * 100 + '%'; t.top = SR[1] * 100 + '%'; t.width = SR[2] * 100 + '%'; t.height = SR[3] * 100 + '%';
+      t.borderRadius = Math.round(OW * .1) + 'px';
+    } else $('tela').style.display = 'none';
+    gsap.set('#tilt', {rotationY: P0.ty, transformOrigin: '50% 50%'});
+    gsap.set('#alonga', {transformOrigin: '50% 100%'});
+    gsap.set('#pos', {x: P0.x, y: P0.y, rotation: P0.rot, scale: P0.s});
+    if (!DE) {
+      // CAI: acelera, e no 1º quadro já vem no meio da queda (o gancho não abre vazio). A curva é a power2.in da
+      // queda inteira, recortada do ponto em que o quadro 0 pega (a velocidade não quebra)
+      const u0 = Math.max(0, (qO - tO) / qO), ys = D.n('ys', '520');
+      if (u0 > 0) {
+        tl.fromTo('#pos', {y: P0.y - ys, opacity: 1, rotation: P0.rot + 4}, {y: P0.y, rotation: P0.rot, duration: tO,
+          ease: p => ((u0 + p * (1 - u0)) ** 2 - u0 * u0) / (1 - u0 * u0)}, 0);
+        tl.fromTo('#tilt', {rotationY: P0.ty - 12}, {rotationY: P0.ty, duration: tO, ease: 'power2.out'}, 0);
+      } else {
+        tl.fromTo('#pos', {y: -OH / 2 - 60, opacity: 1, rotation: P0.rot + 4}, {y: P0.y, rotation: P0.rot, duration: qO, ease: 'power2.in'}, tO - qO);
+        tl.fromTo('#tilt', {rotationY: P0.ty - 12}, {rotationY: P0.ty, duration: qO, ease: 'power2.out'}, tO - qO);
+      }
+      tl.to('#alonga', {scaleX: .985, scaleY: 1.015, duration: Math.min(tO, qO), ease: 'power2.in'}, Math.max(0, tO - qO));
+      tl.to('#alonga', {scaleX: 1, scaleY: 1, duration: 2 * Q, ease: 'power2.out'}, tO);
+      D.amassa('#esm', tO, .02);
+      D.soco('#mundo', tO, 1.04, 1);
+      D.reage(tO, 24);
+      if (som) D.cue(tO, 'thud');
+      tl.fromTo('#ob', {'--sx': '0px', '--sy': '0px'}, {'--sx': '16px', '--sy': '16px', duration: 5 * Q, ease: 'power2.out', immediateRender: false}, tO + 2 * Q);
+    } else {
+      // ANDA: já estava na tela (a emenda do objeto carregado) e vai em arco até a pose nova
+      gsap.set('#pos', {x: DE.x, y: DE.y, rotation: DE.rot, scale: DE.s, opacity: 1});
+      gsap.set('#tilt', {rotationY: DE.ty});
+      gsap.set('#ob', {'--sx': '16px', '--sy': '16px'});
+      const s0 = Math.max(0, tO - qO);
+      D.arco('#pos', s0, [DE.x, DE.y], [P0.x, P0.y], {dur: qO, flecha: D.n('flecha', '50'), ease: 'power3.inOut'});
+      tl.fromTo('#pos', {rotation: DE.rot, scale: DE.s}, {rotation: P0.rot, scale: P0.s, duration: qO, ease: 'power3.inOut', immediateRender: false}, s0);
+      tl.fromTo('#tilt', {rotationY: DE.ty}, {rotationY: P0.ty, duration: qO, ease: 'power3.inOut', immediateRender: false}, s0);
+      if (som) D.cue(s0, 'whoosh');
+    }
+    // a câmera não para: o objeto segue virando devagar depois que assenta (começa e termina parado)
+    D.deriva('#tilt', tO + .15, dur, {rotationY: P0.ty + dd, rotationX: -2});
+
+    // o despertador toca: sacode no ritmo da campainha e acalma (a amplitude cai linear até zero)
+    const RG = D.q('ring', '').split(',').map(Number);
+    if (RG.length === 3) {
+      const [rt, rd, amp] = RG, o = {u: 0}, ciclos = Math.round(rd * 15);
+      tl.to(o, {u: 1, duration: rd, ease: 'none', immediateRender: false,
+        onUpdate: () => gsap.set('#esm', {rotation: amp * (1 - o.u) ** 1.5 * Math.abs(Math.sin(o.u * Math.PI * 2)) * Math.sin(o.u * Math.PI * 2 * ciclos)})}, rt);
+      if (som) { D.cue(rt + rd * .1, 'ding'); D.cue(rt + rd * .6, 'ding'); }       // uma por rajada
+    }
+
+    // ── a tela do celular: o vídeo cru, o ● de gravação, e o congelar que vira arquivo parado ──
+    if (SR.length === 4 && VID) {
+      const v = D.midia('#tela', VID, 'cru', 'cover'), voff = D.n('voff', '0'), tp = D.n('t_para', '999');
+      $('tela').insertBefore(v, $('tela').firstChild);
+      D.aoQuadro(() => { v.currentTime = Math.max(0, Math.min(tl.time(), tp) + voff); });
+      if (tp < 999) {
+        tl.to(v, {filter: 'grayscale(.9) brightness(.78)', duration: 5 * Q, ease: 'power2.out'}, tp);
+        tl.fromTo('#play', {opacity: 0, scale: .6}, {opacity: 1, scale: 1, duration: .26, ease: 'power3.out'}, tp + 2 * Q);
+        tl.fromTo('#arq', {opacity: 0, y: 24}, {opacity: 1, y: 0, duration: .3, ease: 'power3.out'}, tp + .12);
+        if (som) { D.cue(tp, 'click'); D.cue(tp + .14, 'papel'); }
+      }
+    }
+    if (D.q('rec', '0') === '1') {
+      const tp = D.n('t_para', '999'), r0 = D.n('rec0', '0'), fim = Math.min(tp, dur);
+      const fmt = v => { const s = Math.floor(r0 + v); return `00:${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; };
+      $('tc').textContent = fmt(0);
+      const o = {v: 0};
+      tl.to(o, {v: fim, duration: fim, ease: 'none', onUpdate: () => { $('tc').textContent = fmt(o.v); }}, 0);
+      // o ● pisca a cada .42 s (um set por batida: seekável)
+      for (let k = 0, t = .06; t < fim; k++, t += .42) tl.set('#pt', {opacity: k % 2 ? .18 : 1}, t);
+      if (tp < 999) tl.to(['#rec', '#cantos'], {opacity: 0, duration: 3 * Q, ease: 'power2.out'}, tp);
+    } else { $('rec').style.display = 'none'; $('cantos').style.display = 'none'; }
+  }
+
+  // ── a cortina: entra na cor da tela seguinte, e o corte cai no quadro coberto ──
+  if (D.q('fecha', '')) {
+    const fd = D.n('fd', '.13');
+    tl.fromTo('#cortina', {yPercent: -101, opacity: 1}, {yPercent: 0, duration: fd, ease: 'power2.in'}, dur - fd);
+    D.cue(dur - fd, 'whoosh');
+  }
+  return dur;
+});
+</script>
+</body>
+</html>

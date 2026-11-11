@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<!-- ENSAIO — dado com fonte. 1920x1080, --alpha, EM CAMADAS.
+     O número gigante sobe contando ATRÁS da pessoa, alinhado pelo mesmo lado do
+     texto; na frente, o que ele mede e de onde veio, em etiqueta.
+       ?num=73&pre=&suf=%&rot=dos brasileiros já usaram IA no trabalho&fonte=fonte: pesquisa · 2025&lado=dir&t0=0.2&dur=5 -->
+<html lang="pt-BR" class="h alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/direcao-h.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<script src="../nucleo/ensaio.js"></script>
+<style>
+.nu{position:absolute;top:120px;font:700 400px/.8 var(--fd);letter-spacing:-.06em;color:#fff;-webkit-text-stroke:5px var(--ink);text-shadow:14px 14px 0 var(--ink);white-space:nowrap;opacity:0}
+.nu small{font-size:.42em;letter-spacing:-.03em;margin-left:.04em}
+.bx{position:absolute;top:560px;display:flex;flex-direction:column;align-items:flex-start;gap:16px}
+.lb{padding:20px 28px;font:700 44px/1.2 var(--fd);letter-spacing:-.02em;color:var(--ink);opacity:0;text-wrap:balance}
+.fo{padding:11px 16px 9px;font:700 20px/1 var(--fm);letter-spacing:.08em;text-transform:uppercase;border-radius:var(--raio-s);opacity:0}
+.fo:empty{display:none}
+</style>
+</head>
+<body>
+<div id="stage"><div class="nu" id="nu" data-c="tras"><span id="nv"></span><small id="ns"></small></div><div class="bx" id="bx" data-c="frente"><div class="lb nb" id="lb"></div><div class="fo nb cor-ink" id="fo"></div></div></div>
+<script>
+const dur = D.n('dur', '5'), t0 = D.n('t0', '0.2'), $ = id => document.getElementById(id);
+const p = E.pessoa('dir'), num = D.n('num', '73'), pre = D.q('pre', ''), casas = (D.q('num', '73').split(/[.,]/)[1] || '').length;
+const fmt = v => pre + v.toLocaleString('pt-BR', {minimumFractionDigits: casas, maximumFractionDigits: casas});
+$('nv').textContent = fmt(num); $('ns').textContent = D.q('suf', '%');
+$('lb').textContent = D.q('rot', 'dos brasileiros já usaram IA no trabalho');
+$('fo').textContent = D.q('fonte', 'fonte: pesquisa · 2025');
+const esq = p.lado === 'esq';
+Object.assign($('bx').style, esq ? {left: (p.r + 40) + 'px', width: (1800 - p.r - 40) + 'px'} : {left: '120px', width: (p.l - 160) + 'px'});
+D.monta(tl => {
+  // o número alinha pelo mesmo lado do texto de baixo
+  $('nu').style.left = $('bx').style.left;
+  tl.fromTo(nu, {opacity: 0, y: 60}, {opacity: 1, y: 0, duration: .6, ease: D.P.EASE}, D.at(t0));
+  D.conta('#nv', 0, num, t0 + .05, 1.1, fmt);
+  D.pousa('#lb', t0 + .6, {dy: -30});
+  D.carimbo('#fo', t0 + .9, 0);
+  D.sai(['#nu', '#lb', '#fo'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

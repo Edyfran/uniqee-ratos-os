@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<!-- INTERFACE — a ilha: o ponto no alto vira pílula e abre num painel. 1080x1920, --alpha.
+     Um ponto tinta nasce no topo e estica em pílula com o ícone e o estado ("editando…"). Em `t_abre`
+     a pílula abre num painel com as linhas do trabalho, e cada uma ganha ✓ no seu tempo; em `t_fecha`
+     o painel volta a ser pílula, agora com o `fim`. A forma muda primeiro e o conteúdo troca dentro
+     dela; a largura anda na mola e a altura no pouso, então as bordas chegam em tempos diferentes.
+     É o aviso de que o trabalho anda sozinho, sem tela de programa. Da referência (Skillry #432, o
+     entalhe do topo que vira pílula e abre o painel) saiu só o movimento; a forma não imita aparelho.
+       ic      o ícone (▶) · estado  o rótulo da pílula · it  "linha@t;…" as linhas, o ✓ entra em t
+       fim     o rótulo da pílula no fim (reel pronto; vazio: o painel some sem voltar)
+       y       o topo (140) · t0 · t_abre · t_fecha · dur
+       ?ic=▶&estado=editando o seu reel&it=cortou as pausas@1.7;pôs a legenda@2.2;escolheu a trilha@2.7;fez a capa@3.2&fim=reel pronto&y=140&t0=0.2&t_abre=1.1&t_fecha=3.8&dur=5 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+#il{position:absolute;overflow:hidden;opacity:0;color:#fff}
+.ct{position:absolute;left:50%;top:0;transform:translateX(-50%);opacity:0}
+.lin{display:flex;align-items:center;gap:22px;height:112px;padding:0 34px;white-space:nowrap}
+.ic{flex:none;width:70px;height:70px;border-radius:50%;background:var(--ac);border:3px solid #fff;display:flex;align-items:center;justify-content:center;
+  font:800 32px/1 var(--fd);color:#fff}
+.lin b{font:700 52px/1 var(--fd);letter-spacing:-.01em}
+.pts{display:flex;gap:8px;margin-left:6px}
+.pts i{width:12px;height:12px;border-radius:50%;background:var(--mk)}
+#cB .lin{height:104px}
+.it{display:flex;align-items:center;gap:24px;height:96px;padding:0 44px;white-space:nowrap;font:600 50px/1 var(--fd);letter-spacing:-.01em}
+.it u{flex:none;width:52px;height:52px;border:3px solid #fff;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  font:800 34px/1 var(--fd);text-decoration:none;color:var(--ink)}
+.it u span{opacity:0}
+.it em{font-style:normal;opacity:.55}
+#cC .ic{background:var(--mk);color:var(--ink)}
+</style>
+</head>
+<body>
+<div id="stage"><div class="nb cor-ink" id="il">
+  <div class="ct" id="cA"><div class="lin"><span class="ic" id="icA"></span><b id="est"></b><span class="pts"><i></i><i></i><i></i></span></div></div>
+  <div class="ct" id="cB"><div class="lin"><span class="ic" id="icB"></span><b id="estB"></b></div><div id="its"></div></div>
+  <div class="ct" id="cC"><div class="lin"><span class="ic">✓</span><b id="fim"></b></div></div>
+</div></div>
+<script>
+const $ = id => document.getElementById(id);
+const dur = D.n('dur', '5'), t0 = D.n('t0', '0.2'), tAbre = D.n('t_abre', '1.1'), tFecha = D.n('t_fecha', '3.8'), Y = D.n('y', '140');
+$('icA').textContent = $('icB').textContent = D.q('ic', '▶');
+$('est').textContent = $('estB').textContent = D.q('estado', 'editando o seu reel');
+$('fim').textContent = D.q('fim', 'reel pronto');
+const its = D.itens('it', 'cortou as pausas@1.7;pôs a legenda@2.2;escolheu a trilha@2.7;fez a capa@3.2', ['tx']);
+its.forEach((o, i) => $('its').insertAdjacentHTML('beforeend', `<div class="it" id="it${i}"><u><span>✓</span></u><em>${o.tx}</em></div>`));
+
+D.monta(tl => {
+  const il = $('il'), mk = D.css('--mk');
+  // as três formas, do tamanho do conteúdo de cada uma
+  const larg = id => Math.min(960, $(id).scrollWidth + 8);
+  const A = {w: larg('cA'), h: 112}, B = {w: Math.max(larg('cB'), 900), h: 104 + its.length * 96 + 30}, C = {w: larg('cC'), h: 112};
+  ['cA', 'cB', 'cC'].forEach(id => $(id).style.width = ({cA: A, cB: B, cC: C})[id].w + 'px');
+  // G é a forma: a cada quadro buscado a caixa sai dela, centrada, com o raio de pílula até o painel
+  const G = {w: 30, h: 30};
+  D.aoQuadro(() => Object.assign(il.style, {width: G.w + 'px', height: G.h + 'px', left: 540 - G.w / 2 + 'px', top: Y + 'px',
+    borderRadius: Math.min(G.h / 2, 56) + 'px'}));
+  const muda = (para, t, dw = .5) => {
+    tl.to(G, {w: para.w, duration: dw, ease: D.P.MOLA}, t);
+    tl.to(G, {h: para.h, duration: .42, ease: D.P.POUSA}, t + .05);
+  };
+  // o ponto nasce e estica em pílula; o estado entra depois que a forma abriu
+  tl.fromTo(il, {opacity: 0, scale: .4}, {opacity: 1, scale: 1, duration: .22, ease: 'power3.out'}, D.at(t0));
+  muda(A, D.at(t0) + .18);
+  tl.to('#cA', {opacity: 1, duration: .15}, D.at(t0) + .32);
+  D.cue(t0 + .18, 'notif');
+  // os três pontos andam enquanto a pílula está no ar
+  document.querySelectorAll('.pts i').forEach((p, k) => {
+    for (let t = t0 + .5 + k * .12; t < tAbre - .4; t += .6) tl.fromTo(p, {y: 0}, {y: -10, duration: .15, yoyo: true, repeat: 1, ease: 'power2.out', immediateRender: false}, t);
+  });
+  // abre: o painel cresce e a lista entra depois da forma
+  tl.to('#cA', {opacity: 0, duration: .1}, D.at(tAbre) - .05);
+  muda(B, D.at(tAbre));
+  tl.to('#cB', {opacity: 1, duration: .18}, D.at(tAbre) + .2);
+  D.cue(tAbre, 'swish');
+  its.forEach((o, i) => {
+    const t = isNaN(o.t) ? tAbre + .5 + i * .5 : o.t;
+    tl.fromTo(`#it${i} u`, {backgroundColor: 'rgba(0,0,0,0)', scale: 1}, {backgroundColor: mk, scale: 1.15, duration: .12, ease: 'power2.out', immediateRender: false}, D.at(t));
+    tl.to(`#it${i} u`, {scale: 1, duration: .25, ease: D.P.POUSA}, D.at(t) + .12);
+    tl.to(`#it${i} u span`, {opacity: 1, duration: .08}, D.at(t) + .04);
+    tl.to(`#it${i} em`, {opacity: 1, duration: .2}, D.at(t));
+    D.cue(t, 'certo');
+  });
+  // fecha: volta a ser pílula, com o fim
+  tl.to('#cB', {opacity: 0, duration: .12}, D.at(tFecha) - .05);
+  if ($('fim').textContent) {
+    muda(C, D.at(tFecha));
+    tl.to('#cC', {opacity: 1, duration: .15}, D.at(tFecha) + .2);
+    tl.to(il, {scale: 1.06, duration: .12, yoyo: true, repeat: 1, ease: 'power2.out'}, tFecha + .1);
+    D.cue(tFecha, 'ding');
+  } else muda({w: 30, h: 30}, D.at(tFecha), .4);
+  D.sai('#il', dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<!-- EFEITO — mergulho na manchete (clone do efeito 02 "zoom-through cut" do De25fKeTRl7, ficha 03, 30 qps medidos): o quadro inteiro (a pessoa e os
+     cartões da parede) cresce em exponencial em torno da manchete grande até as letras tomarem a tela, com desfoque radial e clarão branco; depois
+     volta em zoom out, sem os cartões, e assenta no plano base em 8 quadros. 1080x1920, tela cheia, --alpha. A peça desenha o zoom ela mesma, nos
+     quadros do vídeo-base (`fr`), porque os cartões da parede são peça (vêm depois da câmera do plano) e têm que crescer junto com a pessoa; o selo
+     é outra peça, por cima, e não encolhe nem recebe o clarão.
+     Quadro 0 da peça = f96 da ref (o primeiro do mergulho). `pre` > 0 põe quadros ANTES, com a parede parada (só pra comparar lado a lado; na montagem
+     a peça da parede cobre até o f95 e `pre` é 0). Medido (escala em relação à base, pela largura da manchete): f96 1,05 · f97 1,09 · f98 1,18 · f99 1,5 ·
+     f100 2,6 · f101 4,8 · f102 9,8; o centro da manchete migra de onde ela está pro meio do quadro (540,1000); f103 é só clarão, f104 o clarão
+     cai com um círculo de luz em (520,1040); a volta é a base inteira em f105 2,0 · f106 1,45 · f107 1,055 · f108 1,006, em torno do centro da manchete.
+     A parede é desenhada aqui no estado final (f95): manchete A, recortes B, D, E, cartão de rede C e cartão de vídeo F, com a vinheta de 30% nos
+     cantos que a ref tem. O cartão G fica atrás do boné e da lista e não aparece. A posição dos cartões acompanha o rosto (`olhos`).
+       fr     pasta dos quadros do vídeo-base a 30 qps desde o t0 da peça (f000.jpg…) ou uma imagem só (foto parada); sem `fr`, marcador listrado
+       olhos  o centro dos olhos no quadro-base, x,y (539.4,752.8 = a foto aprovada; a ref é 553,667): a parede inteira se desloca com eles
+       pre    quadros de parede parada antes do mergulho (0) · dur  duração (0.567 = 17 quadros de f96 a f112)
+       pw  pa  a parede da 02 (`t_manchetes`) parada no f95, em 2x, com o empurrão de 1,02: `pw` os cartões B a G (o de vídeo com a nossa foto e o contorno do rabisco, o MESMO da 02) e `pa` a manchete A
+               (`_f1/faz_parede02.py` gera). Com eles o mergulho parte exatamente do que a 02 deixa em f95 e cresce 1,017 · 1,062 · 1,190 · 1,334 por quadro (f96 a f99, o ECC da ref); sem eles desenha a parede ele mesmo
+       ac  o centro da manchete A em f95 (710.5,1263.5, medido em `pa`) · mt  o recorte da pessoa (a camada da cabeça)
+       dl  sh  ka  afinação do borrão: o obturador por quadro (log da escala), o tranco lateral em px e o borrão da manchete em relação ao do resto (listas por vírgula, a partir do f96)
+       si  ad  a escala por quadro de f96 a f102 (relativa à base; o ECC lê 1,017 · 1,062 · 1,190 · 1,334 em f96 a f99) e quantos px o foco do zoom desce em relação ao centro da manchete (25,4)
+       cp  lh  gh  cl  a cabeça (pose por quadro, borrão vertical, desfoque redondo) e o clarão (luz somada, raio, fator do canto, expoente), por quadro
+       a1  a2  a3  as linhas da manchete (O Claude agora | edita seus vídeos | NOTÍCIAS DO CRIADOR / HOJE) · b  c  d  e  f  g  os textos dos outros cartões
+     etiqueta: mergulho-na-letra, zoom-radial, tela-cheia
+       ?fr=quadros&olhos=539.4,752.8&pre=0&dur=0.567 -->
+<html lang="pt-BR" class="alfa" data-qa="fundo">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&family=Playfair+Display:wght@900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block;overflow:hidden;position:relative}
+#c{position:absolute;left:0;top:0;width:1080px;height:1920px}
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="c" width="1080" height="1920"></canvas></div>
+<script>
+const $ = id => document.getElementById(id);
+const PRE = Math.max(0, Math.round(D.n('pre', '0'))), dur = D.n('dur', String((PRE + 17) / 30));
+const [OX, OY] = D.q('olhos', '539.4,752.8').split(',').map(Number), DX = OX - 553, DY = OY - 667;   // a parede se desloca com o rosto
+const T = {a1: D.q('a1', 'O Claude agora'), a2: D.q('a2', 'edita seus vídeos'), a3: D.q('a3', 'NOTÍCIAS DO CRIADOR  /  HOJE'),
+  b: D.q('b', 'NOTÍCIAS DO CRIADOR|O Claude|agora edita|seus vídeos'), c: D.q('c', 'o Claude acabou de cortar meu reel'),
+  d: D.q('d', 'CRIADOR|O Claude fez|a edição'), e: D.q('e', 'SEMANAL|vídeo editado|pelo Claude'),
+  f: D.q('f', 'rabisco tremido'), g: D.q('g', 'editado pelo Claude')};
+document.fonts.load('900 60px "Playfair Display"'); document.fonts.load('italic 900 60px "Playfair Display"');
+const MK = D.css('--mk') || '#F2C744', AC = D.css('--ac') || '#0640FB';   // o amarelo e o azul são os do núcleo (docs/direcao.md); da ref fica a mecânica
+
+// ---- os quadros do vídeo-base
+const fr = D.q('fr', ''), raiz = fr ? (fr[0] === '/' ? 'file://' + fr : fr).replace(/\/$/, '') : '';
+const unica = /\.(jpe?g|png|webp)$/i.test(raiz), NQ = Math.ceil(dur * 30) + 2, imgs = [];
+if (raiz) for (let i = 0; i < (unica ? 1 : NQ); i++) {
+  const m = new Image(); m.src = unica ? raiz : raiz + '/f' + String(i).padStart(3, '0') + '.jpg'; m.style.display = 'none';
+  document.body.appendChild(m); imgs.push(m);
+}
+
+const lista = (nome, pad) => { const v = D.q(nome, '').split(',').filter(x => x.trim() !== '').map(Number); return v.length ? v : pad; };
+// ---- o recorte da pessoa (`mt`: PNG branco com alfa, pasta g000.png… ou um arquivo só). Sem ele a cabeça borra como o resto da cena
+const mtv = D.q('mt', ''), mraiz = mtv ? (mtv[0] === '/' ? 'file://' + mtv : mtv).replace(/\/$/, '') : '';
+const munica = /\.(jpe?g|png|webp)$/i.test(mraiz), mts = [];
+if (mraiz) for (let i = 0; i < (munica ? 1 : NQ); i++) {
+  const m = new Image(); m.src = munica ? mraiz : mraiz + '/g' + String(i).padStart(3, '0') + '.png'; m.style.display = 'none'; document.body.appendChild(m); mts.push(m);
+}
+const recorteDe = k => { const m = mts.length ? mts[Math.min(k, mts.length - 1)] : null; return m && m.naturalWidth ? m : null; };
+
+// ---- a parede da 02 (`pw`, `pa`): imagens únicas em 2x, 2160x3840 com alfa, no estado de f95 (com o empurrão de 1,02 em torno do centro). Sem elas (NOVA falso) a peça desenha a parede.
+const PWi = D.q('pw', ''), PAi = D.q('pa', ''), NOVA = !!(PWi && PAi);
+const [A02x, A02y] = D.q('ac', '710.5,1263.5').split(',').map(Number);
+function imagemUnica(v) { if (!v) return null; const m = new Image(); m.src = v[0] === '/' ? 'file://' + v : v; m.style.display = 'none'; document.body.appendChild(m); return m; }
+const PW = NOVA ? imagemUnica(PWi) : null, PA = NOVA ? imagemUnica(PAi) : null;
+
+// ---- a parede (estado final, f95), em px do quadro 1080x1920 da ref + deslocamento do rosto (só quando não há `pw` e `pa`)
+function prng(seed) { let s = seed >>> 0; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
+const PAPEL = '#F5F0E6', TINTA = '#17140f', MARCA = MK;
+function rasgado(g, w, h, seed, rugoso = 1) {                       // o contorno de papel rasgado: bordas de cima e de baixo irregulares, lados quase retos
+  const r = prng(seed), pts = [];
+  const borda = (x0, y0, x1, y1, amp) => { const n = Math.max(2, Math.round(Math.hypot(x1 - x0, y1 - y0) / 9)); let o = 0;
+    for (let i = 0; i < n; i++) { const u = i / n; o = o * .5 + (r() - .5) * amp * 2; pts.push([x0 + (x1 - x0) * u + (x1 === x0 ? o : 0), y0 + (y1 - y0) * u + (y1 === y0 ? o : 0)]); } };
+  borda(0, 0, w, 0, 3.2 * rugoso); borda(w, 0, w, h, 1.2 * rugoso); borda(w, h, 0, h, 3.6 * rugoso); borda(0, h, 0, 0, 1.2 * rugoso);
+  g.beginPath(); pts.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.closePath();
+}
+function papel(g, x, y, w, h, rot, seed, desenha, sombra = true) {   // um recorte de jornal: sombra, papel cru e o que o cartão escreve
+  g.save(); g.translate(x + w / 2, y + h / 2); g.rotate(rot * Math.PI / 180); g.translate(-w / 2, -h / 2);
+  if (sombra) { g.save(); rasgado(g, w, h, seed); g.shadowColor = 'rgba(0,0,0,.42)'; g.shadowBlur = 16; g.shadowOffsetY = 9; g.fillStyle = PAPEL; g.fill(); g.restore(); }
+  rasgado(g, w, h, seed); g.fillStyle = PAPEL; g.fill();
+  const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, 'rgba(255,255,255,.28)'); gr.addColorStop(1, 'rgba(120,100,70,.12)');
+  g.fillStyle = gr; g.fill();
+  g.save(); rasgado(g, w, h, seed); g.clip(); desenha(g, w, h); g.restore();
+  g.restore();
+}
+const SERIF = '"Playfair Display", "Didot", "Bodoni 72", serif', SANS = '"Space Grotesk", sans-serif';
+function marca(g, x, y, w, h, seed) {                                // a faixa de marca-texto: levemente torta, pontas irregulares
+  const r = prng(seed);
+  g.save(); g.fillStyle = MARCA; g.beginPath();
+  g.moveTo(x - 2, y + h * .12 + r() * 3); g.lineTo(x + w * .5, y + (r() - .5) * 3); g.lineTo(x + w + 3, y - h * .04 + r() * 3);
+  g.lineTo(x + w - 2, y + h * .98); g.lineTo(x + w * .5, y + h * 1.03); g.lineTo(x, y + h * .95); g.closePath(); g.fill(); g.restore();
+}
+function cabecaCartao(g, w, kicker, y) {                              // o kicker em caixa alta cinza e o fio fino embaixo dele
+  g.fillStyle = '#6b665c'; g.font = `700 ${w > 300 ? 17 : 11}px ${SANS}`; g.textBaseline = 'alphabetic';
+  g.save(); g.letterSpacing = w > 300 ? '1.5px' : '0.8px'; g.fillText(kicker, w > 300 ? 20 : 12, y); g.restore();
+  g.fillStyle = 'rgba(30,26,20,.75)'; g.fillRect(w > 300 ? 20 : 12, y + 10, w - (w > 300 ? 40 : 24), 1.6);
+}
+function ajusta(g, txt, peso, larg, max) { let f = max; do { g.font = `${peso} ${f}px ${SERIF}`; if (g.measureText(txt).width <= larg) break; f -= 1; } while (f > 14); return f; }
+
+// o cartão A, a manchete: num canvas à parte, em alta resolução, porque é nele que o zoom entra
+const SS = 4, AW = 600, AH = 300, AX = 445 - 24 + DX, AY = 1065 - 24 + DY;    // a caixa do cartão (547x230) com 24 px de folga em volta
+const capaA = document.createElement('canvas'); capaA.width = AW * SS; capaA.height = AH * SS;
+function pintaA() {
+  const g = capaA.getContext('2d'); g.setTransform(SS, 0, 0, SS, 0, 0); g.clearRect(0, 0, AW, AH);
+  g.translate(24, 24);
+  papel(g, 0, 0, 547, 230, -.5, 11, (g, w, h) => {
+    cabecaCartao(g, w, T.a3, 38);
+    const f = Math.min(64, ajusta(g, T.a2, 900, w - 70, 66));
+    g.font = `900 ${f}px ${SERIF}`;
+    marca(g, 14, 116, w - 36, 62, 7);
+    g.fillStyle = TINTA; g.textBaseline = 'alphabetic';
+    g.fillText(T.a1, 24, 108); g.fillText(T.a2, 24, 170);
+    g.fillStyle = 'rgba(95,90,82,.85)'; g.fillRect(24, 196, w - 60, 3.5);
+  });
+}
+
+// os outros cartões, no canvas da cena (em px do quadro, + deslocamento)
+function pintaCartoes(g) {
+  g.save(); g.translate(DX, DY);
+  // B: recorte pequeno, -3 graus
+  papel(g, 25, 717, 287, 208, -3, 21, (g, w, h) => {
+    const l = T.b.split('|'); cabecaCartao(g, w, l[0], 30);
+    g.font = `900 33px ${SERIF}`; g.fillStyle = TINTA; g.textBaseline = 'alphabetic';
+    marca(g, 14, 50, 150, 38, 3); g.fillText(l[1], 18, 78); g.fillText(l[2], 18, 118); g.fillText(l[3], 18, 158);
+    g.fillStyle = 'rgba(95,90,82,.8)'; g.fillRect(18, 176, w - 50, 3);
+  });
+  // D: canto de cima à esquerda, sai do quadro
+  papel(g, -6, 138, 231, 162, -3, 31, (g, w, h) => {
+    const l = T.d.split('|'); cabecaCartao(g, w, l[0], 26);
+    g.font = `900 29px ${SERIF}`; g.fillStyle = TINTA; marca(g, 18, 44, 135, 34, 5);
+    g.fillText(l[1], 22, 70); g.fillText(l[2], 22, 108);
+  });
+  // E: canto de cima à direita, +3 graus
+  papel(g, 838, 153, 250, 164, 3, 41, (g, w, h) => {
+    const l = T.e.split('|'); cabecaCartao(g, w, l[0], 28);
+    g.font = `900 29px ${SERIF}`; g.fillStyle = TINTA; g.fillText(l[1], 26, 72);
+    marca(g, 22, 82, 188, 34, 9); g.fillText(l[2], 26, 108);
+  });
+  // C: cartão branco de rede social
+  g.save(); g.translate(197, 842); g.shadowColor = 'rgba(0,0,0,.38)'; g.shadowBlur = 14; g.shadowOffsetY = 7;
+  g.fillStyle = '#fff'; g.beginPath(); g.roundRect(0, 0, 195, 141, 14); g.fill(); g.shadowColor = 'transparent';
+  g.fillStyle = '#b9b9b9'; g.beginPath(); g.arc(24, 26, 13, 0, 7); g.fill();
+  g.fillStyle = '#111'; g.beginPath(); g.roundRect(46, 14, 96, 11, 5); g.fill(); g.fillStyle = '#c9c9c9'; g.beginPath(); g.roundRect(46, 31, 60, 7, 3); g.fill();
+  g.font = `600 15px ${SANS}`; g.fillStyle = '#222'; g.textBaseline = 'alphabetic';
+  const ps = T.c.split(' '); let ln = '', yy = 66; const linhas = [];
+  ps.forEach(p => { if (g.measureText(ln + p + ' ').width > 160) { linhas.push(ln); ln = ''; } ln += p + ' '; }); linhas.push(ln);
+  linhas.slice(0, 3).forEach((s, i) => { if (i === 0) { const w1 = g.measureText(s.split(' ').slice(0, 2).join(' ')).width; g.fillStyle = MARCA; g.fillRect(14, yy - 15, Math.min(w1 + 2, 150), 19); } g.fillStyle = '#222'; g.fillText(s.trim(), 16, yy); yy += 20; });
+  g.strokeStyle = '#555'; g.lineWidth = 1.6; g.beginPath(); g.arc(24, 126, 6, 0, 7); g.moveTo(66, 126); g.arc(66, 126, 6, 0, 7); g.moveTo(104, 120); g.lineTo(116, 126); g.lineTo(104, 132); g.closePath(); g.stroke();
+  g.restore();
+  // F: cartão de vídeo escuro, +1 grau
+  g.save(); g.translate(907, 852); g.rotate(1 * Math.PI / 180); g.translate(-97, -147);
+  g.shadowColor = 'rgba(0,0,0,.5)'; g.shadowBlur = 16; g.shadowOffsetY = 8; g.fillStyle = '#10151c'; g.beginPath(); g.roundRect(0, 0, 195, 295, 12); g.fill(); g.shadowColor = 'transparent';
+  const gf = g.createLinearGradient(0, 0, 0, 295); gf.addColorStop(0, '#2b3340'); gf.addColorStop(.7, '#171c25'); gf.addColorStop(1, '#0d1117');
+  g.fillStyle = gf; g.beginPath(); g.roundRect(0, 0, 195, 295, 12); g.fill();
+  g.strokeStyle = 'rgba(255,255,255,.9)'; g.lineWidth = 2.4; g.lineJoin = 'round';                       // o rabisco branco em volta da silhueta
+  g.beginPath(); g.moveTo(52, 190); g.bezierCurveTo(46, 120, 70, 70, 100, 68); g.bezierCurveTo(132, 66, 154, 112, 150, 190); g.stroke();
+  g.fillStyle = '#e8a0b8'; g.beginPath(); g.moveTo(166, 26); g.bezierCurveTo(158, 10, 140, 18, 150, 32); g.bezierCurveTo(158, 42, 166, 48, 166, 48); g.bezierCurveTo(166, 48, 178, 38, 182, 28); g.bezierCurveTo(184, 14, 168, 10, 166, 26); g.fill();
+  g.fillStyle = MK; g.beginPath(); g.moveTo(138, 22); g.lineTo(142, 14); g.lineTo(146, 22); g.lineTo(154, 26); g.lineTo(146, 30); g.lineTo(142, 38); g.lineTo(138, 30); g.lineTo(130, 26); g.closePath(); g.fill();
+  g.fillStyle = 'rgba(255,255,255,.95)'; g.beginPath(); g.moveTo(88, 100); g.lineTo(88, 134); g.lineTo(118, 117); g.closePath(); g.fill();
+  g.font = `700 11px ${SANS}`; g.fillStyle = 'rgba(255,255,255,.6)'; g.fillText('14/17', 80, 168);
+  const ff = ajusta(g, T.f, 900, 150, 31); g.font = `900 ${ff}px ${SANS.replace('"Space Grotesk"', '"Space Grotesk"')}`; g.fillStyle = MARCA; g.textAlign = 'center'; g.fillText(T.f, 97, 200); g.textAlign = 'left';
+  g.fillStyle = 'rgba(255,255,255,.3)'; g.fillRect(12, 244, 168, 3); g.fillStyle = MARCA; g.fillRect(12, 244, 122, 3); g.fillStyle = '#fff'; g.beginPath(); g.arc(134, 245.5, 4.5, 0, 7); g.fill();
+  g.font = `600 12px ${SANS}`; g.textAlign = 'center';
+  const gp = T.g.split(' '); const w1 = gp.slice(0, 1).join(' '); g.fillStyle = 'rgba(255,255,255,.9)'; g.fillText(T.g, 97, 275); g.textAlign = 'left';
+  g.restore();
+  g.restore();
+}
+
+// ---- as duas cenas: com a parede (até o f102) e só a base (do f103 em diante)
+const cenaC = document.createElement('canvas'), cenaB = document.createElement('canvas');
+cenaC.width = cenaB.width = 1080; cenaC.height = cenaB.height = 1920;
+const gC = cenaC.getContext('2d'), gB = cenaB.getContext('2d');
+let feito = -1;
+function quadroBase(k) { const im = imgs.length ? imgs[Math.min(k, imgs.length - 1)] : null; return im && im.naturalWidth ? im : null; }
+function montaCenas(k) {
+  const key = unica ? 0 : k; if (feito === key) return; feito = key;
+  const im = quadroBase(k);
+  [gC, gB].forEach(g => { g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, 1080, 1920); if (im) g.drawImage(im, 0, 0, 1080, 1920); else { g.fillStyle = '#2a2d33'; g.fillRect(0, 0, 1080, 1920); } });
+  if (!NOVA) pintaCartoes(gC);
+}
+
+// ---- o movimento, em quadros do mergulho (d = 0 é o f96)
+const lerp = (a, b, u) => a + (b - a) * u;
+function tab(t, d) { const i = Math.max(0, Math.min(t.length - 2, Math.floor(d))), u = Math.max(0, Math.min(1, d - i)); return lerp(t[i], t[i + 1], u); }
+// escala em relação à base, f96..f102 (o mergulho): o zoom por quadro da ref de f96 a f99, lido pelo ECC da região da manchete (x 300 a 1080, y 1100 a 1500; o juiz, passada 3), é
+// 1,017 · 1,062 · 1,190 · 1,334. Aqui o ECC (`_f1/ecc03.py`) lê 1,017 · 1,063 · 1,193 · 1,333 nos nossos quadros. A escala verdadeira de f98 a f99 tem que ser 1,49 (não 1,334):
+// o ECC lê 7,7% abaixo nos quadros borrados (a p4 tinha 1,474 e o ECC lia 1,361, que o juiz leu 1,360). f100 a f102 seguem a ficha (2,3 · 4,6 · 10).
+// Tudo x 1,02 do empurrão da parede (a escala é relativa à base, não ao f95)
+const S_IN = lista('si', [1.0373, 1.1016, 1.3107, 1.95, 2.35, 4.69, 10.2]);
+// f103..f112 (a volta); o f103 e o f104 são clarão sobre o fundo (o valor só dá o borrão)
+const S_OUT = [14, 5.0, 2.0, 1.45, 1.055, 1.006, 1.014, 1.011, 1.005, 1.0];
+// o centro da manchete na tela: de f96 a f99 anda a partir de onde ela está (a ref sobe 72 px de y, 126 de x); de f100 a f102 é o ponto de fuga das estrias medido pelo juiz
+const COFF = [[-6, -5], [-28, -20], [-62, -42], [-126, -72]], CABS = [[633, 1080], [603, 1050], [560, 991]];
+// o obturador, em log da escala (± em volta), por quadro d: calibrado contra a nitidez medida na ref (energia do gradiente em y > 720, relativa ao f95: .75 .47 .36 .32 .32 .30 .25;
+// na volta, relativa ao f112: f107 .33, f108 .58, f109 a f111 .77 a .80). A cauda da volta segura o desfoque até o f111
+const DELTA = lista('dl', [.02, .115, .14, .18, .19, .24, .34, .55, .5, .38, .27, .04, .010, .0033, .0033, .0028, 0]);
+const KA = lista('ka', [.2, .3, .6, 1]);                                   // o borrão da manchete em relação ao do resto, nos 4 primeiros quadros: ela fica legível enquanto a pessoa borra
+const SHAKE = lista('sh', [10, 90, 70, 40, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);                       // o borrão lateral dos primeiros quadros (px, total)
+const VIN = [1, .85, .6, .4, .2, .1, 0];
+const BLOOM = [0, 0, 0, 0, 0, .16, .95];
+const FLASH = {7: .8, 8: .42, 9: .17, 10: .05}, VEU = {8: .18, 9: .22, 10: .08};   // o veu quente do clarão que sobra sobre a base
+const A_SCR = NOVA ? [A02x, A02y] : [718 + DX, 1180 + DY], A_OUT = [730 + DX, 1285 + DY];
+// de f100 a f102 o centro da tela é o marca-texto amarelo da manchete (a ref e a nossa antiga): o da 02 fica 26 px abaixo do centro do cartão (+58 contra +32), então o foco do zoom desce `AD` px do
+// centro do cartão (em px da parede) e o amarelo cai onde caía, sem mexer no ponto de fuga das estrias (CABS)
+const AD = D.n('ad', '25.4');
+
+function pose(d, t, kd = 1, sk = 1) {                      // (escala, centro na tela, âncora na cena) do quadro d, no instante do obturador t em [-1, 1]; kd e sk afinam o borrão e o tranco lateral
+  const dl = (DELTA[Math.max(0, Math.min(DELTA.length - 1, d))] || 0) * kd;
+  if (d <= 6) {
+    const s = Math.exp(Math.log(S_IN[d]) + dl * t);
+    const [cx, cy] = d <= 3 ? [A_SCR[0] + COFF[d][0], A_SCR[1] + COFF[d][1]] : CABS[d - 4];
+    return {s, cx: cx + (SHAKE[d] || 0) * sk * t * .5, cy, ax: A_SCR[0], ay: A_SCR[1] + (NOVA && d >= 4 ? AD : 0)};
+  }
+  const s = Math.exp(Math.log(S_OUT[Math.min(S_OUT.length - 1, d - 7)]) + dl * t);
+  return {s, cx: A_OUT[0], cy: A_OUT[1], ax: A_OUT[0], ay: A_OUT[1]};
+}
+
+const ctx = $('c').getContext('2d');
+// A média das amostras do obturador em FLOAT. A média corrente em 8 bits (alfa 1/(i+1)) perde as amostras tardias (a 100 amostras uma que difere menos de 50
+// níveis não muda nem 1 nível) e sobram cópias empilhadas: bordas em degraus, cartões que viram caixas. Aqui soma tudo num Float32Array e divide no fim.
+const CV = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+const T1 = CV(1080, 1920), T2 = CV(540, 960), A1 = CV(1080, 1920), A2 = CV(540, 960);
+const t1g = T1.getContext('2d', {willReadFrequently: true}), t2g = T2.getContext('2d', {willReadFrequently: true}), a1g = A1.getContext('2d'), a2g = A2.getContext('2d');
+const FL = {1: new Float32Array(1080 * 1920 * 4), 0.5: new Float32Array(540 * 960 * 4)};
+function mediaFloat(M, RS, amostra) {
+  const W = Math.round(1080 * RS), H = Math.round(1920 * RS), g = RS === 1 ? t1g : t2g, fl = FL[RS], n = W * H * 4;
+  fl.fill(0);
+  for (let i = 0; i < M; i++) {
+    amostra(g, M === 1 ? 0 : -1 + 2 * (i + .5) / M);
+    const d = g.getImageData(0, 0, W, H).data;
+    for (let k = 0; k < n; k++) fl[k] += d[k];
+  }
+  const ag = RS === 1 ? a1g : a2g, out = ag.createImageData(W, H), o = out.data, inv = 1 / M;
+  for (let k = 0; k < n; k++) o[k] = fl[k] * inv;
+  ag.putImageData(out, 0, 0);
+  return RS === 1 ? A1 : A2;
+}
+const MK1 = CV(1080, 1920), mk1 = MK1.getContext('2d'), TH = CV(1080, 1920), th = TH.getContext('2d');
+// a cabeça: o recorte da pessoa do pescoço pra cima, com a pose e o borrão do ROSTO da ref, por cima da cena já borrada. A ref escala e sobe a pessoa mais que o cartão da
+// manchete, e borra o rosto numa vertical curta (medido em f96 e f97: energia do gradiente mínima a 90 graus, 21 e 39 px, e o rosto ainda se lê em f97); a cena nossa borra tudo
+// em torno do cartão (125 px na cabeça em f97). CAB: por quadro f96..f99, escala relativa ao quadro-base e x,y dos olhos na tela (f96 e f97 medidos no rosto da ref pelo Vision
+// (io 138,6 e 157,8; olhos (558,664) e (528,586) contra (569,681) no f95) e levados à nossa base; f98 e f99 estimados pelo centro da pele)
+const CAB = lista('cp', [1.069, 528.5, 730.8, 1.217, 498.1, 653.0, 1.43, 471.3, 591.2, 1.62, 443.3, 516.2]);
+const GH = lista('gh', [0, 0, 24, 32]);                                     // um desfoque redondo (px) por cima do linear, por quadro: f98 e f99 viram mancha lisa como na ref (o Vision não acha rosto em f98, f99 e f100)
+const LH = lista('lh', [6, 14, 110, 140]);                                   // o comprimento do borrão vertical (px), por quadro: f96 e f97 ajustados à nitidez da caixa da cabeça na ref (rel. f95: .74 .47); f98 e f99 vão muito além (a ref é uma mancha lisa: sem óculos, sem barba, e o Vision não acha rosto)
+function camadaCabeca(dd, jj) {
+  const mt = recorteDe(jj); if (!mt) return;
+  const s = CAB[dd * 3], ex = CAB[dd * 3 + 1], ey = CAB[dd * 3 + 2], L = LH[dd] ?? 0, M = Math.max(6, Math.min(60, Math.round(L / 1.5)));
+  const out = mediaFloat(M, 1, (g, t) => {
+    g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.clearRect(0, 0, 1080, 1920);
+    g.setTransform(s, 0, 0, s, ex - s * OX, ey - s * OY + t * L / 2);
+    g.imageSmoothingQuality = 'high'; g.drawImage(cenaB, 0, 0);
+  });
+  // a máscara: o recorte na pose da cabeça, abrandado, valendo do pescoço pra cima (cai a zero entre y 880 e 1080 do quadro-base)
+  mk1.setTransform(1, 0, 0, 1, 0, 0); mk1.globalCompositeOperation = 'source-over'; mk1.clearRect(0, 0, 1080, 1920);
+  mk1.setTransform(s, 0, 0, s, ex - s * OX, ey - s * OY);
+  mk1.filter = `blur(${Math.max(6, L / 3).toFixed(1)}px)`; mk1.drawImage(mt, 0, 0, 1080, 1920); mk1.filter = 'none';
+  mk1.globalCompositeOperation = 'destination-in';
+  const gr = mk1.createLinearGradient(0, 0, 0, 1920); gr.addColorStop(0, 'rgba(0,0,0,1)'); gr.addColorStop(880 / 1920, 'rgba(0,0,0,1)'); gr.addColorStop(1080 / 1920, 'rgba(0,0,0,0)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+  mk1.fillStyle = gr; mk1.fillRect(0, 0, 1080, 1920); mk1.globalCompositeOperation = 'source-over';
+  th.setTransform(1, 0, 0, 1, 0, 0); th.globalCompositeOperation = 'source-over'; th.clearRect(0, 0, 1080, 1920);
+  if (GH[dd] > 0) th.filter = `blur(${GH[dd]}px)`;
+  th.drawImage(out, 0, 0, out.width, out.height, 0, 0, 1080, 1920); th.filter = 'none';
+  th.globalCompositeOperation = 'destination-in'; th.drawImage(MK1, 0, 0); th.globalCompositeOperation = 'source-over';
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(TH, 0, 0);
+}
+// o clarão da ref não é chapado: é um estouro no centro com os cantos escuros (luminância do centro, 200x200, e dos cantos de baixo, 80x80, f102 230 e 57/35 · f103 244 e 104/104 ·
+// f104 243 e 57/49 · f105 132 e 61/36). Por quadro d = 6..9 (f102 a f105): [alfa do brilho branco no centro, raio dele, fator do canto, expoente da queda]
+const CLA = lista('cl', [50, 800, .28, 3.2, 35, 800, .46, 3.0, 60, 800, .31, 2.0, 26, 600, .43, 3.0]);   // [níveis de luz SOMADOS no centro (somar não achata os raios, `screen` achatava), raio, fator do canto, expoente]: ajustado ao centro, ao canto e à média da faixa de baixo da ref
+function claraoGrade(d) {
+  const i = (d - 6) * 4; if (d < 6 || d > 9 || CLA.length < i + 4) return;
+  const [ad, rb, cc, pp] = CLA.slice(i, i + 4);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  let g = ctx.createRadialGradient(540, 960, 0, 540, 960, rb); g.addColorStop(0, `rgba(255,252,240,${(ad / 255).toFixed(3)})`); g.addColorStop(1, 'rgba(255,252,240,0)');
+  ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = g; ctx.fillRect(0, 0, 1080, 1920);
+  g = ctx.createRadialGradient(540, 960, 0, 540, 960, 1101);
+  for (let k = 0; k <= 10; k++) { const u = k / 10; g.addColorStop(u, `rgba(0,0,0,${((1 - cc) * Math.pow(u, pp)).toFixed(3)})`); }
+  ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = g; ctx.fillRect(0, 0, 1080, 1920);
+}
+function desenha(tt) {
+  const jj = Math.round(tt * 30), d = jj - PRE, dd = Math.max(0, d);
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, 1080, 1920);
+  montaCenas(jj);
+  if (!quadroBase(jj)) { ctx.fillStyle = '#2a2d33'; ctx.fillRect(0, 0, 1080, 1920); return; }
+  const com = d <= 6, cena = com ? cenaC : cenaB;
+  if (d < 0) {                                            // a parede parada (o empurrão de 1,02 a 1,035 que a peça da parede dá)
+    const s = [1.035, 1.03, 1.025, 1.02, 1.02][Math.max(0, Math.min(4, 5 + d))] || 1.02;
+    if (NOVA) {                                          // a base e a parede da 02, as duas empurradas em torno do centro (a câmera da 02 e a peça dela fazem o mesmo)
+      const sw = s / 1.02; ctx.imageSmoothingQuality = 'high';
+      ctx.setTransform(s, 0, 0, s, 540 - s * 540, 960 - s * 960); ctx.drawImage(cenaB, 0, 0);
+      ctx.setTransform(sw, 0, 0, sw, 540 - sw * 540, 960 - sw * 960); ctx.drawImage(PW, 0, 0, 1080, 1920); ctx.drawImage(PA, 0, 0, 1080, 1920);
+      ctx.setTransform(1, 0, 0, 1, 0, 0); vinheta(1); return;
+    }
+    ctx.setTransform(s, 0, 0, s, A_SCR[0] - s * A_SCR[0], A_SCR[1] - s * A_SCR[1]);
+    ctx.drawImage(cenaC, 0, 0);
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = 'source-over';
+    desenhaA(ctx, s, A_SCR[0], A_SCR[1], A_SCR[0], A_SCR[1], 1);
+    vinheta(1); return;
+  }
+  // o borrão radial: M amostras de escala em passo geométrico de ~0,6% (mais grosso vira degrau de 5 a 13 px nos raios); com muitas amostras roda em meia resolução
+  const dl = DELTA[Math.min(DELTA.length - 1, dd)] || 0, M = dl < .002 ? 1 : Math.max(6, Math.min(220, Math.round(dl * 2 / .006)));
+  const RS = M > 40 ? .5 : 1;
+  const out = mediaFloat(M, RS, (g, t) => {
+    const p = pose(dd, t);
+    // a amostra inteira (cena + manchete) fechada num canvas: sem isso a cena vazaria pela manchete
+    g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.clearRect(0, 0, 1080, 1920);
+    g.imageSmoothingQuality = 'high';
+    if (NOVA && com) {
+      // a base (o recorte `cenaB`, já com o empurrão de 1,02 em torno do centro, como a câmera da 02 a deixa) e a parede da 02 (já empurrada), com a mesma pose
+      const sw = p.s / 1.02;
+      g.setTransform(RS * p.s, 0, 0, RS * p.s, RS * (p.cx - sw * p.ax - .02 * sw * 540), RS * (p.cy - sw * p.ay - .02 * sw * 960)); g.drawImage(cenaB, 0, 0);
+      g.setTransform(RS * sw, 0, 0, RS * sw, RS * (p.cx - sw * p.ax), RS * (p.cy - sw * p.ay)); g.drawImage(PW, 0, 0, 1080, 1920);
+    } else {
+      g.setTransform(RS * p.s, 0, 0, RS * p.s, RS * (p.cx - p.s * p.ax), RS * (p.cy - p.s * p.ay));
+      g.drawImage(cena, 0, 0);
+    }
+    if (com && BLOOM[dd] > 0) brilhoEm(g, RS * p.cx, RS * p.cy, RS * 820, BLOOM[dd], '255,214,96', RS);   // o brilho fica ATRÁS das letras: elas seguem escuras sobre o amarelo
+    if (com) {                                                                                                           // a manchete: sem tranco e com o borrão em rampa (KA)
+      const q = pose(dd, t, KA[dd] ?? 1, 0);
+      if (NOVA) { const sq = q.s / 1.02; g.setTransform(RS * sq, 0, 0, RS * sq, RS * (q.cx - sq * q.ax), RS * (q.cy - sq * q.ay)); g.drawImage(PA, 0, 0, 1080, 1920); }
+      else desenhaA(g, q.s, q.cx, q.cy, q.ax, q.ay, RS);
+    }
+  });
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(out, 0, 0, out.width, out.height, 0, 0, 1080, 1920);
+  if (d <= 3) camadaCabeca(dd, jj);
+  if (d <= 6) { vinheta(VIN[dd]); }
+  if (d === 8) brilho(520, 1040, 250, .95, '255,252,240');
+  if (VEU[d]) { ctx.fillStyle = `rgba(226,188,138,${VEU[d]})`; ctx.fillRect(0, 0, 1080, 1920); }
+  if (FLASH[d]) { ctx.fillStyle = `rgba(255,251,238,${FLASH[d]})`; ctx.fillRect(0, 0, 1080, 1920); }
+  claraoGrade(d);
+}
+function desenhaA(g, s, cx, cy, ax, ay, rs = 1) {          // o cartão A, no canvas dele a SS vezes (alta resolução); `rs` é a escala da amostra (meia resolução = 0,5)
+  g.save();
+  g.setTransform(rs * s, 0, 0, rs * s, rs * (cx - s * ax), rs * (cy - s * ay));
+  g.drawImage(capaA, AX, AY, AW, AH);
+  g.restore();
+}
+function vinheta(a) {                                       // os cantos a 0,70 de luz (a ref mediu 0,68 a 0,70 nos cantos de cima)
+  if (a <= 0) return;
+  const g = ctx.createRadialGradient(540, 960, 380, 540, 960, 1150);
+  g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, `rgba(0,0,0,${.32 * a})`);
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = g; ctx.fillRect(0, 0, 1080, 1920);
+}
+function brilhoEm(c, x, y, r, a, rgb, rs = 1) {
+  const g = c.createRadialGradient(x, y, 0, x, y, r);
+  g.addColorStop(0, `rgba(${rgb},${a})`); g.addColorStop(.45, `rgba(${rgb},${a * .45})`); g.addColorStop(1, `rgba(${rgb},0)`);
+  c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.globalAlpha = 1; c.fillStyle = g; c.fillRect(0, 0, 1080 * rs, 1920 * rs); c.restore();
+}
+function brilho(x, y, r, a, rgb) {
+  const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+  g.addColorStop(0, `rgba(${rgb},${a})`); g.addColorStop(.45, `rgba(${rgb},${a * .45})`); g.addColorStop(1, `rgba(${rgb},0)`);
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = g; ctx.fillRect(0, 0, 1080, 1920);
+}
+
+D.monta(tl => {
+  if (!NOVA) pintaA();
+  const P = {t: 0};
+  tl.to(P, {t: dur, duration: dur, ease: 'none', onUpdate: () => desenha(P.t)}, 0);
+  desenha(0);
+  const F = f => f / 30;
+  D.cue(F(PRE + 1), 'whoosh'); D.cue(F(PRE + 5), 'zoom-in'); D.cue(F(PRE + 7), 'boom'); D.cue(F(PRE + 9), 'impact');   // f97, f101, f103 e f105 da ref
+  return dur;
+});
+</script>
+</body>
+</html>

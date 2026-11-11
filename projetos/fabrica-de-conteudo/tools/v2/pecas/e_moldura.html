@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<!-- EFEITO — moldura neobrutal em volta do rosto. 1080x1920, --alpha.
+     Quatro barras amarelas com contorno e sombra dura que se DESENHAM em volta
+     do retângulo do rosto (r=x,y,l,a em px), uma atrás da outra, e a etiqueta
+     bate no canto. Depois a moldura respira; sai recolhendo as barras.
+       ?r=170,300,740,900&rot=eu, em 2019&t=0.1&dur=3 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+.mo{position:absolute}
+.br{position:absolute;background:var(--mk);border:5px solid var(--ink);box-shadow:12px 12px 0 var(--ink)}
+.tag{position:absolute;padding:16px 24px;font:700 44px/1 var(--fd);letter-spacing:var(--ls);white-space:nowrap;opacity:0}
+.tag:empty{display:none}
+</style>
+</head>
+<body>
+<div id="stage"><div class="mo" id="mo">
+  <i class="br" id="bt"></i><i class="br" id="bd"></i><i class="br" id="bb"></i><i class="br" id="be"></i>
+  <span class="tag nb cor-ink" id="tg"></span>
+</div></div>
+<script>
+const dur = D.n('dur', '3'), t0 = D.n('t', '0.1');
+const [x, y, w, h] = D.q('r', '170,300,740,900').split(',').map(Number);
+const E = D.n('esp', '26');
+const mo = document.getElementById('mo');
+Object.assign(mo.style, {left: x + 'px', top: y + 'px', width: w + 'px', height: h + 'px'});
+const pos = {bt: [0, 0, w, E], bd: [w - E, 0, E, h], bb: [0, h - E, w, E], be: [0, 0, E, h]};
+Object.entries(pos).forEach(([id, [l, t, bw, bh]]) => Object.assign(document.getElementById(id).style, {left: l + 'px', top: t + 'px', width: bw + 'px', height: bh + 'px'}));
+const tg = document.getElementById('tg');
+tg.textContent = D.q('rot', '');
+tg.style.left = '-18px'; tg.style.top = '-40px';
+
+D.monta(tl => {
+  // cada barra cresce a partir do canto onde a anterior terminou
+  const ordem = [['#bt', 'left center', 'scaleX'], ['#bd', 'center top', 'scaleY'], ['#bb', 'right center', 'scaleX'], ['#be', 'center bottom', 'scaleY']];
+  ordem.forEach(([s, o, p], i) => tl.fromTo(s, {[p]: 0, transformOrigin: o}, {[p]: 1, duration: .14, ease: 'power2.in'}, D.at(t0) + i * .12));
+  D.cue(t0, 'swish');
+  if (D.q('rot')) D.carimbo('#tg', t0 + .55, D.P.ROT - 2);
+  D.respira('#mo', t0 + .7, dur - .5, 1.012);
+  if (D.q('sai', '1') !== '0') {
+    ordem.slice().reverse().forEach(([s, o, p], i) => tl.to(s, {[p]: 0, duration: .1, ease: 'power2.in'}, dur - .45 + i * .07));
+    tl.to('#tg', {opacity: 0, duration: .15}, dur - .45);
+    D.cue(dur - .45, 'whoosh-out');
+  }
+  return dur;
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<!-- GANCHO — ícone riscado: dois ícones grandes (~180 px) entram em escada no canto, um risco vermelho feito à mão cruza
+     cada um, eles caem com gravidade e giro por cima da cena, e no lugar fica a palavra serifada em itálico ("riscado.").
+     Os ícones são desenhados aqui (tesoura e legenda), sem marca de terceiros. Clone do "Icon strike" de referência.
+       r1 · r2   os rótulos embaixo de cada ícone (cortes · legendas) · pal  a palavra (riscado.)
+       x  y      o canto do primeiro ícone (78, 302) · t0 quando entra (0.05) · dur (1.4; as pausas esticam)
+       ?r1=cortes&r2=legendas&pal=riscado.&dur=1.4 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/editorial.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px;background:transparent}
+#stage{padding:0;display:block;overflow:hidden;background:none}
+.ic2{position:absolute;width:182px;opacity:0}
+.ic2 .q{position:relative;width:182px;height:182px;border:5px solid var(--ink);border-radius:42px;box-shadow:8px 8px 0 var(--ink);
+  display:flex;align-items:center;justify-content:center;background:#fff}
+.ic2.az .q{background:var(--ac)}
+.ic2 svg{width:118px;height:118px;overflow:visible}
+.ic2 .rot{margin-top:14px;text-align:center;font:700 26px/1 var(--fm);letter-spacing:.06em;color:#fff;
+  -webkit-text-stroke:6px var(--ink);paint-order:stroke fill}
+.ic2 .risco{position:absolute;left:-22px;top:-22px;width:226px;height:226px;overflow:visible;pointer-events:none}
+.ic2 .risco path{fill:none;stroke:var(--no);stroke-width:15;stroke-linecap:round;stroke-dasharray:300;stroke-dashoffset:300}
+.ic2 .velo{position:absolute;inset:-5px;border-radius:42px;background:var(--ink);opacity:0}
+#pal{position:absolute;white-space:nowrap;font:italic 400 124px/1 var(--ed-serif);color:#fff;opacity:0;
+  -webkit-text-stroke:9px var(--ink);paint-order:stroke fill;filter:drop-shadow(8px 8px 0 var(--ink))}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="ic2" id="a"><div class="q">
+    <svg viewBox="0 0 100 100" fill="none" stroke="#0B0D12" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="26" cy="76" r="14"/><circle cx="74" cy="76" r="14"/><path d="M36 66 L72 14"/><path d="M64 66 L28 14"/></svg>
+    <svg class="risco" viewBox="0 0 226 226"><path id="ra" d="M14 30 C70 80 150 140 214 200"/></svg><div class="velo"></div></div><div class="rot" id="la"></div></div>
+  <div class="ic2 az" id="b"><div class="q">
+    <svg viewBox="0 0 100 100" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="8" y="22" width="84" height="56" rx="12"/><path d="M26 46 H52"/><path d="M26 62 H74" /><path d="M62 46 H74"/></svg>
+    <svg class="risco" viewBox="0 0 226 226"><path id="rb" d="M12 200 C80 150 150 80 216 26"/></svg><div class="velo"></div></div><div class="rot" id="lb"></div></div>
+  <div id="pal"></div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const dur = D.n('dur', '1.4'), t0 = D.n('t0', '0.05'), X0 = D.n('x', '78'), Y0 = D.n('y', '302');
+$('la').textContent = D.q('r1', 'cortes'); $('lb').textContent = D.q('r2', 'legendas'); $('pal').textContent = D.q('pal', 'riscado.');
+$('a').style.cssText += `left:${X0}px;top:${Y0}px`; $('b').style.cssText += `left:${X0 + 216}px;top:${Y0}px`;
+$('pal').style.left = (X0 + 130) + 'px'; $('pal').style.top = (Y0 + 20) + 'px';
+document.fonts.load('italic 400 100px "Instrument Serif"').catch(() => null).then(() => D.monta(tl => {
+  const e = Math.max(0, dur - 1.2);
+  const pop = (el, t) => { tl.fromTo(el, {opacity: 0, scale: .55}, {opacity: 1, scale: 1, duration: .14, ease: 'power3.out'}, t); };
+  const T = t0;
+  pop('#a', T); D.cue(T, 'pop');
+  pop('#b', T + .125); D.cue(T + .125, 'pop');
+  const tr = T + .21 + e * .5;                      // o risco do primeiro
+  tl.to('#ra', {strokeDashoffset: 0, duration: .1, ease: 'none'}, tr); D.cue(tr, 'swish');
+  // o primeiro risca e cai inclinado, depois o segundo recebe o risco e escurece
+  tl.to('#a', {y: 1700, x: -30, rotation: -28, duration: .3, ease: 'power3.in'}, tr + .1);
+  tl.to('#rb', {strokeDashoffset: 0, duration: .1, ease: 'none'}, tr + .12);
+  tl.to('#b .velo', {opacity: .55, duration: .1, ease: 'none'}, tr + .14);
+  tl.to('#b', {y: 1700, rotation: 24, duration: .3, ease: 'power2.in'}, tr + .24);
+  tl.to('#a,#b', {opacity: 0, duration: .02}, tr + .62);
+  // a palavra entra por corte onde estavam os ícones
+  const tp = tr + .16;
+  tl.set('#pal', {opacity: 1}, tp); D.cue(tp, 'stamp');
+  tl.to('#pal', {opacity: 0, duration: .08}, Math.max(tp + .3, dur - .23));
+  return dur;
+}));
+</script>
+</body>
+</html>

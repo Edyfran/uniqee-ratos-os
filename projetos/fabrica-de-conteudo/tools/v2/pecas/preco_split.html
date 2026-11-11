@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<!-- Preço em painel (40%), v2. 1440x1028. Frase + selos verdes, um por fala. -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1440px;height:1028px}
+#stage{padding:64px 90px}
+.hd{font-size:76px;margin-bottom:48px}
+.selos{display:flex;flex-direction:column;gap:22px}
+.selo{display:flex;align-items:center;gap:24px;padding:26px 32px;opacity:0}
+.selo .tick{width:54px;height:54px;border-radius:var(--raio-s);background:var(--ok);border:var(--bw) solid var(--ink);flex:none;
+  display:flex;align-items:center;justify-content:center;color:#fff;font:900 26px/1 var(--fd)}
+.selo span{font:800 42px/1 var(--fd);color:var(--ink);flex:1;letter-spacing:var(--ls)}
+.selo em{font:600 26px/1 var(--fm);color:var(--ink6);font-style:normal}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="kick" id="k">o que entra junto</div>
+  <div class="hd" id="h">Compra única.<br><b>Acesso vitalício.</b></div>
+  <div class="selos">
+    <div class="selo nb" id="s1"><span class="tick">✓</span><span>Todas as aulas gravadas</span><em>no seu ritmo</em></div>
+    <div class="selo nb" id="s2"><span class="tick">✓</span><span>Atualizações inclusas</span><em>sem cobrança nova</em></div>
+    <div class="selo nb" id="s3"><span class="tick">✓</span><span>Os bônus que eu mostrei</span><em>43 perfis</em></div>
+  </div>
+</div>
+<script>
+D.monta(tl => {
+  D.cabe('.hd', 46);
+  D.cabe('.selo span', 28, ['.selo', .62]);
+  D.camera(5.1, 1.0, 1.025);
+  D.carimbo('#k', .1);
+  D.titulo('#h', .25);
+  ['#s1', '#s2', '#s3'].forEach((id, i) => {
+    D.pousa(id, .7 + i * .42, {dx: -40, rot: D.inclina(i) * .5});
+    tl.fromTo(id + ' .tick', {scale: .2, rotation: -30}, {scale: 1, rotation: 0, duration: .4, ease: 'back.out(3)'}, .62 + i * .42);
+  });
+  D.sai(['#k', '#h', '.selo'], 5.1 - .45);
+  return 5.1;
+});
+</script>
+</body>
+</html>

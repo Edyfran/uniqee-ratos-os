@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<!-- TIPO — a legenda palavra a palavra do clone De4XVvXPTWY, em blocos de 1 a 3 linhas: cada palavra chega cinza e borrada e fica
+     nítida em 3 quadros; a palavra-chave vai em azul (negrito sem serifa, ou serifa itálica); o bloco troca no quadro da primeira palavra do seguinte e,
+     nos cartões, sai desfocando e esmaecendo junto com o título. Cor e posição mudam por cena (preta no claro, branca no escuro e no close, amarela no fecho).
+     Por cima de tudo, 1080x1920, --alpha. No modo nosso: a letra e a paleta da direção (Space Grotesk, a palavra-chave num bloco amarelo ou azul).
+       b     os blocos, em JSON: [{"f0": quadro em que o bloco aparece, "f1": quadro em que some (ou null), "y": topo da primeira linha, "fs": corpo, "cor": "k"|"w"|"y",
+             "sombra": 0|1, "sai": [quadro, quadro] (desfoca e esmaece) ou null, "linhas": [[{"tx": texto, "f": quadro em que a palavra entra, "k": "az"|"serifa"|null}]]}]
+       a0    o primeiro quadro da ref que a peça cobre · dur  a janela em s · modo  nosso (padrão) | fiel (as cores da ref)
+     etiqueta: legenda, texto-cinetico, desfoque, clone, tres-coisas
+       ?b=%5B%7B%22f0%22%3A0%2C%22f1%22%3A30%2C%22y%22%3A960%2C%22fs%22%3A88%2C%22cor%22%3A%22k%22%2C%22linhas%22%3A%5B%5B%7B%22tx%22%3A%22Claude%22%2C%22f%22%3A0%7D%2C%7B%22tx%22%3A%22has%22%2C%22f%22%3A7%7D%5D%5D%7D%5D&a0=0&dur=1 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+@font-face{font-family:'Inter';font-style:normal;font-weight:100 900;src:url(../nucleo/fontes/Inter-opsz-wght.ttf) format('truetype')}
+@font-face{font-family:'Instrument Serif';font-style:italic;font-weight:400;src:url(../nucleo/fontes/InstrumentSerif-Italic.ttf) format('truetype')}
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block;overflow:hidden;position:relative}
+.w{display:inline-block;opacity:0;white-space:pre}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script src="_kit_legenda.js"></script>
+<script>
+window.__folha = Promise.all(["800 80px Inter", "italic 100px 'Instrument Serif'", "700 80px 'Space Grotesk'"].map(f => document.fonts.load(f)));
+const {tq, vis, blurOut, mk, T, C, NOSSO} = K;
+let blocos = [];
+try { blocos = JSON.parse(D.q('b', '[]')); } catch (e) { console.error('b: JSON inválido', e); }
+const dur = D.n('dur', 1);
+const COR = {k: C.ink, w: '#ffffff', y: C.amarelo};
+
+D.monta(tl => {
+  blocos.forEach(b => {
+    const bl = mk(K.stage, `position:absolute;left:0;top:${b.y}px;width:1080px;text-align:center;visibility:hidden;${b.sombra ? 'text-shadow:0 3px 14px rgba(0,0,0,.5),0 1px 3px rgba(0,0,0,.4);' : ''}`);
+    b.linhas.forEach(ln => {
+      const l = mk(bl, `white-space:pre;font-size:${b.fs}px;font-weight:800;font-family:${C.fTit};line-height:${b.fs * 1.28}px;height:${b.fs * 1.28}px`);
+      ln.forEach((p, i) => {
+        if (i) l.appendChild(document.createTextNode(' '));
+        const s = document.createElement('span');
+        s.className = 'w';
+        s.textContent = p.tx;
+        const azul = b.cor === 'w' ? C.kw : C.kwClaro;
+        let css = `font:800 ${b.fs}px/1 ${C.fTit};letter-spacing:-.02em;color:${COR[b.cor] || C.ink};`;
+        if (p.k === 'serifa') {
+          css += `font:italic 400 ${b.fs * 1.2}px/1 ${C.fSerif};` + (NOSSO ? `background:${C.mk};color:${C.ink};padding:0 .16em;border-radius:8px;-webkit-text-stroke:.8px ${C.ink};` : `color:${azul};-webkit-text-stroke:.8px ${azul};`);
+        } else if (p.k === 'az') {
+          css += NOSSO ? `background:${C.az};color:#fff;padding:0 .16em;border-radius:8px;` : `color:${azul};`;
+        }
+        s.style.cssText += css;
+        l.appendChild(s);
+        if (p.ya) { tl.set(s, {opacity: 1, immediateRender: true}, 0); return; }
+        tl.set(s, {opacity: 0, immediateRender: true}, 0);
+        tl.fromTo(s, {opacity: 0, filter: 'blur(11px)'}, {opacity: 1, filter: 'blur(0px)', duration: 3 / K.FPS, ease: 'power2.out', immediateRender: false}, tq(p.f));
+      });
+    });
+    vis(tl, bl, b.f0, b.f1 == null ? null : b.f1);
+    if (b.sai) blurOut(tl, bl, b.sai[0], b.sai[1] + 1, 'power3.in');
+  });
+  return dur;
+});
+</script>
+</body>
+</html>

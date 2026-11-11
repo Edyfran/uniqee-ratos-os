@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<!-- OFERTA — estados sucessivos. 1080x1920, --alpha.
+     UMA peça que muda de estado — nunca uma lista que fica sobre o rosto.
+     O rótulo rola pro próximo, o selo troca, a cor muda e a largura se ajusta
+     com mola. Os quadradinhos embaixo dizem em que passo está.
+     cursor=1 — a demo de produto (Skillry #199): a seta clica no chip a cada troca, e o marcador
+     dos passos anda com as duas bordas em molas diferentes, a da frente estica e a de trás alcança.
+       ?e=Processo salvo|✓@0.3;Rotina agendada|↻@2.6;No seu celular|→@4.9&pos=topo&dur=7.5 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<script src="../nucleo/cursor.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+.zona{position:absolute;left:56px;right:70px;display:flex;flex-direction:column;align-items:flex-start;gap:22px}
+.zona.topo{top:260px}
+.zona.centro{top:840px}
+.zona.base{top:1320px}
+.ch{display:flex;align-items:center;gap:24px;padding:20px 34px 20px 20px;opacity:0;overflow:hidden}
+.ic{width:96px;height:96px;overflow:hidden;align-items:flex-start;justify-content:center}
+.ic .ro{display:flex;flex-direction:column}
+.ic .ro span{height:88px;display:flex;align-items:center;justify-content:center;font:700 50px/1 var(--fd)}
+.jan{height:1.15em;overflow:hidden;font:700 68px/1.15 var(--fd);letter-spacing:var(--ls)}
+.jan .ro{display:flex;flex-direction:column;align-items:flex-start}
+.jan .ro span{white-space:nowrap;display:block;height:1.15em}
+.pas{display:flex;gap:12px;padding-left:6px}
+.pas{position:relative}
+.pas i{width:30px;height:30px;border:var(--bw) solid var(--ink);border-radius:6px;background:var(--sur);opacity:0}
+#ind{position:absolute;top:42px;height:14px;border:3px solid var(--ink);border-radius:4px;background:var(--mk);opacity:0}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="zona" id="z">
+    <div class="ch nb" id="ch"><span class="ic" id="ic"><span class="ro" id="ri"></span></span><span class="jan" id="jn"><span class="ro" id="rl"></span></span></div>
+    <div class="pas" id="ps"><b id="ind"></b></div>
+  </div>
+</div>
+<script>
+const dur = D.n('dur', '7.5');
+document.getElementById('z').classList.add(['topo', 'centro', 'base'].includes(D.q('pos')) ? D.q('pos') : 'topo');
+const es = D.itens('e', 'Processo salvo|✓@0.3;Rotina agendada|↻@2.6;No seu celular|→@4.9', ['rot', 'ic']);
+const ri = document.getElementById('ri'), rl = document.getElementById('rl'), ps = document.getElementById('ps');
+es.forEach((e, i) => {
+  ri.insertAdjacentHTML('beforeend', `<span>${e.ic || String(i + 1).padStart(2, '0')}</span>`);
+  rl.insertAdjacentHTML('beforeend', `<span>${e.rot}</span>`);
+  ps.insertAdjacentHTML('beforeend', `<i id="p${i}"></i>`);
+});
+
+D.monta(tl => {
+  const mk = D.css('--mk'), ac = D.css('--ac'), sur = D.css('--sur'), ink = D.css('--ink');
+  // três tons que se alternam: papel → marcador → bloco azul
+  const TONS = [{bg: sur, cor: ink, ic: mk}, {bg: mk, cor: ink, ic: sur}, {bg: ac, cor: '#fff', ic: mk}];
+  const jn = document.getElementById('jn');
+  const zona = document.getElementById('z').clientWidth;
+  const lim = zona - 20 - 96 - 24 - 34 - D.SH - 8;
+  const larg = [...rl.children].map(s => s.scrollWidth);
+  // se um rótulo não cabe, a fonte da janela encolhe pra todos
+  const pior = Math.max(...larg);
+  if (pior > lim) { const px = Math.floor(68 * lim / pior); jn.style.fontSize = px + 'px'; }
+  const ws = [...rl.children].map(s => s.scrollWidth + 4);
+  gsap.set(jn, {width: ws[0]});
+  const tom = i => TONS[i % TONS.length];
+  gsap.set('#ch', {backgroundColor: tom(0).bg, color: tom(0).cor});
+  gsap.set('#ic', {backgroundColor: tom(0).ic});
+
+  D.pousa('#ch', es[0].t, {rot: D.P.ROT, s: 1.08, som: 'pop'});
+  es.forEach((_, i) => tl.fromTo('#p' + i, {opacity: 0, scale: .4}, {opacity: 1, scale: 1, duration: .3, ease: 'back.out(2.4)'}, D.at(es[0].t) + .2 + i * .06));
+  tl.to('#p0', {backgroundColor: ink, duration: .2}, D.at(es[0].t) + .3);
+  es.forEach((e, i) => {
+    if (!i) return;
+    const t = D.at(e.t);
+    const f = -100 * i / es.length;
+    tl.to('#rl', {yPercent: f, duration: .45, ease: D.P.MOLA}, t);
+    tl.to('#ri', {yPercent: f, duration: .45, ease: D.P.MOLA}, t + .04);
+    tl.to(jn, {width: ws[i], duration: .5, ease: D.P.MOLA}, t);
+    tl.to('#ch', {backgroundColor: tom(i).bg, color: tom(i).cor, duration: .25}, t);
+    tl.to('#ic', {backgroundColor: tom(i).ic, duration: .25}, t);
+    tl.to('#ch', {scale: 1.06, duration: .12, ease: 'power2.out', yoyo: true, repeat: 1, transformOrigin: 'left center'}, t);
+    tl.to('#p' + i, {backgroundColor: ink, duration: .2}, t + .1);
+    D.cue(e.t, 'swish');
+  });
+  if (D.q('cursor', '0') === '1') {
+    // a seta clica no ícone a cada troca e descansa fora do chip entre uma e outra
+    const ch = document.getElementById('ch'), ic = document.getElementById('ic');
+    const z = document.getElementById('z'), x0 = z.offsetLeft + ic.offsetLeft + 60, y0 = z.offsetTop + ic.offsetTop + 58;
+    const fora = {x: x0 + 150, y: y0 + 190};
+    const pts = [{...fora, t: es[0].t + .5}];
+    es.forEach((e, i) => {
+      if (!i) return;
+      pts.push({x: x0, y: y0, t: D.at(e.t), clica: true});
+      if (!es[i + 1] || es[i + 1].t - e.t > 1.2) pts.push({...fora, t: D.at(e.t) + .55});
+    });
+    D.cursor('#stage', pts, {sai: dur - .45});
+    // o marcador dos passos: cada borda na sua mola; na ida, a da frente corre e a de trás alcança
+    const passo = i => { const q = document.getElementById('p' + i); return {l: q.offsetLeft, r: q.offsetLeft + q.offsetWidth}; };
+    const E = {...passo(0)}, ind = document.getElementById('ind');
+    D.aoQuadro(() => { ind.style.left = E.l + 'px'; ind.style.width = Math.max(4, E.r - E.l) + 'px'; });
+    tl.fromTo(ind, {opacity: 0}, {opacity: 1, duration: .2}, D.at(es[0].t) + .3);
+    es.forEach((e, i) => {
+      if (!i) return;
+      const t = D.at(e.t), alvo = passo(i);
+      tl.to(E, {r: alvo.r, duration: .26, ease: 'power3.out'}, t);
+      tl.to(E, {l: alvo.l, duration: .5, ease: D.P.MOLA}, t + .06);
+    });
+  }
+  D.flutua('#ch', es[0].t + .7, dur - .5, 1.2);
+  D.sai(['#ch', '#ps'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

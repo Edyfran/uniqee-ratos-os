@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<!-- EFEITO — carimbo do freeze. 1080x1920 ou 1920x1080 (?ar=), --alpha.
+     Entra junto com o `freeze` do efeitos.py: o rosto congela e um selo BATE
+     por cima — grande, torto, com um quadro de clarão e um tranco. O selo é
+     texto curto (uma ou duas palavras).
+       larg  a largura máxima do texto, fração do palco (0.86; no anúncio, 0.74 cabe na zona segura)
+       ar=1920x1080 deitado · tam o corpo da letra em px (118; o larg ainda encolhe) · treme px do tranco (8)
+       e quantas idas (3) · de a escala da entrada (2.6) · cor=ouro (o marcador do tema; no tinteiro, o selo
+       é ameixa-escuro com letra e borda ouro, chapado)
+       ?txt=ISSO AQUI&cor=no&x=540&y=1250&rot=-8&flash=1&t=0.05&dur=1.2 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+html.h,html.h body,html.h #stage{width:1920px;height:1080px}
+.cb{position:absolute;padding:22px 40px;font:700 var(--tc,118px)/1 var(--fm);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;
+  border:14px solid currentColor;border-radius:var(--raio);background:rgba(255,255,255,.94);
+  box-shadow:var(--sx,14px) var(--sy,14px) 0 var(--ink);opacity:0}
+html.tinteiro .cb{background:var(--ink9);font-family:var(--fd);box-shadow:none}
+.cl{position:absolute;inset:0;background:#fff;opacity:0}
+</style>
+</head>
+<body>
+<div id="stage"><div class="cl" id="cl"></div><div class="cb" id="cb"></div></div>
+<script>
+const HZ = D.q('ar', '1080x1920').startsWith('1920'), W = HZ ? 1920 : 1080, H = HZ ? 1080 : 1920;
+if (HZ) document.documentElement.classList.add('h');
+const dur = D.n('dur', '1.2'), t0 = D.n('t', '0.05'), rot = D.n('rot', '-8');
+const cores = {no: '--no', ac: '--ac', mk: '--ink', ok: '--ok', ink: '--ink', ouro: '--mk'};
+const cb = document.getElementById('cb');
+cb.textContent = D.q('txt', 'ISSO AQUI');
+cb.style.color = `var(${cores[D.q('cor', 'no')] || '--no'})`;
+if (D.q('cor') === 'mk') cb.style.background = 'var(--mk)';
+if (D.q('tam')) cb.style.setProperty('--tc', D.n('tam', '118') + 'px');
+
+D.monta(tl => {
+  D.cabe('.cb', 60, D.n('larg', '.86'));
+  const w = cb.offsetWidth, h = cb.offsetHeight;
+  cb.style.left = Math.max(30, Math.min(W - 30 - w, D.n('x', String(W / 2)) - w / 2)) + 'px';
+  cb.style.top = Math.max(60, Math.min(H - 60 - h, D.n('y', HZ ? '540' : '1250') - h / 2)) + 'px';
+  // o golpe é o do núcleo (D.carimbo: recua, desce acelerando, achata no papel, o palco acusa);
+  // daqui são o tremor e o clarão, a ação secundária própria do selo, no quadro do impacto
+  const bate = Math.max(t0, .05) + 3 * D.QD + .22;
+  D.solido(cb, 14);
+  D.carimbo(cb, bate + D.QD, rot, {de: D.n('de', '2.6'), desce: .22, giro: 22});
+  tl.to(cb, {x: D.n('treme', '8'), y: D.n('treme', '8') > 8 ? -D.n('treme', '8') / 2 : 0, duration: .03, yoyo: true, repeat: Math.round(D.n('idas', '3')), ease: 'none'}, bate);
+  if (D.q('flash', '1') !== '0') tl.fromTo('#cl', {opacity: .85}, {opacity: 0, duration: .1, immediateRender: false}, bate);
+  if (D.q('sai', '1') !== '0') tl.to(cb, {opacity: 0, scale: .9, duration: .16, ease: 'power2.in'}, dur - .2);
+  return dur;
+});
+</script>
+</body>
+</html>

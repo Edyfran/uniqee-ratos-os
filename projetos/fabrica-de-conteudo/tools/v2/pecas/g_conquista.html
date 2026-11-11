@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<!-- GANCHO — a conquista: o selo sobe de nível em estágios, carrega e estoura. 1080x1920, --alpha.
+     Cinco estágios, nesta ordem. Espera: o selo pousa e balança, pedindo o primeiro. Sobe: a cada
+     nível (`n`) ele pula e dá meia-volta no ar, como moeda: o lado que vem de trás já traz a cor e o
+     rótulo do nível, com espessura e luz do núcleo (D.espessura, D.luz); cai achatando e o placar conta. Carrega: no último, treme cada vez mais e os traços
+     se juntam no centro. Estoura: três anéis de traço e os cacos de papel. Revela: o `fim` bate embaixo.
+     A cor sobe com o nível (papel, azul claro, azul, tinta) e o último é o amarelo. Da referência
+     (Skillry #143, #146, #239, a recompensa de jogo em estágios) saiu só a ordem dos estágios; nada de
+     brilho, degradê ou faísca que brilha.
+       n      "NÍVEL;NÍVEL;…" um por degrau · t_n  "0.9,1.45,…" quando cada um está na tela (sem: a cada `passo`)
+       de     o rótulo antes do primeiro (BRUTO) · rot  o nome do placar (SKILLS; vazio: sem placar)
+       fim    o que bate depois do estouro (EDITADO; vazio: nada) · passo (0.55) · y  o centro do selo (900)
+       t0 · dur
+       ?n=LEGENDA;COMPOSIÇÃO;MOVIMENTO;RITMO;ESTILO&de=BRUTO&rot=SKILLS&fim=EDITADO&t0=0.2&passo=0.55&y=900&dur=5.4 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+#selo{position:absolute;left:320px;width:440px;height:440px;opacity:0}
+.lado{position:absolute;inset:0;border-radius:calc(var(--raio) - var(--bw));overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+#fa{transform:translateZ(1px)}
+#fb{transform:translateZ(calc(-1 * var(--esp) - 1px)) rotateY(180deg)}
+.fc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;opacity:0}
+.fc b{font:900 180px/.9 var(--fd);letter-spacing:-.05em}
+.fc u{font:700 36px/1 var(--fm);letter-spacing:.1em;text-decoration:none;text-transform:uppercase;white-space:nowrap}
+#pl{position:absolute;left:50%;display:flex;align-items:center;gap:18px;padding:16px 26px 14px;opacity:0}
+#pl span{font:700 36px/1 var(--fm);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+#pn{position:relative;display:inline-block;height:1em;min-width:2.6em}
+#pn i{position:absolute;left:0;top:0;font:700 36px/1 var(--fm);font-style:normal;opacity:0}
+.raio{position:absolute;left:540px;width:0;height:0}
+.raio i{position:absolute;left:-6px;top:-30px;width:12px;height:60px;border-radius:6px;background:var(--ink);opacity:0}
+.anel{position:absolute;left:540px;width:520px;height:520px;margin:-260px 0 0 -260px;border-radius:50%;border:solid var(--ink);opacity:0}
+.caco{position:absolute;left:540px;border:3px solid var(--ink);border-radius:4px;opacity:0}
+#fim{position:absolute;left:50%;padding:22px 34px 20px;font:800 64px/1 var(--fd);letter-spacing:var(--ls);white-space:nowrap;opacity:0}
+#fim:empty{display:none}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="nb" id="pl"><span id="prt"></span><span id="pn"></span></div>
+  <div class="nb" id="selo"><div class="lado" id="fa"></div><div class="lado" id="fb"></div></div>
+  <div class="nb cor-ink" id="fim"></div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const dur = D.n('dur', '5.4'), t0 = D.n('t0', '0.2'), passo = D.n('passo', '0.55'), Y = D.n('y', '900');
+const niv = D.q('n', 'LEGENDA;COMPOSIÇÃO;MOVIMENTO;RITMO;ESTILO').split(';').map(s => s.trim()).filter(Boolean);
+const N = niv.length, tq = D.q('t_n', '').split(',').map(Number).filter(x => !isNaN(x) && x > 0);
+const tn = niv.map((_, i) => tq[i] ?? t0 + .9 + i * passo);
+$('prt').textContent = D.q('rot', 'SKILLS');
+$('fim').textContent = D.q('fim', 'EDITADO') ? '✓ ' + D.q('fim', 'EDITADO') : '';
+// a cor sobe com o nível; o último é o marcador
+const COR = [['var(--ac2)', 'var(--ink)'], ['var(--ac)', '#fff'], ['var(--ink)', '#fff']];
+const tom = i => i === 0 ? ['var(--sur)', 'var(--ink4)'] : i === N ? ['var(--mk)', 'var(--ink)'] : COR[(i - 1) % 3];
+// os dois lados do selo têm todos os níveis; cada meia-volta mostra o lado que estava atrás, já com o novo
+const rots = [D.q('de', 'BRUTO'), ...niv];
+const lados = ['fa', 'fb'].map(id => rots.map((r, i) => {
+  const f = document.createElement('div');
+  f.className = 'fc';
+  [f.style.background, f.style.color] = tom(i);
+  f.innerHTML = `<b>${i}/${N}</b><u>${r}</u>`;
+  $(id).appendChild(f);
+  return f;
+}));
+rots.forEach((_, i) => $('pn').insertAdjacentHTML('beforeend', `<i>${i}/${N}</i>`));
+const pns = [...$('pn').children];
+Object.assign($('selo').style, {top: Y - 220 + 'px'});
+$('pl').style.top = Y - 480 + 'px';
+$('fim').style.top = Y + 300 + 'px';
+// os traços da carga, os anéis e os cacos do estouro; o sorteio é fixo, então todo render sai igual
+let sem = 7;
+const sorte = () => (sem = (sem * 16807) % 2147483647) / 2147483647;
+const RAIOS = 12, CACOS = 18;
+for (let k = 0; k < RAIOS; k++) $('stage').insertAdjacentHTML('beforeend', `<div class="raio" style="top:${Y}px;transform:rotate(${k * 360 / RAIOS}deg)"><i></i></div>`);
+[[22, .25], [12, .55], [6, 1]].forEach(([w, o]) => $('stage').insertAdjacentHTML('beforeend', `<div class="anel" style="top:${Y}px;border-width:${w}px" data-o="${o}"></div>`));
+const PAPEL = ['var(--mk)', 'var(--ac)', 'var(--sur)', 'var(--ac2)'];
+for (let k = 0; k < CACOS; k++) {
+  const w = 22 + sorte() * 26, h = 12 + sorte() * 12;
+  $('stage').insertAdjacentHTML('beforeend', `<i class="caco" style="top:${Y - h / 2}px;width:${w}px;height:${h}px;margin-left:${-w / 2}px;background:${PAPEL[k % PAPEL.length]}"></i>`);
+}
+
+D.monta(tl => {
+  gsap.set(['#pl', '#fim'], {xPercent: -50});
+  D.palco3d('#stage', `540px ${Y}px`);
+  D.espessura('#selo', {sombra: false});
+  D.luz(['#fa', '#fb']);
+  const selo = $('selo'), mostra = (els, i, t) => els.forEach((e, k) => tl.set(e, {opacity: k === i ? 1 : 0}, t));
+  // espera: o selo pousa e balança a cada 0,9 s, pedindo o primeiro nível
+  D.pousa('#selo', t0, {s: 1.08, som: 'pop'});
+  mostra(lados[0], 0, 0);
+  if ($('prt').textContent) { D.pousa('#pl', t0 + .15, {rot: D.P.ROT}); mostra(pns, 0, 0); }
+  else $('pl').remove();
+  for (let t = t0 + .6; t < tn[0] - .6; t += .9) {
+    tl.to(selo, {rotation: -4, duration: .08, ease: 'power2.out'}, t);
+    tl.to(selo, {rotation: 3, duration: .1, ease: 'power2.inOut'}, t + .08);
+    tl.to(selo, {rotation: 0, duration: .14, ease: 'power2.out'}, t + .18);
+  }
+  // sobe: pula, dá meia-volta no ar (o lado que chega é o que estava atrás), cai achatando
+  tn.forEach((t, i) => {
+    const ta = t - .42;
+    tl.to(selo, {y: -170, duration: .2, ease: 'power2.out'}, ta);
+    tl.to(selo, {y: 0, duration: .18, ease: 'power2.in'}, ta + .2);
+    tl.fromTo(selo, {rotationY: i * 180}, {rotationY: (i + 1) * 180, duration: .38, ease: 'power1.inOut', immediateRender: false}, ta);
+    mostra(lados[(i + 1) % 2], i + 1, ta);
+    tl.to(selo, {scaleX: 1.1, scaleY: .84, duration: .07, ease: 'power2.out'}, ta + .38);
+    tl.to(selo, {scaleX: 1, scaleY: 1, duration: .34, ease: D.P.MOLA}, ta + .45);
+    D.cue(ta, 'whoosh');
+    D.cue(ta + .38, 'thud');
+    if ($('pl')) { mostra(pns, i + 1, ta + .38); tl.to('#pl', {scale: 1.08, duration: .1, yoyo: true, repeat: 1, ease: 'power2.out'}, ta + .38); }
+  });
+  // carrega: treme cada vez mais, e os traços vêm de fora até o selo
+  const tc = tn[N - 1] + .25, tb = tc + .8, K = 16;
+  for (let k = 0; k < K; k++) {
+    const a = 2 + 14 * k / K, s = k % 2 ? 1 : -1;
+    tl.to(selo, {x: s * a, rotation: -s * (1 + 4 * k / K), duration: .05, ease: 'none'}, tc + k * .05);
+  }
+  tl.to(selo, {x: 0, rotation: 0, scale: .88, duration: .08, ease: 'power2.in'}, tb - .08);
+  document.querySelectorAll('.raio i').forEach((r, k) => {
+    const t = tc + (k % 4) * .12;
+    tl.fromTo(r, {y: -470, opacity: 0}, {y: -300, opacity: 1, duration: .32, ease: 'power2.in', immediateRender: false}, t);
+    tl.to(r, {y: -250, opacity: 0, duration: .14, ease: 'none'}, t + .32);
+  });
+  D.cue(tb, 'riser');
+  // estoura: três anéis (largo e fraco, médio, fino e forte) e os cacos de papel
+  tl.to(selo, {scale: 1, duration: .45, ease: D.P.POUSA}, tb);
+  document.querySelectorAll('.anel').forEach((a, k) => {
+    tl.fromTo(a, {scale: .55, opacity: +a.dataset.o}, {scale: 2.3, opacity: 0, duration: .6, ease: 'power2.out', immediateRender: false}, tb + k * .05);
+  });
+  document.querySelectorAll('.caco').forEach((c, k) => {
+    const ang = (k / CACOS) * Math.PI * 2 + sorte() * .3, d = 360 + sorte() * 260, gira = (sorte() - .5) * 720;
+    const x = Math.cos(ang) * d, y = Math.sin(ang) * d * .8 - 80;
+    tl.fromTo(c, {x: 0, y: 0, rotation: 0, opacity: 1}, {x, y, rotation: gira / 2, duration: .42, ease: 'power3.out', immediateRender: false}, tb);
+    tl.to(c, {y: y + 380, rotation: gira, duration: .56, ease: 'power2.in'}, tb + .42);
+    tl.to(c, {opacity: 0, duration: .18}, tb + .8);
+  });
+  D.cue(tb, 'impact');
+  // revela: o fim bate embaixo do selo
+  if ($('fim').textContent) D.carimbo('#fim', tb + .3, -2);
+  D.flutua('#selo', tb + .6, dur - .5, .8);
+  D.sai(['#pl', '#selo', '#fim'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

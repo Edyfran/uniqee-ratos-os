@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<!-- TIPO — fluxo que se desenha, v2. 1440x1028.
+     A LINHA é o argumento: sai do VOCÊ, corre pelo tronco e vira pro card.
+     Agora é traço preto grosso, desenhado — e a linha sempre chega ANTES do
+     card, que aterrissa na ponta dela.
+       ?centro=VOCÊ&sub=as decisões&n=Anúncios|analisa e sobe@1.2;Posts|prepara@2.1&dur=8 -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1440px;height:1028px}
+#stage{padding:40px var(--marg) 50px;justify-content:center}
+.hd{font-size:74px;margin-bottom:28px}
+.mapa{position:relative;flex:1}
+svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.ln{fill:none;stroke:var(--ink);stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+.no{position:absolute;left:0;top:50%;margin-top:-90px;width:300px;height:180px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0}
+.no b{display:block;font:900 78px/1 var(--fd);color:#fff;letter-spacing:var(--ls)}
+.no > span{display:block;font:700 28px/1 var(--fm);color:var(--act);margin-top:14px;
+  letter-spacing:.1em;text-transform:uppercase}
+.ag{position:absolute;left:420px;right:0;display:flex;align-items:center;gap:22px;
+  padding:0 28px;opacity:0}
+.ag .ic{width:70px;height:70px;font-size:30px}
+.ag .tx{flex:1;min-width:0}
+.ag b{display:block;font:900 56px/1.05 var(--fd);color:var(--ink);letter-spacing:var(--ls)}
+.ag em{display:block;font:600 var(--piso)/1.15 var(--fd);color:var(--ink6);font-style:normal;margin-top:4px}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="kick" id="k"></div>
+  <div class="hd" id="h"></div>
+  <div class="mapa" id="m"><svg id="sv"></svg><div class="no nb cor-ac" id="c"><b></b><span></span></div></div>
+</div>
+<script>
+const dur = D.n('dur', '8');
+document.getElementById('k').textContent = D.q('kick', 'a equipe');
+document.getElementById('h').innerHTML = D.q('hd', 'Cada um com um trabalho.<br>Você com as <b>decisões</b>.');
+const c = document.getElementById('c');
+c.querySelector('b').textContent = D.q('centro', 'VOCÊ');
+c.querySelector('span').textContent = D.q('sub', 'as decisões');
+const ags = D.itens('n', 'Anúncios|analisa, propõe e sobe@1.2;Posts|prepara pro Instagram@2.1;Membros|cuida da área@3.0;Suporte|responde o e-mail@3.9', ['nome', 'det']);
+
+D.monta(tl => {
+  D.cabe('.hd', 44);
+  const m = document.getElementById('m'), sv = document.getElementById('sv');
+  const H = m.clientHeight;
+  const alto = Math.min(150, (H - 18 * (ags.length - 1)) / ags.length);
+  const gap = (H - ags.length * alto) / (ags.length - 1 || 1);
+  let d = '';
+  ags.forEach((a, i) => {
+    const y = i * (alto + gap) + alto / 2;
+    const el = document.createElement('div');
+    el.className = 'ag nb'; el.id = 'ag' + i;
+    el.style.top = (y - alto / 2) + 'px';
+    el.style.height = alto + 'px';
+    el.innerHTML = `<span class="ic">0${i + 1}</span><span class="tx"><b>${a.nome}</b><em>${a.det || ''}</em></span>`;
+    m.appendChild(el);
+    d += `<path class="ln" id="ln${i}" d="M 300 ${H / 2} L 360 ${H / 2} L 360 ${y} L 412 ${y}"/>`;
+  });
+  sv.innerHTML = d;
+  D.cabe('.ag b', 34, '.tx');
+  D.cabe('.ag em', 26, '.tx');
+  D.cabe('#c b', 34, '#c');      // centro com nome comprido ("Composio") cabe no bloco
+
+  D.camera(dur, 1.0, 1.025);
+  D.carimbo('#k', .10);
+  D.titulo('#h', .22);
+  D.pousa('#c', .75, {s: 1.12, ease: D.P.HEROI, rot: D.P.ROT});
+  ags.forEach((a, i) => {
+    const p = document.getElementById('ln' + i), L = p.getTotalLength();
+    gsap.set(p, {strokeDasharray: L, strokeDashoffset: L});
+    tl.to(p, {strokeDashoffset: 0, duration: .46, ease: 'power2.inOut'}, a.t - .36);
+    D.pousa('#ag' + i, a.t + .05, {dx: 40, dy: -D.P.QUEDA * .4, rot: D.inclina(i) * .5});
+  });
+  D.sai(['#k', '#h', '#c', 'svg', '.ag'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

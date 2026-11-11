@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<!-- ENSAIO — print de tweet ou manchete que cai. 1920x1080, --alpha (frente).
+     O cartão cai torto no lado livre, aterrissa com a sombra dura e o trecho em
+     <b> é grifado. tipo=tweet ou tipo=manchete; com ?img= entra o print real.
+       tweet:    ?tipo=tweet&nome=Alguém importante&handle=@alguem&txt=Em dois anos, <b>quem não souber delegar</b>...&data=12:40 · 3 mar 2025
+       manchete: ?tipo=manchete&veiculo=jornal de negócios&tt=Empresas já contratam <b>agentes</b>...&sb=...&data=mar 2025 -->
+<html lang="pt-BR" class="h alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/direcao-h.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<script src="../nucleo/ensaio.js"></script>
+<style>
+.cd{position:absolute;top:190px;width:800px;overflow:hidden;opacity:0}
+.hdr{display:flex;align-items:center;gap:18px;padding:26px 30px 0}
+.av{flex:none;width:72px;height:72px;border-radius:50%;background:var(--ink);color:var(--mk);display:flex;align-items:center;justify-content:center;font:700 34px/1 var(--fd)}
+.hdr b{display:block;font:700 30px/1.1 var(--fd);color:var(--ink)}
+.hdr span{display:block;margin-top:6px;font:500 22px/1 var(--fm);color:var(--ink4)}
+.txt{padding:22px 30px 0;font:500 40px/1.3 var(--fd);letter-spacing:-.015em;color:var(--ink);text-wrap:pretty}
+.mt{margin-top:24px;padding:16px 30px 20px;border-top:3px solid var(--ink);font:600 20px/1 var(--fm);color:var(--ink4)}
+.vc{padding:14px 30px;background:var(--ink);color:#fff;font:700 22px/1 var(--fm);letter-spacing:.16em;text-transform:uppercase}
+.tt{padding:26px 30px 0;font:700 60px/1.05 var(--fd);letter-spacing:var(--ls);color:var(--ink);text-wrap:balance}
+.sb{padding:16px 30px 0;font:500 28px/1.3 var(--fd);color:var(--ink6)}
+.sb:empty{display:none}
+.im{position:relative;height:450px}
+</style>
+</head>
+<body>
+<div id="stage"><div class="cd nb" id="cd" data-c="frente"></div></div>
+<script>
+const dur = D.n('dur', '5'), t0 = D.n('t0', '0.2'), $ = id => document.getElementById(id);
+const p = E.pessoa('dir'), img = D.q('img', ''), tipo = D.q('tipo', 'tweet'), cd = $('cd');
+cd.style.left = (p.lado === 'esq' ? p.r + 60 : 140) + 'px';
+if (img) { cd.innerHTML = '<div class="im" id="im"></div>'; D.midia('#im', img, 'print'); }
+else if (tipo === 'manchete') cd.innerHTML = `<div class="vc">${D.q('veiculo', 'jornal de negócios')}</div><div class="tt" id="tx">${D.q('tt', 'Empresas já contratam <b class="mkr">agentes de IA</b> no lugar de estagiários')}</div><div class="sb">${D.q('sb', 'Levantamento mostra que as tarefas repetitivas foram as primeiras a sair da mão das pessoas')}</div><div class="mt">${D.q('data', 'mar 2025')}</div>`;
+else { const nome = D.q('nome', 'Alguém importante'); cd.innerHTML = `<div class="hdr"><div class="av">${nome.trim()[0] || '·'}</div><div><b>${nome}</b><span>${D.q('handle', '@alguem')}</span></div></div><div class="txt" id="tx">${D.q('txt', 'Em dois anos, <b class="mkr">quem não souber delegar pra IA</b> vai trabalhar pra quem sabe.')}</div><div class="mt">${D.q('data', '12:40 · 3 mar 2025')}</div>`; }
+D.monta(tl => {
+  D.pousa('#cd', t0, {rot: -2, dy: -280, dr: -8, s: 1.06, ease: D.P.HEROI, som: 'thud'});
+  D.cue(t0 + .05, 'papel');
+  if ($('tx')) D.marca('#tx b', D.at(t0) + .75);
+  D.flutua('#cd', t0 + 1, dur - .5, .4);
+  D.sai('#cd', dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<!-- TIPOGRAFIA — o respiro em papel: duas ou três palavras e um objeto de verdade que entra com peso.
+     1080x1920, papel com a luz suave da r_bancada. O objeto (`obj`, o .zip em 3D: PNG recortado, midia/objeto-zip.png)
+     é o herói do 1º momento: o cursor (D.cursor) pega o puxador e o arrasta em arco (D.arco, a mesma curva do
+     cursor, então a ponta nunca sai do puxador), a folha pende e balança presa nele, ele solta e ela cai
+     ACELERANDO, esticada, esmaga no chão (D.amassa: objeto leve, ~5 %) e assenta. A sombra macia pousa 2 quadros
+     DEPOIS do corpo, e a câmera dá o soco no pouso (D.soco + D.reage). No pouso entra a palavra de cor (`l2`), em
+     mola (é o herói do 2º momento), com o objeto passando por cima do fim dela: o fim da palavra fica por baixo
+     da folha (profundidade). A composição é a da referência (pesquisa/referencias-criativos/motion-puro/
+     15551561209923797.mp4, a lâmpada): grade fina atrás do texto, objeto grande sangrando pela borda, micro
+     tipografia (código de barras, selo do arquivo), uma palavra em cor; letra e cor são nossas.
+     Movimento do núcleo (pesquisa/animacao-principios/ESTUDO.md): nada reimplementado aqui, só a ordem dos
+     quadros. Texto que se lê dentro da área segura do anúncio (x 65–1015, y 270–1250).
+       l1  a linha de apoio, palavra a palavra (Arrasta o) · l2  a palavra de cor (.zip.) · cor (ac | mk)
+       t1  quando entra a 1ª palavra (0.08) · passo  entre as palavras (0.3) · pousa  o instante do pouso (1.2)
+       obj  o PNG do objeto · tam  o lado dele em px (860) · selo  nome|tamanho (o arquivo) · cod  o código · dur
+       teclado  1 sobe um teclado grande embaixo (nucleo/teclado.js), que enche o terço de baixo e que a k_pedido seguinte continua
+              (teclado=2 lá) · t_tec  quando sobe (0.05) · ty  o y do alto dele (1470)
+       ?l1=Arrasta o&l2=.zip.&cor=ac&t1=0.08&passo=0.3&pousa=1.2&dur=3 -->
+<html lang="pt-BR" data-qa="entra-seco">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<script src="../nucleo/cursor.js"></script>
+<script src="../nucleo/teclado.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+#stage{padding:0;display:block;overflow:hidden;background:var(--pp)}
+#mundo{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:50% 45%}
+#papel,#grade{position:absolute;left:0;top:0}
+.l1{position:absolute;left:100px;top:402px;font:700 112px/1 var(--fd);letter-spacing:var(--ls);color:var(--ink);white-space:nowrap}
+.l1 .w{display:inline-block;margin-right:.24em;opacity:0}
+.l2{position:absolute;left:88px;top:522px;font:700 260px/.92 var(--fd);letter-spacing:-.05em;white-space:nowrap;
+  opacity:0;transform-origin:0 100%}
+.l2.ac{color:var(--ac)} .l2.mk{color:var(--mk);-webkit-text-stroke:8px var(--ink);paint-order:stroke fill}
+/* micro tipografia: o código de barras (parado desde o 1º quadro, como na referência) e o selo do arquivo */
+#codigo{position:absolute;right:65px;top:414px;width:230px;text-align:right}
+#codigo svg{display:block;margin-left:auto}
+#codigo span{display:block;margin-top:10px;font:600 24px/1 var(--fm);letter-spacing:.12em;color:var(--ink6)}
+#selo{position:absolute;left:100px;top:800px;font:600 28px/1.45 var(--fm);color:var(--ink);white-space:nowrap;opacity:0}
+#selo i{display:inline-block;width:15px;height:15px;margin-right:13px;background:var(--ac)}
+#selo b{font-weight:600;padding:0 9px;background:linear-gradient(var(--mk),var(--mk)) 0 90%/100% 58% no-repeat}
+/* o objeto, de fora pra dentro: pos (o arco; gira PRESO NO PUXADOR) > alonga (estica na queda, pé no chão) >
+   esm (esmaga no pouso, D.amassa) > tilt (vira de frente pra quem olha) > a imagem, com a sombra macia */
+.pos,.alonga,.esm,.tilt{position:absolute;left:0;top:0;width:var(--S);height:var(--S)}
+.pos{z-index:10}
+.alonga,.esm,.tilt{inset:0}
+.esm{perspective:1500px}
+#obj{display:block;width:100%;height:100%;--ox:40px;--oy:76px;--ob:50px;--oa:.18;
+  filter:drop-shadow(var(--ox) var(--oy) var(--ob) rgba(11,13,18,var(--oa)))}
+#chao{position:absolute;left:0;top:0;width:560px;height:54px;margin:-27px 0 0 -280px;border-radius:50%;opacity:.06;
+  background:radial-gradient(closest-side,rgba(11,13,18,.62),rgba(11,13,18,0));filter:blur(9px);z-index:5}
+</style>
+</head>
+<body>
+<div id="stage"><div id="mundo">
+  <svg id="papel" width="1080" height="1920"></svg>
+  <svg id="grade" width="1080" height="1920"></svg>
+  <div id="codigo"></div>
+  <div class="l1" id="l1"></div>
+  <div class="l2" id="l2"></div>
+  <div id="selo"></div>
+  <div id="chao"></div>
+  <div class="pos" id="pos"><div class="alonga" id="alonga"><div class="esm" id="esm"><div class="tilt" id="tilt"><img id="obj" alt="" src="../midia/objeto-zip.png"></div></div></div></div>
+</div></div>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const W = 1080, H = 1920, Q = D.QD, dur = D.n('dur', '3');
+const t1 = D.n('t1', '0.08'), passo = D.n('passo', '0.3'), POUSA = D.n('pousa', '1.2');
+
+// o papel com a luz da bancada (a mesma cena, o mesmo ar)
+$('papel').innerHTML = `<defs>
+  <pattern id="pt" width="36" height="36" patternUnits="userSpaceOnUse"><circle cx="18" cy="18" r="2.2" fill="rgba(11,13,18,.07)"/></pattern>
+  <radialGradient id="la"><stop offset="0" style="stop-color:var(--mk);stop-opacity:.42"/><stop offset=".55" style="stop-color:var(--mk);stop-opacity:.14"/><stop offset="1" style="stop-color:var(--mk);stop-opacity:0"/></radialGradient>
+  <radialGradient id="lb2"><stop offset="0" style="stop-color:var(--ac);stop-opacity:.16"/><stop offset="1" style="stop-color:var(--ac);stop-opacity:0"/></radialGradient>
+  <radialGradient id="lc"><stop offset="0" style="stop-color:var(--mk);stop-opacity:.30"/><stop offset="1" style="stop-color:var(--mk);stop-opacity:0"/></radialGradient></defs>
+  <rect width="${W}" height="${H}" style="fill:var(--pp)"/>
+  <circle id="luz-a" cx="860" cy="520" r="760" fill="url(#la)"/>
+  <circle id="luz-b" cx="120" cy="1180" r="640" fill="url(#lb2)"/>
+  <circle id="luz-c" cx="170" cy="280" r="520" fill="url(#lc)"/>
+  <rect width="${W}" height="${H}" fill="url(#pt)"/>`;
+
+// a grade fina atrás do texto (a da lâmpada): linhas de 1,6 px a cada 60, que somem pras bordas
+$('grade').innerHTML = `<defs>
+  <pattern id="gr" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M60 0H0V60" fill="none" style="stroke:var(--ink)" stroke-opacity=".2" stroke-width="1.6"/></pattern>
+  <radialGradient id="gm" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff"/><stop offset=".6" stop-color="#fff" stop-opacity=".85"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+  <mask id="gk"><rect x="-40" y="330" width="1160" height="1080" fill="url(#gm)"/></mask></defs>
+  <rect x="-40" y="330" width="1160" height="1080" fill="url(#gr)" mask="url(#gk)"/>`;
+
+// o código de barras: as larguras são uma sequência fixa (sem Math.random: cada quadro igual)
+const LARG = [3, 2, 5, 2, 2, 4, 3, 6, 2, 3, 4, 2, 5, 3, 2, 2, 6, 3, 4, 2, 3, 5, 2, 4, 3, 2, 2, 5, 3, 4, 2, 6, 2, 3, 3, 2];
+let bx = 0, barras = '';
+LARG.forEach((w, i) => { w = Math.round(w * 1.2); if (i % 2 === 0 && bx + w <= 230) barras += `<rect x="${bx}" y="0" width="${w}" height="68"/>`; bx += w; });
+$('codigo').innerHTML = `<svg width="230" height="68" viewBox="0 0 230 68" style="fill:var(--ink)">${barras}</svg><span>${esc(D.q('cod', 'FC·0016·ZIP'))}</span>`;
+const [selNome, selTam] = D.q('selo', 'fabrica-de-conteudo.zip|16 MB').split('|');
+$('selo').innerHTML = `<i></i>${esc(selNome)}<br><b>${esc(selTam || '')}</b>`;
+
+// o objeto. As medidas são do zip-3d.png (1024×1024): a folha vai de x 180 a 865 e de y 48 a 987, e o
+// puxador (onde a seta pega) está em (571, 415). Outro objeto pede outras medidas.
+// ponytail: medidas fixas do zip; objeto novo vira parâmetro (geo=) quando um vídeo pedir
+if (D.q('obj', '')) $('obj').src = D.q('obj', '');
+const S = D.n('tam', '860'), K = S / 1024;
+document.documentElement.style.setProperty('--S', S + 'px');
+const G = {x0: 180 * K, x1: 865 * K, y0: 48 * K, y1: 987 * K, px: 571 * K, py: 415 * K};
+
+const ws = D.q('l1', 'Arrasta o').split(' ').filter(Boolean);
+$('l1').innerHTML = ws.map(w => `<span class="w">${esc(w)}</span>`).join('');
+$('l2').textContent = D.q('l2', '.zip.');
+$('l2').classList.add(D.q('cor', 'ac'));
+
+D.monta(tl => {
+  if (D.q('teclado', '0') !== '0') { Teclado.monta(D.n('ty', '1470')); Teclado.entra(tl, D.n('t_tec', '0.05')); }
+  // ONDE: a folha assenta com a quina de cima a 570 e a borda da esquerda 30 px por cima do fim do l2
+  // (medido, não chutado: a palavra muda de largura com o texto); o resto sangra pela direita
+  const l2 = $('l2'), SOBRA = 30, TOPO = 570;
+  const FX = l2.offsetLeft + l2.offsetWidth - SOBRA - G.x0, FY = TOPO - G.y0;
+  const CHAO = FY + G.y1, CX = FX + (G.x0 + G.x1) / 2, HOV = 100;
+  const pele = ([x, y]) => [x - G.px, y - G.py];         // da ponta da seta ao canto da caixa do objeto
+  const fim = [FX + G.px, FY + G.py], hov = [fim[0], fim[1] - HOV], ini = [560, 1330];
+
+  // QUANDO: a seta pega, arrasta .54 s, solta parada 2 quadros no ar; a folha cai e pousa em POUSA
+  const T1 = POUSA - .26, T0 = T1 - .6, SOLTA = T1 + 2 * Q, CAI = SOLTA, QUEDA = POUSA - CAI;
+  const d = Math.max(.22, Math.min(.6, T1 - T0 - .06)), S1 = T1 - d;     // a viagem que o D.cursor faz
+
+  D.camera(dur, 1.0, 1.035);
+
+  // a 1ª linha: palavra a palavra, desfocada ficando nítida, subindo pouco
+  [...$('l1').children].forEach((w, i) => tl.fromTo(w, {opacity: 0, y: 30, filter: 'blur(14px)'},
+    {opacity: 1, y: 0, filter: 'blur(0px)', duration: .38, ease: 'power3.out'}, t1 + i * passo));
+
+  // O CURSOR dirige (D.cursor): pega o puxador, leva ao ar em arco, e sai depois de soltar
+  D.cursor('#mundo', [
+    {x: ini[0], y: ini[1], t: T0, clica: true},
+    {x: hov[0], y: hov[1], t: T1},
+    {x: hov[0] + 110, y: hov[1] - 150, t: T1 + .42},
+  ], {tam: 112, sai: T1 + .02});
+
+  // A FOLHA vai com a seta: o MESMO arco (D.arco, mesmos pontos, mesma flecha, mesma curva de tempo), e
+  // gira presa no puxador (transform-origin = o puxador), então a ponta nunca sai dele
+  const org = `${G.px}px ${G.py}px`;
+  const [ix, iy] = pele(ini), [hx, hy] = pele(hov);
+  gsap.set('#pos', {x: ix, y: iy, transformOrigin: org});
+  gsap.set('#tilt', {transformOrigin: org});
+  gsap.set('#alonga', {transformOrigin: `${(G.x0 + G.x1) / 2}px ${G.y1}px`});
+  const L = Math.hypot(hov[0] - ini[0], hov[1] - ini[1]);
+  D.arco('#pos', S1, [ix, iy], [hx, hy], {dur: d, flecha: Math.min(120, Math.max(10, L * .15)), lado: Math.sign(hov[0] - ini[0]) || 1});
+  D.cue(S1, 'whoosh');
+  // ela pende e atrasa (corpo abaixo do puxador: acelera e o pé fica pra trás), passa do ponto na freada
+  tl.to('#pos', {rotation: -12, duration: d * .4, ease: 'power2.out'}, S1);
+  tl.to('#pos', {rotation: 7, duration: d * .6, ease: 'power2.inOut'}, S1 + d * .4);
+  tl.to('#pos', {rotation: 0, duration: 2 * Q + QUEDA, ease: 'power2.inOut'}, T1);
+  // o corpo vira de frente enquanto vem (3D: o giro em profundidade que faz a imagem plana ler como objeto)
+  gsap.set('#tilt', {rotationY: -22, rotationX: 9});
+  tl.to('#tilt', {rotationY: 0, rotationX: 0, duration: POUSA - S1, ease: 'power2.inOut'}, S1);
+  // a sombra do chão segue o corpo por baixo, apagada enquanto ele está no ar
+  gsap.set('#chao', {x: CX + (ix - (FX)) , y: CHAO, scale: 1.45, opacity: .05});
+  tl.to('#chao', {x: CX, duration: d, ease: 'power3.inOut'}, S1);
+
+  // SOLTA e CAI: acelera (objeto leve cai acelerando), esticada na direção da queda, pé no chão
+  tl.to('#pos', {y: FY, duration: QUEDA, ease: 'power2.in'}, CAI);
+  tl.to('#alonga', {scaleX: .95, scaleY: 1.05, duration: QUEDA, ease: 'power2.in'}, CAI);
+  tl.to('#chao', {scale: 1.2, opacity: .16, duration: QUEDA, ease: 'power2.in'}, CAI);
+  // POUSO: o estica volta em 2 quadros, o núcleo esmaga e assenta; a sombra macia chega 2 quadros depois do corpo
+  tl.to('#alonga', {scaleX: 1, scaleY: 1, duration: 2 * Q, ease: 'power2.out'}, POUSA);
+  D.amassa('#esm', POUSA, .05);
+  tl.fromTo('#obj', {'--ox': '40px', '--oy': '76px', '--ob': '50px', '--oa': .18},
+    {'--ox': '14px', '--oy': '28px', '--ob': '34px', '--oa': .36, duration: 5 * Q, ease: 'power2.out', immediateRender: false}, POUSA + 2 * Q);
+  tl.to('#chao', {scale: 1, opacity: .6, duration: 5 * Q, ease: 'power2.out'}, POUSA + 2 * Q);
+  D.soco('#mundo', POUSA, 1.045, 1);
+  D.reage(POUSA, 22);
+  D.cue(POUSA, 'thud');
+
+  // O HERÓI DO 2º MOMENTO: a palavra de cor entra no pouso, em mola, focando
+  tl.fromTo('#l2', {opacity: 0, scale: .62, filter: 'blur(10px)'},
+    {opacity: 1, scale: 1, filter: 'blur(0px)', duration: .5, ease: D.P.MOLA}, POUSA + Q);
+  // a 1ª linha cede 6 px pro herói (coadjuvante, 60 % depois de 150 ms)
+  tl.to('#l1', {y: -6, duration: .3, ease: 'power3.out'}, POUSA + .15);
+  // o selo do arquivo chega depois do herói (secundário, 150–250 ms atrás), subindo pouco
+  tl.fromTo('#selo', {opacity: 0, y: 16}, {opacity: 1, y: 0, duration: .35, ease: 'power3.out'}, POUSA + .3);
+  D.cue(POUSA + .3, 'papel');
+
+  // ambiente: a folha segue virando devagar (começa e termina parada), a luz anda
+  D.deriva('#tilt', POUSA + .45, dur, {rotationY: 5, rotationX: -2});
+  tl.to('#luz-a', {attr: {cx: 820, cy: 560}, duration: dur, ease: 'sine.inOut'}, 0);
+  tl.to('#luz-c', {attr: {cx: 200, cy: 320}, duration: dur, ease: 'sine.inOut'}, 0);
+  return dur;
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<!-- TIPOGRAFIA — título que encolhe (clone do título fixo "18 effects. 20 seconds."): abre grande, em duas linhas de serifa
+     leve e papel, e em ~0,125 s as duas viram UMA linha pequena no alto, no mesmo passo em que o gancho começa a digitar.
+     Fica ali, sobe ~85 px com o gancho (linear, ~0,12 s) e some. 1080x1920, --alpha. Sem sombra, sem borda: é letra solta.
+     A serifa é a Instrument Serif normal (a do núcleo só traz o itálico; o normal vem do Google Fonts, como a Space Grotesk).
+       l1 · l2   as duas linhas (18 efeitos. · 20 segundos.)
+       x · y     o canto esquerdo e o topo da tinta dos números na versão grande, em px (50 · 265) · larg  a largura da linha mais longa (615)
+       enc       quando começa a encolher, em s (0,125) · t0 · sai  quando sobe (-1: dur - 0,25) · dur
+       cx · y2 · h2   o centro, o topo da tinta e o corpo da versão pequena (360 · 242 · 70)
+       ?l1=18 efeitos.&l2=20 segundos.&x=50&y=265&larg=615&enc=0.125&dur=1.1 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/editorial.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px;background:transparent}
+#stage{padding:0;display:block;background:none}
+#blk{position:absolute;left:0;top:0;width:1080px;height:1920px}
+.t{position:absolute;left:0;top:0;white-space:nowrap;line-height:1;transform-origin:0 0;
+  font-family:'Instrument Serif',serif;font-style:normal;font-weight:400;letter-spacing:-.01em;color:var(--ed-pp)}
+</style>
+</head>
+<body>
+<div id="stage"><div id="blk"></div></div>
+<script>
+const dur = D.n('dur', '1.1'), t0 = D.n('t0', '0'), enc = D.n('enc', '0.125'), sai0 = D.n('sai', '-1');
+const sai = sai0 < 0 ? dur - .25 : sai0;
+const X = D.n('x', '50'), Y = D.n('y', '265'), larg = D.n('larg', '615');
+const CX = D.n('cx', '360'), Y2 = D.n('y2', '242'), H2 = D.n('h2', '70');
+const blk = document.getElementById('blk');
+const textos = [D.q('l1', '18 efeitos.'), D.q('l2', '20 segundos.')];
+const els = textos.map(tx => { const d = document.createElement('div'); d.className = 't'; d.textContent = tx; blk.appendChild(d); return d; });
+
+document.fonts.load('400 100px "Instrument Serif"').catch(() => null).then(() => D.monta(tl => {
+  els.forEach(d => d.style.fontSize = '100px');
+  const w100 = els.map(d => d.getBoundingClientRect().width);
+  const S0 = Math.min(240, 100 * larg / Math.max(...w100));
+  const s = H2 / S0;
+  const cx = document.createElement('canvas').getContext('2d');
+  cx.font = `400 100px "Instrument Serif"`;
+  const m = cx.measureText('18');
+  const topo100 = 50 + (m.fontBoundingBoxAscent - m.fontBoundingBoxDescent) / 2 - m.actualBoundingBoxAscent;
+  const k = S0 / 100, pitch = S0 * .9;
+  els.forEach((d, i) => {
+    d.style.fontSize = S0 + 'px';
+    gsap.set(d, {x: X, y: Y - topo100 * k + i * pitch, scale: 1});
+  });
+  // a versão pequena: as duas linhas lado a lado, com um espaço, centradas em CX
+  const wA = w100[0] * k * s, wB = w100[1] * k * s, gap = H2 * .28;
+  const xA = CX - (wA + gap + wB) / 2, yF = Y2 - topo100 * k * s;
+  const T = D.at(t0);
+  tl.to(els[0], {x: xA, y: yF, scale: s, duration: .125, ease: 'power2.inOut'}, T + enc);
+  tl.to(els[1], {x: xA + wA + gap, y: yF, scale: s, duration: .125, ease: 'power2.inOut'}, T + enc);
+  D.cue(T + enc, 'whoosh');
+  tl.to(blk, {y: -85, duration: .12, ease: 'none'}, sai);
+  tl.set(blk, {opacity: 0}, sai + .12);
+  return dur;
+}));
+</script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<!-- PROVA — os créditos que sobem: FUNÇÃO ···· NOME, linha a linha, num cartão tinta. As linhas
+     entram por baixo e sobem até a última assentar embaixo; em `t_marca` ela ganha o marcador amarelo
+     e as outras apagam (o crédito que fica). 1080x1920, --alpha.
+       l      FUNÇÃO|NOME;FUNÇÃO|NOME — a última é a que fica
+       r      o cartão: x,y,largura,altura
+       rola   quanto tempo as linhas levam pra subir
+       ?l=ROSTO|NINJA 01;VOZ|NINJA 02;ROTEIRO|NINJA 03;PEDIDO|Seu nome&titulo=CRÉDITOS&r=90,320,900,680&t=0.1&rola=2.4&t_marca=3&dur=4 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+#cd{position:absolute;opacity:0;display:flex;flex-direction:column;padding:34px 44px 30px}
+.tt{align-self:flex-start;font:700 30px/1 var(--fm);letter-spacing:.16em;text-transform:uppercase;color:var(--ink);
+  background:var(--mk);border-radius:var(--raio-s);padding:12px 16px 10px;margin-bottom:22px}
+.jan{position:relative;flex:1;overflow:hidden}
+.ls{position:absolute;left:0;right:0;top:0}
+.ln{display:flex;align-items:baseline;gap:16px;padding:14px 0}
+.fn{font:700 44px/1 var(--fm);letter-spacing:.06em;text-transform:uppercase;color:var(--cine-tx);white-space:nowrap}
+.pt{flex:1;border-bottom:5px dotted var(--ink6);transform:translateY(-8px)}
+.nm{font:700 56px/1 var(--fd);letter-spacing:var(--ls);color:#fff;white-space:nowrap}
+.ln.fica .fn{color:#fff}
+.ln.fica .nm b{font-weight:inherit;padding:0 .14em;margin:0 -.06em;
+  background:linear-gradient(var(--mk),var(--mk)) no-repeat 0 60%/0% 88%}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="nb cor-ink" id="cd"><div class="tt" id="tt"></div><div class="jan" id="jan"><div class="ls" id="ls"></div></div></div>
+</div>
+<script>
+const dur = D.n('dur', '4'), t0 = D.n('t', '0.1'), rola = D.n('rola', '2.4');
+const [rx, ry, rw, rh] = D.q('r', '90,320,900,680').split(',').map(parseFloat);
+const cd = document.getElementById('cd');
+Object.assign(cd.style, {left: rx + 'px', top: ry + 'px', width: rw + 'px', height: rh + 'px'});
+document.getElementById('tt').textContent = D.q('titulo', 'CRÉDITOS');
+// padrão neutro: a peça vai no pacote do aluno. Os créditos de verdade vêm no plano (l=)
+const linhas = D.q('l', 'ROSTO|NINJA 01;VOZ|NINJA 02;ROTEIRO|NINJA 03;PEDIDO|Seu nome').split(';').filter(Boolean);
+const ls = document.getElementById('ls');
+linhas.forEach((l, i) => {
+  const [fn, nm] = l.split('|');
+  const el = document.createElement('div');
+  el.className = 'ln' + (i === linhas.length - 1 ? ' fica' : '');
+  el.innerHTML = `<span class="fn"></span><i class="pt"></i><span class="nm"><b></b></span>`;
+  el.querySelector('.fn').textContent = fn;
+  el.querySelector('.nm b').textContent = nm || '';
+  ls.appendChild(el);
+});
+
+D.monta(tl => {
+  const jh = document.getElementById('jan').clientHeight, lh = ls.offsetHeight;
+  D.pousa(cd, t0, {som: 'swish'});
+  // sobem de baixo da janela até a última linha assentar no pé dela
+  tl.fromTo(ls, {y: jh}, {y: jh - lh, duration: rola, ease: 'power1.out'}, D.at(t0) + .15);
+  D.cue(t0 + .15, 'tick-roll', {dur: rola});
+  const tm = D.q('t_marca', '');
+  if (tm !== '') {
+    const tinta = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim();
+    tl.to(ls.querySelectorAll('.ln:not(.fica)'), {opacity: .35, duration: .3}, D.at(+tm));
+    // o marcador varre e a letra escurece junto, pra ler sobre o amarelo
+    tl.to('.fica .nm b', {color: tinta, duration: .3}, D.at(+tm) + .1);
+    D.marca('.fica .nm b', D.at(+tm));
+    D.cue(+tm, 'marca');
+  }
+  if (D.q('sai', '1') !== '0') tl.to(cd, {opacity: 0, y: 30, duration: .2, ease: 'power2.in'}, dur - .22);
+  return dur;
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<!-- ENSAIO — title drop QUIET · letterbox. 1920x1080, --alpha (frente).
+     As faixas de cinema (2,39:1) fecham devagar, a cor do take baixa, e o
+     título aparece na faixa de cima (a de baixo é da barra do player do YouTube)
+     com o espaçamento das letras fechando.
+     Sem clarão, sem sombra, sem som de impacto.
+       ?titulo=Faturei 1 milhão&kick=um ensaio&t0=0.2&dur=5 -->
+<html lang="pt-BR" class="h alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/direcao-h.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<script src="../nucleo/ensaio.js"></script>
+<style>
+.bar{position:absolute;left:0;right:0;height:138px;background:var(--cine)}
+#bt{top:0;transform-origin:top}
+#bb{bottom:0;transform-origin:bottom}
+.tt{position:absolute;left:0;right:0;top:44px;height:94px;display:flex;align-items:center;justify-content:center;font:600 46px/1 var(--fd);letter-spacing:.42em;text-transform:uppercase;color:#fff;padding-left:.42em;white-space:nowrap;opacity:0}
+.kk{position:absolute;left:0;right:0;top:12px;height:40px;display:flex;align-items:center;justify-content:center;font:600 20px/1 var(--fm);letter-spacing:.5em;text-transform:uppercase;color:var(--cine-tx);padding-left:.5em;opacity:0}
+</style>
+</head>
+<body>
+<div id="stage" data-c="frente"><div class="bar" id="bt"></div><div class="bar" id="bb"></div><div class="kk" id="kk"></div><div class="tt" id="tt"></div></div>
+<script>
+const dur = D.n('dur', '5'), t0 = D.n('t0', '0.2'), $ = id => document.getElementById(id);
+E.pessoa('centro');
+$('tt').textContent = D.q('titulo', 'Faturei 1 milhão');
+$('kk').textContent = D.q('kick', 'um ensaio');
+E.video(t0, dur, 'dessatura', {valor: .55, entra: 1.2});
+E.video(t0, dur, 'zoom', {de: 1, para: 1.035, entra: dur - t0});
+D.monta(tl => {
+  tl.fromTo(['#bt', '#bb'], {scaleY: 0}, {scaleY: 1, duration: 1.1, ease: 'power2.inOut'}, t0);
+  D.cue(t0 + 1.1, 'swell');   // termina quando as faixas fecham
+  D.cue(t0 + .7, 'tom');
+  // tracking em px: o GSAP não interpola `em` em letter-spacing
+  const fs = parseFloat(getComputedStyle($('tt')).fontSize), de = (fs * .8) + 'px', para = (fs * .42) + 'px';
+  tl.fromTo('#tt', {opacity: 0, letterSpacing: de, paddingLeft: de, filter: 'blur(8px)'}, {opacity: 1, letterSpacing: para, paddingLeft: para, filter: 'blur(0px)', duration: 1.6, ease: 'power2.out'}, t0 + .7);
+  tl.fromTo('#kk', {opacity: 0}, {opacity: 1, duration: 1, ease: 'power1.out'}, t0 + 1.1);
+  if (D.q('sai', '1') !== '0') {
+    tl.to(['#tt', '#kk'], {opacity: 0, filter: 'blur(6px)', duration: .6, ease: 'power1.in'}, dur - 1.2);
+    tl.to(['#bt', '#bb'], {scaleY: 0, duration: .8, ease: 'power2.inOut'}, dur - .8);
+  }
+  return dur;
+});
+</script>
+</body>
+</html>

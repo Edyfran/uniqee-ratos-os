@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<!-- (rodada 3: anel largo, 6 cartões, centro y1300, fundo cruza a silhueta) CLONE — carrossel 3D de cartões de Reels em volta da pessoa (Deps_-cz-Fg, efeito 02). 1080x1920, --alpha.
+     N cartões num anel inclinado centrado no tronco (cx 540, cy 1010): posição, escala, brilho e ordem saem do ângulo de cada um.
+     Rotação contínua. camada=tras desenha só os de trás do eixo (entra com "atras": true, o recorte da pessoa fura);
+     camada=frente só os da frente. Cartão de trás: ~110x200, mais alto; da frente: ~170x310. Nascem pequenos e o anel abre em 0,3 s.
+       img · t0 (0.05) · dur (1.57) · camada tras|frente|todas · n (8) · rev  voltas por segundo (0.4) · raio (400)
+       ?camada=tras&dur=1.57 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;900&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px;background:transparent}
+#stage{padding:0;display:block;overflow:hidden;background:none}
+.cd{position:absolute;left:0;top:0;width:170px;height:310px;border:3px solid #F2F2F2;border-radius:20px;background:var(--ink);overflow:hidden;opacity:0;
+  box-shadow:5px 5px 0 var(--ink)}
+.cd img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cd video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cd i{position:absolute;inset:0;background:#000;opacity:0}
+/* forma=pad: o pad de som da página (.bon-bi-pad): creme, borda de tinta, raio 12, sombra dura, ondas e nome */
+.cd.pad{border:4px solid var(--ink);border-radius:14px;background:#F6F3EC;box-shadow:6px 6px 0 var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.cd.pad .on{display:flex;align-items:center;gap:7px;height:62px}
+.cd.pad .on u{display:block;width:10px;height:100%;border-radius:4px;background:var(--ac);transform-origin:50% 50%}
+.cd.pad b{font:700 34px/1 'Space Grotesk',sans-serif;color:var(--ink)}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+const dur = D.n('dur', '1.57'), t0 = D.n('t0', '0.05'), N = D.n('n', '6'), REV = D.n('rev', '0.5'), R = D.n('raio', '410');
+const camada = D.q('camada', 'todas');
+const B = '../../../../.reels-assets/reels/fabrica-';
+const imgs = D.q('img', ['chega-de-editar','quanto-custou','camadas','cracha','a-pergunta','mesmo-video','roteiro','lista-de-pedidos','plantao'].map(n => B + n + '-capa.jpg').join(';')).split(';').filter(Boolean);
+const CX = 540, CY = D.n('cy', '1250'), TILT = D.n('tilt', '260');   // medido na prévia: queixo y~1010, pescoço x 430-650, ombros y~1150. Fundo do anel (y~1110) cruza pescoço/ombros; frente (y~1490) no peito
+const CW = D.n('w', '170'), CH = D.n('h', '310');   // tamanho do cartão; o pad de som usa w/h quase quadrados
+const st = document.getElementById('stage');
+const pads = [];
+const els = [...Array(N).keys()].map(i => {
+  const d = document.createElement('div'); d.className = 'cd'; d.style.width = CW + 'px'; d.style.height = CH + 'px';
+  const src = imgs[i % imgs.length];
+  if (src.startsWith('pad:')) {   // pad:Nome — ondas que pulsam + o nome
+    d.classList.add('pad');
+    d.innerHTML = '<span class="on">' + '<u></u>'.repeat(5) + '</span><b>' + src.slice(4) + '</b><i></i>';
+    pads.push({u: [...d.querySelectorAll('u')], i});
+  } else if (/\.(mp4|webm)$/i.test(src)) {
+    d.innerHTML = '<video src="' + src + '" muted playsinline preload="auto" data-off="' + ((i % 4) * .1) + '"></video><i></i>';
+    D._videos.push(d.firstChild);
+  } else d.innerHTML = '<img src="' + src + '"><i></i>';
+  st.appendChild(d); return d;
+});
+function pos(p) {   // p = segundos desde t0
+  const a = Math.min(1, p / .3), ab = 1 - Math.pow(1 - a, 3);   // abertura do anel, ease-out
+  els.forEach((d, i) => {
+    const th = 2 * Math.PI * (i / N + REV * p + .06), z = Math.cos(th);   // z>0 frente
+    const ok = camada == 'todas' || (camada == 'frente') == (z >= 0);
+    const sc = (.62 + .48 * (z + 1) / 2) * (.4 + .6 * ab);
+    const x = CX + R * ab * Math.sin(th), y = CY + TILT * z * ab - 30 * (1 - ab);
+    d.style.opacity = ok ? Math.min(1, p / .04) : 0;
+    d.style.transform = `translate(${x - CW / 2}px,${y - CH / 2}px) scale(${sc}) rotate(${Math.sin(th) * 4}deg)`;
+    d.lastChild.style.opacity = .3 * (1 - (z + 1) / 2);
+  });
+}
+function ondas(p) { pads.forEach(q => q.u.forEach((u, k) => u.style.transform = 'scaleY(' + (.3 + .7 * Math.abs(Math.sin(p * 9 + k * 1.3 + q.i))) + ')')); }
+const o = {p: 0};
+D.monta(tl => {
+  tl.fromTo(o, {p: 0}, {p: dur - t0, duration: dur - t0, ease: 'none', onUpdate: () => { pos(o.p); ondas(o.p); }}, t0);
+  pos(0); D.cue(t0, 'swish');
+  return dur;
+});
+</script>
+</body>
+</html>

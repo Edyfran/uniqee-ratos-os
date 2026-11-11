@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<!-- EFEITO — linha do tempo de editor, na faixa de baixo (clone do "NLE timeline"). 1080x1920, --alpha.
+     Um cartão escuro com cabeçalho (nome + timecode), régua, e 5 trilhas: título (amarelo), clipes (papel), quadros
+     do vídeo, e duas ondas de áudio. Entra já aberto e vazio; as trilhas de baixo enchem da esquerda pra direita
+     em ~0,12 s; a barra amarela e a onda amarela chegam; a agulha varre a largura toda em ~0,4 s e o timecode corre
+     até o fim; o cartão achata (65 %) e some. Fica por inteiro abaixo do painel lateral (topo y 1158).
+       nome   o título do cabeçalho (Linha do tempo) · titulo  o texto da barra amarela (abertura do vídeo)
+       clipe  o prefixo dos clipes (c) · n  quantos clipes (24) · fim  o timecode final em s (20.5)
+       img    a imagem dos quadros da trilha de vídeo (../midia/rosto-estudio.png)
+       x  y  w  o canto do cartão (52, 1158, 908) · t0 · varre  quando a agulha começa a varrer (0.5)
+       dur    quanto dura (1.3); a pausa do fim estica, o movimento não
+       ?nome=Linha do tempo&titulo=abertura do vídeo&clipe=c&n=18&fim=20.5&y=1158&dur=1.3 -->
+<html lang="pt-BR" class="alfa tinta">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+.tl{position:absolute;height:311px;background:var(--cod);border-color:var(--ink6);--sh:8px;overflow:visible;transform-origin:50% 100%}
+.tl>.in{position:absolute;inset:0;overflow:hidden;border-radius:calc(var(--raio) - 4px)}
+.ti{position:absolute;left:18px;top:6px;font:700 24px/1 var(--fd);letter-spacing:-.01em;color:#fff;height:34px;display:flex;align-items:center}
+.tc{position:absolute;left:0;right:0;top:6px;height:34px;text-align:center;font:600 24px/34px var(--fm);letter-spacing:.04em;color:var(--mk)}
+.fer{position:absolute;right:20px;top:6px;height:34px;display:flex;align-items:center;gap:22px}
+.fer svg{width:20px;height:20px;fill:none;stroke:var(--cod-cm);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.fer .zm{width:110px;height:2px;background:var(--cod-ln);position:relative;margin-left:8px}
+.fer .zm i{position:absolute;right:0;top:-7px;width:16px;height:16px;border-radius:50%;background:#fff}
+.reg{position:absolute;left:0;right:0;top:40px;height:32px;border-top:2px solid var(--cod2);border-bottom:2px solid var(--cod2)}
+.reg b{position:absolute;top:9px;font:500 14px/1 var(--fm);color:var(--cod-cm);transform:translateX(3px)}
+.reg i{position:absolute;bottom:0;width:1px;height:8px;background:var(--cod-ln)}
+.reg i.g{height:14px}
+.rot{position:absolute;left:4px;width:52px;height:30px;border-radius:6px;background:var(--cod2);color:var(--cod-cm);
+  font:600 15px/30px var(--fm);padding-left:10px}
+.rot:after{content:"";position:absolute;right:9px;top:12px;width:7px;height:7px;border-radius:50%;background:var(--cod-ln)}
+.fx{position:absolute;left:69px;width:830px;overflow:hidden}
+.tt{border-radius:6px;background:var(--mk);color:var(--ink);font:600 16px/30px var(--fm);padding-left:8px;white-space:nowrap;overflow:hidden}
+.cl{display:flex;gap:3px}
+.cl div{flex:1;min-width:0;border-radius:4px;background:var(--pp2);color:var(--ink);font:600 13px/28px var(--fm);text-align:center;white-space:nowrap}
+.qd{border-radius:5px;display:flex;gap:1px;border:2px solid var(--cod-ln);overflow:hidden}
+.qd i{flex:1;background-size:cover;background-position:center 22%}
+.on{border-radius:5px;border:2px solid var(--cod-ln);background:var(--cod2);position:relative}
+.on i{position:absolute;width:3px;border-radius:2px;top:50%;transform:translateY(-50%)}
+.ag{position:absolute;top:34px;width:2px;height:268px;background:var(--no);left:69px}
+.ag:before{content:"";position:absolute;left:-8px;top:0;width:18px;height:20px;background:var(--no);clip-path:polygon(0 0,100% 0,100% 55%,50% 100%,0 55%)}
+</style>
+</head>
+<body>
+<div id="stage"><div class="tl nb cor-ink" id="tl"><div class="in" id="in">
+  <div class="ti" id="ti"></div><div class="tc" id="tc">00:00:00:00</div>
+  <div class="fer">
+    <svg viewBox="0 0 24 24"><path d="M5 3l14 9-6 1.5L10 20z"/></svg>
+    <svg viewBox="0 0 24 24"><path d="M12 3v18M7 12l5-5 5 5-5 5z"/></svg>
+    <svg viewBox="0 0 24 24"><path d="M9 8H7a4 4 0 000 8h2M15 8h2a4 4 0 010 8h-2M8 12h8"/></svg>
+    <div class="zm"><i></i></div>
+  </div>
+  <div class="reg" id="reg"></div>
+  <div id="trs"></div>
+  <div class="ag" id="ag"></div>
+</div></div></div>
+<script>
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const $ = id => document.getElementById(id);
+const dur = D.n('dur', '1.3'), t0 = D.n('t0', '0'), varre = D.n('varre', '0.5'), fim = D.n('fim', '20.5');
+const N = Math.max(4, Math.round(D.n('n', '24'))), pre = D.q('clipe', 'c');
+$('ti').textContent = D.q('nome', 'Linha do tempo');
+const tl = $('tl'); tl.style.left = D.n('x', '52') + 'px'; tl.style.top = D.n('y', '1158') + 'px'; tl.style.width = D.n('w', '908') + 'px';
+// régua: marcas a cada segundo, número a cada 5
+$('reg').innerHTML = Array.from({length: 21}, (_, s) => {
+  const x = 69 + s * 830 / 20;
+  return `<i class="${s % 5 ? '' : 'g'}" style="left:${x}px"></i>` + (s % 5 ? '' : `<b style="left:${x}px">0:${String(s).padStart(2, '0')}</b>`);
+}).join('');
+// ondas: picos deterministas (a mesma onda toda vez)
+const onda = (n, cor, k, seed) => { let s = seed, h = ''; for (let i = 0; i < n; i++) {
+  s = (s * 9301 + 49297) % 233280; const r = s / 233280, env = .35 + .65 * Math.abs(Math.sin(i * k));
+  const a = Math.max(.1, Math.min(1, r * .5 + env * .55)); h += `<i style="left:${4 + i * (822 / n)}px;height:${(a * 100).toFixed(0)}%;background:${cor}"></i>`; } return h; };
+const clipes = Array.from({length: N}, (_, i) => `<div>${esc(pre)}${String(i + 1).padStart(2, '0')}</div>`).join('');
+const trilhas = [
+  ['V3', 77, 30, `<div class="tt" id="t3">${esc(D.q('titulo', 'abertura do vídeo'))}</div>`, 'v3'],
+  ['V2', 124, 28, `<div class="cl" id="t2" style="height:28px">${clipes}</div>`, 'v2'],
+  ['V1', 167, 33, `<div class="qd" id="t1" style="height:33px">${Array.from({length: 54}, () => `<i style="background-image:url('${esc(D.q('img', '../midia/rosto-estudio.png'))}')"></i>`).join('')}</div>`, 'v1'],
+  ['A1', 214, 32, `<div class="on" id="a1" style="height:32px">${onda(118, 'var(--cod-cm)', .55, 7)}</div>`, 'a1'],
+  ['A2', 260, 32, `<div class="on" id="a2" style="height:32px">${onda(205, 'var(--mk)', 1.1, 31)}</div>`, 'a2'],
+];
+$('trs').innerHTML = trilhas.map(([n, y, h, c]) => `<div class="rot" style="top:${y}px;height:${h}px;line-height:${h}px">${n}</div><div class="fx" style="top:${y}px;height:${h}px">${c}</div>`).join('');
+
+D.monta(tl_ => {
+  const T = D.tl, a0 = D.at(t0);
+  // entra já aberto: só aparece (sem queda), as trilhas ainda vazias
+  T.set('#tl', {opacity: 1}, 0);
+  const f1 = a0 + .12;  // V2, V1, A1 enchem da esquerda pra direita, linear
+  ['t2', 't1', 'a1'].forEach(id => T.fromTo('#' + id, {clipPath: 'inset(0 100% 0 0)'}, {clipPath: 'inset(0 0% 0 0)', duration: .12, ease: 'none'}, f1));
+  D.cue(f1, 'click');
+  // a barra amarela e a onda amarela chegam juntas
+  const f2 = f1 + .25;
+  T.fromTo('#t3', {clipPath: 'inset(0 100% 0 0)'}, {clipPath: 'inset(0 0% 0 0)', duration: .12, ease: 'none'}, f2);
+  T.fromTo('#a2', {clipPath: 'inset(0 100% 0 0)'}, {clipPath: 'inset(0 0% 0 0)', duration: .14, ease: 'none'}, f2);
+  // a agulha varre a régua inteira; o timecode corre junto
+  const v = Math.max(f2 + .12, a0 + varre), dv = .4;
+  T.set('#ag', {opacity: 0}, 0); T.set('#ag', {opacity: 1}, v);
+  T.fromTo('#ag', {x: 0}, {x: 830, duration: dv, ease: 'power1.inOut'}, v);
+  D.cue(v, 'swish');
+  const ag = {p: 0}; T.fromTo(ag, {p: 0}, {p: 1, duration: dv, ease: 'power1.inOut'}, v);
+  D.aoQuadro(() => {
+    const t = D.tl.time(), p = t < v ? 0 : t > v + dv ? 1 : ag.p, seg = p * fim, F = 30;
+    const f = Math.floor(seg * F), p2 = n => String(n).padStart(2, '0');
+    $('tc').textContent = `00:00:${p2(Math.floor(f / F))}:${p2(f % F)}`;
+  });
+  // saída: achata a 65 % e some, no fim da janela (a pausa estica, o movimento não)
+  const s = Math.max(v + dv + .1, a0 + dur - .3);
+  T.to('#tl', {scaleY: .65, duration: .1, ease: 'power2.in'}, s);
+  T.to('#tl', {opacity: 0, duration: .06, ease: 'none'}, s + .1);
+  return Math.max(dur, s + .2);
+});
+</script>
+</body>
+</html>

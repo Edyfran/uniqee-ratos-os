@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<!-- EFEITO — cantoneiras / mira de foco. 1080x1920, --alpha.
+     Quatro cantos amarelos com contorno preto nascem longe e tortos e TRAVAM
+     no retângulo (r=x,y,l,a) com mola — o olho vai junto. Travado, pulsa.
+     Casa com um punch na mesma janela.
+       ?r=240,420,600,700&rot=FOCO&t=0.05&dur=1.4 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+.cn{position:absolute;width:150px;height:150px;opacity:0}
+.cn svg{width:100%;height:100%;overflow:visible;display:block}
+.fo{fill:none;stroke:var(--ink);stroke-width:30;stroke-linecap:square}
+.fr{fill:none;stroke:var(--mk);stroke-width:18;stroke-linecap:square}
+.tag{position:absolute;padding:12px 18px;font:700 34px/1 var(--fm);letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;opacity:0}
+.tag:empty{display:none}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+const dur = D.n('dur', '1.4'), t0 = D.n('t', '0.05');
+const [x, y, w, h] = D.q('r', '240,420,600,700').split(',').map(Number);
+const cx = x + w / 2, cy = y + h / 2, S = 150;
+const L = 'M 10 140 L 10 10 L 140 10';
+const cantos = [['tl', x, y, 0], ['tr', x + w - S, y, 90], ['br', x + w - S, y + h - S, 180], ['bl', x, y + h - S, 270]];
+const st = document.getElementById('stage');
+cantos.forEach(([id, l, t, r]) => st.insertAdjacentHTML('beforeend',
+  `<div class="cn" id="${id}" style="left:${l}px;top:${t}px"><svg viewBox="0 0 150 150" style="transform:rotate(${r}deg)"><path class="fo" d="${L}"></path><path class="fr" d="${L}"></path></svg></div>`));
+st.insertAdjacentHTML('beforeend', `<span class="tag nb cor-mk" id="tg" style="left:${x}px;top:${y + h + 28}px">${D.q('rot', 'foco')}</span>`);
+
+D.monta(tl => {
+  cantos.forEach(([id, l, t], i) => {
+    const dx = (l + S / 2 - cx) * .55, dy = (t + S / 2 - cy) * .55;
+    tl.fromTo('#' + id, {opacity: 0, x: dx, y: dy, rotation: i % 2 ? 20 : -20, scale: 1.2},
+      {opacity: 1, x: 0, y: 0, rotation: 0, scale: 1, duration: .38, ease: 'back.out(2.2)'}, D.at(t0) + i * .02);
+  });
+  D.cue(t0 + .15, 'click');
+  if (D.q('rot', 'foco')) D.carimbo('#tg', t0 + .3, D.P.ROT);
+  const n = Math.floor((dur - .5 - (t0 + .5)) / .5);
+  if (n > 0) cantos.forEach(([id, l, t]) => {
+    const dx = (l + S / 2 - cx) * .04, dy = (t + S / 2 - cy) * .04;
+    tl.to('#' + id, {x: dx, y: dy, duration: .25, ease: 'sine.inOut', yoyo: true, repeat: n * 2 - 1}, t0 + .5);
+  });
+  if (D.q('sai', '1') !== '0') {
+    cantos.forEach(([id, l, t]) => tl.to('#' + id, {opacity: 0, x: (l + S / 2 - cx) * .3, y: (t + S / 2 - cy) * .3, duration: .22, ease: 'power2.in'}, dur - .35));
+    tl.to('#tg', {opacity: 0, duration: .15}, dur - .35);
+  }
+  return dur;
+});
+</script>
+</body>
+</html>

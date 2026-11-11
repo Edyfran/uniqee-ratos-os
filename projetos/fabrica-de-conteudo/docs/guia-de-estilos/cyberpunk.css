@@ -1,0 +1,49 @@
+/* Cyberpunk: noite de neon. Chão roxo-preto com linha de varredura, título em caixa alta
+   angulosa com a cor separada em magenta e ciano, e cada objeto com a sombra dobrada nas duas
+   cores, como imagem com defeito.
+   Copie para marca/tema.css e troque as quatro cores (docs/guia-de-estilos.md).
+   As letras moram em tools/video-use/assets/fontes/: copie cada arquivo do url() pra
+   marca/fontes/, com o <Família>-OFL.txt do lado. */
+
+@font-face{font-family:'Marca';font-weight:600;src:url(fontes/ChakraPetch-SemiBold.ttf) format('truetype')}
+@font-face{font-family:'MarcaApoio';font-weight:100 499;src:url(fontes/IBMPlexMono-Regular.ttf) format('truetype')}
+@font-face{font-family:'MarcaApoio';font-weight:500 900;src:url(fontes/IBMPlexMono-SemiBold.ttf) format('truetype')}
+
+html.marca{
+  /* as quatro cores: chão (escuro), letra (clara), bloco (magenta), marcador (ciano) */
+  --pp:#0B0618; --ink:#F3F0FF; --ac:#E21CC0; --mk:#19E8FF;
+  --sur:color-mix(in srgb,var(--pp) 86%,var(--ac)); --ink9:var(--pp);
+  --ink6:color-mix(in srgb,var(--ink) 66%,var(--pp)); --ink4:color-mix(in srgb,var(--ink) 45%,var(--pp));
+  --ink2:color-mix(in srgb,var(--ink) 16%,var(--pp));
+  --ac2:color-mix(in srgb,var(--ac) 30%,var(--pp)); --act:color-mix(in srgb,var(--ac) 40%,var(--pp));
+  --no2:color-mix(in srgb,var(--no) 25%,var(--pp));
+  --fd:'Marca',system-ui,sans-serif; --fm:'MarcaApoio',ui-monospace,monospace; --ls:-.01em;
+
+  /* a forma: filete, sombra dura dobrada, canto reto, varredura e névoa magenta */
+  --bw:2px; --sh:6px; --sombra:var(--mk); --raio:0px; --raio-s:0px; --lado:var(--ac);
+  --tex:repeating-linear-gradient(0deg,color-mix(in srgb,var(--ink) 5%,transparent) 0 2px,transparent 2px 7px),
+        radial-gradient(90% 50% at 85% 100%,color-mix(in srgb,var(--ac) 34%,transparent),transparent 70%),
+        radial-gradient(70% 40% at 0% 0%,color-mix(in srgb,var(--mk) 18%,transparent),transparent 70%);
+  font-synthesis:none;
+
+  /* o reel editorial e a capa: o painel também escurece */
+  --ed-sans:'Marca',system-ui,sans-serif;
+  --ed-pp:var(--pp); --ed-pp-luz:color-mix(in srgb,var(--pp) 85%,var(--ac)); --ed-folha:transparent;
+  --ed-tx:var(--ink);
+  --ed-dg-apaga-tx:linear-gradient(180deg,#FFFFFF 0%,rgba(255,255,255,.82) 42%,rgba(255,255,255,.2) 95%);
+  --ed-dg-azul:linear-gradient(180deg,color-mix(in srgb,var(--ac) 40%,white) 0%,var(--ac) 70%);
+  --ed-dg-ouro:linear-gradient(180deg,color-mix(in srgb,var(--mk) 30%,white) 8%,var(--mk) 58%,color-mix(in srgb,var(--mk) 70%,black) 100%);
+  --ed-dg-some-azul:linear-gradient(180deg,var(--ac) 0%,color-mix(in srgb,var(--ac) 55%,transparent) 55%,color-mix(in srgb,var(--ac) 6%,transparent) 100%);
+  --ed-dg-some-ouro:linear-gradient(180deg,var(--mk) 0%,color-mix(in srgb,var(--mk) 55%,transparent) 55%,color-mix(in srgb,var(--mk) 6%,transparent) 100%);
+}
+html.marca body{color:var(--ink)}
+/* a sombra dobrada: ciano pra um lado, magenta pro outro; o --shx é o que o D.pousa anima */
+html.marca .nb,html.marca .btn{border-color:var(--mk);box-shadow:var(--shx,var(--sh)) var(--shx,var(--sh)) 0 var(--mk),
+  calc(var(--shx,var(--sh))*-1) calc(var(--shx,var(--sh))*-.6) 0 var(--ac)}
+html.marca .nb.cor-ac{color:#fff}
+html.marca .nb.cor-mk{color:var(--ink9)}
+html.marca .nb.cor-ink{background:var(--ink9);color:var(--ink)}
+html.marca .hd,html.marca .big{text-transform:uppercase;text-shadow:.04em 0 0 color-mix(in srgb,var(--ac) 85%,transparent),-.04em 0 0 color-mix(in srgb,var(--mk) 85%,transparent)}
+html.marca .hd b,html.marca .mkr{color:var(--ink9);text-shadow:none}
+html.marca .kick{background:var(--ac);color:#fff;border:0;box-shadow:calc(var(--sh)*.6) calc(var(--sh)*.6) 0 var(--mk)}
+html.marca .ic{background:none;color:var(--mk);border:2px solid var(--mk)}

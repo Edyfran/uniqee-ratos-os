@@ -1,0 +1,52 @@
+/* Tech: tela escura de produto de software. Chão quase preto com grade fina e um brilho
+   em cima, cartão escuro com filete fino, e luz em volta no lugar da sombra. Título em sem
+   serifa firme, apoio em monoespaçada, o marcador em cor neon.
+   Copie para marca/tema.css e troque as quatro cores (docs/guia-de-estilos.md).
+   As letras moram em tools/video-use/assets/fontes/: copie cada arquivo do url() pra
+   marca/fontes/, com o <Família>-OFL.txt do lado. */
+
+@font-face{font-family:'Marca';font-weight:600;src:url(fontes/Inter-opsz-wght.ttf) format('truetype')}
+@font-face{font-family:'MarcaApoio';font-weight:100 499;src:url(fontes/IBMPlexMono-Regular.ttf) format('truetype')}
+@font-face{font-family:'MarcaApoio';font-weight:500 900;src:url(fontes/IBMPlexMono-SemiBold.ttf) format('truetype')}
+
+html.marca{
+  /* as quatro cores: chão (escuro), letra (clara), bloco, marcador */
+  --pp:#060A12; --ink:#E7EEF8; --ac:#2F6BFF; --mk:#4BF0C8;
+  /* o cartão é o chão um tom acima; a letra que senta no marcador é a do chão */
+  --sur:color-mix(in srgb,var(--pp) 90%,var(--ac)); --ink9:var(--pp);
+  --ink6:color-mix(in srgb,var(--ink) 66%,var(--pp)); --ink4:color-mix(in srgb,var(--ink) 45%,var(--pp));
+  --ink2:color-mix(in srgb,var(--ink) 16%,var(--pp));
+  --ac2:color-mix(in srgb,var(--ac) 30%,var(--pp)); --act:color-mix(in srgb,var(--ac) 40%,var(--pp));
+  --no2:color-mix(in srgb,var(--no) 25%,var(--pp));
+  --fd:'Marca',system-ui,sans-serif; --fm:'MarcaApoio',ui-monospace,monospace; --ls:-.035em;
+
+  /* a forma: filete fino, luz no lugar da sombra, canto médio, grade com brilho em cima */
+  --bw:1px; --sh:0px; --sombra:transparent; --raio:12px; --raio-s:6px; --lado:var(--ink2);
+  --tex:radial-gradient(120% 55% at 50% 0%,color-mix(in srgb,var(--ac) 32%,transparent),transparent 62%),
+        linear-gradient(color-mix(in srgb,var(--ink) 6%,transparent) 1px,transparent 1px) 0 0/54px 54px,
+        linear-gradient(90deg,color-mix(in srgb,var(--ink) 6%,transparent) 1px,transparent 1px) 0 0/54px 54px;
+  font-synthesis:none;
+
+  /* o reel editorial e a capa: o painel também escurece */
+  --ed-sans:'Marca',system-ui,sans-serif;
+  --ed-pp:var(--pp); --ed-pp-luz:color-mix(in srgb,var(--pp) 85%,var(--ac)); --ed-folha:transparent;
+  --ed-tx:var(--ink);
+  --ed-dg-apaga-tx:linear-gradient(180deg,#FFFFFF 0%,rgba(255,255,255,.82) 42%,rgba(255,255,255,.2) 95%);
+  --ed-dg-azul:linear-gradient(180deg,color-mix(in srgb,var(--ac) 40%,white) 0%,var(--ac) 70%);
+  --ed-dg-ouro:linear-gradient(180deg,color-mix(in srgb,var(--mk) 30%,white) 8%,var(--mk) 58%,color-mix(in srgb,var(--mk) 70%,black) 100%);
+  --ed-dg-some-azul:linear-gradient(180deg,var(--ac) 0%,color-mix(in srgb,var(--ac) 55%,transparent) 55%,color-mix(in srgb,var(--ac) 6%,transparent) 100%);
+  --ed-dg-some-ouro:linear-gradient(180deg,var(--mk) 0%,color-mix(in srgb,var(--mk) 55%,transparent) 55%,color-mix(in srgb,var(--mk) 6%,transparent) 100%);
+}
+html.marca body{color:var(--ink)}
+/* o objeto brilha: filete na cor do bloco e luz em volta */
+html.marca .nb{border-color:color-mix(in srgb,var(--ac) 60%,transparent);
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--ac) 14%,transparent),0 0 38px color-mix(in srgb,var(--ac) 30%,transparent)}
+html.marca .nb.cor-ac{color:#fff;box-shadow:0 0 44px color-mix(in srgb,var(--ac) 65%,transparent)}
+html.marca .nb.cor-mk{color:var(--ink9);box-shadow:0 0 44px color-mix(in srgb,var(--mk) 55%,transparent)}
+html.marca .nb.cor-ink{background:var(--ink9);color:var(--ink)}
+html.marca .kick{background:color-mix(in srgb,var(--mk) 12%,transparent);color:var(--mk);
+  border:1px solid color-mix(in srgb,var(--mk) 65%,transparent);box-shadow:0 0 20px color-mix(in srgb,var(--mk) 35%,transparent)}
+html.marca .ic{background:color-mix(in srgb,var(--mk) 12%,transparent);color:var(--mk);border:1px solid color-mix(in srgb,var(--mk) 65%,transparent)}
+html.marca .hd b,html.marca .mkr{color:var(--ink9)}
+html.marca .hd i{color:var(--mk);text-shadow:0 0 28px color-mix(in srgb,var(--mk) 60%,transparent)}
+html.marca .btn{box-shadow:0 0 44px color-mix(in srgb,var(--ac) 60%,transparent)}

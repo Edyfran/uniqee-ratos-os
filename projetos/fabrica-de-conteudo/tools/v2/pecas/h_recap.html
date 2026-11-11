@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<!-- GANCHO — recap: o que você aprendeu. 1920x1080, papel (ou ?alfa=1).
+     O título sobe e é grifado; cada item pousa e ganha o ✓ verde carimbado;
+     no pé, o cartão tinta da próxima aula.
+       ?kick=recap&hd=O que você <b>aprendeu</b>&it=Receber dados por webhook;Ligar o Claude no fluxo;Salvar numa planilha;Avisar por e-mail
+        &prox=Agente com memória&t0=0.2&dur=5.5
+     Itens com @tempo entram no tempo dado; prox=- tira o cartão. -->
+<html lang="pt-BR" class="h">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/direcao-h.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+.rc{position:absolute;inset:0;padding:110px 140px calc(var(--yt-pe) + 16px);display:flex;flex-direction:column}
+.rc .hd{font-size:96px;margin-bottom:56px}
+.gr{display:grid;grid-template-columns:1fr 1fr;gap:26px 34px}
+.it{display:flex;align-items:center;gap:22px;padding:22px 26px;opacity:0}
+.it .ic{width:62px;height:62px;background:var(--ok);color:#fff;font-size:34px;opacity:0}
+.it .nm{font:700 36px/1.15 var(--fd);letter-spacing:-.02em;color:var(--ink)}
+.prox{margin-top:auto;align-self:flex-start;display:flex;align-items:center;gap:20px;padding:18px 28px;opacity:0}
+.prox span{font:700 22px/1 var(--fm);letter-spacing:.1em;text-transform:uppercase;color:var(--mk)}
+.prox b{font:700 38px/1 var(--fd);letter-spacing:-.02em;color:#fff}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="rc"><div class="kick" id="k"></div><div class="hd" id="hd"></div><div class="gr" id="gr"></div><div class="prox nb cor-ink" id="px"><span>próxima aula</span><b id="pb"></b></div></div>
+</div>
+<script>
+const dur = D.n('dur', '5.5'), t0 = D.n('t0', '0.2'), $ = id => document.getElementById(id);
+$('k').textContent = D.q('kick', 'recap');
+$('hd').innerHTML = D.q('hd', 'O que você <b>aprendeu</b>');
+const its = D.itens('it', 'Receber dados por webhook;Ligar o Claude no fluxo;Salvar numa planilha;Avisar por e-mail', ['nm']);
+its.forEach(o => $('gr').insertAdjacentHTML('beforeend', `<div class="it nb"><div class="ic">✓</div><div class="nm">${o.nm}</div></div>`));
+const prox = D.q('prox', 'Agente com memória');
+if (prox === '-') $('px').remove(); else $('pb').textContent = prox;
+
+D.monta(tl => {
+  D.carimbo('#k', t0, 0);
+  const fim = D.titulo('#hd', t0 + .12, .07);
+  const els = [...document.querySelectorAll('.it')];
+  let tu = fim;
+  els.forEach((el, i) => {
+    const t = isNaN(its[i].t) ? fim + .15 + i * .32 : its[i].t;
+    D.pousa(el, t, {dy: -30});
+    D.carimbo(el.querySelector('.ic'), t + .2, 0);
+    tu = Math.max(tu, t);
+  });
+  if ($('px')) D.pousa('#px', tu + .5, {dy: -30, som: 'pop'});
+  D.sai(['#k', '#hd', '.it', '#px'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

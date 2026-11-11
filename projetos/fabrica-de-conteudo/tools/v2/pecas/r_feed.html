@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<!-- PROVA — o feed recebendo os posts agendados, um a um. 1080x1920, --alpha.
+     Um cartão neobrutal (não imita app nenhum): no alto a etiqueta das redes, embaixo uma fileira de
+     janelas 9:16 vazias, tracejadas. Em cada `cai` o vídeo do dia cai na janela dele, a etiqueta do dia
+     carimba no pé e o placar soma uma rede por vez (vídeos × redes); no primeiro, o ✓ acende na etiqueta de
+     cada rede. Na janela só vai o dia: selo por janela saía miúdo demais pro celular. Depois do último,
+     o cartão respira até sair. Entra quando a fala diz que o agente agendou.
+       img    "url;url;…" os vídeos, um por janela (de 2 a 4)
+       dia    "TER 14h;QUA 14h;…" a etiqueta de cada um (vazio: nenhuma)
+       redes  "TikTok|Instagram" as etiquetas do alto, uma por rede
+       cai    "0.9;1.6;2.3" quando cada vídeo cai (sem: um a cada 0,6 s depois do cartão)
+       fileiras  1 (padrão): uma fila só, as redes nas etiquetas do alto · redes: uma fila por rede, cada uma
+              com a etiqueta dela, o vídeo cai nas duas, o dia vai no alto das janelas da 1ª fila e o placar
+              sobe pro topo do cartão (a versão alta, que enche a tela; com topo=490, toda letra fica acima de
+              y 1200, e só a imagem das janelas da última fila desce pra faixa da legenda do Instagram)
+       topo   o y do cartão (560)
+       placar o rótulo do placar ("posts agendados"; vazio: sem placar) · t0 · dur
+       ?img=../midia/vitrine-quanto-custou.jpg;../midia/vitrine-cracha.jpg;../midia/vitrine-a-pergunta.jpg&dia=TER 14h;QUA 14h;QUI 14h&redes=TikTok|Instagram&cai=0.9;1.6;2.3&placar=posts agendados&t0=0.2&dur=4.4 -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+#stage{padding:0;display:block;overflow:hidden}
+#cartao{position:absolute;left:70px;right:70px;top:560px;padding:34px 34px 38px;opacity:0}
+#redes{display:flex;gap:16px;justify-content:center;margin-bottom:30px}
+#redes .kick{margin:0;font-size:44px;opacity:0}
+#fila{position:relative;display:flex;flex-direction:column;gap:22px}
+.fl{display:flex;gap:24px;justify-content:center}
+.linha .rot{display:block;width:max-content;margin:0 0 12px;font-size:44px;opacity:0}
+.jn{position:relative;flex:0 0 auto;border:5px dashed var(--ink);border-radius:var(--raio);opacity:.0}
+.jn .jan{position:absolute;inset:-5px;overflow:hidden;border-radius:var(--raio);opacity:0}
+.jn .dia{position:absolute;left:50%;bottom:18px;margin:0;font-size:40px;white-space:nowrap;transform:translateX(-50%);z-index:2}
+.alta .jn .dia{bottom:auto;top:16px}
+.alta #placar{margin:0 0 18px}
+.kick .v{display:inline-block;margin-left:.35em;color:var(--ok);opacity:0}
+#placar{display:flex;align-items:baseline;justify-content:center;gap:18px;margin-top:24px;opacity:0}
+#placar .n{font:900 80px/1 var(--fd);color:var(--ink)}
+#placar .r{font:700 44px/1 var(--fd);color:var(--ink)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="cartao" class="nb"><div id="redes"></div><div id="fila"></div><div id="placar"><span class="n">0</span><span class="r"></span></div></div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const dur = D.n('dur', '4.4'), t0 = D.n('t0', '0.2');
+const imgs = D.q('img', ['quanto-custou', 'cracha', 'a-pergunta'].map(n => `../midia/vitrine-${n}.jpg`).join(';'))
+  .split(';').filter(Boolean).slice(0, 4);
+const N = Math.max(2, imgs.length);
+const dias = D.q('dia', 'TER 14h;QUA 14h;QUI 14h').split(';').map(s => s.trim());
+const redes = D.q('redes', 'TikTok|Instagram').split('|').map(s => s.trim()).filter(Boolean);
+const ts = D.q('cai', '').split(';').filter(s => s.trim() !== '').map(Number);
+const quando = i => Number.isFinite(ts[i]) ? ts[i] : t0 + .7 + i * .6;
+const rot = D.q('placar', 'posts agendados');
+
+const alta = D.q('fileiras', '1') === 'redes';
+if (alta) document.body.classList.add('alta');
+const chip = r => `<span class="kick${alta ? ' rot' : ''}">${r}<b class="v">✓</b></span>`;
+if (alta) $('redes').remove(); else $('redes').innerHTML = redes.map(chip).join('');
+// a janela: 9:16, a maior que cabe em 872 de largura (o cartão menos a borda) com a fila inteira
+const G = 24, JW = Math.min(alta ? 230 : 240, (872 - (N - 1) * G) / N), JH = JW * 16 / 9;
+// filas[k][i]: a janela do vídeo i na fila k (uma fila por rede na versão alta, uma só na outra)
+$('cartao').style.top = D.n('topo', '560') + 'px';
+const filas = (alta ? redes : [null]).map((r, f) => {
+  const l = document.createElement('div');
+  l.className = 'linha';
+  l.innerHTML = (r ? chip(r) : '') + '<div class="fl"></div>';
+  $('fila').appendChild(l);
+  return Array.from({length: N}, (_, i) => {
+    const e = document.createElement('div');
+    e.className = 'jn';
+    Object.assign(e.style, {width: JW + 'px', height: JH + 'px'});
+    e.innerHTML = '<div class="jan"></div>' + (dias[i] && !f ? `<span class="kick dia">${dias[i]}</span>` : '');
+    l.querySelector('.fl').appendChild(e);
+    D.midia(e.querySelector('.jan'), imgs[i] || '', 'vídeo ' + (i + 1));
+    return e;
+  });
+});
+if (rot) $('placar').querySelector('.r').textContent = rot; else $('placar').remove();
+if (alta && rot) $('cartao').prepend($('placar'));
+const jns = filas.flat();
+
+D.monta(tl => {
+  D.pousa('#cartao', t0, {dy: 40, rot: 0, som: 'whoosh'});
+  D.lista(alta ? '.linha .rot' : '#redes .kick', t0 + .15, .08);
+  tl.to(jns, {opacity: 1, duration: .2, stagger: .03}, D.at(t0 + .2));
+  if (rot) tl.to('#placar', {opacity: 1, duration: .2}, D.at(t0 + .3));
+  // cada vídeo cai na janela dele (nas filas de todas as redes, uma logo depois da outra), o dia carimba e o
+  // placar soma uma rede por vez; no primeiro, o ✓ acende na etiqueta de cada rede
+  const vs = [...document.querySelectorAll('.kick .v')];
+  let feitos = 0;
+  for (let i = 0; i < N; i++) {
+    const t = quando(i);
+    filas.forEach((fila, f) => {
+      const e = fila[i], tf = t + f * .12;
+      D.pousa(e.querySelector('.jan'), tf, {dy: -60, rot: 0, s: 1.08, som: f ? undefined : 'pop'});
+      tl.to(e, {borderColor: 'transparent', duration: .1}, D.at(tf) + .1);
+      if (e.querySelector('.dia')) D.carimbo(e.querySelector('.dia'), tf + .25, -3);
+    });
+    redes.forEach((_, k) => {
+      const tk = t + .4 + k * .14;
+      if (i === 0 && vs[k]) tl.fromTo(vs[k], {opacity: 0, scale: .4}, {opacity: 1, scale: 1, duration: .22, ease: D.P.POUSA}, D.at(tk));
+      if (rot) {
+        const n = ++feitos;
+        tl.set('#placar .n', {textContent: n}, D.at(tk));
+        tl.fromTo('#placar .n', {scale: 1.25}, {scale: 1, duration: .25, ease: D.P.POUSA}, D.at(tk));
+      }
+    });
+    D.cue(t + .4, 'ding');
+  }
+  // depois do último, o cartão respira: nenhum trecho fica parado
+  const fim = quando(N - 1) + .4 + redes.length * .14 + .2 + (filas.length - 1) * .12;
+  if (dur - .5 > fim + .3) D.respira('#cartao', fim, dur - .5, 1.02);
+  D.sai(['#cartao'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

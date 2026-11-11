@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<!-- EFEITO — linhas de velocidade / zoom lines. 1080x1920, --alpha.
+     Raios de mangá que convergem pro rosto (c=x,y), deixando livre um miolo
+     de raio `r`. Entram de fora pra dentro e TREMULAM a 15 quadros/s — cada
+     quadro sorteia de novo (semente fixa: o render é sempre igual).
+       ?c=540,760&r=430&n=46&cor=#FFFFFF&t=0&dur=0.9 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+svg{position:absolute;inset:0;width:1080px;height:1920px;opacity:0}
+.lo{stroke:var(--ink);stroke-linecap:round}
+.li{stroke-linecap:round}
+</style>
+</head>
+<body>
+<div id="stage"><svg id="sv" viewBox="0 0 1080 1920"><g id="g"></g></svg></div>
+<script>
+const dur = D.n('dur', '0.9'), t0 = D.n('t', '0');
+const [cx, cy] = D.q('c', '540,760').split(',').map(Number);
+const R0 = D.n('r', '430'), N = parseInt(D.q('n', '46'), 10), cor = D.q('cor', '#FFFFFF');
+const RMAX = 2300;
+const g = document.getElementById('g');
+const ls = [];
+for (let i = 0; i < N; i++) {
+  g.insertAdjacentHTML('beforeend', `<line class="lo" id="o${i}"></line><line class="li" id="i${i}" stroke="${cor}"></line>`);
+  ls.push([document.getElementById('o' + i), document.getElementById('i' + i)]);
+}
+const sorteio = s => { const x = Math.sin(s * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+D.monta(tl => {
+  const o = {k: 0, p: 0};
+  const pinta = () => {
+    const q = Math.floor(o.k * 15);          // 15 sorteios por segundo
+    ls.forEach(([a, b], i) => {
+      const ang = (i + sorteio(i * 3.1 + q) * .7) / N * Math.PI * 2;
+      const r1 = R0 * (1 + .35 * (1 - o.p)) + sorteio(i + q * 7.3) * 160;
+      const larg = 6 + sorteio(i * 1.7 + q * 2.1) * 16;
+      const x1 = cx + Math.cos(ang) * r1, y1 = cy + Math.sin(ang) * r1;
+      const x2 = cx + Math.cos(ang) * RMAX, y2 = cy + Math.sin(ang) * RMAX;
+      [a, b].forEach((l, j) => { l.setAttribute('x1', x1); l.setAttribute('y1', y1); l.setAttribute('x2', x2); l.setAttribute('y2', y2); l.setAttribute('stroke-width', j ? larg : larg + 8); });
+    });
+  };
+  pinta();
+  tl.fromTo('#sv', {opacity: 0}, {opacity: 1, duration: .06}, D.at(t0));
+  tl.fromTo(o, {k: 0}, {k: dur, duration: dur, ease: 'none', onUpdate: pinta}, 0);
+  tl.fromTo(o, {p: 0}, {p: 1, duration: .25, ease: 'expo.out'}, D.at(t0));
+  D.cue(t0, 'whoosh');
+  if (D.q('sai', '1') !== '0') tl.to('#sv', {opacity: 0, duration: .12}, dur - .15);
+  return dur;
+});
+</script>
+</body>
+</html>

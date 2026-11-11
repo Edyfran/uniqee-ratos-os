@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<!-- AULA — o rosto de quem fala, sem câmera: a foto num círculo e um anel que pulsa com a voz,
+     como a ligação de vídeo com a câmera desligada. Enche o cartão da chapa na aula narrada
+     (a voz clonada sobre a tela), sem gerar avatar. 1080x1350, mas desenha em vw: renderize
+     no tamanho do cartão (--ar 628x784). ?onda= é a voz medida, um dígito de 0 a 9 a cada
+     1/ofps s (sai do áudio, ex. astats); sem ela, o anel respira devagar. ?foco=x,y é onde está o
+     rosto na foto (0 a 1) e ?z= o quanto aproxima.
+       ?foto=../midia/vitrine-cracha.jpg&foco=0.5,0.4&z=1.4&nome=Matheus&onda=0013579865320013689975310&ofps=15&dur=4 -->
+<html lang="pt-BR" class="h">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:100vw;height:100vh;margin:0;overflow:hidden}
+#stage{width:100vw;height:100vh;padding:0;display:block;background:var(--ac)}
+.ct{position:absolute;left:50%;top:48%;width:64vw;height:64vw;transform:translate(-50%,-50%)}
+.an{position:absolute;inset:-5.5vw;border-radius:50%;border:2.6vw solid var(--mk)}
+.an.eco{border-width:1.2vw;opacity:0}
+.ft{position:absolute;inset:0;border-radius:50%;overflow:hidden;border:1.4vw solid var(--ink);
+    box-shadow:2vw 2vw 0 var(--ink);background:var(--pp)}
+.ft .mid{width:100%;height:100%}
+.nm{position:absolute;left:0;right:0;bottom:7%;text-align:center}
+.nm span{display:inline-block;padding:1.6vw 3vw;font:700 4.6vw/1 var(--fm);letter-spacing:.08em;
+    text-transform:uppercase;background:var(--pp);color:var(--ink);border:.8vw solid var(--ink)}
+.nm span:empty{display:none}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="ct"><div class="an eco" id="eco"></div><div class="an" id="an"></div><div class="ft" id="ft"></div></div>
+  <div class="nm"><span id="nm"></span></div>
+</div>
+<script>
+const dur = D.n('dur', '4'), ofps = D.n('ofps', '15'), $ = id => document.getElementById(id);
+const ft = D.midia('#ft', D.q('foto'), 'foto de quem fala', 'cover');
+const [fx, fy] = D.q('foco', '0.5,0.4').split(',').map(Number);
+if (ft) Object.assign(ft.style, {objectPosition: `${fx * 100}% ${fy * 100}%`,
+                                 transformOrigin: `${fx * 100}% ${fy * 100}%`, transform: `scale(${D.n('z', '1')})`});
+$('nm').textContent = D.q('nome', '');
+// a voz em 0..1; sem ?onda=, uma respiração lenta pra a prévia não ficar morta
+const onda = [...D.q('onda', '')].map(c => +c / 9).filter(v => !isNaN(v));
+const nivel = t => {
+  if (!onda.length) return .25 + .25 * Math.sin(t * 2.4);
+  const x = t * ofps, i = Math.min(Math.floor(x), onda.length - 1), j = Math.min(i + 1, onda.length - 1);
+  return onda[i] + (onda[j] - onda[i]) * (x - i);
+};
+
+D.monta(tl => {
+  const o = {t: 0};
+  const pinta = () => {
+    const v = nivel(o.t);
+    // o anel cresce e engrossa com a voz (cor cheia: o amarelo meio apagado no azul vira bege); o eco só aparece no pico, mais largo e apagado
+    gsap.set('#an', {scale: 1 + .1 * v, borderWidth: (1.6 + 1.6 * v) + 'vw'});
+    gsap.set('#eco', {scale: 1.06 + .16 * v, opacity: Math.max(0, v - .55) * 1.2});
+  };
+  pinta();
+  tl.fromTo(o, {t: 0}, {t: dur, duration: dur, ease: 'none', onUpdate: pinta}, 0);
+  return dur;
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<!-- EFEITO — antes e depois: a barra de luz vertical que varre o quadro da direita pra esquerda e os dois rótulos de vidro (clone do
+     efeito 13 do De25fKeTRl7, ficha 14: 30 qps medidos quadro a quadro). 1080x1920, --alpha. A COR "depois" não é desta peça: é o passo `cor`
+     do plano (grade.py, `varre`), que anda na mesma tabela de posições; a peça só pinta a luz, os rótulos e o empurrão.
+     Linha do tempo (quadro 0 = o rótulo "antes" surge): "antes" f0-f2 (borrão de 2 quadros) · barra acende em x 905 no f4 e FICA parada 5 quadros
+     (antecipação) · "depois" surge no f6-f7 · a barra arranca no f9, acelera (17, 39, 78, 128, 193 px por quadro), alarga de 14 a 164 px sem
+     perder brilho, segura 3 quadros em x ~150 e sai pela esquerda no f21 · o rótulo "antes" é EMPURRADO pra fora pela barra (a borda direita
+     dele fica 25 px à esquerda da barra) · "depois" fica até o fim da peça e some de uma vez com ela. A espera de antes da varredura estica
+     repetindo o último valor das listas (quem monta o plano faz isso, e põe a mesma lista no passo `cor`).
+       xs  ws  ps  por quadro, a partir do f4: o x do centro da barra (px), a largura a meio de altura (px) e o brilho de pico (0-1).
+                   Sem eles, a tabela medida na ref (a mesma do `familia1-plano.json`)
+       ka  kb    os rótulos (antes, depois)
+       y  o centro dos rótulos (1096) · xa  a esquerda do "antes" (55) · xb  a direita do "depois" (978) · dur
+     etiqueta: antes-depois, barra-de-luz
+       ?ka=antes&kb=depois&dur=1.2 -->
+<html lang="pt-BR" class="alfa" data-qa="fica">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block;overflow:hidden;position:relative}
+#c{position:absolute;left:0;top:0;width:1080px;height:1920px}
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="c" width="1080" height="1920"></canvas></div>
+<script>
+const $ = id => document.getElementById(id);
+const MK = D.css('--mk') || '#F2C744', AC = D.css('--ac') || '#0640FB';   // o amarelo e o azul são os do núcleo (docs/direcao.md); da ref fica a mecânica
+const dur = D.n('dur', String(36 / 30));
+const ka = D.q('ka', 'antes'), kb = D.q('kb', 'depois');
+const YC = D.n('y', '1096'), XA = D.n('xa', '55'), XB = D.n('xb', '978');
+
+// a barra, medida na ref (f456 = quadro 4): x do centro (média do que a ficha mediu por limiar e do pico da diferença contra o f455),
+// largura a meio de altura e brilho de pico relativo ao parado (pico da diferença)
+const XS0 = [905, 905, 906, 905, 902, 889, 849, 783, 662, 457, 302, 210, 163, 154, 150, 119, 61, -15];
+const WS0 = [13, 13, 13, 13, 13, 26, 49, 91, 134, 163, 150, 100, 55, 30, 24, 70, 60, 15];
+const PS0 = [1, 1, 1, 1, 1, .97, .96, .94, .90, .87, .63, .59, .69, .73, .71, .60, .53, .46];
+const lista = (nome, pad) => { const v = D.q(nome, '').split(',').filter(s => s.trim() !== '').map(Number); return v.length ? v : pad; };
+const XS = lista('xs', XS0), WS = lista('ws', WS0), PS = lista('ps', PS0);
+const barraEm = k => (k >= 4 && k - 4 < XS.length) ? [k, XS[k - 4], WS[k - 4] || 14, PS[k - 4] || .6] : null;
+const xBarra = k => { const b = barraEm(k); return b ? b[1] : (k >= 4 + XS.length ? -200 : null); };
+
+const cv = $('c'), ctx = cv.getContext('2d');
+const gauss = (d, s) => Math.exp(-0.5 * (d / s) * (d / s));
+// o perfil horizontal da luz (alfa 0-1) de uma barra de largura W em x0, na altura onde a luz é plena: núcleo + duas caudas. Ajuste de três gaussianas
+// à régua do juiz (barra parada, f457: a média da diferença contra o f455 entre y 1250 e 1900, em fração do pico): largura a meia altura 13 px; 0,52 a 6 px,
+// 0,385 a 12, 0,245 a 20, 0,18 a 30, 0,14 a 45, 0,105 a 60, 0,05 a 90, ~0 a 120. Em movimento o núcleo vira um platô de largura W - 13 (a ref alarga sem
+// perder brilho). A: o alfa do centro (a ref soma 124 de luz no pico; a nossa base é mais escura, então 0,64 de branco dá a mesma soma)
+const AMP = 0.83, DOME = 0.25;   // DOME: o platô da barra larga cai 25% nas pontas; sem isso o pico medido por coluna cai em qualquer ponto do platô (a base não é uniforme) e a posição lida pula 100 px
+function perfil(x0, W, pico) {
+  const a = new Uint8ClampedArray(1080 * 4), h = Math.max(0, (W - 13) / 2);
+  for (let x = 0; x < 1080; x++) {
+    const e = Math.max(0, Math.abs(x + .5 - x0) - h), cupula = h > 0 ? 1 - DOME * Math.min(1, ((x + .5 - x0) / h) ** 2) : 1;
+    const v = Math.min(.99, AMP * cupula * (.44 * gauss(e, 2.2) + .34 * gauss(e, 9.5) + .22 * gauss(e, 50)) * pico);
+    a[x * 4] = a[x * 4 + 1] = a[x * 4 + 2] = 255; a[x * 4 + 3] = Math.round(255 * v);
+  }
+  return a;
+}
+const ENVV = [[0.026, 0.473], [0.078, 0.481], [0.130, 0.427], [0.182, 0.505], [0.234, 0.216], [0.286, 0.266], [0.339, 0.281], [0.391, 0.631], [0.443, 0.622], [0.495, 0.557], [0.547, 0.893], [0.599, 1.000], [0.651, 0.969], [0.703, 0.898], [0.755, 0.815], [0.807, 0.716], [0.859, 0.602], [0.911, 0.520], [0.964, 0.414], [0.995, 0.406]];
+const lin = document.createElement('canvas'); lin.width = 1080; lin.height = 1;
+const off = document.createElement('canvas'); off.width = 1080; off.height = 1920;
+function luz(x0, W, pico) {
+  lin.getContext('2d').putImageData(new ImageData(perfil(x0, W, pico), 1080, 1), 0, 0);
+  const o = off.getContext('2d');
+  o.globalCompositeOperation = 'source-over'; o.clearRect(0, 0, 1080, 1920);
+  o.drawImage(lin, 0, 0, 1080, 1, 0, 0, 1080, 1920);
+  // o perfil vertical da luz: fraca nas duas pontas, com o pico no meio e embaixo (a ref soma, no centro da barra e em faixas de 200 px, 55 72 32 63 96 135 129 111 86 69 de
+  // luminância de y 0 a 2000; a faixa de y 400 a 600 cai nos dois pelo painel de vidro do selo). Pontos no centro de cada faixa, em y/1920
+  const g = o.createLinearGradient(0, 0, 0, 1920);
+  ENVV.forEach(([p, v]) => g.addColorStop(p, `rgba(0,0,0,${v})`));
+  o.globalCompositeOperation = 'destination-in'; o.fillStyle = g; o.fillRect(0, 0, 1080, 1920);
+  o.globalCompositeOperation = 'source-over';
+  ctx.drawImage(off, 0, 0);
+}
+
+// o rótulo de vidro: pílula de 72 px, branco a 15% com borda de 1,5 px a 40%, ponto e texto branco pesado
+function pilula(x, y, txt, pontoCor, alfa) {
+  if (alfa <= 0) return 0;
+  ctx.save(); ctx.globalAlpha = alfa;
+  ctx.font = '800 43px "Space Grotesk", sans-serif';
+  const tw = ctx.measureText(txt).width, w = Math.round(tw + 112), h = 72, r = h / 2;
+  const x0 = x, y0 = y - h / 2;
+  const caminho = () => { ctx.beginPath(); ctx.roundRect(x0, y0, w, h, r); };
+  caminho(); ctx.fillStyle = 'rgba(20,20,22,.34)'; ctx.fill();                     // o vidro escurece um pouco o que está atrás
+  caminho(); ctx.fillStyle = 'rgba(255,255,255,.17)'; ctx.fill();
+  const gr = ctx.createLinearGradient(0, y0, 0, y0 + h); gr.addColorStop(0, 'rgba(255,255,255,.55)'); gr.addColorStop(1, 'rgba(255,255,255,.28)');
+  caminho(); ctx.lineWidth = 1.6; ctx.strokeStyle = gr; ctx.stroke();
+  ctx.beginPath(); ctx.arc(x0 + 34, y, 7.5, 0, Math.PI * 2); ctx.fillStyle = pontoCor; ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.textBaseline = 'middle'; ctx.shadowColor = 'rgba(0,0,0,.28)'; ctx.shadowBlur = 6;
+  ctx.fillText(txt, x0 + 58, y + 2);
+  ctx.restore();
+  return w;
+}
+
+function desenha(t) {
+  const kk = Math.round(t * 30), k = kk;
+  ctx.clearRect(0, 0, 1080, 1920);
+  // a barra
+  const b = barraEm(k);
+  if (b && kk >= 4) luz(b[1], b[2], b[3]);
+  if (kk === 4) { ctx.fillStyle = 'rgba(255,255,255,.04)'; ctx.fillRect(0, 0, 905, 1920); }   // o f456: o lado esquerdo clareia uns 8%
+  // "antes": surge em 3 quadros e a barra o empurra pra fora quando chega na borda direita dele
+  const aA = kk <= 0 ? .22 : kk === 1 ? .7 : 1;
+  ctx.font = '800 43px "Space Grotesk", sans-serif';
+  const wA = Math.round(ctx.measureText(ka).width + 112), xr = XA + wA;
+  const bx = xBarra(k);
+  const empurra = (bx !== null && kk >= 4) ? Math.min(0, bx - 25 - xr) : 0;
+  if (xr + empurra > -10) pilula(XA + empurra, YC, ka, 'rgba(176,176,176,.95)', aA);
+  // "depois": f6 fraco, f7 em diante nítido; fica até o fim
+  const aB = kk < 6 ? 0 : kk === 6 ? .22 : kk === 7 ? .7 : 1;
+  const wB = Math.round(ctx.measureText(kb).width + 112);
+  pilula(XB - wB, YC, kb, MK, aB);
+}
+
+D.monta(tl => {
+  const P = {t: 0};
+  tl.to(P, {t: dur, duration: dur, ease: 'none', onUpdate: () => desenha(P.t)}, 0);
+  desenha(0);
+  const F = f => f / 30;
+  D.cue(F(4), 'shimmer');                  // a barra acende
+  D.cue(F(9) - .02, 'whoosh');             // e arranca
+  D.cue(F(7), 'click');                    // o "depois" assenta
+  return dur;
+});
+</script>
+</body>
+</html>

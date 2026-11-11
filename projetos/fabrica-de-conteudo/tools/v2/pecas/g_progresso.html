@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<!-- GANCHO — barra de capítulo. 1080x1920, --alpha.
+     N segmentos no topo: os já vistos são tinta, o atual ENCHE de amarelo.
+     O número do capítulo rola do anterior pro atual, e o nome sobe por
+     palavra. Serve de marco de retenção: "estamos aqui, falta isso".
+       ?cap=2&total=5&nome=Os agentes&pos=topo&t=0.2&dur=3.5 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+.zona{position:absolute;left:56px;right:70px;display:flex;flex-direction:column;align-items:flex-start;gap:22px}
+.zona.topo{top:120px}
+.zona.base{top:1560px}
+.segs{display:flex;gap:12px;width:100%}
+.sg{flex:1;height:34px;border-radius:8px;overflow:hidden;opacity:0;position:relative;box-shadow:5px 5px 0 var(--ink)}
+.sg i{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--ink)}
+.sg.at i{background:var(--mk)}
+.tag{display:flex;align-items:center;gap:22px;padding:16px 26px 16px 16px;opacity:0}
+.tag .n{display:flex;align-items:center;gap:6px;padding:10px 14px;font:700 36px/1 var(--fm);border-radius:var(--raio-s)}
+.jan{height:1em;overflow:hidden}
+.jan .ro{display:flex;flex-direction:column}
+.jan .ro span{height:1em;display:block}
+.tag b{font:700 54px/1.05 var(--fd);letter-spacing:var(--ls);white-space:nowrap;opacity:0}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="zona" id="z">
+    <div class="segs" id="sgs"></div>
+    <div class="tag nb" id="tg"><span class="n nb cor-ink"><span class="jan"><span class="ro" id="ro"></span></span><span id="tt"></span></span><b id="nm"></b></div>
+  </div>
+</div>
+<script>
+const dur = D.n('dur', '3.5'), t0 = D.n('t', '0.2');
+const total = Math.max(1, parseInt(D.q('total', '5'), 10)), cap = Math.min(total, Math.max(1, parseInt(D.q('cap', '2'), 10)));
+document.getElementById('z').classList.add(D.q('pos') === 'base' ? 'base' : 'topo');
+const sgs = document.getElementById('sgs');
+for (let i = 1; i <= total; i++) sgs.insertAdjacentHTML('beforeend', `<span class="sg nb${i === cap ? ' at' : ''}" id="s${i}"><i></i></span>`);
+const pad = n => String(n).padStart(2, '0');
+document.getElementById('ro').innerHTML = `<span>${pad(Math.max(0, cap - 1))}</span><span>${pad(cap)}</span>`;
+document.getElementById('tt').textContent = '/' + pad(total);
+document.getElementById('nm').textContent = D.q('nome', 'Os agentes');
+
+D.monta(tl => {
+  D.cabe('.tag b', 32, ['.zona', .7]);
+  for (let i = 1; i <= total; i++) {
+    tl.fromTo('#s' + i, {opacity: 0, scaleX: .2, transformOrigin: 'left center'}, {opacity: 1, scaleX: 1, duration: .32, ease: D.P.EASE}, D.at(t0) + (i - 1) * .05);
+    if (i < cap) tl.fromTo(`#s${i} i`, {width: '0%'}, {width: '100%', duration: .3, ease: 'power2.out'}, D.at(t0) + .15 + (i - 1) * .06);
+  }
+  D.pousa('#tg', t0 + .25, {rot: D.P.ROT, dy: -24, som: 'pop'});
+  tl.fromTo('#ro', {yPercent: 0}, {yPercent: -50, duration: .45, ease: D.P.MOLA}, D.at(t0) + .55);
+  D.palavras('#nm', t0 + .5);
+  tl.fromTo(`#s${cap} i`, {width: '0%'}, {width: '100%', duration: .9, ease: 'expo.out'}, D.at(t0) + .6);
+  D.cue(t0 + .6, 'swish');
+  D.sai(['#sgs', '#tg'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

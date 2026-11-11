@@ -1,0 +1,40 @@
+/* Quadrinhos: página de gibi. Papel jornal com retícula de pontos, contorno preto bem grosso,
+   título em letra de balão, amarelo com contorno e sombra preta, e a etiqueta como balão de
+   fala com a pontinha embaixo.
+   Copie para marca/tema.css e troque as quatro cores (docs/guia-de-estilos.md).
+   As letras moram em tools/video-use/assets/fontes/: copie cada arquivo do url() pra
+   marca/fontes/, com o <Família>-OFL.txt do lado. */
+
+@font-face{font-family:'Marca';font-weight:400;src:url(fontes/Bangers-Regular.ttf) format('truetype')}
+@font-face{font-family:'MarcaApoio';font-weight:700 1000;src:url(fontes/Nunito-Variable.ttf) format('truetype')}
+
+html.marca{
+  /* as quatro cores: chão, letra e contorno, bloco, marcador */
+  --pp:#FFF3D6; --ink:#111111; --ac:#F2620F; --mk:#FFDE2E;
+  --ink9:var(--ink); --sur:#FFFFFF;
+  --ac2:color-mix(in srgb,var(--ac) 16%,white); --act:color-mix(in srgb,var(--ac) 26%,white);
+  --fd:'Marca',Impact,sans-serif; --fm:'MarcaApoio',system-ui,sans-serif; --ls:.02em;
+
+  /* a forma: contorno grosso, sombra preta, canto quase reto, retícula de pontos */
+  --bw:5px; --sh:9px; --raio:6px; --raio-s:4px;
+  --tex:radial-gradient(circle,color-mix(in srgb,var(--ac) 30%,transparent) 0 3.5px,transparent 4px) 0 0/18px 18px;
+  font-synthesis:none;
+
+  /* o reel editorial e a capa */
+  --ed-sans:'Marca',Impact,sans-serif;
+  --ed-pp:var(--pp); --ed-pp-luz:color-mix(in srgb,var(--pp) 40%,white);
+  --ed-tx:var(--ink);
+  --ed-dg-azul:linear-gradient(180deg,color-mix(in srgb,var(--ac) 50%,white) 0%,var(--ac) 70%);
+  --ed-dg-ouro:linear-gradient(180deg,color-mix(in srgb,var(--mk) 30%,white) 8%,var(--mk) 58%,color-mix(in srgb,var(--mk) 80%,black) 100%);
+  --ed-dg-some-azul:linear-gradient(180deg,var(--ac) 0%,color-mix(in srgb,var(--ac) 55%,transparent) 55%,color-mix(in srgb,var(--ac) 6%,transparent) 100%);
+  --ed-dg-some-ouro:linear-gradient(180deg,var(--mk) 0%,color-mix(in srgb,var(--mk) 55%,transparent) 55%,color-mix(in srgb,var(--mk) 6%,transparent) 100%);
+}
+/* o título do gibi: amarelo, contorno preto e sombra seca; o destaque sai na cor do bloco */
+html.marca .hd,html.marca .big{color:var(--mk);-webkit-text-stroke:.05em var(--ink);paint-order:stroke fill;
+  text-shadow:.07em .07em 0 var(--ink)}
+html.marca .hd b,html.marca .mkr{background-image:none;color:var(--ac)}
+/* a etiqueta é balão de fala: branco, contorno, a pontinha embaixo (a etiqueta não se move de lugar) */
+html.marca .kick{position:relative;background:#fff;border-radius:22px;box-shadow:none;letter-spacing:.04em}
+html.marca .kick::after{content:'';position:absolute;left:34px;bottom:-22px;border:12px solid transparent;
+  border-top:14px solid var(--ink);border-left:6px solid var(--ink)}
+html.marca .ic{border-radius:50%}

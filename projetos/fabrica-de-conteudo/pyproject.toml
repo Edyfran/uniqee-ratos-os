@@ -1,0 +1,42 @@
+[project]
+name = "fabrica-de-conteudo"
+version = "0.1.0"
+description = "Fábrica de Conteúdo com IA: reels editados pelo seu agente de IA"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "pillow",
+    "scipy",
+    # transcrição: o large-v3 (~3 GB) baixa na instalação (INSTALAR.md), a menos que haja chave da ElevenLabs
+    "faster-whisper>=1.2.1",
+    # no Mac com chip Apple o transcribe.py usa este, na GPU; no resto da máquina, o faster-whisper
+    "mlx-whisper; sys_platform == 'darwin' and platform_machine == 'arm64'",
+    # o adaptador da ElevenLabs (transcribe_scribe.py) chama a API com ele
+    "requests",
+    # o faster-whisper 1.2.1 abre o áudio com `av.open(..., metadata_errors=)`, que o av 19
+    # tirou: sem o teto, a primeira transcrição de quem instala do zero quebra (03/10/2026)
+    "av<19",
+    # o onnxruntime 1.29+ (VAD do faster-whisper e rembg) traz a telemetria da Microsoft ligada
+    # no macOS, e a thread dela disputa a saída do processo: a transcrição abortava com
+    # `recursive_mutex lock failed` depois de escrever o JSON, uma vez em três (03/10/2026)
+    "onnxruntime<1.29",
+    # render das peças de tools/v2. O Chromium vem à parte: `playwright install chromium`
+    "playwright>=1.60.0",
+    # recorte da pessoa no card `atras` da legenda. Sem o [cpu] não vem o onnxruntime
+    # e na tela dividida (recorte.py): o MODNet (25 MB, ~/.cache/obs-optimize/modelos), o BiRefNet general-lite (224 MB,
+    # ~/.rembg/models) e o SAM 2.1-tiny em ONNX (181 MB, mesma pasta do MODNet; Apache-2.0) baixam sozinhos na 1ª vez.
+    # O rosto vem do YuNet do OpenCV (opencv-python-headless, declarado aqui: a versão do rembg que o aluno recebe pode não o trazer)
+    "rembg[cpu]>=2.0.69",
+    "opencv-python-headless>=4.8",
+    # o logo que a página do onboarding desenha: o nome na letra da marca, virado em contorno
+    # (onboarding.py letra-svg), porque SVG dentro de imagem não carrega fonte de fora
+    "fonttools>=4.50",
+    # o runner único da conferência (confere.py)
+    "pytest>=8",
+    # o Windows não traz a tabela de fusos: sem ela o zoneinfo não acha "America/Sao_Paulo"
+    # e a agenda do módulo de postagens recusa (o testa pegou em 12/10)
+    "tzdata",
+]
+
+[tool.uv]
+package = false

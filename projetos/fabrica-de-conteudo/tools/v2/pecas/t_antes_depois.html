@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<!-- TIPO — antes → depois, v2. 1080x1920.
+     Repensado: o corte seco virou CORTINA. Um bloco preto com bordas amarelas
+     varre o quadro em 0,5s — rápido o bastante pra ler como mudança, não como
+     morph. Por trás dela o antes some e o depois já está lá; o número novo cai
+     com a mola do herói.
+       ?ka=antes&a1=10–12h&a2=por dia&kb=hoje&b1=menos de 4h&b2=horários meus&corte=2.4&dur=5 -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+#stage{align-items:center;text-align:center;padding:0 100px;overflow:hidden}
+.lado{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 100px;visibility:hidden}
+.lado .kick{align-self:center;margin-bottom:44px;font-size:40px}
+.lado .n{font:900 232px/.92 var(--fd);font-stretch:var(--fx);letter-spacing:-.045em;text-transform:uppercase;opacity:0}
+.lado .s{font:700 58px/1.2 var(--fd);color:var(--ink6);margin-top:36px;opacity:0}
+#antes .kick{background:var(--sur);color:var(--ink4);border-color:var(--ink4);box-shadow:none}
+#antes .n{color:var(--ink4)}
+#antes .s{color:var(--ink4)}
+#depois .n{color:var(--ac);text-shadow:.035em .035em 0 var(--ink)}
+.cortina{position:absolute;top:-10%;bottom:-10%;left:-10%;right:-10%;background:var(--ink);z-index:9;
+  box-shadow:48px 0 0 var(--mk),-48px 0 0 var(--mk)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="lado" id="antes"><div class="kick" id="ka"></div><div class="n" id="a1"></div><div class="s" id="a2"></div></div>
+  <div class="lado" id="depois"><div class="kick" id="kb"></div><div class="n" id="b1"></div><div class="s" id="b2"></div></div>
+  <div class="cortina" id="cu"></div>
+</div>
+<script>
+const corte = D.n('corte', '2.4'), dur = D.n('dur', '5');
+[['ka', 'treinar uma pessoa'], ['a1', 'dura meses'], ['a2', 'e se ela sai, começa do zero'],
+ ['kb', 'ensinar o agente'], ['b1', 'é uma vez só'], ['b2', 'o processo fica registrado']]
+  .forEach(([id, d]) => document.getElementById(id).textContent = D.q(id, d));
+
+D.monta(tl => {
+  D.cabe('.lado .n', 90);
+  D.cabe('.lado .s', 34);
+  D.camera(dur, 1.0, 1.05);
+  tl.set('#antes', {autoAlpha: 1}, 0);
+  D.carimbo('#ka', .12, 0);
+  D.palavras('#a1', .22);
+  D.palavras('#a2', .22 + D.PASSO + .1);
+  // a cortina cobre até o corte, troca por trás, e descobre o depois
+  // a posição de partida mora SÓ aqui: um translate no CSS vira `x` em px pro
+  // GSAP, soma com o xPercent, e a cortina parava em cima do depois
+  gsap.set('#cu', {x: 0, xPercent: -130});
+  tl.fromTo('#cu', {xPercent: -130}, {xPercent: 0, duration: .24, ease: 'power3.in'}, corte - .24);
+  tl.set('#antes', {autoAlpha: 0}, corte);
+  tl.set('#depois', {autoAlpha: 1}, corte);
+  tl.to('#cu', {xPercent: 130, duration: .32, ease: 'power3.out'}, corte);
+  D.carimbo('#kb', corte + .2);
+  D.heroi('#b1', corte + .16);
+  D.palavras('#b2', corte + .45);
+  D.sai(['#kb', '#b1', '#b2'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

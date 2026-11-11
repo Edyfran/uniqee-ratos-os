@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<!-- EFEITO — fundo borrado e frio atrás da pessoa (clone do efeito 03 "vertigo" do De25fKeTRl7, ficha 04: a ref NÃO faz dolly zoom; o fundo borra,
+     escurece e esfria, a pessoa fica como está). 1080x1920, tela cheia, --alpha. VAI COM `atras: true` NO PLANO: a fábrica fura esta peça com o
+     recorte da pessoa e ela passa por cima, sem tratamento nenhum. A peça desenha só o fundo, nos quadros do vídeo-base (`fr`), e o desfoca COM o
+     recorte (`mt`): a pessoa sai do quadro antes de borrar (convolução normalizada, por camadas de raio crescente), então a cor dela não escorre pra
+     borda do fundo (o halo laranja em volta da cabeça e da barba que o juiz viu na 1ª passada).
+     Medido na ref (30 qps; quadro 0 da peça = f127): desfoque de 0 a ~4 px em 3 quadros (f126 a f128), cor do fundo x(0,71 0,83 0,86) com a
+     rampa de 5 quadros (parede 82,83,70 -> 66,73,64 em f128 -> 58,69,60 em f132), deriva de escala 1,00 a 1,02 (centro) de f131 a f143. A saída tem
+     rampa de cor em f144 a f146 (a razão do vermelho do fundo, relativa ao normal: 0,80 em f144, 0,92 em f145, 1,00 em f146) e o desfoque fica até o f145:
+     a nitidez só volta no f146, que é o primeiro quadro depois da peça (ela cobre f127 a f145, 19 quadros).
+       fr    pasta dos quadros do vídeo-base a 30 qps desde o t0 da peça (f000.jpg, f001.jpg…, 1080x1920) ou uma imagem só (foto parada).
+             Sem `fr`, a peça pinta um marcador listrado
+       mt    o recorte da pessoa: PNG branco com alfa (pasta g000.png… ou um arquivo só). Sem ele a peça desfoca o quadro inteiro (como na 1ª passada)
+       blur  o desfoque pleno, em px (4, o medido) · cor  o multiplicador do fundo, R,G,B (0.71,0.83,0.86, o medido) · deriva  quanto o fundo cresce (0.02)
+       dur   duração (0.6333 = 19 quadros)
+     etiqueta: fundo-borrado, atras-da-pessoa, grade-de-cor
+       ?fr=quadros&mt=recorte.png&blur=4&cor=0.71,0.83,0.86&deriva=0.02&dur=0.6333 -->
+<html lang="pt-BR" class="alfa" data-qa="fundo">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block;overflow:hidden;position:relative}
+#c{position:absolute;left:0;top:0;width:1080px;height:1920px}
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="c" width="1080" height="1920"></canvas></div>
+<script>
+const $ = id => document.getElementById(id);
+const dur = D.n('dur', String(19 / 30)), BL = D.n('blur', '4'), DER = D.n('deriva', '0.02');
+const COR = D.q('cor', '0.71,0.83,0.86').split(',').map(Number);
+
+// carrega uma pasta de quadros (prefixo + NNN + ext) ou um arquivo só
+function carrega(param, pref, ext, n) {
+  const v = D.q(param, ''), raiz = v ? (v[0] === '/' ? 'file://' + v : v).replace(/\/$/, '') : '';
+  const unica = /\.(jpe?g|png|webp)$/i.test(raiz), lista = [];
+  if (raiz) for (let i = 0; i < (unica ? 1 : n); i++) {
+    const m = new Image(); m.src = unica ? raiz : raiz + '/' + pref + String(i).padStart(3, '0') + ext; m.style.display = 'none';
+    document.body.appendChild(m); lista.push(m);
+  }
+  return k => lista.length ? lista[Math.min(k, lista.length - 1)] : null;
+}
+const NQ = Math.ceil(dur * 30) + 3, quadro = carrega('fr', 'f', '.jpg', NQ), recorte = carrega('mt', 'g', '.png', NQ);
+
+// as rampas, medidas na ref (j = quadro da peça; j 0 = f127). O desfoque: 3 quadros e fica até o f145. A cor (progresso 0-1 do multiplicador): entra em ~7 quadros
+// (razão do vermelho do fundo na ref: .95 .87 .83 .80 .77 de f127 a f132, estável em .75) e sai em f144 (.80), f145 (.92)
+const RAMPA_BLUR = [.6, .95, 1];
+const RAMPA_COR = [.20, .52, .68, .80, .87, .92, .96];
+const SAIDA_COR = {17: .80, 18: .32};                          // f144, f145; no f146 a peça já acabou (a cor e a nitidez voltam de uma vez)
+const J_DERIVA = [4, 16];                                      // a deriva anda de f131 a f143 e segura
+const blurEm = j => BL * (j < RAMPA_BLUR.length ? RAMPA_BLUR[j] : 1);
+const corEm = j => SAIDA_COR[j] ?? (j < RAMPA_COR.length ? RAMPA_COR[j] : 1);
+const derivaEm = j => DER * Math.max(0, Math.min(1, (j - J_DERIVA[0]) / (J_DERIVA[1] - J_DERIVA[0])));
+
+const CV = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+const M = 28, BW = 1080 + 2 * M, BH = 1920 + 2 * M;            // o quadro com margem de bordas repetidas: o desfoque não puxa transparência pra dentro das beiradas
+const big = CV(BW, BH), bg = big.getContext('2d');
+const furo = CV(BW, BH), fg = furo.getContext('2d');            // o quadro sem a pessoa
+const cam = CV(BW, BH), cg = cam.getContext('2d');              // uma camada borrada
+const base = CV(BW, BH), sg = base.getContext('2d');            // o fundo preenchido: o mais fino por cima, o mais largo por baixo
+const ctx = $('c').getContext('2d');
+
+function margem(g, im) {
+  g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'source-over'; g.filter = 'none'; g.clearRect(0, 0, BW, BH);
+  g.drawImage(im, M, M, 1080, 1920);
+  g.drawImage(im, 0, 0, 1, 1920, 0, M, M, 1920);             g.drawImage(im, 1079, 0, 1, 1920, M + 1080, M, M, 1920);
+  g.drawImage(im, 0, 0, 1080, 1, M, 0, 1080, M);             g.drawImage(im, 0, 1919, 1080, 1, M, M + 1920, 1080, M);
+  g.drawImage(im, 0, 0, 1, 1, 0, 0, M, M);                   g.drawImage(im, 1079, 0, 1, 1, M + 1080, 0, M, M);
+  g.drawImage(im, 0, 1919, 1, 1, 0, M + 1920, M, M);         g.drawImage(im, 1079, 1919, 1, 1, M + 1080, M + 1920, M, M);
+}
+// o recorte dilatado em ~10 px: o desenho dele repetido em volta (um anel de 16 deslocamentos), pra a borda mole da máscara não entrar na média do fundo
+function furaPessoa(g, mt) {
+  g.globalCompositeOperation = 'destination-out'; g.filter = 'none';
+  const R = 10;
+  for (let k = 0; k < 16; k++) { const a = k / 16 * Math.PI * 2; g.drawImage(mt, M + Math.cos(a) * R, M + Math.sin(a) * R, 1080, 1920); }
+  g.drawImage(mt, M, M, 1080, 1920);
+  // a borda do quadro embaixo: a pessoa sai por ali, o furo vai até o pé
+  g.globalCompositeOperation = 'source-over';
+}
+function desenha(t) {
+  const j = Math.round(t * 30), im = quadro(j), mt = recorte(j);
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = 'source-over'; ctx.filter = 'none';
+  ctx.clearRect(0, 0, 1080, 1920);
+  if (!im) {                                                  // sem quadros: o marcador listrado diz o que vai ali
+    ctx.fillStyle = '#2a2d33'; ctx.fillRect(0, 0, 1080, 1920); ctx.fillStyle = '#3a3e46';
+    for (let x = -1920; x < 1080; x += 112) { ctx.beginPath(); ctx.moveTo(x, 1920); ctx.lineTo(x + 56, 1920); ctx.lineTo(x + 1976, 0); ctx.lineTo(x + 1920, 0); ctx.fill(); }
+    return;
+  }
+  margem(bg, im);
+  // a cor primeiro (multiplicar é linear e comuta com o desfoque; o quadro é opaco, então a conta é exata)
+  const p = corEm(j), c = COR.map(m => Math.round(255 * (1 - p * (1 - m))));
+  bg.globalCompositeOperation = 'multiply'; bg.fillStyle = `rgb(${c[0]},${c[1]},${c[2]})`; bg.fillRect(0, 0, BW, BH); bg.globalCompositeOperation = 'source-over';
+  let fonte = big;
+  if (mt) {                                                    // com o recorte: tira a pessoa e desfoca o que sobra por camadas (cada uma preenche o furo da anterior)
+    fg.setTransform(1, 0, 0, 1, 0, 0); fg.globalCompositeOperation = 'source-over'; fg.filter = 'none'; fg.clearRect(0, 0, BW, BH); fg.drawImage(big, 0, 0);
+    furaPessoa(fg, mt);
+    sg.setTransform(1, 0, 0, 1, 0, 0); sg.globalCompositeOperation = 'source-over'; sg.filter = 'none'; sg.clearRect(0, 0, BW, BH);
+    const raios = [BL * 40, BL * 16, BL * 6, blurEm(j)];       // do mais largo ao mais fino; o fino fica por cima
+    raios.forEach(r => {
+      cg.setTransform(1, 0, 0, 1, 0, 0); cg.globalCompositeOperation = 'source-over'; cg.clearRect(0, 0, BW, BH);
+      cg.filter = r > .3 ? `blur(${r.toFixed(2)}px)` : 'none'; cg.drawImage(furo, 0, 0); cg.filter = 'none';
+      sg.drawImage(cam, 0, 0);
+    });
+    fonte = base;
+  } else {
+    sg.setTransform(1, 0, 0, 1, 0, 0); sg.clearRect(0, 0, BW, BH); sg.filter = `blur(${blurEm(j).toFixed(2)}px)`; sg.drawImage(big, 0, 0); sg.filter = 'none'; fonte = base;
+  }
+  const s = 1 + derivaEm(j);
+  ctx.translate(540, 960); ctx.scale(s, s); ctx.translate(-540, -960);
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(fonte, -M, -M);
+}
+
+D.monta(tl => {
+  const P = {t: 0};
+  tl.to(P, {t: dur, duration: dur, ease: 'none', onUpdate: () => desenha(P.t)}, 0);
+  desenha(0);
+  D.cue(0, 'swish');
+  return dur;
+});
+</script>
+</body>
+</html>

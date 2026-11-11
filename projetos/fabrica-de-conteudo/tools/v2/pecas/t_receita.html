@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<!-- TIPO — a receita: o vídeo se enche, ingrediente por ingrediente. 1080x1920.
+     O quadro 9:16 começa vazio, com a régua do lado. Cada ingrediente pousa em cima numa ficha (o
+     nome e a medida), cai dentro do quadro e vira uma faixa que sobe o nível; a medida marca a régua
+     na altura da faixa. Cheio, o vídeo pronto (`img`) sobe por cima das faixas e o `fim` carimba. A
+     conta de um vídeo vista de fora, do quadro vazio ao pronto. Da referência (Skillry #198, #409, a
+     receita que mostra cada ingrediente e a medida entrando no copo vazio) saiu só o movimento.
+       it       "NOME|medida@t;…" de baixo pra cima; t é quando a faixa está no quadro
+       img      o vídeo pronto, 9:16 (vazio: as faixas ficam) · fim  o carimbo (PRONTO; vazio: nenhum)
+       hd       a frase de cima (<b> grifa; vazio: nenhuma) · t_pronto · dur
+       ?it=ROTEIRO|1 pedido@0.8;VOZ|40 s@1.4;ROSTO|avatar@2.0;CENAS|6@2.6;LEGENDA|2 letras@3.2;CAPA|1@3.8&img=../midia/vitrine-semana.jpg&fim=PRONTO&hd=O que vai <b>num vídeo</b>&t_pronto=4.5&dur=5.8 -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+#stage{padding:0;display:block;overflow:hidden}
+#hd{position:absolute;left:var(--marg);right:var(--marg);top:200px;text-align:center;font-size:84px;margin:0}
+#copo{position:absolute;left:130px;top:600px;width:510px;height:906px;opacity:0}
+#cheio{position:absolute;inset:0;overflow:hidden;border-radius:calc(var(--raio) - var(--bw))}
+#copo u{position:absolute;left:0;right:0;top:24px;text-align:center;font:700 28px/1 var(--fm);letter-spacing:.14em;text-decoration:none;color:var(--ink4)}
+.fx{position:absolute;left:0;right:0;border-top:var(--bw) solid var(--ink);display:flex;align-items:center;padding-left:26px;transform-origin:bottom}
+.fx span{font:700 32px/1 var(--fm);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+#pronto{position:absolute;inset:0;clip-path:inset(100% 0 0 0)}
+#regua{position:absolute;left:672px;top:600px;width:6px;height:906px;background:var(--ink);opacity:0}
+.md{position:absolute;left:672px;display:flex;align-items:center;gap:14px;opacity:0}
+.md i{width:34px;height:6px;background:var(--ink)}
+.md b{font:700 36px/1 var(--fm);letter-spacing:.04em;color:var(--ink);background:var(--mk);border:3px solid var(--ink);border-radius:var(--raio-s);padding:10px 14px 8px;white-space:nowrap}
+.fi{position:absolute;left:385px;top:390px;display:flex;flex-direction:column;align-items:center;gap:10px;padding:22px 34px 20px;opacity:0;white-space:nowrap}
+.fi b{font:800 60px/1 var(--fd);letter-spacing:var(--ls)}
+.fi u{font:700 32px/1 var(--fm);letter-spacing:.06em;text-decoration:none;color:var(--ink6)}
+#fim{position:absolute;right:-26px;top:-34px;margin:0;font-size:34px;white-space:nowrap;z-index:3}
+</style>
+</head>
+<body>
+<div id="stage">
+  <h1 class="hd" id="hd"></h1>
+  <div class="nb" id="copo"><div id="cheio"><u>9:16</u><div id="pronto"></div></div><span class="kick" id="fim"></span></div>
+  <div id="regua"></div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const dur = D.n('dur', '5.8'), tPronto = D.n('t_pronto', '4.5');
+const its = D.itens('it', 'ROTEIRO|1 pedido@0.8;VOZ|40 s@1.4;ROSTO|avatar@2.0;CENAS|6@2.6;LEGENDA|2 letras@3.2;CAPA|1@3.8', ['nome', 'md'])
+  .map((o, i) => ({...o, t: isNaN(o.t) ? .8 + i * .6 : o.t}));
+$('hd').innerHTML = D.q('hd', 'O que vai <b>num vídeo</b>');
+if (!$('hd').textContent.trim()) $('hd').remove();
+$('fim').textContent = D.q('fim', 'PRONTO') ? '✓ ' + D.q('fim', 'PRONTO') : '';
+const img = D.q('img', '../midia/vitrine-semana.jpg');
+if (img) D.midia('#pronto', img, 'o vídeo pronto'); else $('pronto').remove();
+// cada faixa tem a mesma altura; a cor anda pelo bloco, o marcador e o apoio
+const H = 906 - 8, hb = H / its.length;
+const COR = [['var(--ac)', '#fff'], ['var(--mk)', 'var(--ink)'], ['var(--ac2)', 'var(--ink)'], ['var(--ink)', '#fff'], ['var(--act)', 'var(--ink)'], ['var(--pp2)', 'var(--ink)']];
+its.forEach((o, i) => {
+  const [bg, cor] = COR[i % COR.length];
+  $('cheio').insertAdjacentHTML('beforeend', `<div class="fx" id="fx${i}" style="bottom:${i * hb}px;height:${hb + 4}px;background:${bg};color:${cor}"><span>${o.nome}</span></div>`);
+  $('stage').insertAdjacentHTML('beforeend', `<div class="md" id="md${i}" style="top:${600 + 4 + H - (i + .5) * hb - 24}px"><i></i><b>${o.md || ''}</b></div>`);
+  $('stage').insertAdjacentHTML('beforeend', `<div class="fi nb" id="fi${i}"><b>${o.nome}</b><u>${o.md || ''}</u></div>`);
+});
+if ($('pronto')) $('cheio').appendChild($('pronto'));   // por cima das faixas
+
+D.monta(tl => {
+  if ($('hd')) D.titulo('#hd', .15);
+  D.pousa('#copo', .2, {dy: -20, s: 1.03, som: 'pop'});
+  tl.fromTo('#regua', {opacity: 0, scaleY: 0, transformOrigin: 'bottom'}, {opacity: 1, scaleY: 1, duration: .45, ease: D.P.EASE}, .3);
+  its.forEach((o, i) => {
+    const fi = $('fi' + i), ta = o.t - .55;
+    gsap.set(fi, {xPercent: -50});
+    // a ficha pousa em cima do quadro, segura, e cai dentro dele até o nível em que vira faixa
+    D.pousa(fi, ta, {dy: -40, rot: i % 2 ? 2 : -2});
+    const nivel = 600 + 4 + H - (i + 1) * hb - 390;
+    tl.to(fi, {y: nivel, scale: .45, rotation: 0, duration: .3, ease: 'power3.in'}, Math.max(0, o.t - .3));
+    tl.to(fi, {opacity: 0, duration: .08}, o.t - .04);
+    tl.fromTo('#fx' + i, {scaleY: 0}, {scaleY: 1, duration: .42, ease: 'expo.out'}, o.t - .04);
+    D.cue(o.t - .04, 'thud');
+    tl.fromTo('#md' + i, {opacity: 0, x: -24}, {opacity: 1, x: 0, duration: .3, ease: D.P.POUSA}, o.t + .02);
+    tl.to('#copo', {y: 6, duration: .06, yoyo: true, repeat: 1, ease: 'power2.out'}, o.t - .04);
+  });
+  if ($('pronto')) {
+    // cheio: o vídeo pronto sobe por cima das faixas
+    tl.to('#pronto', {clipPath: 'inset(0% 0 0 0)', duration: .55, ease: 'power3.inOut'}, D.at(tPronto));
+    D.cue(D.at(tPronto), 'swish');
+    tl.to('#cheio u', {opacity: 0, duration: .2}, D.at(tPronto));
+  }
+  if ($('fim').textContent) D.carimbo('#fim', tPronto + .3, 4);
+  tl.to('#copo', {scale: 1.03, duration: .3, ease: D.P.POUSA}, tPronto + .3);
+  D.sai(['#hd', '#copo', '#regua', '.md'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

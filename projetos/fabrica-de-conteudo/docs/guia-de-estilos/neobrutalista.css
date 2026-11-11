@@ -1,0 +1,30 @@
+/* Neobrutalista: papel claro pontilhado, bloco de cor chapada, marcador, borda grossa e
+   sombra dura, sem desfoque. É a direção padrão da fábrica.
+   Copie para marca/tema.css e troque as quatro cores (docs/guia-de-estilos.md).
+   As letras moram em tools/video-use/assets/fontes/: copie cada arquivo do url() pra
+   marca/fontes/, com o <Família>-OFL.txt do lado. */
+
+@font-face{font-family:'Marca';font-weight:300 700;src:url(fontes/SpaceGrotesk-Variable.ttf) format('truetype')}
+@font-face{font-family:'MarcaApoio';font-weight:100 499;src:url(fontes/IBMPlexMono-Regular.ttf) format('truetype')}
+@font-face{font-family:'MarcaApoio';font-weight:500 900;src:url(fontes/IBMPlexMono-SemiBold.ttf) format('truetype')}
+
+html.marca{
+  /* as quatro cores: chão, letra e borda, bloco, marcador */
+  --pp:#FFFFFF; --ink:#0B0D12; --ac:#0640FB; --mk:#F2C744;
+  --ink9:var(--ink); --sur:var(--pp);
+  --ac2:color-mix(in srgb,var(--ac) 16%,white); --act:color-mix(in srgb,var(--ac) 26%,white);
+  --fd:'Marca',system-ui,sans-serif; --fm:'MarcaApoio',ui-monospace,monospace; --ls:-.035em;
+
+  /* a forma: borda grossa, sombra dura, canto pequeno, papel pontilhado */
+  --bw:4px; --sh:10px; --raio:12px; --raio-s:8px;
+  --dot:color-mix(in srgb,var(--ink) 10%,transparent);
+
+  /* o reel editorial e a capa */
+  --ed-sans:'Marca',system-ui,sans-serif;
+  --ed-pp:color-mix(in srgb,var(--pp) 94%,var(--ink)); --ed-pp-luz:var(--pp);
+  --ed-tx:var(--ink);
+  --ed-dg-azul:linear-gradient(180deg,color-mix(in srgb,var(--ac) 50%,white) 0%,var(--ac) 70%);
+  --ed-dg-ouro:linear-gradient(180deg,color-mix(in srgb,var(--mk) 30%,white) 8%,var(--mk) 58%,color-mix(in srgb,var(--mk) 80%,black) 100%);
+  --ed-dg-some-azul:linear-gradient(180deg,var(--ac) 0%,color-mix(in srgb,var(--ac) 55%,transparent) 55%,color-mix(in srgb,var(--ac) 6%,transparent) 100%);
+  --ed-dg-some-ouro:linear-gradient(180deg,var(--mk) 0%,color-mix(in srgb,var(--mk) 55%,transparent) 55%,color-mix(in srgb,var(--mk) 6%,transparent) 100%);
+}

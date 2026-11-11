@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<!-- ENSAIO — title drop QUIET · cartela. 1920x1080, --alpha (frente).
+     A cena escurece até o preto e a cartela se monta no centro, em silêncio: o
+     rótulo, um fio que se estende, o título e a linha fina, cada um no seu tempo.
+     Depois o preto abre de volta pra cena. É a cartela de documentário.
+       ?titulo=Faturei 1 milhão&kick=um ensaio&sub=e o que isso me ensinou&t0=0.2&dur=4.5 -->
+<html lang="pt-BR" class="h alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/direcao-h.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<script src="../nucleo/ensaio.js"></script>
+<style>
+.pr{position:absolute;inset:0;background:var(--cine);opacity:0}
+.ct{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0}
+.kk{font:600 20px/1 var(--fm);letter-spacing:.5em;text-transform:uppercase;color:var(--cine-tx);padding-left:.5em;opacity:0}
+.fio{width:260px;height:3px;margin:34px 0 38px;background:var(--mk);transform:scaleX(0)}
+.tt{font:600 104px/1 var(--fd);letter-spacing:-.03em;color:#fff;white-space:nowrap;opacity:0}
+.sb{margin-top:30px;font:500 26px/1 var(--fm);letter-spacing:.06em;color:var(--cod-cm);opacity:0}
+.sb:empty{display:none}
+</style>
+</head>
+<body>
+<div id="stage" data-c="frente"><div class="pr" id="pr"></div><div class="ct"><div class="kk" id="kk"></div><div class="fio" id="fio"></div><div class="tt" id="tt"></div><div class="sb" id="sb"></div></div></div>
+<script>
+const dur = D.n('dur', '4.5'), t0 = D.n('t0', '0.2'), $ = id => document.getElementById(id);
+E.pessoa('centro');
+$('tt').textContent = D.q('titulo', 'Faturei 1 milhão');
+$('kk').textContent = D.q('kick', 'um ensaio');
+$('sb').textContent = D.q('sub', 'e o que isso me ensinou');
+D.monta(tl => {
+  D.cabe('#tt', 60, 1);
+  tl.fromTo('#pr', {opacity: 0}, {opacity: 1, duration: .6, ease: 'power1.inOut'}, t0);
+  const a = t0 + .6, sobe = (el, t) => tl.fromTo(el, {opacity: 0, y: 12}, {opacity: 1, y: 0, duration: .9, ease: 'power2.out'}, t);
+  sobe('#kk', a);
+  D.cue(a, 'tom');
+  tl.to('#fio', {scaleX: 1, duration: .8, ease: 'power3.inOut'}, a + .25);
+  sobe('#tt', a + .45);
+  sobe('#sb', a + .85);
+  if (D.q('sai', '1') !== '0') {
+    tl.to('.ct > *', {opacity: 0, duration: .5, ease: 'power1.in'}, dur - 1.1);
+    tl.to('#pr', {opacity: 0, duration: .7, ease: 'power1.inOut'}, dur - .7);
+  }
+  return dur;
+});
+</script>
+</body>
+</html>

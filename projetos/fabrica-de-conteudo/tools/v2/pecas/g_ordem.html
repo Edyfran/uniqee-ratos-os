@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<!-- GANCHO — a ordem de produção. 1080x1920, --alpha.
+     Começa na dor: palavras gigantes, uma por batida, por cima do vídeo em tela cheia (quem compõe
+     põe o vídeo em preto e branco). Em `t_ficha` a ficha de papel cai por cima das palavras: título,
+     linhas numeradas em branco, e embaixo dela a janela do vídeo (vazia, "do zero") com a coluna das
+     skills ao lado. Cada pedido se escreve na linha dele do jeito que se manda mensagem (nada de
+     terminal), ganha ✓, e a skill dele acende na coluna, que conta. No fim o carimbo PRONTO bate na
+     ficha e o campo do agente se preenche. A janela é um buraco: quem compõe põe o vídeo atrás dela.
+       dor      "PALAVRA|…" uma por batida · t_dor  "0,0.6,…" (sem ele, uma a cada 0,6 s) · t_ficha
+       titulo   o cabeçalho (ORDEM DE PRODUÇÃO) · num  o número dela (nº 001)
+       pedidos  "texto|skill|t0|t1;…" — a linha se escreve de t0 a t1, e o ✓ e a skill entram em t1
+       janela   "x,y,l,a" do vídeo · vazio  o rótulo da janela antes do 1º ✓ ("seu reel")
+       rot      o nome da coluna (SKILLS) · t_skills  a coluna inteira pulsa (-1: não)
+       t_pronto o carimbo (-1: não) · pronto  o texto dele · campo  o rótulo do pé (AGENTE)
+       agente   o valor que se escreve no pé · t_agente · dur
+     ?dor=ROTEIRIZAR.|GRAVAR.|EDITAR.|FAZER A CAPA.&t_ficha=2.6&pedidos=faz um reel sobre a Fábrica|roteiro|3.0|3.8;narra com a minha voz|voz|4.1|4.8;me põe falando|avatar|5.1|5.7&janela=40,740,504,897&t_pronto=6.4&agente=Claude Code ou Codex&t_agente=6.9&dur=8 -->
+<html lang="pt-BR" class="alfa" data-qa="entra-seco fica">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block;position:relative;overflow:hidden}
+/* a dor: uma palavra por batida, branca com a sombra dura por cima do vídeo */
+.dor{position:absolute;left:40px;right:40px;top:200px;text-align:center;opacity:0;
+  font:900 150px/1 var(--fd);letter-spacing:var(--ls);color:var(--sur);text-shadow:9px 9px 0 var(--ink);white-space:nowrap}
+/* a ficha */
+.ficha{position:absolute;left:40px;right:40px;top:90px;padding:26px 34px 22px;opacity:0;display:flex;flex-direction:column}
+.cab{display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;margin-bottom:6px;
+  border-bottom:var(--bw) solid var(--ink)}
+.cab .tt{font:700 36px/1 var(--fm);letter-spacing:.1em;text-transform:uppercase;color:var(--ink)}
+.cab .nu{font:600 30px/1 var(--fm);letter-spacing:.06em;color:var(--ink6)}
+.ln{display:flex;align-items:center;gap:20px;flex:1;min-height:0;border-bottom:3px dashed var(--ink2)}
+.ln .ix{flex:none;width:34px;font:700 30px/1 var(--fm);color:var(--ink4)}
+.ln .cx{flex:none;position:relative;width:46px;height:46px;border:var(--bw) solid var(--ink);border-radius:var(--raio-s);background:var(--sur)}
+.ln .cx i{position:absolute;inset:-4px;border-radius:var(--raio-s);display:flex;align-items:center;justify-content:center;
+  font:800 36px/1 var(--fd);font-style:normal;color:var(--sur);background:var(--ok);border:var(--bw) solid var(--ink);transform:scale(0)}
+.ln .tx{flex:1;min-width:0;font:700 46px/1.1 var(--fd);letter-spacing:var(--ls);color:var(--ink);white-space:nowrap}
+.ln .tx .l{display:none}
+.cur{display:inline-block;width:.42em;height:.95em;margin-left:.05em;vertical-align:-.12em;background:var(--ac)}
+.pe{display:flex;align-items:center;gap:22px;padding-top:16px}
+.pe .rt{flex:none;font:700 30px/1 var(--fm);letter-spacing:.1em;text-transform:uppercase;color:var(--ink6)}
+.pe .vl{flex:1;min-width:0;font:700 44px/1.1 var(--fd);letter-spacing:var(--ls);color:var(--ac);white-space:nowrap;
+  border-bottom:3px solid var(--ink);padding-bottom:4px;min-height:52px}
+.pe .vl .l{display:none}
+.carimbo{position:absolute;right:70px;top:250px;padding:14px 34px;font:700 112px/1 var(--fm);letter-spacing:.06em;
+  color:var(--ok);border:12px solid var(--ok);border-radius:var(--raio);background:transparent;opacity:0;white-space:nowrap}
+/* a janela do vídeo: borda e sombra por fora, buraco por dentro */
+.jan{position:absolute;border:6px solid var(--ink);border-radius:var(--raio-s);box-shadow:var(--sh) var(--sh) 0 var(--ink);opacity:0}
+.jan .vazio{border-radius:2px}
+/* a coluna das skills */
+.col{position:absolute;display:flex;flex-direction:column;gap:18px;opacity:1}
+.placar{display:flex;align-items:baseline;justify-content:space-between;padding:18px 24px;opacity:0}
+.placar .rt{font:700 30px/1 var(--fm);letter-spacing:.1em;color:var(--ink6)}
+.placar .n{display:flex;align-items:baseline;font:800 64px/1 var(--fd);letter-spacing:var(--ls);color:var(--ink)}
+.jn{height:1em;overflow:hidden;display:inline-block}
+.jn .ro{display:flex;flex-direction:column}
+.jn .ro span{height:1em;display:block}
+.sk{position:relative;display:flex;align-items:center;gap:16px;padding:0 22px;flex:1;min-height:0;opacity:0;overflow:hidden}
+.sk .lz{flex:none;position:relative;width:30px;height:30px;border:var(--bw) solid var(--ink);border-radius:6px;background:var(--sur);overflow:hidden}
+.sk .lz i{position:absolute;inset:0;background:var(--ac);transform:scale(0)}
+.sk .nm{position:relative;font:700 38px/1 var(--fm);letter-spacing:.06em;text-transform:uppercase;color:var(--ink4);white-space:nowrap}
+.sk .fu{position:absolute;inset:0;background:var(--mk);transform:scaleX(0);transform-origin:left center}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+const $ = id => document.getElementById(id);
+const stage = $('stage'), dur = D.n('dur', '8');
+const esc = s => String(s).replace(/[&<>]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;'}[c]));
+const DOR = D.q('dor', 'ROTEIRIZAR.|GRAVAR.|EDITAR.|FAZER A CAPA.').split('|').filter(Boolean);
+const TD = D.q('t_dor', '') ? D.q('t_dor', '').split(',').map(parseFloat) : DOR.map((_, i) => i * .6);
+const tF = D.n('t_ficha', '2.6');
+const PED = D.q('pedidos', 'faz um reel sobre a Fábrica|roteiro|3.0|3.8;narra com a minha voz|voz|4.1|4.8;me põe falando|avatar|5.1|5.7')
+  .split(';').filter(Boolean).map(s => { const [tx, sk, a, b] = s.split('|'); return {tx, sk, t0: parseFloat(a), t1: parseFloat(b)}; });
+const [jx, jy, jw, jh] = D.q('janela', '40,740,504,897').split(',').map(parseFloat);
+const tPronto = D.n('t_pronto', '6.4'), tAg = D.n('t_agente', '6.9'), tSk = D.n('t_skills', '-1');
+
+DOR.forEach((w, i) => stage.insertAdjacentHTML('beforeend', `<div class="dor" id="d${i}">${esc(w)}</div>`));
+stage.insertAdjacentHTML('beforeend', `
+  <div class="ficha nb" id="fi" style="height:${jy - 24 - 90}px">
+    <div class="cab"><span class="tt">${esc(D.q('titulo', 'ordem de produção'))}</span><span class="nu">${esc(D.q('num', 'nº 001'))}</span></div>
+    ${PED.map((p, i) => `<div class="ln"><span class="ix">${i + 1}</span><span class="cx"><i id="k${i}">✓</i></span><span class="tx" id="t${i}">${esc(p.tx)}</span></div>`).join('')}
+    <div class="pe"><span class="rt">${esc(D.q('campo', 'agente'))}</span><span class="vl" id="ag">${esc(D.q('agente', 'Claude Code ou Codex'))}</span></div>
+    <div class="carimbo" id="pr">${esc(D.q('pronto', 'PRONTO'))}</div>
+  </div>
+  <div class="jan" id="jn" style="left:${jx}px;top:${jy}px;width:${jw}px;height:${jh}px"></div>
+  <div class="col" id="cl" style="left:${jx + jw + 40}px;right:40px;top:${jy}px;height:${Math.min(jh, 1440 - jy)}px">
+    <div class="placar nb" id="pl"><span class="rt">${esc(D.q('rot', 'SKILLS'))}</span><span class="n"><span class="jn"><span class="ro" id="ro">${PED.map((_, i) => `<span>${i}</span>`).join('')}<span>${PED.length}</span></span></span><span>/${PED.length}</span></span></div>
+    ${PED.map((p, i) => `<div class="sk nb" id="s${i}"><span class="fu" id="u${i}"></span><span class="lz"><i id="z${i}"></i></span><span class="nm">${esc(p.sk)}</span></div>`).join('')}
+  </div>`);
+// o vídeo atrás da janela ainda não existe: o padrão listrado diz o que vai nascer ali
+const cx = document.createElement('div');
+cx.className = 'vazio'; cx.id = 'vz';
+cx.innerHTML = `<span>${esc(D.q('vazio', 'seu reel'))}</span>`;
+$('jn').appendChild(cx);
+
+D.monta(tl => {
+  D.cabe('.dor', 80, 1);
+  // todas as linhas no mesmo corpo: o do pedido mais comprido
+  D.cabe('.ln .tx', 34, ['.ln', 1]);
+  const px = Math.min(...[...document.querySelectorAll('.ln .tx')].map(e => parseFloat(getComputedStyle(e).fontSize)));
+  document.querySelectorAll('.ln .tx').forEach(e => e.style.fontSize = px + 'px');
+  D.cabe('.pe .vl', 32, ['.pe', 1]);
+
+  // a dor: cada palavra bate e a anterior recua, apagada, até sumir na seguinte
+  DOR.forEach((w, i) => {
+    const t = TD[i] ?? i * .6, el = '#d' + i;
+    if (i === 0) gsap.set(el, {opacity: 1});
+    else {
+      tl.fromTo(el, {opacity: 0, scale: 1.12}, {opacity: 1, scale: 1, duration: .14, ease: 'power3.out'}, D.at(t) + .1);
+      tl.to('#d' + (i - 1), {opacity: .3, y: -150, scale: .42, duration: .12, ease: 'power2.out'}, D.at(t) + .06);
+      if (i > 1) tl.to('#d' + (i - 2), {opacity: 0, duration: .12}, D.at(t) + .1);
+    }
+    D.cue(t, 'thud');
+  });
+  tl.to('.dor', {opacity: 0, y: '-=60', duration: .18, ease: D.P.SAI}, D.at(tF));
+
+  // a ficha cai por cima, a janela e a coluna chegam em cascata
+  D.pousa('#fi', tF, {dy: -90, som: 'whoosh'});
+  D.pousa('#jn', tF + .12, {dy: 40});
+  D.pousa('#pl', tF + .2, {dy: -30});
+  PED.forEach((_, i) => D.pousa('#s' + i, tF + .26 + i * .06, {dy: -24}));
+  const luzes = PED.map((_, i) => '#z' + i);
+
+  // o texto se escreve de a até b; o cursor anda junto (cada letra aparece por `display`: seekável)
+  const escreve = (el, a, b) => {
+    const tx = el.textContent;
+    el.textContent = '';
+    const ls = [...tx].map(ch => { const s = document.createElement('span'); s.className = 'l'; s.textContent = ch; el.appendChild(s); return s; });
+    const cur = document.createElement('span'); cur.className = 'cur'; cur.style.opacity = 0; el.appendChild(cur);
+    const passo = Math.max(.012, Math.min(.07, (b - .08 - a) / ls.length));
+    tl.set(cur, {opacity: 1}, a);
+    ls.forEach((s, k) => tl.set(s, {display: 'inline'}, a + k * passo));
+    D.cue(a, 'type', {dur: +(ls.length * passo).toFixed(3)});
+    tl.set(cur, {opacity: 0}, b);
+  };
+  PED.forEach((p, i) => {
+    escreve($('t' + i), p.t0, p.t1);
+    // o ✓, a skill acende e a coluna conta
+    tl.to('#k' + i, {scale: 1, duration: .3, ease: D.P.MOLA}, D.at(p.t1));
+    D.cue(p.t1, 'certo');
+    tl.to('#u' + i, {scaleX: 1, duration: .28, ease: D.P.EASE}, D.at(p.t1) + .05);
+    tl.to(luzes[i], {scale: 1, duration: .3, ease: D.P.MOLA}, D.at(p.t1) + .05);
+    tl.to('#s' + i + ' .nm', {color: D.css('--ink'), duration: .1}, D.at(p.t1) + .05);
+    tl.fromTo('#s' + i, {scale: 1}, {scale: 1.06, duration: .12, ease: 'power2.out', yoyo: true, repeat: 1}, D.at(p.t1) + .05);
+    tl.to('#ro', {yPercent: -100 * (i + 1) / (PED.length + 1), duration: .4, ease: D.P.MOLA}, D.at(p.t1));
+    // o vazio da janela some no 1º ✓: o vídeo nasce ali
+    if (i === 0) tl.to('#vz', {opacity: 0, duration: .2, ease: 'none'}, D.at(p.t1));
+  });
+  if (tSk >= 0 && tSk < dur) {
+    PED.forEach((_, i) => tl.fromTo('#s' + i, {x: 0}, {x: -14, duration: .12, ease: 'power2.out', yoyo: true, repeat: 1}, D.at(tSk) + i * .07));
+    D.cue(tSk, 'swish');
+  }
+  if (tPronto >= 0 && tPronto < dur) {
+    // bate grande no meio da ficha e, depois de lido, encolhe pro canto do cabeçalho: as linhas voltam a aparecer
+    D.carimbo('#pr', tPronto, -9);
+    const pr = $('pr'), fi = $('fi');
+    const dx = fi.clientWidth - 34 - (pr.offsetLeft + pr.offsetWidth), dy = 2 - pr.offsetTop;
+    if (tPronto + 1.4 < dur) {
+      tl.to(pr, {scale: .36, x: dx, y: dy, transformOrigin: '100% 0%', duration: .35, ease: D.P.MOLA}, tPronto + 1.2);
+      tl.to('.cab .nu', {opacity: 0, duration: .15}, tPronto + 1.2);
+    }
+  }
+  if (tAg >= 0 && tAg < dur) escreve($('ag'), tAg, Math.min(dur - .05, tAg + .9));
+  return dur;
+});
+</script>
+</body>
+</html>

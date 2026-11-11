@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<!-- EFEITO — cortina antes/depois sobre o vídeo: uma linha vertical com alça cruza o quadro de ponta a ponta, rótulos
+     ANTES e DEPOIS ao lado da alça; a linha fica parada, varre pra esquerda num chicote e some, e o lado "depois"
+     toma o quadro. 1080x1920, --alpha, tela cheia (o painel passa por cima). A lavagem clara e quente do lado
+     "depois" é só uma película de alfa: a gradação de verdade (cor de cada lado) é passo de render, com
+     `grade.py` no trecho da direita. `lavagem=0` tira a película.
+       x     onde a linha fica parada (510) · x2  onde ela chega no chicote (30) · y  a altura da alça (1222)
+       ka  kb  os rótulos (ANTES, DEPOIS) · lavagem  a opacidade da película (0.5; 0 tira)
+       veu  1 (padrão) desenha a película do "depois"; 0 deixa só linha, alça e pílulas (a cor vira passo de render)
+       pausa  quando o chicote começa, em fração de dur (0.417) · chicote  quanto ele dura, em fração de dur (0.1)
+       a linha some no fim do chicote; o véu "depois" fica até `veufim` (0.94 de dur) e sai num fade de 1 quadro
+       tempos em fração de dur: fim da pausa .417 · fim do chicote .517 · fim do véu .94
+       t0  quando entra (0) · dur  (1.2 no original)
+       ?x=510&x2=30&y=1222&ka=ANTES&kb=DEPOIS&lavagem=0.6&veu=1&pausa=0.417&chicote=0.1&dur=1.2 -->
+<html lang="pt-BR" class="alfa" data-qa="fundo">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;padding:0;display:block;overflow:hidden;background:none}
+#w{position:absolute;inset:0;background:#FFF1CC;opacity:0;transform-origin:100% 50%}
+#g{position:absolute;left:0;top:0;width:0;height:1920px}
+#ln{position:absolute;left:-2px;top:0;width:4px;height:1920px;background:#fff;box-shadow:0 0 14px rgba(255,255,255,.7)}
+#al{position:absolute;left:-37px;width:70px;height:70px;border-radius:50%;background:var(--ink);border:3px solid #fff;
+  display:flex;align-items:center;justify-content:center;font:700 26px/1 var(--fm);color:#fff;letter-spacing:-.08em}
+.pl{position:absolute;padding:9px 16px;border-radius:var(--raio-s);background:rgba(11,13,18,.72);color:var(--pp);
+  font:700 20px/1 var(--fm);letter-spacing:.14em;opacity:0;white-space:nowrap}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="w"></div>
+  <div id="g"><div id="ln"></div><div id="al">&lt;&gt;</div><div class="pl" id="pa"></div><div class="pl" id="pb"></div></div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const dur = D.n('dur', '1.4'), t0 = D.n('t0', '0'), x1 = D.n('x', '510'), x2 = D.n('x2', '30'), y = D.n('y', '1222'), lav = D.n("lavagem", "0.6") * D.n('veu', '1');
+$('pa').textContent = D.q('ka', 'ANTES'); $('pb').textContent = D.q('kb', 'DEPOIS');
+$('al').style.top = (y - 35) + 'px';
+$('pa').style.top = $('pb').style.top = (y - 18) + 'px';
+
+D.monta(tl => {
+  const tw = dur * D.n('pausa', '.417'), cw = dur * D.n('chicote', '.1');
+  $('pa').style.right = '52px'; $('pb').style.left = '52px';
+  $('pa').style.left = 'auto';
+  const sx = x => 1 - x / 1080;                      // a película cobre da linha até a borda direita
+  gsap.set('#g', {x: x1}); gsap.set('#w', {scaleX: sx(x1), opacity: lav});
+  tl.fromTo('#g', {x: x1 + 120}, {x: x1, duration: .05, ease: 'power3.out'}, t0);
+  tl.fromTo('#w', {scaleX: sx(x1 + 120)}, {scaleX: sx(x1), duration: .05, ease: 'power3.out'}, t0);
+  tl.to('#pa,#pb', {opacity: 1, duration: .06, ease: 'none'}, t0 + .125);
+  // o chicote: espera longa e saída rápida
+  tl.to('#g', {x: x2, duration: cw, ease: 'power3.in'}, t0 + tw);
+  tl.to('#w', {scaleX: sx(x2), duration: cw, ease: 'power3.in'}, t0 + tw);
+  tl.set('#g', {autoAlpha: 0}, t0 + tw + cw + .005);
+  tl.set('#w', {scaleX: 1}, t0 + tw + cw);
+  const vf = t0 + dur * D.n('veufim', '.94');      // o véu sai 1–2 quadros antes do fim
+  tl.to('#w', {opacity: 0, duration: .033, ease: 'none'}, vf - .033);
+  D.cue(t0 + tw, 'whoosh');
+  return dur;
+});
+</script>
+</body>
+</html>

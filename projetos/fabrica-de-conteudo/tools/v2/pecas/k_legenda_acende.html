@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<!-- TIPO — legenda em blocos com desfoque, clone da legenda do gancho e do convite do De25fKeTRl7 (fichas 01 e 17, medidas quadro a quadro).
+     Cada bloco é uma ou duas linhas já centradas e sem se mexer; as palavras (`runs`) acendem na ordem, cada uma com desfoque que some em 3
+     quadros (de invisível e borrada a nítida), e o bloco todo sai junto com desfoque que cresce em 3,5 quadros. A palavra de ênfase vai em
+     amarelo e maior (`k`), o número do convite em corpo gigante. A letra é a da legenda do plano (Creato Display Black).
+     Peça de texto grande é a legenda do trecho: nesse intervalo a legenda padrão do plano sai. 1080x1920, --alpha, por cima da pessoa.
+       etiqueta: legenda, texto-cinetico, desfoque
+       b    os blocos, em JSON: [{"sai": s, "linhas": [{"bl": base da linha (px, quadro da ref), "runs": [{"tx": texto, "t": s, "k": corpo x tam, "cor": "mk"}]}]}]
+            `t` é o segundo em que a palavra começa a aparecer (invisível; nítida 3 quadros depois); `sai`, o último segundo nítido do bloco; `fd`, os quadros que a saída leva (3,5; a do convite leva 2,5)
+       tam  o corpo da linha normal (84) · dy  quanto descer tudo (110: a nossa foto tem o queixo 100 px abaixo do da ref) · dur
+       ?b=%5B%7B%22sai%22%3A0.533%2C%22linhas%22%3A%5B%7B%22bl%22%3A1077%2C%22runs%22%3A%5B%7B%22tx%22%3A%22Claude%2C%22%2C%22t%22%3A0.033%7D%2C%7B%22tx%22%3A%22d%C3%A1%20pra%20fazer%22%2C%22t%22%3A0.267%7D%5D%7D%5D%7D%2C%7B%22sai%22%3A1.467%2C%22linhas%22%3A%5B%7B%22bl%22%3A1077%2C%22runs%22%3A%5B%7B%22tx%22%3A%22todos%20esses%22%2C%22t%22%3A0.667%7D%5D%7D%2C%7B%22bl%22%3A1207%2C%22runs%22%3A%5B%7B%22tx%22%3A%22efeitos%3F%22%2C%22t%22%3A0.867%2C%22k%22%3A1.52%2C%22cor%22%3A%22mk%22%7D%5D%7D%5D%7D%5D&dur=1.633 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+/* a mesma letra da legenda do plano (captions_viral): a Creato Display Black, OFL, que viaja com os helpers */
+@font-face{font-family:'CapviralCreato';font-weight:400 900;
+  src:url('../../video-use/assets/fontes/CreatoDisplay-Black.otf') format('opentype'),local('Creato Display Black'),local('CreatoDisplay-Black')}
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+.ln{position:absolute;left:0;width:1080px;text-align:center;white-space:nowrap;font:900 84px/1 'CapviralCreato',var(--fd);letter-spacing:-.02em;color:#fff}
+.r{display:inline-block;opacity:0;text-shadow:0 4px 14px rgba(11,13,18,.5),0 1px 3px rgba(11,13,18,.45)}
+.r.mk{color:var(--mk)}
+.z{display:inline-block;width:0;height:0}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+const FR = 1 / 30;
+window.__folha = document.fonts.load("900 84px 'CapviralCreato'");   // o D.monta espera a letra antes de medir a base das linhas
+const dy = D.n('dy', '110'), tam = D.n('tam', '84');
+let blocos = [];
+try { blocos = JSON.parse(D.q('b', '[]')); } catch (e) { console.error('b: JSON inválido', e); }
+const dur = D.n('dur', String(Math.round((Math.max(0, ...blocos.map(b => b.sai || 0)) + .4) * 1000) / 1000));
+const stage = document.getElementById('stage');
+
+D.monta(tl => {
+  // o layout só depois da letra carregada: a base de cada linha depende das métricas dela
+  const grupos = blocos.map(b => ({b, runs: []}));
+  grupos.forEach(g => g.b.linhas.forEach(l => {
+    const div = document.createElement('div');
+    div.className = 'ln';
+    div.style.fontSize = tam + 'px';
+    l.runs.forEach((r, i) => {
+      if (i) div.appendChild(document.createTextNode(' '));
+      const sp = document.createElement('span');
+      sp.className = 'r' + (r.cor === 'mk' ? ' mk' : '');
+      sp.textContent = r.tx;
+      if (r.k && r.k !== 1) sp.style.fontSize = (tam * r.k) + 'px';
+      div.appendChild(sp);
+      g.runs.push({el: sp, t: r.t});
+    });
+    const z = document.createElement('span');
+    z.className = 'z';
+    div.appendChild(z);
+    stage.appendChild(div);
+    // a base da linha: o fundo do marcador de altura zero cai na linha de base; `top` põe essa base em `bl + dy`
+    const topo = div.getBoundingClientRect().top, base = z.getBoundingClientRect().bottom;
+    div.style.top = (l.bl + dy - (base - topo)) + 'px';
+  }));
+  grupos.forEach(g => {
+    const els = g.runs.map(r => r.el);
+    g.runs.forEach(r => tl.fromTo(r.el, {opacity: 0, filter: 'blur(10px)'}, {opacity: 1, filter: 'blur(0px)', duration: 3 * FR, ease: 'power2.out', immediateRender: false}, r.t));
+    if (g.b.sai != null)
+      tl.fromTo(els, {opacity: 1, filter: 'blur(0px)'}, {opacity: 0, filter: 'blur(14px)', duration: (g.b.fd || 3.5) * FR, ease: 'none', immediateRender: false}, g.b.sai);
+  });
+  return dur;
+});
+</script>
+</body>
+</html>

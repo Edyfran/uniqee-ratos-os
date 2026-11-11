@@ -1,0 +1,44 @@
+/* Colagem: recorte sobre papel pardo. Uma faixa de papel rasgado atravessa o fundo, o
+   objeto é papel branco sem borda com uma fita adesiva em cima e sombra de papel, o título
+   é letra preta bem gorda, a etiqueta é fita de rotuladora e o destaque é marca-texto.
+   Copie para marca/tema.css e troque as quatro cores (docs/guia-de-estilos.md).
+   As letras moram em tools/video-use/assets/fontes/: copie cada arquivo do url() pra
+   marca/fontes/, com o <Família>-OFL.txt do lado. */
+
+@font-face{font-family:'Marca';font-weight:400;src:url(fontes/ArchivoBlack-Regular.ttf) format('truetype')}
+@font-face{font-family:'MarcaApoio';font-weight:100 499;src:url(fontes/IBMPlexMono-Regular.ttf) format('truetype')}
+@font-face{font-family:'MarcaApoio';font-weight:500 900;src:url(fontes/IBMPlexMono-SemiBold.ttf) format('truetype')}
+
+html.marca{
+  /* as quatro cores: papel pardo, letra, bloco, marca-texto */
+  --pp:#D6C4A2; --ink:#141414; --ac:#1F45C8; --mk:#FF9FC8;
+  --ink9:var(--ink); --sur:#FFFDF8;
+  --ink6:color-mix(in srgb,var(--ink) 72%,white);
+  --ac2:color-mix(in srgb,var(--ac) 16%,white); --act:color-mix(in srgb,var(--ac) 26%,white);
+  --fd:'Marca',Impact,sans-serif; --fm:'MarcaApoio',ui-monospace,monospace; --ls:-.02em;
+
+  /* a forma: sem borda, sem canto, sombra de papel; a faixa rasgada e o grão do pardo */
+  --bw:0px; --sh:6px; --sombra:color-mix(in srgb,var(--ink) 30%,transparent); --raio:0px; --raio-s:0px;
+  --fita:linear-gradient(color-mix(in srgb,#F6E7A8 78%,transparent),color-mix(in srgb,#F6E7A8 78%,transparent)) 50% 0/170px 30px no-repeat;
+  --tex:linear-gradient(-6deg,transparent 22%,color-mix(in srgb,white 55%,transparent) 22.3% 33%,transparent 33.3%),
+        radial-gradient(color-mix(in srgb,var(--ink) 9%,transparent) 0 1px,transparent 1.5px) 0 0/7px 7px,
+        radial-gradient(color-mix(in srgb,white 18%,transparent) 0 1.2px,transparent 1.8px) 3px 4px/11px 11px;
+  font-synthesis:none;
+
+  /* o reel editorial e a capa */
+  --ed-sans:'Marca',Impact,sans-serif;
+  --ed-pp:var(--pp); --ed-pp-luz:color-mix(in srgb,var(--pp) 40%,white);
+  --ed-tx:var(--ink);
+  --ed-dg-azul:linear-gradient(180deg,color-mix(in srgb,var(--ac) 50%,white) 0%,var(--ac) 70%);
+  --ed-dg-ouro:linear-gradient(180deg,color-mix(in srgb,var(--mk) 30%,white) 8%,var(--mk) 58%,color-mix(in srgb,var(--mk) 80%,black) 100%);
+  --ed-dg-some-azul:linear-gradient(180deg,var(--ac) 0%,color-mix(in srgb,var(--ac) 55%,transparent) 55%,color-mix(in srgb,var(--ac) 6%,transparent) 100%);
+  --ed-dg-some-ouro:linear-gradient(180deg,var(--mk) 0%,color-mix(in srgb,var(--mk) 55%,transparent) 55%,color-mix(in srgb,var(--mk) 6%,transparent) 100%);
+}
+/* papel colado: a fita por cima, a sombra que espalha; o --shx é o que o D.pousa anima */
+html.marca .nb{background:var(--fita),var(--sur);
+  box-shadow:calc(var(--shx,var(--sh))*.5) var(--shx,var(--sh)) calc(var(--shx,var(--sh))*2.5) var(--sombra)}
+html.marca .nb.cor-ac{background:var(--fita),var(--ac)}
+html.marca .nb.cor-mk{background:var(--fita),var(--mk)}
+html.marca .nb.cor-ink{background:var(--fita),var(--ink)}
+html.marca .kick{background:var(--ink);color:#fff;border:0;box-shadow:none;letter-spacing:.16em}
+html.marca .ic{border:0}

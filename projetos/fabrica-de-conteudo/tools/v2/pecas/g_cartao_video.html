@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<!-- GANCHO — cartão de vídeo: cartão da coluna esquerda (x 65–670, y 294–770) com a miniatura em 16:9 e o botão de play,
+     o título em serifa e a linha de capítulos. Entra revelando de cima pra baixo, o play some e a miniatura "toca"
+     (a barra anda, o capítulo 01), troca pra segunda imagem (capítulo 02) e sai num corte. Clone do "Video card" de referência.
+       img  três imagens (;): as duas da primeira miniatura (plano aberto, 16:9) e a do print do editor · tit  o título · kick  a etiqueta (PASSO A PASSO) · n  quantos capítulos (2 capítulos)
+       c1 · c2  os nomes dos capítulos · t0 quando entra (0.05) · dur (1.4)
+       ?img=../../../videos/fabrica/reel-igual-kinetic/ref/lado/quadros/q1.jpg;../../../videos/fabrica/reel-igual-kinetic/ref/lado/quadros/q4.jpg;../../../videos/fabrica/reel-igual-kinetic/ref/lado/quadros/q2.jpg&tit=Cartão de vídeo&kick=PASSO A PASSO&n=2 capítulos&c1=O bruto&c2=O reel pronto&dur=1.4 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/editorial.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px;background:transparent}
+#stage{padding:0;display:block;overflow:hidden;background:none}
+#cv{position:absolute;left:65px;top:294px;width:605px;height:476px;opacity:0;border-radius:22px;
+  border:5px solid #fff;outline:5px solid var(--ink);background:var(--ink);overflow:hidden;box-shadow:none}
+#sd{position:absolute;left:65px;top:294px;width:605px;height:476px;border-radius:22px;background:var(--mk);
+  transform:translate(10px,10px);opacity:0;border:5px solid var(--ink)}
+#th{position:absolute;left:0;top:0;width:100%;height:345px;overflow:hidden;background:var(--ink6)}
+#i1,#i2{position:absolute;inset:0}
+#i1 img{position:absolute;top:0;height:100%;width:50%;object-fit:cover;object-position:50% 12%}
+#i1 #a1{left:0}#i1 #a2{left:50%;border-left:4px solid var(--ink)}
+#i2{opacity:0;background:var(--cod2)}
+#i2 img{position:absolute;left:206px;top:0;width:194px;height:345px;object-fit:cover;border:0}
+.ed{display:none}
+.ed i{position:absolute;display:block;border-radius:6px}
+.ed .b1{left:190px;top:26px;right:18px;height:120px;background:var(--cod)}
+.ed .b2{left:190px;top:158px;width:190px;height:134px;background:var(--ac)}
+.ed .b3{left:392px;top:158px;right:18px;height:134px;background:var(--cod)}
+.ed .tl{left:18px;right:18px;top:300px;height:18px;background:var(--mk)}
+#pl{position:absolute;left:257px;top:127px;width:92px;height:92px;border-radius:50%;background:#fff;border:5px solid var(--ink);
+  box-shadow:5px 5px 0 var(--ink)}
+#pl:after{content:"";position:absolute;left:34px;top:22px;border-left:30px solid var(--ink);border-top:19px solid transparent;border-bottom:19px solid transparent}
+#bar{position:absolute;left:0;right:0;top:331px;height:14px;background:rgba(11,13,18,.6)}
+#bar i{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--mk)}
+#bar b{position:absolute;left:0;top:-4px;width:22px;height:22px;margin-left:-11px;border-radius:50%;background:#fff;border:4px solid var(--ink)}
+#tt{position:absolute;left:14px;top:352px;font:400 54px/1 var(--ed-serif);color:#fff;white-space:nowrap}
+#ln{position:absolute;left:14px;top:424px;font:600 22px/1 var(--fm);letter-spacing:.04em;color:var(--cod-cm);white-space:nowrap;text-transform:uppercase}
+#ln em{font-style:normal;color:var(--mk)}
+#ln .l{display:none}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="cv">
+    <div id="th"><div id="i1"><img id="a1"><img id="a2"></div><div id="i2"><img id="a3"><div class="ed"><i class="b1"></i><i class="b2"></i><i class="b3"></i><i class="tl"></i></div></div><div id="pl"></div><div id="bar"><i></i><b></b></div></div>
+    <div id="tt"></div>
+    <div id="ln"><span class="l l0"><em id="k"></em>&nbsp;&nbsp;<span id="n"></span></span><span class="l l1"><em>01</em>&nbsp;&nbsp;<span id="c1"></span></span><span class="l l2"><em>02</em>&nbsp;&nbsp;<span id="c2"></span></span></div>
+  </div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const dur = D.n('dur', '1.4'), t0 = D.n('t0', '0.05');
+const imgs = D.q('img', '../../../videos/fabrica/reel-igual-kinetic/ref/lado/quadros/q1.jpg;../../../videos/fabrica/reel-igual-kinetic/ref/lado/quadros/q4.jpg;../../../videos/reels/fabrica-edita-o-meu-assim-capa.jpg').split(';').filter(Boolean);
+$('a1').src = imgs[0]; $('a2').src = imgs[1] || imgs[0]; $('a3').src = imgs[2] || imgs[0];
+$('tt').textContent = D.q('tit', 'Cartão de vídeo'); $('k').textContent = D.q('kick', 'PASSO A PASSO'); $('n').textContent = D.q('n', '2 capítulos');
+$('c1').textContent = D.q('c1', 'O bruto'); $('c2').textContent = D.q('c2', 'O reel pronto');
+document.fonts.load('400 54px "Instrument Serif"').catch(() => null).then(() => D.monta(tl => {
+  const e = Math.max(0, dur - 1.2);
+  const L = n => `.l${n}`;
+  tl.set('.l0', {display: 'inline'}, 0);
+  // entra: a parte de baixo ainda cortada, o cartão cresce um pouco; a sombra vem junto
+  tl.fromTo('#cv', {opacity: 0, scale: .96, clipPath: 'inset(0px 0px 62% 0px)', transformOrigin: '50% 0%'},
+    {opacity: 1, scale: 1, clipPath: 'inset(0px 0px 62% 0px)', duration: .06, ease: 'none'}, t0);
+    tl.to('#cv', {clipPath: 'inset(0px 0px 0% 0px)', duration: .22, ease: 'power3.out'}, t0 + .12);
+  D.cue(t0 + .12, 'pop');
+  const pl = t0 + .12 + .12 + e * .3;                 // o play sai, a miniatura toca
+  tl.set('#pl', {opacity: 0}, pl); tl.set('.l0', {display: 'none'}, pl); tl.set('.l1', {display: 'inline'}, pl);
+  tl.to('#bar i', {width: '100%', duration: dur - pl - .1, ease: 'none'}, pl);
+  tl.to('#bar b', {left: '100%', duration: dur - pl - .1, ease: 'none'}, pl);
+  tl.fromTo('#i1 img', {scale: 1}, {scale: 1.06, duration: dur - t0, ease: 'none'}, t0);
+  const p2 = pl + .5 + e * .4;                        // a segunda miniatura e o capítulo 02
+  tl.set('#i2', {opacity: 1}, p2); tl.set('.l1', {display: 'none'}, p2); tl.set('.l2', {display: 'inline'}, p2);
+  D.cue(p2, 'click');
+  const ts = Math.max(p2 + .12, dur - .26);
+  tl.to('#cv', {opacity: 0, duration: .04, ease: 'none'}, ts);
+  return dur;
+}));
+</script>
+</body>
+</html>

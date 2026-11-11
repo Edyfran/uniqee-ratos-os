@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<!-- TIPOGRAFIA — o cartão final em papel, sem preço: a marca e as três batidas, uma por vez, e a chamada.
+     1080x1920, o mesmo papel da k_objeto. A marca da Fábrica pousa no alto (D.pousa). Depois três linhas, cada uma
+     com o seu ícone num chip de borda tinta e sombra dura, na cadência da música (a última cai na batida forte):
+     "Você grava." (a câmera), "Pede." (o enviar, azul) e "Pronto." (o ✓ verde carimbado, e a palavra é o herói,
+     D.heroi). Por último o botão azul da chamada assenta e é apertado (afunda na sombra e volta), com a palavra
+     do meio no marcador amarelo, e a seta aponta pra baixo, onde o anúncio põe o botão de verdade. Montado em
+     ~3,3 s; o resto é respiração, não parada: a seta balança, o botão e a câmera respiram (D.respira, D.camera) e
+     a luz anda. Não sai: é o último quadro. Texto que se lê em x 65–1015, y 270–1250; a seta termina em y 1230.
+       img  a marca, quadrada (../midia/marca-fabrica.svg) · nome  o nome · sub  o carimbo (com IA; vazio: nenhum)
+       l  as três linhas, separadas por ; (Você grava.;Pede.;Pronto.) · cta  o botão; *trecho* vai no marcador
+       t_l  quando cai cada linha (0.51;1.28;2.04) · t_cta  o botão assenta (2.55) · t_aperta  o aperto (3.06) · dur  (5)
+       kf  o tamanho das linhas (1: chip de 132 e letra de 126 px) · y  os tops, separados por ; (logo;l1;l2;l3;botão;seta = 290;462;642;822;1010;1148)
+       ?ar=1080x1350  o 4:5 de verdade: quem chama passa kf e y do quadro dele
+       cel  a imagem do celular 3D (a da k_chega e da k_pedido): sobe do pé e fica espiando embaixo (passa do pé do quadro), pra
+       a composição encher o que o texto não ocupa · celv  o vídeo na tela dele · celv0  o segundo em que ele começa · cel1
+       (293,1330,.66)  x,y do canto de cima e escala · t_cel  quando sobe (0.2)
+       plano  1 troca o botão por texto simples (sem borda, sem aperto, sem seta): o fecho do Reel orgânico, onde não há botão
+       pra apontar. A chamada fica em ink, com o trecho entre * no marcador amarelo (e | quebra a linha); a seta não entra; cta vazio (cta=) tira a chamada
+       e deixa só a marca e as três linhas
+       teclado  1 sobe um teclado grande embaixo (nucleo/teclado.js), que enche o terço de baixo e aperta P-E-D-E quando a linha "Pede."
+              cai · t_tec  quando sobe (0.1) · ty  o y do alto dele (1500)
+       ?img=../midia/marca-fabrica.svg&nome=Fábrica de Conteúdo&sub=com IA&l=Você grava.;Pede.;Pronto.&cta=Toca em *Saiba mais*&dur=5 -->
+<html lang="pt-BR" data-qa="fica">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<script src="../nucleo/teclado.js"></script>
+<script>if ((new URLSearchParams(location.search).get('ar') || '').indexOf('1080x1350') === 0) document.write('<style>html,body,#stage,#mundo{height:1350px!important}</style>');</script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+#stage{padding:0;display:block;overflow:hidden;background:var(--pp)}
+#mundo{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:50% 45%}
+#papel{position:absolute;left:0;top:0}
+.ab{position:absolute;opacity:0}
+#logo{left:65px;top:290px;width:950px;display:flex;align-items:center;gap:26px}
+#pl{flex:none;width:118px;height:118px;padding:12px;display:grid;place-items:center}
+#pl img{width:100%;height:100%}
+#nm{font:800 64px/1 var(--fd);letter-spacing:var(--ls);color:var(--ink);white-space:nowrap}
+#logo .kick{margin:0;align-self:center;opacity:1}
+.lin{position:absolute;left:65px;width:950px;height:132px;display:flex;align-items:center;gap:36px}
+.ch{flex:none;width:132px;height:132px;border-radius:30px;display:grid;place-items:center;opacity:0}
+.ch svg{width:76px;height:76px;overflow:visible}
+.tx{font:700 126px/1 var(--fd);letter-spacing:-.045em;color:var(--ink);white-space:nowrap;opacity:0}
+.tx.ac{color:var(--ac)}
+#bt{left:65px;top:1010px;width:885px;height:122px;font-size:62px;white-space:nowrap}
+#bt b{display:inline-block;margin-left:.22em;padding:0 .2em;border-radius:10px;background:var(--mk);color:var(--ink)}
+#se{left:470px;top:1148px;width:80px;height:80px}
+#cel{position:absolute;left:0;top:0;width:748px;height:1554px;transform-origin:0 0;filter:drop-shadow(16px 16px 0 var(--ink));opacity:0}
+#cel .corpo{position:absolute;left:0;top:0;width:748px;height:1554px;display:block}
+#cel .tela{position:absolute;left:21px;top:17px;width:690px;height:1518px;border-radius:66px;overflow:hidden;background:var(--ink)}
+#cel .cam{position:absolute;left:359px;top:56px;width:30px;height:30px;border-radius:50%;background:var(--cine);z-index:4;
+  box-shadow:0 0 0 4px #0b0d12,inset 3px 3px 0 rgba(120,150,255,.28)}
+#se svg{width:100%;height:100%;overflow:visible}
+#bt.plano{background:none;border:0;box-shadow:none;color:var(--ink);justify-content:flex-start;font-weight:800;letter-spacing:-.03em;transform-origin:0 50%;padding-left:30px;height:auto;line-height:1.05;display:block}
+</style>
+</head>
+<body>
+<div id="stage"><div id="mundo">
+  <svg id="papel" width="1080" height="1920"></svg>
+  <div class="ab" id="logo"><div class="nb" id="pl"></div><span id="nm"></span><span class="kick" id="sb"></span></div>
+  <div class="lin" id="r1" style="top:462px"></div>
+  <div class="lin" id="r2" style="top:642px"></div>
+  <div class="lin" id="r3" style="top:822px"></div>
+  <div class="ab btn" id="bt"></div>
+  <div class="ab" id="se"><svg viewBox="0 0 140 190"><path d="M45 6h50v104h39L70 184 6 110h39z" fill="var(--mk)"
+    stroke="var(--ink)" stroke-width="8" stroke-linejoin="round"/></svg></div>
+</div></div>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const W = 1080, H = 1920, Q = D.QD, dur = D.n('dur', '5');
+
+$('papel').innerHTML = `<defs>
+  <pattern id="pt" width="36" height="36" patternUnits="userSpaceOnUse"><circle cx="18" cy="18" r="2.2" fill="rgba(11,13,18,.07)"/></pattern>
+  <radialGradient id="la"><stop offset="0" style="stop-color:var(--mk);stop-opacity:.42"/><stop offset=".55" style="stop-color:var(--mk);stop-opacity:.14"/><stop offset="1" style="stop-color:var(--mk);stop-opacity:0"/></radialGradient>
+  <radialGradient id="lb2"><stop offset="0" style="stop-color:var(--ac);stop-opacity:.16"/><stop offset="1" style="stop-color:var(--ac);stop-opacity:0"/></radialGradient>
+  <radialGradient id="lc"><stop offset="0" style="stop-color:var(--mk);stop-opacity:.30"/><stop offset="1" style="stop-color:var(--mk);stop-opacity:0"/></radialGradient></defs>
+  <rect width="${W}" height="${H}" style="fill:var(--pp)"/>
+  <circle id="luz-a" cx="860" cy="520" r="760" fill="url(#la)"/>
+  <circle id="luz-b" cx="120" cy="1180" r="640" fill="url(#lb2)"/>
+  <circle id="luz-c" cx="170" cy="280" r="520" fill="url(#lc)"/>
+  <rect width="${W}" height="${H}" fill="url(#pt)"/>`;
+
+const CEL = D.q('cel', '');
+if (CEL) {
+  $('mundo').insertAdjacentHTML('beforeend', `<div id="cel"><img class="corpo" alt="" src="${esc(CEL)}"><div class="tela" id="cel-tela"></div><i class="cam"></i></div>`);
+  const mv = D.midia('#cel-tela', D.q('celv', ''), 'editado');
+  if (mv) mv.dataset.off = String(D.n('celv0', '0') + D.QD / 2);
+}
+$('pl').innerHTML = `<img src="${esc(D.q('img', '../midia/marca-fabrica.svg'))}" alt="">`;
+$('nm').textContent = D.q('nome', 'Fábrica de Conteúdo');
+$('sb').textContent = D.q('sub', 'com IA');
+// os ícones: a câmera (a de gravar), o enviar do campo de mensagem e o ✓ de pronto
+const ICONES = [
+  ['', '<svg viewBox="0 0 100 100"><rect x="6" y="26" width="62" height="48" rx="9" style="fill:var(--ink)"/><path d="M68 44l26-14v40L68 56z" style="fill:var(--ink)"/><circle cx="24" cy="42" r="8" style="fill:var(--no)"/></svg>'],
+  ['cor-ac', '<svg viewBox="0 0 100 100"><path d="M50 82V22M24 46 50 20l26 26" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></svg>'],
+  ['cor-ok', '<svg viewBox="0 0 100 100"><path d="M20 54l22 22 40-48" fill="none" stroke="#fff" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/></svg>'],
+];
+const linhas = D.q('l', 'Você grava.;Pede.;Pronto.').split(';').filter(Boolean).slice(0, 3);
+linhas.forEach((t, i) => {
+  $('r' + (i + 1)).innerHTML = `<div class="nb ch ${ICONES[i][0]}" id="c${i + 1}">${ICONES[i][1]}</div><div class="tx${i === linhas.length - 1 ? ' ac' : ''}" id="t${i + 1}">${esc(t)}</div>`;
+});
+$('bt').innerHTML = esc(D.q('cta', 'Toca em *Saiba mais*')).replace(/\*(.+?)\*/g, '<b>$1</b>');
+const PLANO = D.q('plano', '0') !== '0';
+if (PLANO) { $('bt').classList.add('plano'); $('se').remove(); $('bt').innerHTML = $('bt').innerHTML.replace(/\|/g, '<br>'); }
+
+// o tamanho e o lugar de cada coisa (o 9:16 e o 4:5 são composições separadas: quem chama passa as medidas)
+const KF = D.n('kf', 1), YS = D.q('y', '290;462;642;822;1010;1148').split(';').map(Number);
+$('logo').style.top = YS[0] + 'px'; ['r1', 'r2', 'r3'].forEach((id, i) => { $(id).style.top = YS[i + 1] + 'px'; $(id).style.height = 132 * KF + 'px'; });
+$('bt').style.top = YS[4] + 'px'; if ($('se')) $('se').style.top = YS[5] + 'px';
+document.head.insertAdjacentHTML('beforeend', `<style>.ch{width:${132 * KF}px;height:${132 * KF}px;border-radius:${30 * KF}px}.ch svg{width:${76 * KF}px;height:${76 * KF}px}.tx{font-size:${126 * KF}px}#bt{font-size:${(PLANO ? 80 : 62) * Math.min(KF, 1.1)}px}</style>`);
+D.monta(tl => {
+  D.cabe('#nm', 40, ['#logo', .62]);
+  D.cabe('.tx', 60, ['.lin', .78]);       // a coluna do texto: a linha menos o chip e o vão
+  D.cabe('#bt', 44, .92);
+  const [t1, t2, t3] = D.q('t_l', '0.51;1.28;2.04').split(';').map(Number);
+  const tC = D.n('t_cta', '2.55'), tA = D.n('t_aperta', '3.06');
+  D.camera(dur, 1.0, 1.03);
+  if (D.q('teclado', '0') !== '0') {
+    Teclado.monta(D.n('ty', '1500')); Teclado.entra(tl, D.n('t_tec', '0.1'));
+    [...'PEDE'].forEach((c, i) => Teclado.aperta(tl, c, t2 + .02 + i * .1));
+  }
+
+  if (CEL) {
+    // o celular sobe do pé e assenta (freia, sem passar do ponto), depois flutua devagar até o fim
+    const c1 = D.q('cel1', '293,1330,.66').split(',').map(Number), tc = D.n('t_cel', '0.2');
+    gsap.set('#cel', {x: c1[0], y: c1[1], scale: c1[2]});
+    tl.fromTo('#cel', {y: c1[1] + 640, opacity: 1}, {y: c1[1], duration: .62, ease: 'power3.out', immediateRender: false}, tc);
+    tl.set('#cel', {opacity: 0}, 0);
+    tl.set('#cel', {opacity: 1}, tc);
+    D.cue(tc, 'whoosh');
+    for (let t = tc + .7; t < dur - .8; t += 1.6)
+      tl.fromTo('#cel', {y: c1[1]}, {y: c1[1] - 10, duration: .8, ease: 'sine.inOut', yoyo: true, repeat: 1, immediateRender: false}, t);
+  }
+  D.pousa('#logo', .14, {som: 'pop'});
+  // uma linha por vez: o chip pousa, a palavra sobe por máscara; a última é o herói e o ✓ bate
+  [t1, t2].forEach((t, i) => {
+    if (!$('t' + (i + 1))) return;
+    D.pousa('#c' + (i + 1), t, {som: 'pop'});
+    D.palavras('#t' + (i + 1), t + .1);
+  });
+  if ($('t3')) {
+    D.carimbo('#c3', t3 - .08, -3);
+    D.heroi('#t3', t3);
+    D.cue(t3 + .2, 'certo');
+  }
+
+  // a chamada: o botão assenta e é apertado; o marcador amarelo varre a palavra do meio no aperto
+  D.pousa('#bt', tC, {som: 'pop'});
+  if (!PLANO) {
+    tl.to('#bt', {x: D.SH * .7, y: D.SH * .7, '--shx': '0px', duration: 2 * Q, ease: 'power2.in'}, tA);
+    tl.to('#bt', {x: 0, y: 0, '--shx': D.SH + 'px', duration: .22, ease: D.P.POUSA}, tA + 2 * Q);
+    D.cue(tA, 'click');
+  }
+  if ($('bt').querySelector('b')) D.marca('#bt b', tA + .1);
+  // a seta aponta pra baixo, onde o anúncio põe o botão, e balança até o fim
+  if (!PLANO) {
+    tl.fromTo('#se', {opacity: 0, y: -34}, {opacity: 1, y: 0, duration: .35, ease: D.P.POUSA}, D.at(tA + .22));
+    const per = .7;
+    for (let t = tA + .6; t < dur - per; t += per)
+      tl.fromTo('#se', {y: 0}, {y: 18, duration: per / 2, ease: 'sine.inOut', yoyo: true, repeat: 1, immediateRender: false}, t);
+  }
+
+  // respiração do fim: o botão e o ✓ pulsam devagar, a luz anda
+  if (!PLANO) D.respira('#bt', tA + .6, dur, 1.02);   // texto simples não pulsa: o 1,02 empurraria a borda pra fora da zona
+  tl.to('#luz-a', {attr: {cx: 820, cy: 560}, duration: dur, ease: 'sine.inOut'}, 0);
+  tl.to('#luz-c', {attr: {cx: 200, cy: 320}, duration: dur, ease: 'sine.inOut'}, 0);
+  return dur;
+});
+</script>
+</body>
+</html>

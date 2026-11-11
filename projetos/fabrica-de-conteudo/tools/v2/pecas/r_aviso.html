@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<!-- PROVA — o aviso pequeno sobre o vídeo: o que tem que ser dito e não é o assunto (a narração é IA). 1080x1920, --alpha.
+     Uma etiqueta de papel (borda tinta, sombra dura) que pousa no canto e sai. O texto quebra no "|", em letra de 44 px
+     (piso do celular em tela cheia). Canto livre da bancada: x 65 a 435, y 270 a 435 (acima do rótulo BRUTO, que começa em y 436).
+       texto  "linha 1|linha 2|…" · x, y  o canto de cima-esquerdo (65, 270) · t  quando pousa (0.15) · dur
+     ?texto=Aqui a narração|é IA, só pra|demonstrar.&x=65&y=270&t=0.15&dur=3.6 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block;position:relative;overflow:hidden}
+.av{position:absolute;padding:7px 16px 8px;opacity:0;font:700 44px/1.03 var(--fd);letter-spacing:var(--ls);color:var(--ink);white-space:nowrap}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+const dur = D.n('dur', '3.6'), t0 = D.n('t', '0.15');
+const esc = s => String(s).replace(/[&<>]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;'}[c]));
+const el = document.createElement('div');
+el.className = 'av nb'; el.id = 'av';
+el.style.left = D.n('x', '65') + 'px'; el.style.top = D.n('y', '270') + 'px';
+el.innerHTML = D.q('texto', 'Aqui a narração|é IA, só pra|demonstrar.').split('|').map(esc).join('<br>');
+document.getElementById('stage').appendChild(el);
+
+D.monta(tl => {
+  D.pousa('#av', t0, {rot: 0, som: 'pop'});
+  D.sai(['#av'], dur - .35);
+  return dur;
+});
+</script>
+</body>
+</html>

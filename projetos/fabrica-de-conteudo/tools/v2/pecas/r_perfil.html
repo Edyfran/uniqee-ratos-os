@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<!-- PROVA — o meu perfil. 1080x1920, --alpha. Entra quando ele fala do perfil.
+     Cartão neobrutal (não imita a tela do app): a foto cai e o anel amarelo se
+     desenha em volta, o nome sobe, os três números contam em cascata — o de
+     seguidores por último e maior — e o botão Seguir é apertado e vira ✓.
+     ?ar=1920x1080 põe o cartão no canto de cima à esquerda, pro vídeo deitado.
+     `apertado` é o que o botão vira depois de apertado (Seguindo; no YouTube, Inscrito).
+     numeros=0 tira a linha dos três números: o cartão de outra pessoa (o oponente, a loja)
+     é pra mostrar quem é, não o tamanho do perfil dela; o botão entra mais cedo.
+       ?foto=../midia/perfil-avatar.png&nome=Seu nome&sub=Automação e IA&arroba=@usuario
+        &posts=41&seguidores=33,6 mil&seguindo=73&botao=Seguir&pos=topo&t0=0.2&dur=4.5 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+.zona{position:absolute;left:50px;right:64px}
+.zona.topo{top:190px}
+.zona.centro{top:720px}
+.zona.base{top:1210px}
+.cd{position:relative;padding:34px 34px 30px;opacity:0}
+.top{display:flex;align-items:center;gap:32px}
+.av{position:relative;flex:none;width:210px;height:210px}
+.av svg{position:absolute;inset:-18px;width:246px;height:246px;overflow:visible}
+.anel-t{fill:none;stroke:var(--ink);stroke-width:18}
+.anel-m{fill:none;stroke:var(--mk);stroke-width:10;stroke-linecap:round}
+.av .ft{position:absolute;inset:0;border-radius:50%;overflow:hidden;border:var(--bw) solid var(--ink);opacity:0;background:var(--cod2)}
+.av .ft img{width:100%;height:100%;object-fit:cover;display:block}
+.id{flex:1;min-width:0}
+.id b{display:block;font:700 58px/1.02 var(--fd);letter-spacing:var(--ls);color:var(--ink);white-space:nowrap;opacity:0}
+.id .sub{display:inline-block;margin-top:14px;padding:10px 16px;font:700 28px/1 var(--fm);letter-spacing:.06em;text-transform:uppercase;border-radius:var(--raio-s);opacity:0}
+.id .ar{display:block;margin-top:12px;font:600 30px/1 var(--fm);color:var(--ink6);opacity:0}
+.id .ar:empty{display:none}
+.nums{display:grid;grid-template-columns:1fr 1.35fr 1fr;gap:18px;margin-top:34px}
+.nu{padding:18px 20px 16px;border:var(--bw) solid var(--ink);border-radius:var(--raio-s);background:var(--sur);box-shadow:var(--shx,6px) var(--shx,6px) 0 var(--ink);opacity:0}
+.nu.dest{background:var(--mk)}
+/* no tinteiro a tinta é creme: sobre o ouro, número e rótulo voltam ao escuro do chão */
+html.tinteiro .nu.dest b,html.tinteiro .nu.dest span{color:var(--ink9)}
+.nu b{display:block;font:700 62px/1 var(--fd);letter-spacing:-.03em;color:var(--ink);white-space:nowrap}
+.nu span{display:block;margin-top:8px;font:600 26px/1 var(--fm);letter-spacing:.04em;color:var(--ink6)}
+.bt{margin-top:28px;display:flex;align-items:center;justify-content:center;gap:14px;height:96px;font:700 44px/1 var(--fd);opacity:0}
+.bt i{font-style:normal}
+/* ?ar=1920x1080: o cartão no canto de cima, à esquerda, em 78% (o vídeo deitado tem pouca altura) */
+html.h,html.h body,html.h #stage{width:1920px;height:1080px}
+html.h .zona,html.h .zona.topo,html.h .zona.centro,html.h .zona.base{left:60px;right:auto;top:56px;width:900px;
+  transform:scale(.78);transform-origin:top left}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="zona" id="z">
+    <div class="cd nb" id="cd">
+      <div class="top">
+        <div class="av" id="av">
+          <svg viewBox="0 0 246 246"><circle class="anel-t" cx="123" cy="123" r="114"></circle><circle class="anel-m" id="an" cx="123" cy="123" r="114"></circle></svg>
+          <div class="ft" id="ft"></div>
+        </div>
+        <div class="id"><b id="nm"></b><span class="sub nb cor-ink" id="sb"></span><span class="ar" id="ar"></span></div>
+      </div>
+      <div class="nums">
+        <div class="nu" id="n0"><b id="v0"></b><span>posts</span></div>
+        <div class="nu dest" id="n1"><b id="v1"></b><span>seguidores</span></div>
+        <div class="nu" id="n2"><b id="v2"></b><span>seguindo</span></div>
+      </div>
+      <div class="bt btn" id="bt"><i id="bi"></i><span id="bl"></span></div>
+    </div>
+  </div>
+</div>
+<script>
+if ((D.q('ar', '')).startsWith('1920x1080')) document.documentElement.classList.add('h');
+const dur = D.n('dur', '4.5'), t0 = D.n('t0', '0.2');
+document.getElementById('z').classList.add(['topo', 'centro', 'base'].includes(D.q('pos')) ? D.q('pos') : 'topo');
+D.midia('#ft', D.q('foto', '../midia/perfil-avatar.png'), 'foto do perfil');
+// padrão neutro: a peça vai no pacote do aluno. O nome de verdade vem no plano (nome=)
+document.getElementById('nm').textContent = D.q('nome', 'Seu nome');
+document.getElementById('sb').textContent = D.q('sub', 'Automação e IA');
+document.getElementById('ar').textContent = D.q('arroba', '');
+const botao = D.q('botao', 'Seguir');
+document.getElementById('bl').textContent = botao;
+// "33,6 mil" → 33.6 + " mil", com as casas que o texto tinha
+const le = s => { const m = String(s).trim().match(/^([\d.]+)(?:,(\d+))?\s*(.*)$/); if (!m) return {v: 0, casas: 0, suf: s}; const casas = m[2] ? m[2].length : 0; return {v: parseFloat(m[1].replace(/\./g, '') + (m[2] ? '.' + m[2] : '')), casas, suf: m[3] ? ' ' + m[3] : ''}; };
+const nums = [le(D.q('posts', '41')), le(D.q('seguidores', '33,6 mil')), le(D.q('seguindo', '73'))];
+const fmt = o => n => n.toLocaleString('pt-BR', {minimumFractionDigits: o.casas, maximumFractionDigits: o.casas}) + o.suf;
+nums.forEach((o, i) => document.getElementById('v' + i).textContent = fmt(o)(o.v));
+const comNumeros = D.q('numeros', '1') !== '0';
+if (!comNumeros) document.querySelector('.nums').remove();
+
+D.monta(tl => {
+  D.cabe('.id b', 36, '.id');
+  D.pousa('#cd', t0, {rot: D.P.ROT * .5, dy: -40, som: 'pop'});
+  // a foto estala e o anel amarelo se desenha em volta
+  tl.fromTo('#ft', {opacity: 0, scale: .4, rotation: -12}, {opacity: 1, scale: 1, rotation: 0, duration: .45, ease: 'back.out(2.2)'}, D.at(t0) + .12);
+  const an = document.getElementById('an'), L = an.getTotalLength();
+  gsap.set(an, {strokeDasharray: L, strokeDashoffset: L, rotation: -90, transformOrigin: '50% 50%'});
+  tl.to(an, {strokeDashoffset: 0, duration: .6, ease: 'power2.inOut'}, D.at(t0) + .3);
+  D.cue(t0 + .3, 'swish');
+  D.palavras('#nm', t0 + .35);
+  D.carimbo('#sb', t0 + .62, D.P.ROT);
+  D.entra('#ar', t0 + .72, 12);
+  // números em cascata; seguidores por último e com soco
+  if (comNumeros) [0, 2, 1].forEach((k, j) => {
+    const tk = t0 + .85 + j * .22;
+    D.pousa('#n' + k, tk, {dy: -30, s: k === 1 ? 1.1 : 1.04, ease: k === 1 ? D.P.HEROI : D.P.MOLA, dr: 0});
+    D.conta('#v' + k, 0, nums[k].v, tk + .05, k === 1 ? .9 : .5, fmt(nums[k]));
+  });
+  // o botão cai, é APERTADO e vira ✓
+  const tb = t0 + (comNumeros ? 1.9 : 1.0);
+  D.pousa('#bt', tb, {dy: -24, dr: 0});
+  const tc = tb + .55;
+  tl.to('#bt', {x: D.SH, y: D.SH, '--shx': '0px', duration: .09, ease: 'power2.out'}, tc);
+  tl.to('#bt', {x: 0, y: 0, '--shx': D.SH + 'px', duration: .4, ease: D.P.MOLA}, tc + .1);
+  tl.to('#bt', {backgroundColor: D.css('--ink9'), duration: .15}, tc + .05);   // --ink9: escuro em todo tema (no tinteiro, --ink é creme)
+  tl.call(() => { document.getElementById('bi').textContent = '✓'; document.getElementById('bl').textContent = D.q('apertado', 'Seguindo'); }, null, tc + .06);
+  tl.call(() => { document.getElementById('bi').textContent = ''; document.getElementById('bl').textContent = botao; }, null, 0);
+  D.cue(tc, 'click');
+  D.flutua('#cd', tc + .5, dur - .5, .6);
+  D.sai('#cd', dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

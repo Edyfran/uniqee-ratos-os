@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<!-- TIPO — grade que se preenche, v2. 1080x1920.
+     Dois pesos: quem tem nome é bloco azul; quem é quantidade é azulejo sem
+     texto. Os azulejos estalam UM POR VEZ — é contagem, não efeito — cada um
+     girando de leve e assentando com mola.
+       ?kick=BÔNUS 1&n=43&destaques=Anúncios|analisa e sobe&icones=📣,✍️&dur=6 -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+#stage{padding:0 70px;justify-content:center}
+.kick{align-self:center}
+.hd{text-align:center;margin-bottom:46px;font-size:88px}
+.nomes{display:flex;flex-direction:column;gap:20px;margin-bottom:44px}
+.perfil{display:flex;align-items:center;gap:24px;padding:22px 30px;opacity:0}
+.perfil .ic{width:66px;height:66px;background:#fff}
+.perfil .tx{flex:1;min-width:0}
+.perfil b{display:block;font:900 60px/1.04 var(--fd);color:#fff;letter-spacing:var(--ls)}
+.perfil em{display:block;font:600 44px/1.15 var(--fd);color:var(--act);font-style:normal;margin-top:2px}
+.resto{display:grid;grid-template-columns:repeat(9,1fr);gap:14px;padding-right:6px}
+.tile{aspect-ratio:1;border-radius:var(--raio-s);background:var(--sur);
+  border:calc(var(--bw)*.75) solid var(--ink);box-shadow:5px 5px 0 var(--ink);opacity:0;
+  display:flex;align-items:center;justify-content:center;font-size:40px;line-height:1;
+  font-family:'Apple Color Emoji','Noto Color Emoji','Segoe UI Emoji',sans-serif}
+.rod{margin-top:50px;text-align:center;font:700 52px/1.3 var(--fd);color:var(--ink6);opacity:0}
+.rod b{color:var(--ink);font-weight:900;padding:0 .1em;
+  background:linear-gradient(var(--mk),var(--mk)) no-repeat 0 60%/0% 88%}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="kick" id="k"></div>
+  <div class="hd" id="h"></div>
+  <div class="nomes" id="nm"></div>
+  <div class="resto" id="g"></div>
+  <div class="rod" id="r"></div>
+</div>
+<script>
+const n = parseInt(D.q('n', '43'), 10);
+const dest = D.q('destaques', 'Anúncios|analisa, propõe e sobe;Posts|prepara pro Instagram;Membros|cuida da área;Suporte|responde o e-mail')
+  .split(';').map(s => s.split('|'));
+const dur = D.n('dur', '6');
+document.getElementById('k').textContent = D.q('kick', '');
+document.getElementById('h').innerHTML = D.q('hd', 'Quatro trabalham<br>pra mim hoje.');
+// separados por vírgula: [...'✍️'] devolve o desenho E o seletor de variação
+const icones = D.q('icones', '📣,✍️,📧,🎧,💬,🧾,📊,🔎,📅,🗂️,💻,🛒,📦,🤝,📝,🎬,📌,🧭')
+  .split(',').map(s => s.trim()).filter(Boolean);
+document.getElementById('r').innerHTML = D.q('rod', `Os outros <b>${n - dest.length}</b><br>você adapta ao seu negócio.`);
+const nm = document.getElementById('nm');
+dest.forEach(([nome, det], i) => {
+  const d = document.createElement('div');
+  d.className = 'perfil nb cor-ac'; d.id = 'bg' + i;
+  d.innerHTML = `<span class="ic">0${i + 1}</span><span class="tx"><b>${nome}</b>${det ? `<em>${det}</em>` : ''}</span>`;
+  nm.appendChild(d);
+});
+const g = document.getElementById('g');
+const resto = [];
+for (let i = 0; i < n - dest.length; i++) {
+  const d = document.createElement('div');
+  d.className = 'tile'; d.id = 'az' + i;
+  d.textContent = icones[i % icones.length];
+  g.appendChild(d); resto.push('#az' + i);
+}
+
+D.monta(tl => {
+  D.cabe('.hd', 52);
+  D.cabe('.perfil b', 36, '.tx');
+  D.cabe('.perfil em', 28, '.tx');
+  D.cabe('.rod', 34);
+  D.camera(dur, 1.0, 1.03);
+  if (D.q('kick')) D.carimbo('#k', .08);
+  D.titulo('#h', .15);
+  dest.forEach((_, i) => D.pousa('#bg' + i, .6 + i * .3, {dx: -40, dy: -D.P.QUEDA * .4, rot: D.inclina(i) * .6}));
+  // o passo sai da janela e do número de peças, não de uma constante
+  const t0 = 2.05, tRod = Math.max(t0 + 1.2, dur - 1.9);
+  const passo = (tRod - t0 - .3) / Math.max(1, resto.length);
+  resto.forEach((sel, i) => {
+    tl.fromTo(sel, {opacity: 0, scale: .3, rotation: i % 2 ? 18 : -18},
+      {opacity: 1, scale: 1, rotation: D.inclina(i) * 1.5, duration: .34, ease: 'back.out(2.6)'}, t0 + i * passo);
+  });
+  D.titulo('#r', tRod);
+  D.sai(['#k', '#h', '.perfil', '.resto', '#r'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

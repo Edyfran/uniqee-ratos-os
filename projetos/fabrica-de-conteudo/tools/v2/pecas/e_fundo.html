@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<!-- EFEITO — fundo do retrato recortado. 1080x1920, opaco.
+     O papel pontilhado da direção e um bloco de cor com borda e sombra dura
+     onde a cabeça (head.webm do floating_head) vai pousar — o efeitos.py põe
+     a cabeça por cima, no mesmo x/y. O bloco entra com mola e deriva devagar;
+     a placa de texto é opcional, em cima ou embaixo.
+       ?forma=circulo&cor=ac&x=540&y=1100&tam=900&kick=o dono&hd=Eu <b>não programo</b>.&placa=topo&dur=4 -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+#stage{padding:0;display:block}
+.bl{position:absolute;opacity:0}
+.bl.circulo{border-radius:50%}
+.placa{position:absolute;left:64px;right:64px;display:flex;flex-direction:column;align-items:flex-start}
+.placa.topo{top:170px}
+.placa.base{bottom:190px}
+.placa .hd{font-size:92px;margin:0}
+.placa .hd:empty{display:none}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="bl nb" id="bl"></div>
+  <div class="placa" id="pl"><div class="kick" id="k"></div><div class="hd" id="h"></div></div>
+</div>
+<script>
+const dur = D.n('dur', '4');
+const tam = D.n('tam', '900'), x = D.n('x', '540'), y = D.n('y', '1100');
+const bl = document.getElementById('bl');
+bl.classList.add(D.q('forma', 'circulo') === 'quadrado' ? 'quadrado' : 'circulo', {ac: 'cor-ac', mk: 'cor-mk', ink: 'cor-ink'}[D.q('cor', 'ac')] || 'cor-ac');
+Object.assign(bl.style, {left: (x - tam / 2) + 'px', top: (y - tam / 2) + 'px', width: tam + 'px', height: tam + 'px'});
+document.getElementById('pl').classList.add(D.q('placa') === 'base' ? 'base' : 'topo');
+document.getElementById('k').textContent = D.q('kick', '');
+document.getElementById('h').innerHTML = D.q('hd', '');
+
+D.monta(tl => {
+  D.cabe('.placa .hd', 48, '.placa');
+  D.camera(dur, 1.0, 1.03);
+  tl.fromTo(bl, {opacity: 0, scale: .4, rotation: -18, '--shx': '0px'}, {opacity: 1, scale: 1, rotation: 0, '--shx': (D.SH * 1.6) + 'px', duration: .6, ease: D.P.HEROI}, 0);
+  D.cue(.05, 'pop');
+  tl.to(bl, {rotation: 6, x: 18, duration: dur - .6, ease: 'sine.inOut'}, .6);
+  if (D.q('kick')) D.carimbo('#k', .25);
+  if (D.q('hd')) D.titulo('#h', .35);
+  return dur;
+});
+</script>
+</body>
+</html>

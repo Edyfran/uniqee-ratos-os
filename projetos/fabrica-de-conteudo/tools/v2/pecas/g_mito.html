@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<!-- GANCHO — mito × verdade. 1080x1920, tela cheia.
+     A frase do mito cai, é lida, e leva o carimbo vermelho: desbota e afunda.
+     A verdade cai embaixo em bloco azul, com o carimbo do sinal verde.
+       ?mito=Precisa saber programar&verdade=Você só precisa <b>explicar o processo</b>
+        &t_mito=0.3&t_carimbo=1.5&t_verdade=2.3&dur=5.5 -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+#stage{padding:0 70px;justify-content:center;gap:70px}
+.cd{position:relative;padding:34px 40px 40px;opacity:0}
+.cd .tg{display:inline-block;font:700 30px/1 var(--fm);letter-spacing:.14em;text-transform:uppercase;
+  padding:.4em .6em .34em;border:var(--bw) solid var(--ink);border-radius:var(--raio-s);margin-bottom:22px}
+.cd .fr{font:700 78px/1.04 var(--fd);letter-spacing:var(--ls)}
+#m .tg{background:var(--no2);color:var(--no)}
+#m .fr{color:var(--ink)}
+#v .tg{background:var(--mk);color:var(--ink)}
+#v .fr{color:#fff}
+#v .fr b{font-weight:inherit;color:var(--ink);padding:0 .08em;background:linear-gradient(var(--mk),var(--mk)) no-repeat 0 60%/0% 90%;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone}
+.cb{position:absolute;right:30px;bottom:-40px;padding:14px 26px;font:700 84px/1 var(--fm);letter-spacing:.08em;
+  border:10px solid currentColor;border-radius:var(--raio);background:rgba(255,255,255,.92);opacity:0}
+#cm{color:var(--no)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="cd nb" id="m"><div class="tg">mito</div><div class="fr" id="fm"></div><div class="cb" id="cm">MITO</div></div>
+  <div class="cd nb cor-ac" id="v"><div class="tg">verdade</div><div class="fr" id="fv"></div></div>
+</div>
+<script>
+const dur = D.n('dur', '5.5');
+const tm = D.n('t_mito', '0.3'), tc = D.n('t_carimbo', '1.5'), tv = D.n('t_verdade', '2.3');
+document.getElementById('fm').innerHTML = D.q('mito', 'Precisa saber programar');
+document.getElementById('fv').innerHTML = D.q('verdade', 'Você só precisa <b>explicar o processo</b>');
+
+D.monta(tl => {
+  D.cabe('.cd .fr', 44, '.cd');
+  D.camera(dur, 1.0, 1.03);
+  D.pousa('#m', tm, {dx: -40, rot: D.P.ROT, som: 'pop'});
+  D.palavras('#fm', tm + .1);
+  // o carimbo bate: grande, torto, e a ficha do mito afunda e desbota
+  tl.fromTo('#cm', {opacity: 0, scale: 2.2, rotation: -26}, {opacity: 1, scale: 1, rotation: -10, duration: .32, ease: 'back.out(2)'}, D.at(tc));
+  D.cue(tc, 'stamp');
+  tl.to('#m', {x: D.SH, y: D.SH, '--shx': '0px', duration: .18, ease: 'power2.out'}, D.at(tc) + .2);
+  tl.to('#fm', {color: D.css('--ink4'), duration: .25}, D.at(tc) + .2);
+  D.pousa('#v', tv, {dx: 40, rot: -D.P.ROT, s: 1.08, ease: D.P.HEROI, som: 'pop'});
+  const ws = D.palavras('#fv', tv + .1);
+  D.marca('#fv b', tv + .1 + ws.length * .055 + .1);
+  D.sai(['#m', '#v'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<!-- GANCHO — letreiro de title drop: linhas empilhadas que entram cada uma no seu tempo, junto
+     com o jingle da série. 1080x1920, --alpha. Uma linha é texto ou IMAGEM (prefixo @ + url,
+     de preferência PNG transparente: a palavra desenhada que o texto não alcança). O texto
+     sobe; a imagem estala e assenta. `tempos` dá o instante de cada linha (a palavra cantada);
+     sem `tempos`, entram a cada 0,4 s. `fundo` escurece o vídeo atrás (0 a 1). `junta` aproxima
+     as linhas, em px (negativo encosta: a imagem com acento traz um vão em cima); um número vale
+     pra todas, uma lista (-20,-30,-110) dá o vão antes de cada linha a partir da segunda.
+     `y` desloca o bloco do meio da tela, em px (negativo sobe): a carta citada na fala fica
+     acima da faixa da legenda; `lugar` (terco-dir, terco-esq, centro: o lugar do núcleo) põe o bloco
+     de lado, no vídeo deitado a carta ao lado do rosto (o antigo `x`, em px, ainda vale). ?ar=1920x1080 pro vídeo deitado.
+     `int` (contida | media | ousada) é o title drop elaborado (dono, 12/10: "motion mais elaborado"): vinheta
+     escura, câmera que empurra, brilho que varre a palavra desenhada e partículas que estouram quando ela
+     pousa; a media entra por uma cortina com desfoque e a ousada cai do alto com clarão, raios e tremor.
+     Sem `int`, a de sempre. `semente` muda o sorteio das partículas.
+     `coreo=pedra` (com `pedra=@url` e `ouro=@url`, os dois PNG transparentes) é o title drop coreografado do De Zero a
+     Herói (dono, 12/10: "o title drop pode ser melhor"): a câmera despenca de longe, o DE ZERO de pedra cai no impacto do
+     jingle e racha por dentro com luz dourada, lasca e solta cacos, e o A HERÓI de ouro nasce da rachadura com clarão, raios
+     e tinta; `int` escolhe o quanto. Sai empurrando a câmera pra dentro da cena.
+       ?l=Treinando|@../midia/perfil-avatar.png|pra deixar de ser|@../midia/perfil-avatar.png&tempos=0.2,0.85,1.7,2.8&larg=940&alt=300&fundo=0.55&junta=0&dur=4 -->
+<html data-qa="entra-seco" lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+#veu{position:absolute;inset:0;background:var(--pp);opacity:0}
+.zona{position:absolute;left:40px;right:40px;top:0;bottom:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:10px}
+.tx{font:900 84px/1 var(--fd);letter-spacing:var(--ls);text-transform:uppercase;color:var(--ink);
+  text-align:center;white-space:nowrap;opacity:0;text-shadow:0 6px 0 var(--ink9),0 0 30px rgba(0,0,0,.6)}
+html.h,html.h body,html.h #stage{width:1920px;height:1080px}
+html.h .zona{left:80px;right:80px}
+.im{display:block;width:var(--larg,940px);max-height:var(--alt,300px);object-fit:contain;opacity:0}
+/* ?int= : o title drop elaborado */
+#cam{position:absolute;inset:0}
+#vinheta{position:absolute;inset:0;opacity:0;background:radial-gradient(ellipse at center,rgba(0,0,0,0) 28%,rgba(6,3,12,.88) 100%)}
+#raios{position:absolute;left:50%;top:50%;width:2600px;height:2600px;margin:-1300px 0 0 -1300px;opacity:0;
+  background:repeating-conic-gradient(from 0deg,rgba(255,226,140,.0) 0deg 7deg,rgba(255,226,140,.55) 9deg 11deg,rgba(255,226,140,0) 13deg 20deg);
+  -webkit-mask:radial-gradient(circle,#000 0,rgba(0,0,0,.6) 22%,transparent 55%);mask:radial-gradient(circle,#000 0,rgba(0,0,0,.6) 22%,transparent 55%)}
+#clarao{position:absolute;inset:0;background:radial-gradient(circle at 50% 55%,#fff8e0 0,rgba(255,240,200,.75) 30%,rgba(255,240,200,0) 70%);opacity:0}
+.cx{position:relative;display:block;opacity:0}
+.cx .im{opacity:1}
+.cx .bri{position:absolute;pointer-events:none;mix-blend-mode:screen}
+.pt{position:absolute;left:0;top:0;width:14px;height:14px;margin:-7px 0 0 -7px;opacity:0;
+  clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);
+  background:radial-gradient(circle,#fff 0,#ffe7a0 45%,#f2c744 100%);filter:drop-shadow(0 0 6px rgba(255,220,120,.9))}
+.pt.bola{clip-path:circle(50%);background:radial-gradient(circle,#fff 0,#ffd98a 60%,rgba(242,199,68,0) 100%)}
+#pts{position:absolute;inset:0;pointer-events:none}
+#pedra{position:absolute;inset:0}
+.pd{position:absolute;opacity:0;will-change:transform}
+.ca{position:absolute;overflow:hidden;background-repeat:no-repeat}
+#rach{position:absolute;overflow:visible;pointer-events:none}
+.pt.tinta{clip-path:circle(50%);background:radial-gradient(circle at 35% 30%,#b58cff 0,#6a35c9 55%,#2c0f66 100%);filter:drop-shadow(0 0 5px rgba(150,90,255,.8))}
+.pt.po{width:120px;height:120px;margin:-60px 0 0 -60px;clip-path:circle(50%);background:radial-gradient(circle,rgba(190,180,200,.6) 0,rgba(120,110,140,.25) 55%,rgba(0,0,0,0) 72%);filter:none}
+.anel{position:absolute;border-radius:50%;border:7px solid rgba(255,225,140,.9);opacity:0;box-shadow:0 0 30px rgba(255,200,90,.8)}
+</style>
+</head>
+<body>
+<div id="stage"><div id="veu"></div><div id="vinheta"></div><div id="cam"><div id="raios"></div><div id="pedra"></div><div class="zona" id="z"></div><div id="pts"></div></div><div id="clarao"></div></div>
+<script>
+const dur = D.n('dur', '4');
+const COREO = D.q('coreo', '') === 'pedra';
+const ls = COREO ? [] : D.q('l', 'Treinando|pra deixar de ser').split('|');
+const ts = D.q('tempos', '').split(',').map(Number).filter(x => !isNaN(x));
+const R = document.documentElement.style;
+R.setProperty('--larg', D.n('larg', '940') + 'px');
+R.setProperty('--alt', D.n('alt', '300') + 'px');
+if ((D.q('ar', '')).startsWith('1920x1080')) document.documentElement.classList.add('h');
+document.getElementById('z').style.transform = `translate(${D.desloc(0)}px, ${D.n('y', '0')}px)`;
+const z = document.getElementById('z');
+// as duas imagens entram no DOM antes do D.monta: ele espera o decode delas (a medida vem do arquivo)
+const PRE = {};
+if (COREO) ['pedra', 'ouro'].forEach(k => { PRE[k] = Object.assign(new Image(), {src: D.q(k, '').replace(/^@/, '')});
+  PRE[k].style.cssText = 'position:absolute;left:0;top:0;width:2px;opacity:0'; document.body.appendChild(PRE[k]); });
+const NV = {contida: 1, media: 2, ousada: 3}[D.q('int', '')] || (COREO ? 2 : 0);
+ls.forEach((s, i) => {
+  let el = s.startsWith('@') ? Object.assign(new Image(), {src: s.slice(1), alt: '', className: 'im'})
+                             : Object.assign(document.createElement('div'), {textContent: s, className: 'tx'});
+  if (NV && s.startsWith('@')) {
+    const cx = Object.assign(document.createElement('span'), {className: 'cx'});
+    // o brilho é um canvas por cima, desenhado só onde a palavra tem tinta (source-in): a máscara
+    // CSS com imagem de file:// não pega no Chrome e o brilho saía num retângulo
+    const bri = Object.assign(document.createElement('canvas'), {className: 'bri'});
+    cx.append(el, bri);
+    el = cx;
+  }
+  el.id = 'l' + i;
+  const js = D.q('junta', '0').split(',').map(Number);
+  if (i) el.style.marginTop = (js.length > 1 ? js[i - 1] ?? 0 : js[0]) + 'px';
+  z.appendChild(el);
+});
+
+// o sorteio das partículas é fixo (a mesma semente, o mesmo quadro): a timeline é buscada fora de ordem
+const rnd = (a => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a);
+  t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; })(D.n('semente', '7'));
+
+function estoura(tl, cx, cy, n, t, alcance, bola = false) {
+  const pts = document.getElementById('pts');
+  for (let k = 0; k < n; k++) {
+    const p = Object.assign(document.createElement('div'), {className: 'pt' + (bola || k % 3 === 0 ? ' bola' : '')});
+    pts.appendChild(p);
+    const a = rnd() * Math.PI * 2, r = alcance * (.35 + rnd() * .8), s = .5 + rnd() * 1.4, d = .55 + rnd() * .6;
+    gsap.set(p, {x: cx, y: cy, scale: s});
+    tl.to(p, {opacity: 1, duration: .05}, t);
+    tl.to(p, {x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r * .7 + 40, rotation: rnd() * 360,
+              duration: d, ease: 'power3.out'}, t);
+    tl.to(p, {opacity: 0, scale: s * .3, duration: d * .6, ease: 'power1.in'}, t + d * .4);
+  }
+}
+
+function brasas(tl, n, t0, t1, W, H) {
+  const pts = document.getElementById('pts');
+  for (let k = 0; k < n; k++) {
+    const p = Object.assign(document.createElement('div'), {className: 'pt bola'});
+    pts.appendChild(p);
+    const x = W * (.1 + rnd() * .8), y0 = H * (.55 + rnd() * .5), d = 1.6 + rnd() * 1.6, t = t0 + rnd() * Math.max(.1, t1 - t0 - d);
+    gsap.set(p, {x, y: y0, scale: .3 + rnd() * .6});
+    tl.to(p, {opacity: .4 + rnd() * .5, duration: .3}, t);
+    tl.to(p, {y: y0 - 220 - rnd() * 260, x: x + (rnd() - .5) * 120, duration: d, ease: 'none'}, t);
+    tl.to(p, {opacity: 0, duration: .4}, t + d - .4);
+  }
+}
+
+function brilho(cx) {
+  // o canvas cobre só o que a imagem desenha (object-fit: contain dentro da caixa dela)
+  const im = cx.querySelector('.im'), cv = cx.querySelector('.bri');
+  const bw = im.offsetWidth, bh = im.offsetHeight, k = Math.min(bw / im.naturalWidth, bh / im.naturalHeight);
+  const w = im.naturalWidth * k, h = im.naturalHeight * k;
+  Object.assign(cv.style, {left: (bw - w) / 2 + 'px', top: (bh - h) / 2 + 'px', width: w + 'px', height: h + 'px'});
+  cv.width = Math.round(w); cv.height = Math.round(h);
+  const c = cv.getContext('2d');
+  const o = {p: 0, desenha() {
+    c.clearRect(0, 0, cv.width, cv.height);
+    if (o.p <= 0 || o.p >= 1) return;
+    c.globalCompositeOperation = 'source-over';
+    c.drawImage(im, 0, 0, cv.width, cv.height);
+    c.globalCompositeOperation = 'source-in';
+    const x = -cv.width * .4 + o.p * cv.width * 1.8, g = c.createLinearGradient(x - 160, 0, x + 160, cv.height * .35);
+    g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(.5, 'rgba(255,255,255,.95)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+    c.fillStyle = g; c.fillRect(0, 0, cv.width, cv.height);
+  }};
+  return o;
+}
+
+function elaborado(tl) {
+  const W = innerWidth, H = innerHeight, tf = dur - .35;
+  const tt = ls.map((s, i) => ts[i] ?? .2 + i * .4), ult = Math.max(...tt);
+  // as caixas medidas ANTES das entradas (o fromTo já aplica a escala de partida)
+  const box = ls.map((s, i) => { const r = document.getElementById('l' + i).getBoundingClientRect();
+    return [r.left + r.width / 2, r.top + r.height / 2, r.width]; });
+  tl.to('#veu', {opacity: D.n('fundo', ['', '.18', '.3', '.42'][NV]), duration: .3, ease: 'power1.out'}, 0);
+  tl.to('#vinheta', {opacity: [0, .55, .8, 1][NV], duration: .5, ease: 'power1.out'}, 0);
+  // a câmera: contida só respira pra dentro; media chega de longe; ousada despenca e treme no herói
+  if (NV === 1) tl.fromTo('#cam', {scale: .97}, {scale: 1.04, duration: tf, ease: 'none'}, 0);
+  if (NV === 2) {
+    tl.fromTo('#cam', {scale: 1.16, rotation: -1.5}, {scale: 1, rotation: 0, duration: ult + .5, ease: 'power3.out'}, 0);
+    tl.to('#cam', {scale: 1.05, duration: tf - ult - .5, ease: 'none'}, ult + .5);
+  }
+  if (NV === 3) {
+    tl.fromTo('#cam', {scale: 1.4, rotation: -3, filter: 'blur(6px)'},
+      {scale: 1, rotation: 0, filter: 'blur(0px)', duration: ult + .3, ease: 'expo.out'}, 0);
+    tl.to('#cam', {scale: 1.07, duration: tf - ult - .3, ease: 'none'}, ult + .3);
+    tl.to('#z', {x: '+=14', y: '-=10', duration: .045, yoyo: true, repeat: 7, ease: 'none'}, D.at(ult) + .3);
+    tl.to('#clarao', {opacity: .85, duration: .06}, D.at(ult) + .26);
+    tl.to('#clarao', {opacity: 0, duration: .5, ease: 'power2.out'}, D.at(ult) + .32);
+    tl.fromTo('#raios', {opacity: 0, rotation: 0, scale: .6},
+      {opacity: .7, scale: 1, duration: .5, ease: 'power2.out'}, D.at(ult) + .25);
+    tl.to('#raios', {rotation: 24, duration: tf - ult, ease: 'none'}, D.at(ult) + .25);
+    tl.to('#raios', {opacity: 0, duration: .3}, tf - .1);
+    brasas(tl, 26, .2, tf, W, H);
+  }
+  ls.forEach((s, i) => {
+    const t = D.at(tt[i]), el = '#l' + i, [cx, cy, w] = box[i];
+    if (!s.startsWith('@')) {
+      tl.fromTo(el, {opacity: 0, y: NV === 3 ? -60 : 40, scale: NV === 3 ? 1.6 : 1, filter: `blur(${NV > 1 ? 8 : 0}px)`},
+        {opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', duration: .3, ease: 'power3.out'}, t);
+      return;
+    }
+    const pousa = t + (NV === 1 ? .2 : .32);
+    if (NV === 1) tl.fromTo(el, {opacity: 0, scale: .35, rotation: i % 2 ? 6 : -6},
+      {opacity: 1, scale: 1, rotation: 0, duration: .42, ease: 'back.out(2.6)'}, t);
+    if (NV === 2) {
+      tl.fromTo(el, {opacity: 0, x: -60, scale: 1.12, clipPath: 'inset(0% 100% 0% 0%)', filter: 'blur(14px) brightness(1.8)'},
+        {opacity: 1, x: 0, scale: 1, clipPath: 'inset(0% 0% 0% 0%)', filter: 'blur(0px) brightness(1)', duration: .4, ease: 'power3.out'}, t);
+    }
+    if (NV === 3) {
+      tl.fromTo(el, {opacity: 0, y: -520, scale: 2.4, rotation: i % 2 ? 10 : -10, filter: 'blur(18px) brightness(2)'},
+        {opacity: 1, y: 0, scale: 1, rotation: 0, filter: 'blur(0px) brightness(1)', duration: .36, ease: 'power4.in'}, t - .05);
+      tl.to(el, {scaleY: .9, scaleX: 1.06, duration: .06, yoyo: true, repeat: 1, ease: 'power1.out'}, pousa);
+    }
+    // o brilho varre a palavra depois que ela pousa (a ousada passa duas vezes)
+    const varre = brilho(document.querySelector(el));
+    tl.fromTo(varre, {p: 0}, {p: 1, duration: .7, ease: 'power2.inOut', onUpdate: () => varre.desenha()}, pousa + .05);
+    if (NV === 3) tl.fromTo(varre, {p: 0}, {p: 1, duration: .8, ease: 'power2.inOut', onUpdate: () => varre.desenha()}, pousa + 1.3);
+    // o halo dourado pulsa na pousada
+    if (NV > 1) tl.fromTo(el + ' .im', {filter: 'drop-shadow(0 0 0px rgba(255,214,110,0))'},
+      {filter: `drop-shadow(0 0 ${NV === 3 ? 46 : 28}px rgba(255,214,110,.95))`, duration: .18, yoyo: true, repeat: 1,
+       repeatDelay: .25, ease: 'power2.out'}, pousa);
+    const n = [0, 10, 22, 44][NV] * (i === ls.length - 1 ? 1.4 : .8);
+    estoura(tl, cx, cy, Math.round(n), pousa, w * (NV === 3 ? .75 : .55));
+  });
+  D.flutua([...z.children], ult + .6, dur - .45, 1.2);
+  tl.to(['#z', '#veu', '#vinheta', '#pts'], {opacity: 0, duration: .3, ease: 'power1.in'}, dur - .35);
+  return dur;
+}
+
+// ---- coreo=pedra: DE ZERO de pedra racha e solta cacos; A HERÓI de ouro nasce da rachadura ----
+function pedraOuro(tl) {
+  const W = innerWidth, H = innerHeight, hz = W > H, pe = document.getElementById('pedra');
+  const imP = PRE.pedra, imO = PRE.ouro;
+  const aP = imP.naturalWidth / imP.naturalHeight, aO = imO.naturalWidth / imO.naturalHeight;
+  const sw = Math.min(W - 60, hz ? 1120 : 1020), sh = sw / aP, gh = Math.min(hz ? 650 : 800, (W - 60) / aO), gw = gh * aO;
+  const scy = hz ? H * .255 : H * .34, gcy = hz ? H * .665 : H * .60;
+  const sx = (W - sw) / 2, sy = scy - sh / 2, gx = (W - gw) / 2, gy = gcy - gh / 2;
+  const T = {imp: .75, rach: 1.18, quebra: 1.64, swell: 2.9, saida: 3.05};   // os golpes do jingle
+  const fall = [0, .11, .22, .34][NV], tf = dur - .35;
+
+  // a pedra: uma grade de células (as que caem saem na quebra)
+  const cols = [0, 9, 12, 16][NV], rows = [0, 2, 3, 4][NV], cw = sw / cols, ch = sh / rows;
+  const stone = Object.assign(document.createElement('div'), {className: 'pd'});
+  Object.assign(stone.style, {left: sx + 'px', top: sy + 'px', width: sw + 'px', height: sh + 'px'});
+  const cells = [];
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+    const e = Object.assign(document.createElement('div'), {className: 'ca'});
+    Object.assign(e.style, {left: c * cw - .6 + 'px', top: r * ch - .6 + 'px', width: cw + 1.2 + 'px', height: ch + 1.2 + 'px',
+      backgroundImage: `url("${PRE.pedra.src}")`, backgroundSize: `${sw}px ${sh}px`, backgroundPosition: `${-c * cw + .6}px ${-r * ch + .6}px`});
+    stone.appendChild(e); cells.push({e, r, c});
+  }
+  pe.appendChild(stone);
+
+  // a rachadura: linhas de luz que correm pela pedra (desenhadas no traço)
+  const sv = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  sv.id = 'rach'; sv.setAttribute('width', sw); sv.setAttribute('height', sh);
+  Object.assign(sv.style, {left: sx + 'px', top: sy + 'px'});
+  const nR = [0, 4, 6, 8][NV], rachas = [];
+  for (let k = 0; k < nR; k++) {
+    let x = sw * (.1 + .8 * (k + rnd() * .6) / nR), y = k % 2 ? sh : 0, d = `M${x} ${y}`;
+    const dirY = k % 2 ? -1 : 1;
+    for (let j = 0; j < 7; j++) { x += (rnd() - .5) * sw * .09; y += dirY * sh * (.1 + rnd() * .08); d += ` L${x.toFixed(1)} ${Math.max(0, Math.min(sh, y)).toFixed(1)}`; }
+    const pa = document.createElementNS(sv.namespaceURI, 'path');
+    pa.setAttribute('d', d); pa.setAttribute('fill', 'none'); pa.setAttribute('stroke', '#ffe9a6');
+    pa.setAttribute('stroke-width', [0, 4, 5, 7][NV]); pa.setAttribute('stroke-linejoin', 'round');
+    pa.style.filter = 'drop-shadow(0 0 8px #ffc94a) drop-shadow(0 0 18px #ff9d1f)';
+    sv.appendChild(pa); rachas.push(pa);
+  }
+  pe.appendChild(sv);
+
+  // o ouro, com o brilho que varre
+  const og = Object.assign(document.createElement('span'), {className: 'cx pd'});
+  Object.assign(og.style, {left: gx + 'px', top: gy + 'px', width: gw + 'px', height: gh + 'px', position: 'absolute'});
+  imO.className = 'im'; imO.style.opacity = 1; imO.style.cssText = `width:${gw}px;height:${gh}px;max-height:none;object-fit:contain`;
+  const bri = Object.assign(document.createElement('canvas'), {className: 'bri'});
+  og.append(imO, bri); pe.appendChild(og);
+
+  // o fundo: véu, vinheta, poeira que cai o tempo todo
+  tl.to('#veu', {opacity: [0, .25, .4, .5][NV], duration: .35}, 0);
+  tl.to('#vinheta', {opacity: [0, .6, .85, 1][NV], duration: .5}, 0);
+  for (let k = 0; k < [0, 14, 24, 40][NV]; k++) {
+    const p = Object.assign(document.createElement('div'), {className: 'pt bola'});
+    document.getElementById('pts').appendChild(p);
+    const x = W * rnd(), y0 = H * (.2 + rnd() * .8), d = 1.8 + rnd() * 1.4, t = rnd() * (dur - d - .4);
+    gsap.set(p, {x, y: y0, scale: .25 + rnd() * .5});
+    tl.to(p, {opacity: .3 + rnd() * .4, duration: .3}, t);
+    tl.to(p, {y: y0 - 160 - rnd() * 240, x: x + (rnd() - .5) * 90, duration: d, ease: 'none'}, t);
+    tl.to(p, {opacity: 0, duration: .4}, t + d - .4);
+  }
+
+  // a câmera: despenca de longe, assenta no impacto, empurra devagar, atravessa na saída
+  tl.fromTo('#cam', {scale: [0, 1.25, 1.55, 2.0][NV], rotation: [0, -1.5, -3, -6][NV], filter: `blur(${[0, 3, 6, 10][NV]}px)`},
+    {scale: 1, rotation: 0, filter: 'blur(0px)', duration: T.imp + .02, ease: 'expo.out'}, 0);
+  tl.to('#cam', {scale: 1.07, duration: T.saida - T.imp, ease: 'none'}, T.imp + .02);
+  tl.to('#cam', {scale: [0, 1.7, 2.4, 3.2][NV], duration: dur - T.saida, ease: 'power3.in'}, T.saida);
+
+  // 1. impacto: o DE ZERO cai (entra de cima, escala maior, e assenta no golpe do jingle)
+  tl.fromTo(stone, {opacity: 0, y: -H * .55, scale: 1.5, rotation: -4, filter: 'blur(14px)'},
+    {opacity: 1, y: 0, scale: 1, rotation: 0, filter: 'blur(0px)', duration: .5, ease: 'power4.in'}, T.imp - .5);
+  tl.set(stone, {filter: 'brightness(1) drop-shadow(0 0 0px rgba(255,190,70,0))'}, T.imp + .001);
+  tl.to(stone, {scaleY: .93, scaleX: 1.04, duration: .07, yoyo: true, repeat: 1, ease: 'power1.out'}, T.imp);
+  const sk = [0, 6, 14, 26][NV];
+  tl.to('#pedra', {x: `+=${sk}`, y: `-=${sk * .7}`, duration: .04, yoyo: true, repeat: 7, ease: 'none'}, T.imp);
+  // poeira, tinta e o anel do choque
+  const cx0 = W / 2, cy0 = scy + sh * .45;
+  for (let k = 0; k < [0, 5, 8, 12][NV]; k++) {
+    const p = Object.assign(document.createElement('div'), {className: 'pt po'}); document.getElementById('pts').appendChild(p);
+    const lado = k % 2 ? 1 : -1, x1 = cx0 + lado * (80 + rnd() * sw * .42);
+    gsap.set(p, {x: cx0 + lado * 40, y: cy0 + sh * .4, scale: .4});
+    tl.to(p, {opacity: .8, duration: .05}, T.imp);
+    tl.to(p, {x: x1, y: cy0 + sh * .4 - rnd() * 40, scale: 1.2 + rnd() * 1.4, duration: .9, ease: 'power2.out'}, T.imp);
+    tl.to(p, {opacity: 0, duration: .6}, T.imp + .25);
+  }
+  tinta(tl, cx0, cy0, [0, 10, 20, 34][NV], T.imp, sw * .5, 1);
+  const an = Object.assign(document.createElement('div'), {className: 'anel'}); document.getElementById('pts').appendChild(an);
+  Object.assign(an.style, {left: cx0 - sw * .25 + 'px', top: cy0 + sh * .35 + 'px', width: sw * .5 + 'px', height: sw * .14 + 'px'});
+  tl.fromTo(an, {opacity: .9, scale: .2}, {opacity: 0, scale: 2.1, duration: .6, ease: 'power2.out'}, T.imp);
+
+  // 2. rachadura: a luz corre pelas fendas, a pedra esquenta
+  rachas.forEach((pa, k) => {
+    const L = pa.getTotalLength(); pa.setAttribute('stroke-dasharray', L); pa.setAttribute('stroke-dashoffset', L);
+    tl.to(pa, {attr: {'stroke-dashoffset': 0}, duration: .32, ease: 'power2.out'}, T.rach + k * .045);
+  });
+  tl.to(stone, {filter: 'brightness(1.5) drop-shadow(0 0 22px rgba(255,190,70,.85))', duration: T.quebra - T.rach, ease: 'power2.in'}, T.rach);
+  tl.to(stone, {x: '+=5', y: '-=3', duration: .035, yoyo: true, repeat: 9, ease: 'none'}, T.rach + .1);
+
+  // 3. quebra: caem os cacos, o clarão, e o ouro nasce da rachadura
+  // as de baixo caem de verdade; as outras soltam um caco que voa e a pedra segue inteira (o título tem que ler)
+  const cairam = cells.filter(c => rnd() < (c.r === rows - 1 ? Math.min(.45, fall * 2.2) : fall * 1.2)).map(c => {
+    if (c.r === rows - 1) return c;
+    const cl = c.e.cloneNode(); stone.appendChild(cl); return {...c, e: cl};
+  });
+  cairam.forEach(c => {
+    const el = c.e, lado = (c.c + .5) / cols - .5, vx = lado * sw * (.5 + rnd() * .6), vy = -80 - rnd() * 160;
+    tl.set(el, {clipPath: `polygon(${rnd() < .5 ? '0 0,100% 12%,88% 100%,6% 86%' : '10% 0,100% 0,92% 90%,0 100%'})`}, T.quebra);
+    tl.to(el, {x: vx, y: vy, rotation: (rnd() - .5) * 220, duration: .32, ease: 'power2.out'}, T.quebra);
+    tl.to(el, {y: `+=${H * .5 + rnd() * 200}`, x: `+=${vx * .5}`, rotation: `+=${(rnd() - .5) * 280}`, opacity: 0, duration: .8, ease: 'power2.in'}, T.quebra + .3);
+  });
+  tl.to(stone, {filter: 'brightness(1) drop-shadow(0 0 0px rgba(255,190,70,0))', duration: .5, ease: 'power2.out'}, T.quebra + .05);
+  tl.to(rachas, {opacity: 0, duration: .5, ease: 'power1.in'}, T.quebra + .35);
+  if (NV > 1) {
+    tl.to('#clarao', {opacity: [0, 0, .55, .9][NV], duration: .06}, T.quebra - .02);
+    tl.to('#clarao', {opacity: 0, duration: .5, ease: 'power2.out'}, T.quebra + .06);
+    tl.fromTo('#raios', {opacity: 0, rotation: 0, scale: .5}, {opacity: [0, 0, .5, .75][NV], scale: 1, duration: .45, ease: 'power2.out'}, T.quebra);
+    tl.to('#raios', {rotation: 26, duration: dur - T.quebra, ease: 'none'}, T.quebra);
+    tl.to('#raios', {opacity: 0, duration: .35, ease: 'power1.in'}, T.saida);
+    document.getElementById('raios').style.top = gcy + 'px';
+  }
+  tl.fromTo(og, {opacity: 0, scale: .2, y: -gh * .2, rotation: -5, filter: 'blur(16px) brightness(3)'},
+    {opacity: 1, scale: 1, y: 0, rotation: 0, filter: 'blur(0px) brightness(1)', duration: .5, ease: 'back.out(1.7)'}, T.quebra);
+  tl.fromTo(og, {clipPath: 'inset(38% 46% 38% 46%)'}, {clipPath: 'inset(-10% -10% -10% -10%)', duration: .34, ease: 'power3.out'}, T.quebra);
+  tl.fromTo(og.querySelector('.im'), {filter: 'drop-shadow(0 0 0px rgba(255,214,110,0))'},
+    {filter: `drop-shadow(0 0 ${[0, 24, 36, 54][NV]}px rgba(255,214,110,.95))`, duration: .22, yoyo: true, repeat: 1, repeatDelay: .2}, T.quebra + .25);
+  tl.to(og, {scaleY: .94, scaleX: 1.04, duration: .07, yoyo: true, repeat: 1}, T.quebra + .45);
+  // centelhas douradas e tinta no nascimento do ouro
+  estoura(tl, W / 2, gcy, [0, 14, 30, 56][NV], T.quebra + .05, gw * .6);
+  tinta(tl, W / 2, gcy, [0, 6, 14, 24][NV], T.quebra + .05, gw * .5, 0);
+  // o brilho varre o ouro; no swell do fim, de novo e com pulso
+  const v = brilhoDe(bri, imO, gw, gh);
+  tl.fromTo(v, {p: 0}, {p: 1, duration: .7, ease: 'power2.inOut', onUpdate: () => v.desenha()}, T.quebra + .45);
+  tl.fromTo(v, {p: 0}, {p: 1, duration: .55, ease: 'power2.inOut', onUpdate: () => v.desenha()}, T.swell - .1);
+  tl.to(og, {scale: 1.05, duration: .1, yoyo: true, repeat: 1, ease: 'power2.out'}, T.swell);
+  tl.to(stone, {scale: 1.03, duration: .1, yoyo: true, repeat: 1, ease: 'power2.out'}, T.swell);
+  estoura(tl, W / 2, (scy + gcy) / 2, [0, 10, 22, 40][NV], T.swell, sw * .5);
+  if (NV === 3) brasas(tl, 22, T.quebra, tf, W, H);
+
+  // 4. saída: o clarão cobre e a câmera atravessa pra dentro da cena
+  tl.to('#clarao', {opacity: [0, .25, .5, .8][NV], duration: .16, ease: 'power2.in'}, dur - .22);
+  tl.to(['#pedra', '#pts', '#veu', '#vinheta', '#clarao', '#raios'], {opacity: 0, duration: .2, ease: 'power1.in'}, dur - .2);
+  return dur;
+}
+
+// gotas de tinta roxa/ouro que voam e caem (gravidade em dois tempos)
+function tinta(tl, cx, cy, n, t, alcance, roxa) {
+  const pts = document.getElementById('pts');
+  for (let k = 0; k < n; k++) {
+    const p = Object.assign(document.createElement('div'), {className: 'pt tinta'}); pts.appendChild(p);
+    if (!roxa || k % 3 === 0) p.style.background = 'radial-gradient(circle at 35% 30%,#fff6c8 0,#ffc94a 55%,#c27a10 100%)';
+    const a = -Math.PI * (.1 + rnd() * .8), r = alcance * (.3 + rnd() * .8), s = .7 + rnd() * 1.8, d = .35 + rnd() * .25;
+    gsap.set(p, {x: cx, y: cy, scale: s});
+    tl.to(p, {opacity: 1, duration: .04}, t);
+    tl.to(p, {x: cx + Math.cos(a) * r, duration: d * 2.2, ease: 'power1.out'}, t);
+    tl.to(p, {y: cy + Math.sin(a) * r * .8, duration: d, ease: 'power2.out'}, t);
+    tl.to(p, {y: cy + 260 + rnd() * 160, duration: d * 1.8, ease: 'power2.in'}, t + d);
+    tl.to(p, {opacity: 0, duration: .3}, t + d * 2.0);
+  }
+}
+
+// o brilho de brilho(), mas com a imagem e o canvas já dados (a caixa é a da imagem inteira)
+function brilhoDe(cv, im, w, h) {
+  cv.style.cssText = `left:0;top:0;width:${w}px;height:${h}px`; cv.width = Math.round(w); cv.height = Math.round(h);
+  const c = cv.getContext('2d'), o = {p: 0, desenha() {
+    c.clearRect(0, 0, cv.width, cv.height);
+    if (o.p <= 0 || o.p >= 1) return;
+    const k = Math.min(w / im.naturalWidth, h / im.naturalHeight), iw = im.naturalWidth * k, ih = im.naturalHeight * k;
+    c.globalCompositeOperation = 'source-over';
+    c.drawImage(im, (w - iw) / 2, (h - ih) / 2, iw, ih);
+    c.globalCompositeOperation = 'source-in';
+    const x = -w * .4 + o.p * w * 1.8, g = c.createLinearGradient(x - 160, 0, x + 160, h * .35);
+    g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(.5, 'rgba(255,255,255,.95)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+    c.fillStyle = g; c.fillRect(0, 0, w, h);
+  }};
+  return o;
+}
+
+D.monta(tl => {
+  if (COREO) return pedraOuro(tl);
+  D.cabe('.tx', 44, '.zona');
+  if (NV) return elaborado(tl);
+  tl.to('#veu', {opacity: D.n('fundo', '0.55'), duration: .25, ease: 'power1.out'}, 0);
+  ls.forEach((s, i) => {
+    const t = ts[i] ?? .2 + i * .4;
+    if (s.startsWith('@')) {
+      // a palavra desenhada estala: cresce além do tamanho, gira um pouco e assenta
+      tl.fromTo('#l' + i, {opacity: 0, scale: .35, rotation: i % 2 ? 6 : -6},
+        {opacity: 1, scale: 1, rotation: 0, duration: .42, ease: 'back.out(2.6)'}, D.at(t));
+    } else {
+      tl.fromTo('#l' + i, {opacity: 0, y: 40}, {opacity: 1, y: 0, duration: .3, ease: 'power3.out'}, D.at(t));
+    }
+  });
+  D.flutua([...z.children], Math.max(...ts, .6) + .4, dur - .45, 1.2);
+  tl.to([...z.children, '#veu'], {opacity: 0, duration: .3, ease: 'power1.in'}, dur - .35);
+  return dur;
+});
+</script>
+</body>
+</html>

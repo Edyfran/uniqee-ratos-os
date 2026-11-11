@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<!-- TESTE — vinheta do canal Tinteiro (12/10, protótipo; peça de teste, fora do catálogo de produção). 1920x1080, opaca.
+     `modo=canal`: os rios de tinta do banner puxam pro centro, enchem as letras do logo em seis tintas, assentam em
+     creme e ouro, o brilho varre, sai limpo. `modo=combo`: o mesmo em 1,5 s, o logo se desfaz em tinta e vira o nome
+     da série (`zero=@png`, `heroi=@png`), que cai e estoura. `fundo`, `logo`: PNG da marca.
+       ?modo=canal&dur=3.6&fundo=@/x/fundo.png&logo=@/x/logo.png -->
+<html data-qa="entra-seco" lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../../../pesquisa/lorcana/vinheta/_assets/assets.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1920px;height:1080px;background:#120C1A;overflow:hidden}
+#stage{width:1920px;height:1080px;background:#120C1A;padding:0;display:block;position:relative;overflow:hidden}
+#bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,#1d1329 0,#120C1A 62%,#0a0610 100%)}
+.rio{position:absolute;top:0;width:960px;height:1080px;background-size:1920px 1080px;opacity:0;will-change:transform,filter}
+#rioL{left:0;background-position:0 0;-webkit-mask-image:linear-gradient(90deg,#000 62%,transparent)}
+#rioR{right:0;background-position:-960px 0;-webkit-mask-image:linear-gradient(270deg,#000 62%,transparent)}
+#cx{position:absolute;left:50%;top:50%;width:1180px;height:144px;margin:-72px 0 0 -590px}
+.lg{position:absolute;inset:0;background-size:100% 100%}
+#logo{opacity:0}
+#cor{opacity:0}
+#brilho{opacity:0}
+#anel{position:absolute;left:50%;top:50%;width:200px;height:200px;margin:-100px 0 0 -100px;border-radius:50%;
+  border:6px solid rgba(255,214,130,.95);box-shadow:0 0 40px rgba(232,174,79,.8);opacity:0}
+#halo{position:absolute;left:50%;top:50%;width:1500px;height:700px;margin:-350px 0 0 -750px;opacity:0;
+  background:radial-gradient(ellipse,rgba(232,174,79,.5) 0,rgba(232,174,79,.14) 38%,rgba(232,174,79,0) 70%)}
+#pts{position:absolute;inset:0}
+.pt{position:absolute;left:0;top:0;width:12px;height:12px;margin:-6px 0 0 -6px;opacity:0;
+  clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);
+  background:radial-gradient(circle,#fff 0,#ffe7a0 45%,#E8AE4F 100%);filter:drop-shadow(0 0 6px rgba(255,220,120,.9))}
+#serie{position:absolute;left:0;right:0;top:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0}
+#serie .t{font:800 64px/1 var(--fd);color:var(--ink);letter-spacing:.04em;opacity:0}
+#serie img{display:block;opacity:0}
+#clarao{position:absolute;inset:0;background:radial-gradient(circle at 50% 52%,#fff8e0 0,rgba(255,240,200,.7) 28%,rgba(255,240,200,0) 68%);opacity:0}
+</style>
+</head>
+<body>
+<div id="stage"><div id="bg"></div><div class="rio" id="rioL"></div><div class="rio" id="rioR"></div><div id="halo"></div>
+<div id="cx"><div class="lg" id="logo"></div><div class="lg" id="cor"></div><div class="lg" id="brilho"></div></div>
+<div id="anel"></div><div id="pts"></div>
+<div id="serie"><div class="t" id="sDE">DE</div><img id="sZ"><div class="t" id="sA">A</div><img id="sH"></div>
+<div id="clarao"></div></div>
+<script>
+const dur = D.n('dur', '3.6');
+const COMBO = D.q('modo', 'canal') === 'combo';
+const src = k => ASSETS[k];   // data URL: o mask-image de arquivo local cai por CORS
+const url = k => `url("${src(k)}")`;
+['rioL', 'rioR'].forEach(i => document.getElementById(i).style.backgroundImage = url('fundo'));
+['logo', 'cor', 'brilho'].forEach(i => { document.getElementById(i).style.backgroundImage = url(i); });
+if (COMBO) { document.getElementById('sZ').src = src('zero'); document.getElementById('sH').src = src('heroi'); }
+// as imagens entram antes do D.monta: ele espera o decode
+['logo', 'fundo'].forEach(k => { const im = Object.assign(new Image(), {src: src(k)}); im.style.cssText = 'position:absolute;width:2px;opacity:0'; document.body.appendChild(im); });
+
+// o sorteio é fixo: o mesmo render sai igual
+let sd = 7; const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+
+D.monta(tl => {
+  const k = COMBO ? 0.43 : 1;                 // a combinada comprime a vinheta do canal em ~1,5 s
+  const t = x => x * k;
+  const rios = ['#rioL', '#rioR'];
+  // 1. os rios entram dos cantos, desfocados, e puxam pro centro
+  tl.fromTo('#rioL', {x: -380, opacity: 0, filter: 'blur(14px)'}, {x: 0, opacity: 1, filter: 'blur(0px)', duration: t(1.0), ease: 'power2.out'}, t(.1));
+  tl.fromTo('#rioR', {x: 380, opacity: 0, filter: 'blur(14px)'}, {x: 0, opacity: 1, filter: 'blur(0px)', duration: t(1.0), ease: 'power2.out'}, t(.1));
+  tl.to('#rioL', {x: 340, scaleX: .55, transformOrigin: '0% 50%', opacity: .0, filter: 'blur(10px)', duration: t(.65), ease: 'power3.in'}, t(1.05));
+  tl.to('#rioR', {x: -340, scaleX: .55, transformOrigin: '100% 50%', opacity: .0, filter: 'blur(10px)', duration: t(.65), ease: 'power3.in'}, t(1.05));
+  // 2. as seis tintas enchem as letras, da esquerda pra direita, no instante em que os rios chegam
+  tl.fromTo('#cor', {opacity: 1, clipPath: 'inset(0 100% 0 0)'},
+    {clipPath: 'inset(0 0% 0 0)', duration: t(.55), ease: 'power2.inOut'}, t(1.2));
+  tl.set('#anel', {opacity: 0}, 0);
+  tl.fromTo('#anel', {opacity: .95, scale: .2}, {opacity: 0, scale: 7, duration: t(.7), ease: 'power2.out', immediateRender: false}, t(1.6));
+  tl.fromTo('#halo', {opacity: 0}, {opacity: 1, duration: t(.3), ease: 'power2.out'}, t(1.6));
+  // 3. assenta: o creme e o ouro aparecem por baixo e as tintas se retiram (a gota cai junto)
+  tl.fromTo('#logo', {opacity: 0, scale: 1.06}, {opacity: 1, scale: 1, duration: t(.35), ease: 'power3.out'}, t(1.6));
+  tl.to('#cor', {opacity: 0, duration: t(.5), ease: 'power1.in'}, t(1.65));
+  tl.fromTo('#cx', {scale: 1}, {scale: 1.035, duration: t(.18), ease: 'power2.out', yoyo: true, repeat: 1}, t(1.6));
+  // 4. o brilho dourado varre a palavra
+  const br = {p: 0}, bEl = document.getElementById('brilho');
+  const faixa = () => { const c = -.15 + br.p * 1.3, a = c - .13, b = c + .13;   // a faixa inclinada que varre
+    bEl.style.clipPath = `polygon(${a * 100}% 0,${b * 100}% 0,${(b - .05) * 100}% 100%,${(a - .05) * 100}% 100%)`; };
+  tl.set('#brilho', {opacity: 1}, t(2.0));
+  tl.to(br, {p: 1, duration: t(.6), ease: 'power1.inOut', onUpdate: faixa, immediateRender: false}, t(2.0));
+  tl.to('#brilho', {opacity: 0, duration: .05}, t(2.62));
+  // faíscas: estouram quando as tintas se juntam e sobem devagar
+  const pts = document.getElementById('pts');
+  for (let i = 0; i < (COMBO ? 18 : 34); i++) {
+    const p = Object.assign(document.createElement('div'), {className: 'pt'}); pts.appendChild(p);
+    const a = rnd() * 6.283, r = 80 + rnd() * 520, s = .5 + rnd() * 1.1;
+    tl.set(p, {x: 960 + Math.cos(a) * 60, y: 560 + Math.sin(a) * 30, scale: s}, 0);
+    tl.fromTo(p, {opacity: 0}, {opacity: 1, duration: .08}, t(1.6) + rnd() * .15);
+    tl.to(p, {x: 960 + Math.cos(a) * r * 1.4, y: 560 + Math.sin(a) * r * .6 - 60, duration: t(1.2), ease: 'power2.out'}, t(1.6));
+    tl.to(p, {opacity: 0, duration: t(.5)}, t(2.3));
+  }
+
+  if (!COMBO) {
+    // sai limpo: tudo vai ao chão escuro
+    tl.to(['#cx', '#halo', '#pts'], {opacity: 0, duration: .32, ease: 'power1.in'}, dur - .38);
+    return dur;
+  }
+  // 5. combinada: o logo se desfaz em tinta e o nome da série ocupa o lugar
+  const T0 = 1.5;
+  tl.to('#cx', {opacity: 0, scale: 1.12, filter: 'blur(18px)', duration: .22, ease: 'power2.in'}, T0 - .02);
+  tl.fromTo('#cor', {opacity: 0}, {opacity: .9, duration: .12}, T0 - .1);
+  tl.to('#halo', {opacity: 0, duration: .4}, T0);
+  const sZ = document.getElementById('sZ'), sH = document.getElementById('sH');
+  const set = (el, w) => { el.style.width = w + 'px'; };
+  set(sZ, 700); set(sH, 760);
+  tl.fromTo('#sDE', {opacity: 0, y: -20}, {opacity: 1, y: 0, duration: .25, ease: 'power3.out'}, T0 + .1);
+  tl.fromTo(sZ, {opacity: 0, y: -260, scale: 1.4}, {opacity: 1, y: 0, scale: 1, duration: .28, ease: 'power4.in'}, T0 + .25);
+  tl.fromTo('#stage', {x: 0, y: 0}, {x: 7, y: 9, duration: .05, repeat: 5, yoyo: true, ease: 'none'}, T0 + .53);
+  tl.set('#stage', {x: 0, y: 0}, T0 + .86);
+  tl.fromTo('#sA', {opacity: 0}, {opacity: 1, duration: .2}, T0 + .78);
+  tl.fromTo(sH, {opacity: 0, scale: 1.5, filter: 'blur(14px)'}, {opacity: 1, scale: 1, filter: 'blur(0px)', duration: .3, ease: 'expo.out'}, T0 + .9);
+  tl.fromTo('#clarao', {opacity: 0}, {opacity: .9, duration: .06, ease: 'none'}, T0 + .93);
+  tl.to('#clarao', {opacity: 0, duration: .5, ease: 'power2.out'}, T0 + .99);
+  tl.fromTo('#halo', {opacity: 0}, {opacity: .8, duration: .3}, T0 + .93);
+  tl.to(['#serie', '#halo', '#pts'], {opacity: 0, duration: .32, ease: 'power1.in'}, dur - .38);
+  return dur;
+});
+</script>
+</body>
+</html>

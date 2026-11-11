@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<!-- O onboarding da fábrica: uma decisão por tela, sempre com o resultado do lado.
+     Quem serve é o onboarding.py, só em 127.0.0.1; o endereço traz o token (?t=) que a API pede.
+     Cor, letra, borda e sombra da página vêm do núcleo (tools/v2/nucleo/direcao-v2.css): aqui só
+     o arranjo. As peças do celular vêm com o tema do estilo escolhido (docs/guia-de-estilos/). -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Começar a sua fábrica</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/tools/v2/nucleo/direcao-v2.css">
+<style>
+/* o núcleo trava a rolagem (a peça é um quadro fixo); aqui a página rola. Só o html: com o body
+   rolando também, ele vira a caixa de rolagem e o celular do lado deixa de acompanhar */
+html{overflow:auto;height:auto}
+body{overflow:visible;height:auto}
+body{background:var(--tex),var(--pp);background-attachment:fixed;color:var(--ink);min-height:100vh;
+  font:500 17px/1.45 var(--fd);letter-spacing:-.005em}
+a{color:var(--ac);font-weight:600}
+a.btn{text-decoration:none}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--ac);outline-offset:3px}
+
+header{position:sticky;top:0;z-index:9;background:var(--pp);border-bottom:var(--bw) solid var(--ink);padding:12px 28px 10px}
+.topo{display:flex;align-items:center;gap:18px}
+.marca-k{font:700 13px/1 var(--fm);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+.trilho{flex:1;height:12px;border:2px solid var(--ink);border-radius:8px;background:var(--sur);overflow:hidden}
+.trilho i{display:block;height:100%;background:var(--ac);transform-origin:0 0;transform:scaleX(0);transition:transform .3s}
+.conta{font:700 13px/1 var(--fm);white-space:nowrap}
+.grupos{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.grupos button{font:600 12.5px/1 var(--fm);letter-spacing:.03em;padding:7px 10px;border:2px solid var(--ink);
+  border-radius:var(--raio-s);background:var(--sur);cursor:pointer}
+.grupos button.feito{background:var(--ac2)}
+.grupos button.atual{background:var(--mk);box-shadow:3px 3px 0 var(--ink)}
+
+main{max-width:1200px;margin:0 auto;padding:36px 28px 140px}
+.palco{display:grid;grid-template-columns:minmax(0,1fr);gap:56px;align-items:start}
+.palco.com-lado{grid-template-columns:minmax(0,1fr) auto}
+.etapa{display:none}
+.etapa.on{display:block}
+.etapa.dupla.on{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:56px;align-items:start}
+.kick{opacity:1;margin-bottom:18px;font-size:13px}
+h1{font:700 52px/1.02 var(--fd);letter-spacing:-.035em;margin-bottom:18px;max-width:18ch}
+h1 b,.grifo{font-weight:inherit;padding:0 .08em;background:linear-gradient(var(--mk),var(--mk)) no-repeat 0 62%/100% 70%}
+h2{font:700 22px/1.15 var(--fd);letter-spacing:-.02em;margin:30px 0 12px}
+.lead{font-size:19px;color:var(--ink6);max-width:58ch;margin-bottom:26px}
+.nota{font:500 14px/1.45 var(--fd);color:var(--ink6)}
+.mono{font-family:var(--fm)}
+
+.nb{padding:20px 22px;border-width:3px;box-shadow:6px 6px 0 var(--sombra,var(--ink))}
+.btn{display:inline-flex;font:700 18px/1 var(--fd);padding:16px 26px;border-width:3px;box-shadow:5px 5px 0 var(--ink);cursor:pointer}
+.btn:active{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--ink)}
+.btn.claro{background:var(--sur);color:var(--ink)}
+.btn.peq{font-size:16px;padding:12px 18px}
+.btn[disabled]{opacity:.45;cursor:default}
+
+/* o celular, onde o resultado aparece */
+.lado{position:sticky;top:120px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.lado[hidden]{display:none}
+.fone{position:relative;width:288px;aspect-ratio:9/16;border:4px solid var(--ink);border-radius:30px;overflow:hidden;
+  background:#16181D;box-shadow:8px 8px 0 var(--ink)}
+.fone video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.fone iframe{position:absolute;left:0;top:0;width:1080px;height:1920px;border:0;transform-origin:0 0;pointer-events:none}
+.fone .vazio-f{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:28px;
+  text-align:center;color:#C9CCD3;font:600 15px/1.4 var(--fd)}
+.rotulo{font:600 13px/1.3 var(--fm);letter-spacing:.06em;text-transform:uppercase;color:var(--ink6);text-align:center;max-width:288px}
+.fones{display:flex;gap:18px}
+.fones .fone{width:236px}
+
+/* o passo (o "aplicando" da tela final) */
+.passo-v{display:flex;gap:14px;align-items:flex-start;padding:10px 0;border-bottom:2px solid var(--ink2)}
+.passo-v:last-child{border:0}
+.passo-v .ic{width:34px;height:34px;font-size:15px;border-width:2px;background:var(--sur)}
+.passo-v.feito .ic{background:var(--ok);color:#fff}
+.passo-v.agora .ic{background:var(--mk)}
+.passo-v.erro .ic{background:var(--no);color:#fff}
+.passo-v .t{font-weight:700}
+.passo-v .d{font-size:14px;color:var(--ink6)}
+.log{font:500 12px/1.5 var(--fm);color:var(--ink6);white-space:pre-wrap;max-height:7.5em;overflow:hidden;margin-top:6px}
+
+/* escolhas em grade */
+.grade{display:grid;gap:16px}
+.g4{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.g3{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}
+.g2{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.escolha{position:relative;text-align:left;padding:0;overflow:hidden;cursor:pointer;background:var(--sur);
+  border:3px solid var(--ink);border-radius:var(--raio);box-shadow:5px 5px 0 var(--ink)}
+.escolha.sel{background:var(--mk);box-shadow:5px 5px 0 var(--ac);outline:3px solid var(--ac);outline-offset:2px}
+.escolha img{display:block;width:100%;aspect-ratio:1200/1066;object-fit:cover;border-bottom:3px solid var(--ink)}
+.escolha .tx{padding:12px 14px}
+.escolha .tx b{display:block;font:700 18px/1.15 var(--fd)}
+.escolha .tx span{font-size:13.5px;color:var(--ink6)}
+.escolha.sel .tx span{color:var(--ink)}
+.campo{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;max-width:620px}
+.campo label{font:600 14px/1.2 var(--fd)}
+.campo input[type=text],.campo input[type=password],.campo textarea,.campo select{padding:12px 14px;border:3px solid var(--ink);
+  border-radius:var(--raio-s);background:var(--sur);font-size:16px}
+.cores{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;max-width:620px}
+.cor{display:flex;align-items:center;gap:12px;padding:10px 12px;border:3px solid var(--ink);border-radius:var(--raio-s);background:var(--sur)}
+.cor input[type=color]{width:52px;height:44px;border:2px solid var(--ink);border-radius:8px;padding:0;background:none;cursor:pointer}
+.cor b{display:block;font:700 15px/1.2 var(--fd)}
+.cor span{font-size:12.5px;color:var(--ink6)}
+.aviso{margin-top:10px;padding:10px 14px;border:3px solid var(--ink);border-radius:var(--raio-s);background:var(--no2);font-size:14.5px;max-width:620px}
+.aviso:empty{display:none}
+.fontes{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.fonte-op{text-align:left;padding:12px 14px;border:3px solid var(--ink);border-radius:var(--raio-s);background:var(--sur);cursor:pointer}
+.fonte-op.sel{background:var(--mk)}
+.fonte-op .a{display:block;font-size:28px;line-height:1.15;font-weight:700}
+.fonte-op .b{display:block;font:600 12.5px/1.3 var(--fm);margin-top:6px}
+.fonte-op .c{display:block;font-size:13px;color:var(--ink6);margin-top:4px}
+.paletas{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.paleta{text-align:left;padding:12px;border:3px solid var(--ink);border-radius:var(--raio-s);background:var(--sur);cursor:pointer}
+.paleta .faixa{display:flex;height:46px;border:2px solid var(--ink);border-radius:8px;overflow:hidden;margin-bottom:8px}
+.paleta .faixa i{flex:1}
+.paleta b{display:block;font-size:15px}
+.paleta span{font-size:13px;color:var(--ink6)}
+.logos{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+.logo-op{padding:0;border:3px solid var(--ink);border-radius:var(--raio-s);background:var(--sur);cursor:pointer;overflow:hidden;text-align:left}
+.logo-op.sel{outline:3px solid var(--ac);outline-offset:2px}
+.logo-op .fundo{display:flex;align-items:center;justify-content:center;aspect-ratio:1;padding:18px;border-bottom:3px solid var(--ink)}
+.logo-op img{max-width:100%;max-height:100%}
+.logo-op span{display:block;padding:8px 10px;font-size:13.5px}
+.capa{width:288px;aspect-ratio:1;border:4px solid var(--ink);border-radius:24px;display:flex;align-items:center;justify-content:center;
+  padding:40px;box-shadow:8px 8px 0 var(--ink)}
+.capa img{max-width:100%;max-height:100%}
+
+/* o "gera pra mim" */
+.gera{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:6px 0 20px;padding:14px 16px;border:3px dashed var(--ink);
+  border-radius:var(--raio-s);background:color-mix(in srgb,var(--sur) 80%,transparent);max-width:760px}
+.gera .nota{flex:1;min-width:220px}
+.gera.fazendo{border-style:solid;background:var(--ac2)}
+.sugestao{display:inline-block;font:700 11px/1 var(--fm);letter-spacing:.08em;text-transform:uppercase;padding:5px 7px;
+  border:2px solid var(--ink);border-radius:6px;background:var(--mk);margin-bottom:6px}
+
+/* legenda e tipo */
+.leg{display:flex;flex-direction:column}
+.leg .quadro{position:relative;aspect-ratio:9/16;background:#16181D;border-bottom:3px solid var(--ink)}
+.leg .quadro video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.leg .quadro .vazio-f{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:16px;
+  text-align:center;color:#C9CCD3;font:600 13px/1.35 var(--fm)}
+
+/* ferramentas */
+.ferr{max-width:780px;background:var(--sur)}
+.ferr h3{font:700 24px/1.1 var(--fd);display:flex;align-items:center;gap:12px}
+.ferr .ok-f{font:700 13px/1 var(--fm);letter-spacing:.06em;text-transform:uppercase;padding:7px 9px;border:2px solid var(--ink);
+  border-radius:6px;background:var(--ok);color:#fff}
+.ferr pre.cmd{white-space:pre-wrap;word-break:break-all;user-select:all;font:500 14px/1.4 var(--fm);margin:6px 0 8px;padding:8px 10px;
+  border:2px solid var(--ink);background:var(--pp);color:var(--ink)}
+.ferr details summary{cursor:pointer;font-weight:700;margin:4px 0}
+.ferr .exemplo{display:flex;gap:18px;align-items:flex-start;margin:14px 0 6px}
+.ferr .exemplo video{width:150px;aspect-ratio:9/16;object-fit:cover;border:3px solid var(--ink);border-radius:14px;background:#16181D;flex:none}
+.linha{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+.linha .campo{flex:1;min-width:220px;margin:0}
+.linha .btn{padding:13px 18px;font-size:16px}
+.afiliado{margin-top:14px;padding-top:12px;border-top:2px solid var(--ink2);font-size:14px;color:var(--ink6)}
+.resp{margin-top:10px;font-size:15px;font-weight:600}
+.resp.erro{color:var(--no)}
+
+/* clone */
+.check{display:flex;gap:14px;align-items:flex-start;padding:14px 16px;border:3px solid var(--ink);border-radius:var(--raio-s);
+  background:var(--sur);margin-bottom:10px;cursor:pointer;max-width:780px}
+.check input{width:24px;height:24px;accent-color:var(--ac);flex:none;margin-top:2px}
+.check b{display:block}
+
+/* pronto */
+.resumo{display:grid;grid-template-columns:150px 1fr;gap:10px 18px;align-items:center;max-width:780px}
+.resumo dt{font:600 13px/1.2 var(--fm);letter-spacing:.06em;text-transform:uppercase;color:var(--ink6)}
+.amostra{display:inline-block;width:26px;height:26px;border:2px solid var(--ink);border-radius:6px;vertical-align:middle;margin-right:4px}
+pre.pedido{white-space:pre-wrap;font:500 15px/1.5 var(--fm);padding:18px;border:3px solid var(--ink);border-radius:var(--raio-s);
+  background:var(--sur);margin:10px 0 14px;max-width:780px}
+
+/* a oferta */
+.pacote{list-style:none;display:grid;gap:10px;margin:0 0 18px;max-width:640px}
+.pacote li{display:flex;gap:12px;align-items:flex-start;font-size:17px}
+.pacote li::before{content:'✓';flex:none;width:28px;height:28px;display:flex;align-items:center;justify-content:center;
+  border:2px solid var(--ink);border-radius:8px;background:var(--ok);color:#fff;font-weight:700}
+
+nav.rodape{position:fixed;left:0;right:0;bottom:0;z-index:9;display:flex;justify-content:space-between;align-items:center;
+  padding:14px 28px;background:var(--pp);border-top:var(--bw) solid var(--ink)}
+.faixa-erro{display:none;background:var(--no);color:#fff;padding:12px 28px;font-weight:600}
+@media (max-width:900px){.palco.com-lado,.etapa.dupla.on{grid-template-columns:1fr}.lado{position:static}h1{font-size:38px}}
+</style>
+</head>
+<body>
+<div class="faixa-erro" id="semToken">Abra esta página pelo endereço que o seu agente mostrou: ele termina com um código, e sem ele a página não grava nada.</div>
+<header>
+  <div class="topo">
+    <div class="marca-k">Fábrica de Conteúdo</div>
+    <div class="trilho" id="trilho"><i></i></div>
+    <div class="conta" id="conta"></div>
+  </div>
+  <div class="grupos" id="grupos"></div>
+</header>
+
+<main><div class="palco" id="palco"><div>
+
+<!-- sobre ele -->
+<section class="etapa" id="e-sobre">
+  <div class="kick"></div>
+  <h1>Quem é <b>você</b>?</h1>
+  <p class="lead">O nome aparece nas peças. O resto ajuda a sugerir cores, letras e logo nas próximas telas.</p>
+  <p class="nota" style="margin:-12px 0 22px">Uma escolha por tela, uns 10 minutos no total. Cada uma já vem com um padrão:
+    mude só o que quiser, e volte quando quiser sem perder nada. Cada escolha fica salva no seu computador
+    na hora: não precisa do agente aberto nem esperando.<span id="avisoFerr"></span></p>
+  <div class="campo"><label for="nome">Nome da marca ou o seu @</label>
+    <input type="text" id="nome" maxlength="40" placeholder="Ex.: Doce Lua ou @docelua"></div>
+  <div class="campo"><label for="sobre">O que você vende, e pra quem <span class="nota">(opcional)</span></label>
+    <textarea id="sobre" rows="2" maxlength="300" placeholder="Ex.: bolo de festa por encomenda em Niterói, pra quem organiza aniversário de criança"></textarea></div>
+  <div class="campo"><label for="jeito">O seu jeito de falar, em três palavras <span class="nota">(opcional)</span></label>
+    <input type="text" id="jeito" maxlength="80" placeholder="Ex.: carinhoso, animado e direto"></div>
+</section>
+
+<!-- o estilo -->
+<section class="etapa" id="e-estilo">
+  <div class="kick"></div>
+  <h1>Escolha o <b>estilo</b></h1>
+  <p class="lead">Cada estilo é um jeito inteiro de desenhar: a letra, a borda, a sombra, o fundo. Toque num e veja as
+    peças do lado mudarem. Na dúvida, fique no primeiro, que é o da fábrica. Cor e letra você ajusta nas próximas telas.</p>
+  <div class="grade g4" id="estilos"></div>
+</section>
+
+<!-- as cores -->
+<section class="etapa" id="e-cores">
+  <div class="kick"></div>
+  <h1>As <b>cores</b></h1>
+  <p class="lead">Já vêm as do estilo. Troque as que quiser: as peças do lado mudam na hora.</p>
+  <div class="gera" data-o="paleta"></div>
+  <div class="cores" id="cores"></div>
+  <div class="aviso" id="avisoCor"></div>
+  <div class="campo" style="margin-top:18px"><label for="coolors">Já tem a paleta no Coolors? Cole o endereço ou os códigos</label>
+    <input type="text" id="coolors" placeholder="coolors.co/fff4e6-3d1f2b-d9376e-ffc93c">
+    <span class="nota">Sem paleta ainda? Monte uma de graça em <a href="https://coolors.co/generate" target="_blank" rel="noopener">coolors.co</a>:
+      cada toque na barra de espaço traz cores novas, e o cadeado segura as que você gostou.</span></div>
+</section>
+
+<!-- as letras -->
+<section class="etapa" id="e-letras">
+  <div class="kick"></div>
+  <h1>As <b>letras</b></h1>
+  <p class="lead">Uma pros títulos, outra pro texto pequeno. Todas já vêm na fábrica e são livres pra usar em vídeo vendido.
+    Na dúvida, fique na do estilo, a primeira.</p>
+  <div class="gera" data-o="letras"></div>
+  <div class="fontes" id="fontes"></div>
+</section>
+
+<!-- o logo -->
+<section class="etapa dupla" id="e-logo">
+  <div>
+    <div class="kick"></div>
+    <h1>O seu <b>logo</b></h1>
+    <p class="lead">Vai na capa dos vídeos. Opcional: sem logo, a capa sai só com o título.</p>
+    <div class="gera" data-o="logo"></div>
+    <div class="logos" id="logos" style="margin-bottom:20px"></div>
+    <label class="btn claro nb peq">Já tenho: escolher o arquivo
+      <input type="file" id="logo" accept="image/png,image/jpeg,image/svg+xml,image/webp" hidden></label>
+  </div>
+  <div class="lado">
+    <div class="capa" id="capaLogo"></div>
+    <div class="rotulo" id="rotuloLogo">Ainda sem logo</div>
+  </div>
+</section>
+
+<!-- a legenda -->
+<section class="etapa" id="e-legenda">
+  <div class="kick"></div>
+  <h1>Escolha a <b>legenda</b></h1>
+  <p class="lead" id="leadLegenda"></p>
+  <div class="grade g3" id="legendas"></div>
+</section>
+
+<!-- as ferramentas: uma por tela -->
+<section class="etapa" id="e-elevenlabs"><div class="kick"></div><div class="ferr-tela" data-f="elevenlabs"></div></section>
+<section class="etapa" id="e-heygen"><div class="kick"></div><div class="ferr-tela" data-f="heygen"></div></section>
+<section class="etapa" id="e-higgsfield"><div class="kick"></div><div class="ferr-tela" data-f="higgsfield"></div></section>
+<!-- as telas dos módulos (o ZIP de um order bump) nascem em montaModulos(), uma por módulo instalado -->
+
+<!-- o clone -->
+<section class="etapa" id="e-clone">
+  <div class="kick"></div>
+  <h1>Pra gravar o <b>seu clone</b></h1>
+  <p class="lead">O clone é o seu avatar na HeyGen: você grava uma vez, e ele fala qualquer roteiro.
+    Não precisa gravar nada agora: a fábrica edita os vídeos que você já tem. Esta é a lista pra quando você
+    quiser o clone. Ela existe porque a HeyGen copia o que você grava: se o olhar foge ou a mão tampa a boca, o
+    clone sai assim.</p>
+  <div id="clone"></div>
+  <p class="nota">Antes de gravar, faça um teste de 5 segundos e assista: foco, luz e som.</p>
+  <h2>E você?</h2>
+  <div class="grade g2" id="cloneSituacao" style="max-width:780px"></div>
+</section>
+
+<!-- pronto -->
+<section class="etapa" id="e-pronto">
+  <div class="kick"></div>
+  <h1>Falta <b>um passo</b>, no seu agente</h1>
+  <div id="aplicar"></div>
+  <h2 style="margin-top:30px">O que você escolheu</h2>
+  <dl class="resumo nb" id="resumo"></dl>
+</section>
+
+<!-- a oferta da implantação, depois do "Pronto". PROPOSTA: só aparece com OFERTA.ligada -->
+<section class="etapa dupla" id="e-oferta">
+  <div>
+    <div class="kick"></div>
+    <h1>Opcional: a sua voz e o seu rosto, <b>montados por nós</b></h1>
+    <p class="lead" id="ofertaFrase"></p>
+    <ul class="pacote" id="ofertaItens"></ul>
+    <p class="nota" id="ofertaPreco" style="margin:0 0 22px"></p>
+    <div class="linha" style="align-items:center;gap:16px">
+      <a class="btn nb" id="ofertaSim" target="_blank" rel="noopener">Quero a minha montada</a>
+      <button class="btn claro nb" id="ofertaNao" type="button">Não, obrigado: sigo com a minha</button>
+    </div>
+    <p class="nota" id="ofertaTchau" hidden style="margin-top:8px">Tudo certo. As suas escolhas ficaram na fábrica, e esta aba pode ser fechada.</p>
+  </div>
+  <div class="lado">
+    <div class="fone" id="foneOferta"><div class="vazio-f">Um exemplo pronto.</div></div>
+    <div class="rotulo">Um exemplo pronto, feito pela fábrica</div>
+  </div>
+</section>
+
+</div>
+<!-- as peças na marca dele: o mesmo celular nas telas da marca -->
+<aside class="lado" id="ladoMarca" hidden>
+  <div class="fones">
+    <div class="fone" id="foneMarcaA"></div>
+    <div class="fone" id="foneMarcaB"></div>
+  </div>
+  <div class="rotulo">Peças da fábrica, na sua marca</div>
+</aside>
+</div></main>
+
+<nav class="rodape">
+  <button class="btn claro nb" id="volta">Voltar</button>
+  <span class="nota" id="salvo"></span>
+  <button class="btn nb" id="segue">Continuar</button>
+</nav>
+
+<script>
+const T = new URLSearchParams(location.search).get('t') || '';
+const H = {'X-Fabrica': T};
+const ETAPAS = [
+  ['sobre', 'Marca', 'Sobre você'], ['estilo', 'Marca', 'Estilo'],
+  ['cores', 'Marca', 'Cores'], ['letras', 'Marca', 'Letras'], ['logo', 'Marca', 'Logo'],
+  ['legenda', 'Legenda', 'Legenda'],
+  ['elevenlabs', 'Ferramentas', 'ElevenLabs'], ['heygen', 'Ferramentas', 'HeyGen'], ['higgsfield', 'Ferramentas', 'Higgsfield'],
+  ['clone', 'Clone', 'Clone'], ['pronto', 'Pronto', 'Pronto'],
+];
+// A oferta da implantação (a mesma da /upsell), depois do "Pronto". PROPOSTA: desligada até o ok do dono;
+// ligar é trocar `ligada` pra true. O ?src=onboarding mede na Kiwify quem veio daqui.
+const OFERTA = {
+  ligada: false,
+  frase: 'A sua fábrica já está pronta e funciona assim, com os vídeos que você grava. Se um dia quiser que a IA também fale com a sua voz e apareça com o seu rosto, dá pra montar sozinho com o que já veio na fábrica; e, se preferir não montar, a nossa equipe monta pra você.',
+  itens: ['A IA falando com a sua voz, e vídeos seus feitos por IA sem você gravar de novo, nas suas contas da ElevenLabs e da HeyGen (essas você assina à parte)',
+          'O seu agente sabendo do seu negócio, com um pedido pronto pra cada tipo de vídeo',
+          'Dois vídeos prontos feitos assim, e 30 dias de suporte no WhatsApp, por escrito'],
+  preco: 'R$ 597, uma vez só, sem mensalidade. Você grava uma vez (meia hora lendo um texto e 2 minutos de vídeo), e fica tudo pronto em até 7 dias úteis. Não precisa decidir agora.',
+  link: 'https://pay.kiwify.com.br/fUFxPXu?src=onboarding',
+};
+if (OFERTA.ligada) ETAPAS.push(['oferta', 'Opcional', 'Montada por nós']);
+const COM_PECAS = new Set(['sobre', 'estilo', 'cores', 'letras', 'pronto']);
+const IDX = id => ETAPAS.findIndex(e => e[0] === id);
+// As letras que se pode escolher: todas da pasta de fontes do kit (tools/video-use/assets/fontes, LICENCAS.md).
+// `peso` é o que o @font-face declara: um número prende a letra nesse peso, dois deixam a peça escolher.
+const L = (arq, peso, nome) => ({arq, peso, nome});
+const PARES = [
+  {fd: L('SpaceGrotesk-Variable.ttf', '300 700', 'Space Grotesk'), fm: L('IBMPlexMono-SemiBold.ttf', '600', 'IBM Plex Mono')},
+  {fd: L('Inter-opsz-wght.ttf', '600', 'Inter'), fm: L('IBMPlexMono-SemiBold.ttf', '600', 'IBM Plex Mono')},
+  {fd: L('Fraunces-Variable.ttf', '340', 'Fraunces leve'), fm: L('Inter-opsz-wght.ttf', '100 900', 'Inter')},
+  {fd: L('Fraunces-Variable.ttf', '700 900', 'Fraunces gorda'), fm: L('Jost-Variable.ttf', '100 900', 'Jost')},
+  {fd: L('PlayfairDisplay-Variable.ttf', '400', 'Playfair Display'), fm: L('Jost-Variable.ttf', '300 500', 'Jost leve')},
+  {fd: L('Nunito-Variable.ttf', '800 1000', 'Nunito'), fm: L('Nunito-Variable.ttf', '600 1000', 'Nunito')},
+  {fd: L('DMSans-Variable.ttf', '100 1000', 'DM Sans'), fm: L('DMSans-Variable.ttf', '100 1000', 'DM Sans')},
+  {fd: L('Montserrat[wght].ttf', '500 900', 'Montserrat'), fm: L('Jost-Variable.ttf', '300 500', 'Jost leve')},
+  {fd: L('ArchivoBlack-Regular.ttf', '400', 'Archivo Black'), fm: L('IBMPlexMono-SemiBold.ttf', '600', 'IBM Plex Mono')},
+  {fd: L('BebasNeue-Regular.otf', '400', 'Bebas Neue'), fm: L('Inter-opsz-wght.ttf', '100 900', 'Inter')},
+  {fd: L('ChakraPetch-SemiBold.ttf', '600', 'Chakra Petch'), fm: L('IBMPlexMono-SemiBold.ttf', '600', 'IBM Plex Mono')},
+  {fd: L('Bangers-Regular.ttf', '400', 'Bangers'), fm: L('Nunito-Variable.ttf', '600 1000', 'Nunito')},
+  {fd: L('PixelifySans-Variable.ttf', '400 700', 'Pixelify Sans'), fm: L('PixelifySans-Variable.ttf', '400 700', 'Pixelify Sans')},
+  {fd: L('Excalifont-Regular.ttf', '400', 'Excalifont'), fm: L('Excalifont-Regular.ttf', '400', 'Excalifont')},
+  {fd: L('Jost-Variable.ttf', '100 900', 'Jost'), fm: L('Jost-Variable.ttf', '100 900', 'Jost')},
+  {fd: L('TikTokSans-Variable.ttf', '100 900', 'TikTok Sans'), fm: L('Inter-opsz-wght.ttf', '100 900', 'Inter')},
+];
+// o nome de cada arquivo, sem o "leve" e o "gorda" do par: é o que o resumo e o "a do estilo" mostram
+const NOME_ARQ = Object.fromEntries(PARES.flatMap(p => [p.fd, p.fm]).map(l => [l.arq, l.nome.replace(/ (leve|gorda)$/, '')]));
+const nomeArq = arq => NOME_ARQ[arq] || String(arq || '').split(/[-\[.]/)[0];
+const FERR = {
+  elevenlabs: {nome: 'ElevenLabs', titulo: 'A sua <b>voz</b>, pela IA',
+    faz: 'A ElevenLabs clona a sua voz. A fábrica usa a voz clonada pra narrar o reel editorial e o criativo a partir do texto, sem você gravar o áudio.',
+    onde: 'No site da ElevenLabs: Developers › API Keys.', campos: [['ELEVENLABS_API_KEY', 'Chave (o código que o site da ElevenLabs te dá)']],
+    escolhe: ['VOZ_ID', 'Qual é a sua voz?'],
+    link: 'https://try.elevenlabs.io/gv0zkwofdgx2', extra: ''},
+  // sem chave: o agente fala com a HeyGen pelo MCP oficial dela (developers.heygen.com/mcp), com o login do aluno
+  heygen: {nome: 'HeyGen', titulo: 'O seu <b>rosto</b>, pela IA',
+    faz: 'A HeyGen faz o seu avatar: o seu rosto falando o texto. Quem gera o vídeo é o seu agente, pela conexão oficial da HeyGen, com os créditos do seu plano. Antes de cada vídeo, ele diz quanto vai gastar e espera o seu sim.',
+    mcp: 'https://mcp.heygen.com/mcp/v1/',
+    escolhe: ['HEYGEN_LOOK', 'Qual é o seu look?'],
+    link: 'https://www.heygen.com/?sid=rewardful&utm_content=creator&utm_medium=influencera&via=ninja-automacoes', extra: ''},
+  higgsfield: {nome: 'Higgsfield', titulo: 'As <b>cenas</b>, pela IA',
+    faz: 'A Higgsfield faz as cenas do criativo por IA: você não filma nada. Cada trecho da fala vira uma cena, e a fábrica escreve o pedido de cada uma e escolhe sozinha como a imagem se mexe, pelo que o trecho quer dizer: parada pra mostrar um lugar, chegando perto pra revelar um detalhe. As cenas ficam guardadas pra sua marca, e o próximo vídeo reaproveita.',
+    exemplo: 'exemplos/cenas/estudio-vazio.mp4',
+    legenda: 'Uma cena do nosso banco, feita na Higgsfield: um estúdio vazio, a câmera parada, só a planta e a luz se mexem.',
+    custo: 'Se um dia usar: cada cena custa uns US$ 0,34, pagos na Higgsfield (lá o saldo das cenas é em dólar, à parte da assinatura). A fábrica mostra o preço antes e só gera com o seu ok.',
+    onde: 'Em open.higgsfield.ai, no menu da esquerda: API keys.', campos: [['HIGGSFIELD_KEY', 'Chave (cole inteira, do jeito que o site copia)']],
+    link: 'https://higgsfield.ai?fpr=matheus-1664f8',
+    extra: ' Entrando por ele, a Higgsfield te dá um desconto pessoal de até 50% pra assinar nas 3 horas seguintes.'},
+};
+const AVISO = 'Link de afiliado: se você assinar por ele, o Matheus ganha uma comissão e você não paga nada a mais.';
+const CLONE = [
+  ['Celular em pé, num tripé', 'Câmera de trás, na altura dos olhos, a 1,2 metro. 1080p ou 4K, 30 quadros.'],
+  ['O rosto inteiro à vista', 'Microfone escondido na gola, nada na frente da boca. Do peito pra cima, com as mãos cabendo no quadro.'],
+  ['Olho na lente', 'O tempo todo. Mãos abaixo do peito, cabeça sem giro brusco.'],
+  ['Luz e fundo', 'Luz clara dos dois lados, fundo liso e parado, sala quieta e sem eco.'],
+  ['Roupa lisa', 'Sem logo, sem texto, sem estampa.'],
+  ['Dois minutos sem corte', 'Uma fala contínua. Comece com 2 segundos de boca fechada e feche a boca entre as frases.'],
+  ['O consentimento', 'No mesmo dia, o vídeo que a HeyGen pede: menos de 30 segundos, lendo o texto da tela.'],
+];
+
+let S = {escolhas: {}, video: {}, legendas: {}, agente: {}, gera: {}, usos: [], estilos: [], ferramentas: {}, ia: ''};
+let E = {marca: {}, ferramentas: {}, clone: {feitos: []}};
+let atual = 0, montado = false;
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+
+async function api(caminho, corpo) {
+  const r = await fetch(caminho, corpo === undefined ? {headers: H}
+    : {method: 'POST', headers: {...H, 'Content-Type': 'application/json'}, body: JSON.stringify(corpo)});
+  if (r.status === 403) { $('semToken').style.display = 'block'; throw new Error('sem token'); }
+  return r.json();
+}
+// as mudanças se juntam e vão de uma vez: duas em menos de 300 ms não perdem a primeira
+let salvando, pend = {};
+function grava(parte) {
+  Object.assign(E, parte); Object.assign(pend, parte);
+  clearTimeout(salvando);
+  salvando = setTimeout(envia, 300);
+}
+async function envia() {
+  clearTimeout(salvando);
+  const p = pend; pend = {};
+  if (!Object.keys(p).length) return;
+  await api('/api/escolhas', p); $('salvo').textContent = 'Salvo no seu computador';
+}
+// fechou a aba antes dos 300 ms: manda na saída, sem esperar resposta
+addEventListener('pagehide', () => { if (Object.keys(pend).length)
+  fetch('/api/escolhas', {method: 'POST', keepalive: true, headers: {...H, 'Content-Type': 'application/json'}, body: JSON.stringify(pend)}); });
+
+// ── cor ──
+function rgb(h) { const n = parseInt(h.slice(1), 16); return [n >> 16, n >> 8 & 255, n & 255]; }
+function lum(h) { return rgb(h).map(v => { v /= 255; return v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; })
+  .reduce((a, v, i) => a + v * [.2126, .7152, .0722][i], 0); }
+function contraste(a, b) { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + .05) / (y + .05); }
+
+// ── navegação: uma escolha por tela, e voltar não perde nada (tudo fica no servidor) ──
+function vai(i) {
+  atual = Math.max(0, Math.min(ETAPAS.length - 1, i));
+  const [id, grupo, nome] = ETAPAS[atual];
+  document.querySelectorAll('.etapa').forEach(s => s.classList.toggle('on', s.id === 'e-' + id));
+  document.querySelector('#e-' + id + ' .kick').textContent = `Tela ${atual + 1} de ${ETAPAS.length} · ${grupo}`;
+  $('trilho').firstChild.style.transform = `scaleX(${(atual + 1) / ETAPAS.length})`;
+  $('conta').textContent = `${atual + 1} / ${ETAPAS.length}`;
+  const grupos = [...new Set(ETAPAS.map(e => e[1]))];
+  $('grupos').innerHTML = grupos.map(g => { const k = IDX(ETAPAS.find(e => e[1] === g)[0]);
+    const fim = ETAPAS.length - 1 - [...ETAPAS].reverse().findIndex(e => e[1] === g);
+    return `<button class="${g === grupo ? 'atual' : fim < atual ? 'feito' : ''}" data-i="${k}">${g}</button>`; }).join('');
+  const lado = COM_PECAS.has(id);
+  $('ladoMarca').hidden = !lado; $('palco').classList.toggle('com-lado', lado);
+  $('volta').style.visibility = atual ? 'visible' : 'hidden';
+  $('segue').style.visibility = atual < ETAPAS.length - 1 ? 'visible' : 'hidden';
+  $('segue').textContent = FERR[id] && !S.ferramentas[id] ? 'Pular' : 'Continuar';
+  grava(id === 'pronto' ? {etapa: id, pronto: true} : {etapa: id});
+  window.scrollTo(0, 0);
+  if (lado) previaMarca();
+  if (id === 'pronto') desenhaPronto();
+  if (id === 'oferta') desenhaOferta();
+  desenhaGeras();
+}
+$('grupos').onclick = e => { const b = e.target.closest('button'); if (b) vai(+b.dataset.i); };
+$('volta').onclick = () => vai(atual - 1);
+$('segue').onclick = () => vai(atual + 1);
+
+// ── sobre ──
+['nome', 'sobre', 'jeito'].forEach(k => $(k).oninput = () => { E.marca[k] = $(k).value.trim(); grava({marca: E.marca});
+  if (k === 'nome') previaMarca(); });
+
+// ── o estilo ──
+function estiloAtual() { return S.estilos.find(e => e.slug === E.marca.estilo) || S.estilos[0] || {}; }
+const escuro = () => lum((E.marca.cores || {}).pp || '#FFFFFF') < .25;
+function desenhaEstilos() {
+  $('estilos').innerHTML = S.estilos.map(e => `<button class="escolha ${e.slug === E.marca.estilo ? 'sel' : ''}" data-e="${e.slug}">
+    <img src="/${e.imagem}" alt="" loading="lazy"><div class="tx"><b>${esc(e.nome)}</b><span>${esc(e.jeito)}<br>Combina com ${esc(e.combina)}</span></div></button>`).join('');
+}
+$('estilos').onclick = e => { const b = e.target.closest('button'); if (b) escolheEstilo(b.dataset.e, true); };
+function escolheEstilo(slug, desenha) {
+  const est = S.estilos.find(e => e.slug === slug);
+  const [pp, ink, ac, mk] = est.cores;
+  // trocar de estilo traz as cores e as letras dele: cada estilo é uma linguagem inteira
+  E.marca = {...E.marca, estilo: slug, cores: {pp, ink, ac, mk}, fontes: null};
+  grava({marca: E.marca});
+  if (desenha) { desenhaEstilos(); desenhaCores(); desenhaFontes(); previaMarca(); }
+}
+
+// ── as cores ──
+function papeis() {
+  return [['pp', 'Chão', 'o fundo das peças'], ['ink', 'Letra', escuro() ? 'o texto, clara sobre o chão escuro' : 'o texto e a borda'],
+          ['ac', 'Bloco', 'a cor forte da marca; leva letra branca'], ['mk', 'Marcador', 'a palavra grifada e a etiqueta']];
+}
+function desenhaCores() {
+  const m = E.marca.cores || {};
+  $('cores').innerHTML = papeis().map(([k, nome, d]) => `<label class="cor"><input type="color" data-k="${k}" value="${m[k] || '#000000'}">
+    <span><b>${nome}</b><span>${d}</span></span></label>`).join('');
+  desenhaCoresAviso();
+}
+$('cores').oninput = e => { const k = e.target.dataset.k; if (!k) return;
+  E.marca.cores[k] = e.target.value.toUpperCase(); grava({marca: E.marca}); desenhaCoresAviso(); previaMarca(); };
+function desenhaCoresAviso() { const m = E.marca.cores || {}, av = []; if (!m.pp) return;
+  const noMarcador = escuro() ? m.pp : m.ink;      // a letra que senta no marcador
+  if (contraste(m.ink, m.pp) < 4.5) av.push('A letra quase some no chão. Afaste as duas: uma bem clara, outra bem escura.');
+  if (contraste('#FFFFFF', m.ac) < 3) av.push('A letra branca some nesse bloco. Escureça um pouco a cor do bloco.');
+  if (contraste(noMarcador, m.mk) < 3) av.push(escuro() ? 'A letra escura some nesse marcador. Clareie o marcador.' : 'A letra some nesse marcador. Clareie o marcador ou escureça a letra.');
+  $('avisoCor').textContent = av.join(' '); }
+function poeCores(hex) {
+  // pelo papel, não pela ordem: chão e letra são a mais clara e a mais escura (no estilo escuro, ao contrário),
+  // o bloco é a que mais segura letra branca, e o marcador a mais clara das que sobram
+  const ord = [...hex].sort((a, b) => lum(b) - lum(a)), claro = ord[0], esc_ = ord[ord.length - 1];
+  const resto = hex.filter(h => h !== claro && h !== esc_);
+  const bloco = resto.reduce((a, b) => contraste('#FFFFFF', b) > contraste('#FFFFFF', a) ? b : a);
+  const marcador = resto.filter(h => h !== bloco).reduce((a, b) => lum(b) > lum(a) ? b : a, resto.find(h => h !== bloco) || claro);
+  const escEstilo = lum(estiloAtual().cores?.[0] || '#FFFFFF') < .25;
+  E.marca.cores = escEstilo ? {pp: esc_, ink: claro, ac: bloco, mk: marcador} : {pp: claro, ink: esc_, ac: bloco, mk: marcador};
+  grava({marca: E.marca}); desenhaCores(); previaMarca();
+}
+$('coolors').oninput = e => {
+  const hex = [...e.target.value.matchAll(/(?:^|[^0-9a-f])#?([0-9a-f]{6})(?![0-9a-f])/gi)].map(m => '#' + m[1].toUpperCase());
+  if (hex.length >= 4) poeCores(hex);
+};
+
+// ── as letras ──
+const kf = (lado, i) => `K${lado}${i}`;
+document.head.insertAdjacentHTML('beforeend', '<style>' + PARES.flatMap((p, i) => ['fd', 'fm'].map(l =>
+  `@font-face{font-family:'${kf(l, i)}';font-weight:${p[l].peso};src:url("/tools/video-use/assets/fontes/${p[l].arq}")}`)).join('') + '</style>');
+function amostraFonte(p, i, extra = '', classe = '') {
+  return `<button class="fonte-op ${classe}" ${extra}>
+    <span class="a" style="font-family:'${kf('fd', i)}'">Aa · Seu título</span>
+    <span class="b" style="font-family:'${kf('fm', i)}'">${esc(p.fd.nome)} + ${esc(p.fm.nome)}</span></button>`;
+}
+function desenhaFontes() {
+  const f = E.marca.fontes, est = estiloAtual();
+  const le = est.letras || {};
+  $('fontes').innerHTML =
+    `<button class="fonte-op ${!f ? 'sel' : ''}" data-i="estilo"><span class="a">A do estilo</span>
+      <span class="b">${esc(nomeArq(le.fd))}${le.fm && le.fm !== le.fd ? ' + ' + esc(nomeArq(le.fm)) : ''}</span>
+      <span class="c">a que o estilo ${esc(est.nome || '')} foi desenhado pra usar</span></button>` +
+    PARES.map((p, i) => amostraFonte(p, i, `data-i="${i}"`, f && f.fd.arq === p.fd.arq && f.fd.peso === p.fd.peso && f.fm.arq === p.fm.arq ? 'sel' : '')).join('');
+}
+$('fontes').onclick = e => { const b = e.target.closest('button'); if (!b) return;
+  E.marca.fontes = b.dataset.i === 'estilo' ? null : PARES[+b.dataset.i]; grava({marca: E.marca}); desenhaFontes(); previaMarca(); };
+
+// ── o logo ──
+$('logo').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  const r = await fetch('/api/logo?nome=' + encodeURIComponent(f.name), {method: 'POST', headers: H, body: f}).then(r => r.json());
+  if (r.ok) { E.marca.logo = r.logo; E.marca.logo_em = Date.now(); desenhaLogo(); }
+  else alert(r.msg);
+};
+function desenhaLogo() {
+  const m = E.marca, c = m.cores || {};
+  $('capaLogo').style.background = c.pp || '#fff';
+  $('capaLogo').innerHTML = m.logo ? `<img src="/${m.logo}?v=${m.logo_em || 1}" alt="o seu logo">` : '';
+  $('rotuloLogo').textContent = m.logo ? 'O seu logo, no chão da sua marca' : 'Ainda sem logo';
+  const g = S.gera.logo || {};
+  $('logos').innerHTML = (g.opcoes || []).map(o => `<button class="logo-op ${m.logo_de === o.arquivo ? 'sel' : ''}" data-a="${esc(o.arquivo)}">
+    <div class="fundo" style="background:${c.pp || '#fff'}"><img src="/${esc(o.arquivo)}" alt=""></div><span>${esc(o.nome || 'opção')}</span></button>`).join('');
+}
+$('logos').onclick = async e => { const b = e.target.closest('button'); if (!b) return;
+  const r = await api('/api/logo-gerado', {arquivo: b.dataset.a});
+  if (r.ok) { E.marca.logo = r.logo; E.marca.logo_de = b.dataset.a; E.marca.logo_em = Date.now(); grava({marca: E.marca}); desenhaLogo(); } };
+
+// ── o "gera pra mim": quem responde é a IA do aluno, chamada pelo servidor (sem o agente da conversa) ──
+// Só aparece se o servidor achou o Claude Code ou o Codex neste computador (S.ia). As opções voltam por /api/estado.
+const GERA = {
+  paleta: {ia: 1, txt: 'Sem ideia de cor? A IA monta três paletas pro seu assunto.', btn: 'Gera pra mim',
+    pede: () => ({nome: E.marca.nome, sobre: E.marca.sobre, jeito: E.marca.jeito, estilo: E.marca.estilo, escuro: escuro()})},
+  letras: {ia: 1, txt: 'Na dúvida? A IA sugere três pares de letras pro seu assunto, entre as que vêm na fábrica.', btn: 'Gera pra mim',
+    pede: () => ({nome: E.marca.nome, sobre: E.marca.sobre, jeito: E.marca.jeito, estilo: E.marca.estilo,
+      fontes: [...new Set(PARES.flatMap(p => [p.fd.arq, p.fm.arq]))]})},
+  logo: {ia: 1, txt: 'Não tem logo? A IA desenha três, com o seu nome, nas suas cores e letras.', btn: 'Gera pra mim',
+    pede: () => ({nome: E.marca.nome, sobre: E.marca.sobre, estilo: E.marca.estilo, cores: E.marca.cores,
+      fontes: E.marca.fontes || {fd: {arq: estiloAtual().letras?.fd}, fm: {arq: estiloAtual().letras?.fm}}})},
+  looks: {txt: 'Ligou e entrou? O seu agente pergunta à HeyGen quais são os seus looks.', btn: 'Listar os meus looks', pede: () => ({}),
+    pronto: 'Pronto: escolha o seu look abaixo.', outra: 'Listar de novo'},
+};
+function desenhaGeras() {
+  document.querySelectorAll('.etapa.on .gera').forEach(el => {
+    const o = el.dataset.o, g = S.gera[o] || {}, cfg = GERA[o];
+    el.hidden = !!cfg.ia && !S.ia;          // sem agente instalado, o botão some
+    const fazendo = g.estado === 'pedido' || g.estado === 'fazendo';
+    el.classList.toggle('fazendo', fazendo);
+    const msg = fazendo ? (cfg.ia ? 'A IA está pensando. Leva uns segundos; pode escolher à mão enquanto isso.' : 'O seu agente está fazendo. Leva uns segundos.')
+      : g.estado === 'erro' ? (g.msg ? esc(g.msg) : 'Não saiu dessa vez. Tente de novo.')
+      : g.estado === 'pronto' ? (cfg.pronto || 'Pronto: escolha uma abaixo, ou peça outras.') : cfg.txt;
+    const chave = msg + fazendo;
+    if (el.dataset.chave === chave) return;
+    el.dataset.chave = chave;
+    el.innerHTML = `<span class="nota">${msg}</span>` + (fazendo ? '' :
+      `<button class="btn nb peq" data-gera="${o}">${g.estado === 'pronto' ? (cfg.outra || 'Gerar outras') : cfg.btn}</button>`);
+  });
+  const id = ETAPAS[atual][0];
+  if (id === 'cores') desenhaPaletas();
+  if (id === 'letras') desenhaLetrasGeradas();
+  if (id === 'logo') desenhaLogo();
+  if (id === 'heygen') desenhaLooks();
+}
+document.addEventListener('click', async e => {
+  const b = e.target.closest('[data-gera]'); if (!b) return;
+  const o = b.dataset.gera;
+  S.gera[o] = {estado: 'pedido'}; desenhaGeras();
+  const r = await api('/api/gera', {o, ...GERA[o].pede()});
+  if (r && r.ok === false) { S.gera[o] = {estado: 'erro', msg: r.msg}; desenhaGeras(); }
+});
+function desenhaPaletas() {
+  const g = S.gera.paleta || {}; let el = $('paletas');
+  if (!el) { $('avisoCor').insertAdjacentHTML('afterend', '<div class="paletas" id="paletas" style="margin-top:16px;max-width:760px"></div>'); el = $('paletas'); }
+  el.innerHTML = (g.opcoes || []).map((o, i) => `<button class="paleta" data-i="${i}"><span class="sugestao">sugestão da IA</span>
+    <div class="faixa">${['pp', 'ink', 'ac', 'mk'].map(k => `<i style="background:${o.cores[k]}"></i>`).join('')}</div>
+    <b>${esc(o.nome)}</b><span>${esc(o.porque)}</span></button>`).join('');
+}
+document.addEventListener('click', e => { const b = e.target.closest('#paletas .paleta'); if (!b) return;
+  E.marca.cores = {...S.gera.paleta.opcoes[+b.dataset.i].cores}; grava({marca: E.marca}); desenhaCores(); previaMarca(); });
+function desenhaLetrasGeradas() {
+  const g = S.gera.letras || {}; let el = $('letrasGeradas');
+  if (!el) { $('fontes').insertAdjacentHTML('beforebegin', '<div class="fontes" id="letrasGeradas" style="margin-bottom:16px"></div>'); el = $('letrasGeradas'); }
+  const chave = JSON.stringify(g.opcoes || []);
+  if (el.dataset.chave === chave) return;
+  el.dataset.chave = chave;
+  const ops = (g.opcoes || []).map((o, i) => ({...o, i: 100 + i}));
+  // a letra sugerida entra com @font-face próprio, como as da lista
+  document.head.insertAdjacentHTML('beforeend', '<style>' + ops.flatMap(o => ['fd', 'fm'].map(l =>
+    `@font-face{font-family:'${kf(l, o.i)}';font-weight:${o[l].peso};src:url("/tools/video-use/assets/fontes/${o[l].arq}")}`)).join('') + '</style>');
+  el.innerHTML = ops.map(o => {
+    const p = {fd: {...o.fd, nome: nomeArq(o.fd.arq)}, fm: {...o.fm, nome: nomeArq(o.fm.arq)}};
+    return amostraFonte(p, o.i, `data-g="${o.i - 100}"`).replace('<span class="a"', '<span class="sugestao">sugestão da IA</span><span class="a"')
+      .replace('</button>', `<span class="c">${esc(o.nome)}${o.porque ? ': ' + esc(o.porque) : ''}</span></button>`);
+  }).join('');
+}
+document.addEventListener('click', e => { const b = e.target.closest('#letrasGeradas .fonte-op'); if (!b) return;
+  const o = S.gera.letras.opcoes[+b.dataset.g];
+  E.marca.fontes = {fd: {...o.fd, nome: nomeArq(o.fd.arq)}, fm: {...o.fm, nome: nomeArq(o.fm.arq)}};
+  grava({marca: E.marca}); desenhaFontes(); previaMarca(); });
+// ── as peças na marca dele ──
+let previaT;
+function previaMarca() {
+  clearTimeout(previaT);
+  previaT = setTimeout(() => {
+    const m = E.marca, c = m.cores || {}, f = m.fontes, nome = m.nome || 'A sua marca';
+    // sai=0: a peça fica na tela até o laço recomeçar, em vez de sumir e deixar o celular vazio
+    const base = {estilo: m.estilo, ...c, sai: 0};
+    if (f) Object.assign(base, {fd: f.fd.arq, pfd: f.fd.peso, fm: f.fm.arq, pfm: f.fm.peso});
+    pecaNoFone('foneMarcaA', 'o_pacote', {...base, hd: 'O seu conteúdo, <b>com a sua cara</b>.', kick: 'esta semana',
+      it: 'Roteiro|pronto pra gravar@0.3;Reel editado|corte e legenda@0.6;Capa|nas suas cores@0.9',
+      fecho: 'Feito pela fábrica da ' + nome, t_fecho: 1.2, dur: 4.5}, null);
+    pecaNoFone('foneMarcaB', 'g_gancho', {...base, l: nome + '|*em todo vídeo|_com a sua cara', pos: 'topo', dur: 4},
+      S.previa && S.previa.base, 'r_lower', {...base, nome, cargo: (m.sobre || 'feito pela sua fábrica').slice(0, 42),
+      handle: /^@/.test(nome) ? nome : '', y: 1380, lado: 'esquerda', t: .6, dur: 4});
+  }, 250);
+}
+function pecaNoFone(id, peca, q, fundo, peca2, q2) {
+  const el = $(id), w = el.clientWidth || 236, k = w / 1080;
+  const url = (p, qq) => `/peca/${p}?` + new URLSearchParams(qq).toString();
+  const vid = fundo ? `<video src="${fundo.startsWith('blob:') ? fundo : '/' + fundo}" autoplay loop muted playsinline></video>` : '';
+  el.innerHTML = vid + [[peca, q], peca2 ? [peca2, q2] : null].filter(Boolean)
+    .map(([p, qq]) => `<iframe src="${url(p, qq)}" style="transform:scale(${k})" tabindex="-1" aria-hidden="true"></iframe>`).join('');
+  if (!fundo && peca === 'g_gancho') el.style.background = 'linear-gradient(160deg,#3B3F4A,#16181D)';
+  el.querySelectorAll('iframe').forEach(toca);
+}
+function toca(ifr) {   // a timeline da peça (window.__tl, pausada) toca em laço
+  ifr.onload = () => { const w = ifr.contentWindow; const t = setInterval(() => {
+    if (!w.__ready || !w.__tl) return; clearInterval(t);
+    const tl = w.__tl; tl.eventCallback('onComplete', () => setTimeout(() => tl.restart(), 2500)); tl.play(); }, 120); };
+}
+
+// ── a legenda ──
+const nomeLeg = n => n === 'padrao' ? 'A de sempre' : n[0].toUpperCase() + n.slice(1).replace(/-/g, ' ');
+let legDesenhada = '';
+function desenhaLegendas() {
+  const tem = !!S.previa;
+  $('leadLegenda').textContent = tem ? 'A legenda é o texto das palavras que aparece na tela enquanto você fala. Cada uma aparece no começo de um vídeo de exemplo; passe o mouse pra ver tocando.'
+    : 'Este kit veio sem o vídeo de exemplo, então não há prévia. Escolha pela descrição.';
+  const chave = JSON.stringify([S.legendas, E.legenda, tem]);
+  if (chave === legDesenhada) return;
+  legDesenhada = chave;
+  $('legendas').innerHTML = S.usos.map(u => {
+    const st = S.legendas[u.nome];
+    // dezessete vídeos em 1080p tocando juntos travam o navegador: toca a escolhida e a do mouse
+    const q = st === 'pronta' ? `<video src="/onboarding/legendas/${u.nome}.mp4#t=2.5" loop muted playsinline
+        preload="metadata" ${E.legenda === u.nome ? 'autoplay' : ''}></video>`
+      : `<div class="vazio-f">${!tem ? 'sem prévia neste kit' : st === 'fazendo' ? 'preparando no seu computador…' : st === 'erro' ? 'esta não deu pra mostrar' : 'na fila'}</div>`;
+    return `<button class="escolha leg ${E.legenda === u.nome ? 'sel' : ''}" data-l="${u.nome}"><div class="quadro">${q}</div>
+      <div class="tx"><b>${esc(nomeLeg(u.nome))}</b><span>${esc(u.uso)}</span></div></button>`;
+  }).join('');
+}
+$('legendas').addEventListener('mouseover', e => { const v = e.target.closest('.leg')?.querySelector('video'); if (v && v.paused) v.play(); });
+$('legendas').addEventListener('mouseout', e => { const b = e.target.closest('.leg'); const v = b?.querySelector('video');
+  if (v && !b.contains(e.relatedTarget) && !b.classList.contains('sel')) v.pause(); });
+$('legendas').onclick = e => { const b = e.target.closest('button'); if (!b) return;
+  grava({legenda: b.dataset.l}); api('/api/previa', {legenda: b.dataset.l}); legDesenhada = ''; desenhaLegendas(); };
+
+// ── as ferramentas de sempre vêm em módulos: a ElevenLabs e a HeyGen (e a tela do clone) no Crie seu Clone de IA, a
+// Higgsfield no Cenas de Cinema com IA. O servidor só põe em S.ferramentas as que esta pasta tem; a tela das outras sai.
+const EMBUTIDAS = ['elevenlabs', 'heygen', 'higgsfield'];
+function tiraAusentes() {
+  for (const id of [...EMBUTIDAS, 'clone']) {
+    if (id in S.ferramentas || (id === 'clone' && 'heygen' in S.ferramentas)) continue;
+    delete FERR[id]; ETAPAS.splice(IDX(id), 1); $('e-' + id).remove();
+  }
+  const nomes = {elevenlabs: 'voz', heygen: 'rosto', higgsfield: 'cenas'}, tem = EMBUTIDAS.filter(x => FERR[x]).map(x => nomes[x]);
+  const lista = tem.length > 1 ? tem.slice(0, -1).join(', ') + ' e ' + tem.at(-1) : tem[0];
+  $('avisoFerr').textContent = !tem.length ? '' : tem.length > 1
+    ? ` Lá pelo meio aparecem ${tem.length} ferramentas de outros sites, pagas lá (${lista}, por IA): são opcionais, e dá pra pular.`
+    : ` Lá pelo meio aparece uma ferramenta de outro site, paga lá (${lista}, por IA): é opcional, e dá pra pular.`;
+}
+
+// ── os módulos: cada um descreve a tela dele em .agents/skills/<módulo>/onboarding.json (o servidor manda em
+// S.modulos) e entra antes do "Pronto". Sem o módulo instalado, a tela não existe.
+function montaModulos() {
+  for (const m of S.modulos || []) {
+    if (FERR[m.id]) continue;
+    FERR[m.id] = m;
+    const sec = document.createElement('section');
+    sec.className = 'etapa'; sec.id = 'e-' + m.id;
+    sec.innerHTML = `<div class="kick"></div><div class="ferr-tela" data-f="${esc(m.id)}"></div>`;
+    $('e-pronto').before(sec);
+    ETAPAS.splice(IDX('pronto'), 0, [m.id, m.grupo || m.nome, m.etapa || m.nome]);
+  }
+}
+
+// ── as ferramentas: uma por tela, todas opcionais ──
+function desenhaFerramenta(id) {
+  const f = FERR[id], liga = S.ferramentas[id], primeira = id === EMBUTIDAS.find(x => FERR[x]);
+  document.querySelector(`.ferr-tela[data-f="${id}"]`).innerHTML = `
+    <h1>${f.titulo}${f.id ? '' : ': <b>só se quiser</b>'}</h1>
+    <p class="lead">${f.lead || (primeira ? 'Sem nenhuma destas, a fábrica já faz o essencial: edita o vídeo que você grava no celular. Elas são de outros sites, pagas lá, no plano que você escolher, e servem pra IA fazer o que você não quer gravar: a voz, o rosto, as cenas. A fábrica não cobra nada a mais.'
+      : 'Opcional, como a anterior. A fábrica funciona sem ela.')}</p>
+    ${primeira ? '<button class="btn nb" id="pulaFerr" style="margin-bottom:26px">Pular todas: seguir sem nenhuma</button>' : ''}
+    <div class="ferr nb" id="f-${id}">
+      <h3>${f.nome} ${liga ? '<span class="ok-f">✅ conectada</span>' : ''}</h3>
+      <p style="margin:8px 0 6px">${f.faz}</p>
+      ${f.exemplo ? `<div class="exemplo"><video src="/${f.exemplo}" autoplay loop muted playsinline></video><p class="nota">${f.legenda}</p></div>` : ''}
+      ${f.custo ? `<p class="nota" style="margin:6px 0 10px">${f.custo}</p>` : ''}
+      ${f.mcp ? conexao(f.mcp) : f.id ? '<p class="nota" style="margin:12px 0 10px">A <b>chave</b> é um código que o site te dá pra fábrica usar a sua conta. Copie lá e cole aqui.</p>' : `<p class="nota" style="margin:12px 0 10px">Não tem conta? Não precisa: aperte "Pular", embaixo. Já assina? A <b>chave</b> é um
+        código que o site te dá pra fábrica usar a sua conta. Copie lá e cole aqui.</p>`}
+      ${(f.campos || []).length ? `<form class="linha" data-f="${id}">
+        ${f.campos.map(([k, rot]) => `<div class="campo"><label for="${k}">${rot}</label>
+          <input type="password" id="${k}" name="${k}" autocomplete="off" placeholder="${liga ? 'já tem uma; cole outra pra trocar' : 'cole aqui'}"></div>`).join('')}
+        <button class="btn nb" type="submit">Conectar</button>
+      </form>` : ''}
+      ${f.onde ? `<div class="nota" style="margin-top:8px">Onde pegar: ${f.onde}</div>` : ''}
+      <div class="resp" id="r-${id}"></div>
+      <div id="o-${id}"></div>
+      <div class="afiliado">Ainda não tem conta? <a href="${f.link}" target="_blank" rel="noopener">${f.acao || 'Assinar a ' + f.nome}</a>.${f.extra || ''}${f.afiliado === false ? '' : '<br>' + AVISO}</div>
+    </div>
+    <p class="nota" style="margin-top:18px;max-width:780px">${f.mcp
+      ? 'Sem chave: a HeyGen entra pelo seu login, dentro do seu agente. Ver a lista dos looks não gasta crédito.'
+      : 'A chave fica só no arquivo <span class="mono">.env.local</span> desta pasta, no seu computador. A página testa com uma consulta que não gasta crédito.'}</p>`;
+  if (primeira) $('pulaFerr').onclick = () => vai(ETAPAS.findIndex((e, i) => i > atual && !EMBUTIDAS.includes(e[0])));
+}
+// A ferramenta pelo MCP (a HeyGen): ligar no agente, entrar na conta e escolher o look, que o agente lista.
+// Os comandos são os da doc da HeyGen (developers.heygen.com/mcp, 07/10/2026); no Codex, sem a barra no fim.
+function conexao(url) {
+  const passo = (n, t, d) => `<div class="passo-v"><span class="ic">${n}</span><div><div class="t">${t}</div><div class="d">${d}</div></div></div>`;
+  return `<div style="margin:12px 0 4px">
+    ${passo(1, 'Ligue a HeyGen no seu agente', `Não tem chave: é um login. No app do Claude, no <b>+</b> ao lado da caixa de texto:
+      <b>Connectors › Manage connectors</b>, e lá em cima <b>Add › Add custom connector</b>. Nome <b>HeyGen</b> e este endereço:<pre class="cmd">${url}</pre>
+      <details><summary>Usa o Claude Code no terminal, ou o Codex?</summary>Peça pro seu agente: “liga a HeyGen em você”.
+      Ele roda o comando, ou te pede pra colar no terminal. Claude Code:
+      <pre class="cmd">claude mcp add --transport http -s user heygen ${url}</pre>Codex:
+      <pre class="cmd">codex mcp add heygen --url ${url.replace(/\/$/, '')}</pre></details>`)}
+    ${passo(2, 'Entre na sua conta da HeyGen', `No app do Claude: <b>Continue</b>, <b>Add</b> (sem mexer no resto) e <b>Connect</b>; no navegador, <b>Continue
+      connecting</b>. No Claude Code, digite <span class="mono">/mcp</span> e escolha heygen. No Codex, o navegador abre sozinho.
+      Na página da HeyGen, <b>Authorize access</b>.`)}
+    ${passo(3, 'Escolha o seu look', 'O seu agente pergunta à HeyGen quais são os seus looks, e a lista aparece aqui embaixo.')}
+  </div><div class="gera" data-o="looks"></div>`;
+}
+function desenhaLooks() {
+  const g = S.gera.looks || {}, el = $('o-heygen'), f = FERR.heygen;
+  if (!el || !f) return;
+  const chave = (g.estado || '') + (g.opcoes || []).map(o => o.id).join();
+  if (el.dataset.chave === chave) return;
+  el.dataset.chave = chave;
+  el.innerHTML = g.estado === 'pronto' && (g.opcoes || []).length ? `<div class="campo" style="margin-top:12px"><label>${f.escolhe[1]}</label>
+    <select data-k="${f.escolhe[0]}"><option value="">escolha</option>${g.opcoes.map(o =>
+      `<option value="${esc(o.id)}">${esc(o.nome)}</option>`).join('')}</select></div>`
+    : `<div class="campo" style="margin-top:12px"><label>Ou cole o ID do seu look <span class="nota">(a lista não sai? o ID está no endereço do look, na HeyGen)</span></label>
+      <input type="text" data-k="${f.escolhe[0]}" maxlength="80" placeholder="cole aqui"></div>`;
+}
+document.addEventListener('submit', async e => {
+  const fm = e.target.closest('form[data-f]'); if (!fm) return;
+  e.preventDefault();
+  const id = fm.dataset.f, f = FERR[id], corpo = {ferramenta: id};
+  f.campos.forEach(([k]) => corpo[k] = fm.elements[k].value);
+  const r = $('r-' + id);
+  r.className = 'resp'; r.textContent = 'Testando a chave…';
+  const res = await api('/api/chave', corpo).catch(() => ({ok: false}));
+  if (!res.ok) {
+    r.className = 'resp erro';
+    r.textContent = res.msg || (res.status === 0 ? 'Não consegui falar com a ' + f.nome + '. Confira a internet e tente de novo.'
+      : 'A chave não abriu. Confira se copiou inteira, sem espaço no fim.');
+    return;
+  }
+  S.ferramentas[id] = true;
+  fm.reset(); r.textContent = '✅ Conectada. A chave ficou guardada só no seu computador, nesta pasta.';
+  f.campos.forEach(([k]) => fm.elements[k].placeholder = 'já tem uma; cole outra pra trocar');
+  $('f-' + id).querySelector('h3').innerHTML = `${f.nome} <span class="ok-f">✅ conectada</span>`;
+  if (f.lista) $('o-' + id).innerHTML = `<p class="nota" style="margin-top:12px">${f.lista}: ${res.opcoes && res.opcoes.length
+    ? res.opcoes.map(o => esc(o.nome)).join(', ') : 'nenhuma ainda. Ligue no painel da Zernio (Connect) e cole a chave de novo pra conferir.'}</p>`;
+  if (f.escolhe && res.opcoes && res.opcoes.length) {
+    $('o-' + id).innerHTML = `<div class="campo" style="margin-top:12px"><label>${f.escolhe[1]}</label>
+      <select data-k="${f.escolhe[0]}"><option value="">escolha</option>${res.opcoes.map(o =>
+        `<option value="${esc(o.id)}">${esc(o.nome)}${o.tipo ? ' · ' + esc(o.tipo) : ''}</option>`).join('')}</select></div>`;
+    if (id === 'elevenlabs') $('o-' + id).innerHTML += `<div class="campo" style="margin-top:12px"><label>Sotaque (opcional): a voz clonada já fala do seu jeito, deixe em "nenhum" a não ser que queira puxar</label>
+      <select data-s="sotaque">${[['nenhum', 'nenhum'], ['carioca', 'carioca'], ['paulista', 'paulista'], ['nordestino', 'nordestino'], ['mineiro', 'mineiro'], ['gaucho', 'gaúcho']].map(([v, t]) =>
+        `<option value="${v}">${t}</option>`).join('')}</select></div>`;
+  }
+  $('segue').textContent = 'Continuar';
+});
+document.addEventListener('change', async e => {
+  if (e.target.dataset.s === 'sotaque') { await api('/api/sotaque', {nome: e.target.value}); $('salvo').textContent = 'Salvo no .env.local'; return; }
+  const k = e.target.dataset.k; if (!k || !e.target.value || e.target.type === 'color') return;
+  await api('/api/id', {chave: k, valor: e.target.value});
+  $('salvo').textContent = 'Salvo no .env.local';
+  if (k === 'HEYGEN_LOOK') {                // a HeyGen não tem chave: escolher o look é o que conecta
+    S.ferramentas.heygen = true;
+    $('f-heygen').querySelector('h3').innerHTML = `${FERR.heygen.nome} <span class="ok-f">✅ conectada</span>`;
+    $('segue').textContent = 'Continuar';
+  }
+});
+
+// ── o clone ──
+function desenhaClone() {
+  const feitos = (E.clone || {}).feitos || [];
+  $('clone').innerHTML = CLONE.map(([t, d], i) => `<label class="check"><input type="checkbox" data-i="${i}" ${feitos.includes(i) ? 'checked' : ''}>
+    <span><b>${t}</b>${d}</span></label>`).join('');
+  const sit = (E.clone || {}).situacao;
+  $('cloneSituacao').innerHTML = [['depois', 'Vou gravar depois', 'A fábrica edita os vídeos que você grava no celular enquanto isso.'],
+    ['tenho', 'Já tenho o meu avatar na HeyGen', 'O agente usa o seu avatar no reel editorial.']].map(([id, t, d]) =>
+    `<button class="escolha ${sit === id ? 'sel' : ''}" data-s="${id}"><div class="tx"><b>${t}</b><span>${d}</span></div></button>`).join('');
+}
+$('clone').onchange = e => { const i = +e.target.dataset.i;
+  const feitos = new Set((E.clone || {}).feitos || []); e.target.checked ? feitos.add(i) : feitos.delete(i);
+  grava({clone: {...E.clone, feitos: [...feitos]}}); };
+$('cloneSituacao').onclick = e => { const b = e.target.closest('button'); if (!b) return;
+  grava({clone: {...E.clone, situacao: b.dataset.s}}); desenhaClone(); };
+
+// ── pronto: tudo já está salvo em onboarding/escolhas.json; o agente lê quando o aluno voltar pra conversa ──
+const FRASE = 'Terminei o onboarding. Leia onboarding/escolhas.json e aplique as minhas escolhas na fábrica.';
+function desenhaPronto() {
+  const m = E.marca || {}, c = m.cores || {}, est = estiloAtual();
+  const ligadas = Object.keys(FERR).filter(x => S.ferramentas[x]).map(x => FERR[x].nome);
+  const ferr = ligadas.length ? `${ligadas.join(' e ')} conectada${ligadas.length > 1 ? 's' : ''}. As outras ficam pra quando você quiser.`
+    : 'Nenhuma. A fábrica edita sem elas, e dá pra conectar depois.';
+  const letras = m.fontes ? `${m.fontes.fd.nome} + ${m.fontes.fm.nome}` : `as do estilo (${nomeArq((est.letras || {}).fd)})`;
+  $('resumo').innerHTML = `
+    <dt>Marca</dt><dd><b>${esc(m.nome || 'sem nome ainda')}</b> · estilo ${esc(est.nome || '')}</dd>
+    <dt>Cores</dt><dd>${['pp', 'ink', 'ac', 'mk'].filter(k => c[k]).map(k => `<span class="amostra" style="background:${c[k]}"></span>`).join('')}</dd>
+    <dt>Letras</dt><dd>${esc(letras)}</dd>
+    <dt>Logo</dt><dd>${m.logo ? `<img src="/${m.logo}?v=${m.logo_em || 1}" alt="" style="height:34px;vertical-align:middle;background:${c.pp || '#fff'};padding:3px;border:2px solid var(--ink);border-radius:6px">` : 'sem logo'}</dd>
+    <dt>Legenda</dt><dd>${esc(E.legenda ? nomeLeg(E.legenda) : 'a fábrica escolhe')}</dd>
+    ${Object.keys(FERR).length ? `<dt>Ferramentas</dt><dd>${ferr}</dd>` : ''}
+    ${IDX('clone') < 0 ? '' : `<dt>Clone</dt><dd>${(E.clone || {}).situacao === 'tenho' ? 'já tem o avatar' : 'grava depois'}</dd>`}`;
+  if (!$('copia')) {
+    $('aplicar').innerHTML = `<p class="lead">As suas escolhas já estão salvas no seu computador. Agora volte à conversa com o seu agente
+        (Claude Code ou Codex) e mande esta frase: é ela que põe a sua marca na fábrica. Abra o agente na pasta da fábrica, cole a frase e aperte Enter.</p>
+      <pre class="pedido" id="pedido">${esc(FRASE)}</pre>
+      <button class="btn nb" id="copia">Copiar a frase</button>
+      ${OFERTA.ligada ? '' : '<p class="nota" style="margin-top:16px">Depois de colar a frase, pode fechar esta aba. Quer mudar algo? Volte nas telas: o que você mudar fica salvo na hora.</p>'}`;
+    $('copia').onclick = () => {
+      navigator.clipboard.writeText(FRASE).then(() => { $('copia').textContent = 'Copiado ✓'; }, () => {
+        getSelection().selectAllChildren($('pedido')); $('copia').textContent = 'Selecionado: aperte Ctrl+C (no Mac, Cmd+C)'; });
+    };
+  }
+}
+
+// ── a oferta ──
+function desenhaOferta() {
+  $('ofertaFrase').textContent = OFERTA.frase;
+  $('ofertaItens').innerHTML = OFERTA.itens.map(i => `<li>${esc(i)}</li>`).join('');
+  $('ofertaPreco').textContent = OFERTA.preco;
+  $('ofertaSim').href = OFERTA.link;
+  const src = '';
+  if ($('foneOferta').dataset.src !== src) {
+    $('foneOferta').dataset.src = src;
+    if (src) $('foneOferta').innerHTML = `<video src="${src}" autoplay loop muted playsinline></video>`;
+  }
+}
+$('ofertaNao').onclick = () => { $('ofertaTchau').hidden = false; $('ofertaNao').disabled = true; };
+
+// ── o laço ──
+async function puxa() {
+  try { S = await api('/api/estado'); } catch (e) { return; }
+  S.gera = S.gera || {};
+  if (!montado) {
+    montado = true;
+    E = {marca: {}, ferramentas: {}, clone: {feitos: []}, ...S.escolhas};
+    const m = E.marca;
+    $('nome').value = m.nome || ''; $('sobre').value = m.sobre || ''; $('jeito').value = m.jeito || ''; 
+    if (!m.estilo && S.estilos[0]) escolheEstilo(S.estilos[0].slug, false);
+    desenhaEstilos(); desenhaCores(); desenhaFontes(); desenhaLogo(); desenhaClone();
+    tiraAusentes(); montaModulos();
+    Object.keys(FERR).forEach(desenhaFerramenta);
+    vai(Math.max(0, IDX(S.escolhas.etapa)));
+  }
+  desenhaLegendas(); desenhaGeras();
+  if (ETAPAS[atual][0] === 'pronto') desenhaPronto();
+}
+if (!T) $('semToken').style.display = 'block';
+puxa(); setInterval(puxa, 1500);
+</script>
+</body>
+</html>

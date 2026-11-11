@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<!-- TIPO — o preço em tela cheia, v2. 1080x1920. Tela cheia esconde a boca.
+     O valor cai com a mola do herói e ganha sombra dura azul; a parcela vem numa
+     laje azul, e o selo bate como carimbo.
+       ?valor=297&parcela=12× R$ 30,72&t_valor=1.64&t_ou=3.32&t_par=4.98&dur=6.25 -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+:root{--t-big:420px}
+#stage{align-items:center;text-align:center}
+.kick{align-self:center;margin-bottom:40px}
+.big{text-shadow:.03em .03em 0 var(--ac)}
+.ou{font:700 44px/1 var(--fm);color:var(--ink4);letter-spacing:.14em;text-transform:uppercase;margin:52px 0 26px;opacity:0}
+.par{font:800 120px/1 var(--fd);letter-spacing:-.03em;padding:.12em .32em .16em;opacity:0}
+.selo{margin-top:110px;padding:26px 44px;font:700 40px/1 var(--fd);opacity:0}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="kick" id="k"></div>
+  <div class="big" id="v"></div>
+  <div class="ou" id="o">ou</div>
+  <div class="par nb cor-ac" id="p"></div>
+  <div class="selo nb cor-mk" id="s"></div>
+</div>
+<script>
+const dur = D.n('dur', '6.25');
+document.getElementById('k').textContent = D.q('kick', 'acesso vitalício ao treinamento');
+document.getElementById('v').innerHTML = '<small>R$</small>' + D.q('valor', '297');
+document.getElementById('p').textContent = D.q('parcela', '12× R$ 30,72');
+document.getElementById('s').textContent = D.q('selo', 'uma vez, e é seu');
+
+D.monta(tl => {
+  D.cabe('.big', 160, .94);
+  D.cabe('.par', 80, .9);
+  D.cabe('.selo', 28, .9);
+  D.camera(dur, 1.0, 1.04);
+  D.carimbo('#k', .10);
+  D.heroi('#v', D.n('t_valor', '1.64'));
+  D.entra('#o', D.n('t_ou', '3.32'), 12);
+  D.pousa('#p', D.n('t_par', '4.98'), {rot: D.P.ROT, s: 1.1});
+  D.carimbo('#s', D.n('t_selo', '5.60'), -D.P.ROT - 2);
+  return dur;
+});
+</script>
+</body>
+</html>

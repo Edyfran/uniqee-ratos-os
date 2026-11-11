@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<!-- TIPOGRAFIA + INTERFACE — o anúncio "Edita o meu assim" (B1 a B4), num palco só: os dois cartões (REFERÊNCIA e SEU VÍDEO)
+     atravessam as batidas, então não há emenda entre elas. A mecânica do original (Dd990J6ADQk), no nosso visual:
+       1. o pedido: o título sobe palavra a palavra, o cartão da referência pousa, o campo do Claude Code abre, o vídeo
+          dele chega em arco ao 2/2 e a frase se escreve no campo enquanto estoura em letra gigante ("EDITA O MEU ASSIM");
+       2. a leitura: a referência passa na leitura rápida (os cortes viram marcas numa régua, um por um) e a ficha de
+          estilo se enche, uma linha por vez, no instante em que a voz a diz: ritmo, lugar da legenda, cor, palavras por linha,
+          zoom, cada uma com a marca desenhada em cima do vídeo da referência;
+       3. o seu vídeo: a pausa do bruto passa rápido e é cortada, e a ficha ganha a coluna dele, linha a linha;
+       4. o ajuste: a linha da legenda vira ✗ (66 % contra 82 %), o pedido se escreve no campo e o mesmo instante do vídeo
+          refeito mostra a legenda mais embaixo (77 %).
+     Os dois vídeos dos cartões chegam prontos, no relógio do peça (o quadro n do arquivo é o quadro n da peça): o `anuncio.py`
+     monta cada um com os trechos da referência e do vídeo dele, e os números da ficha são os do `referencia.py le` e do `compara`.
+     1080x1920 e 1080x1350 (`?ar=1080x1350`: o desenho do 4:5 é outro, não o 9:16 cortado). Texto que se lê dentro da área
+     segura do anúncio (x 65–1015, y 270–1250; no 4:5, o quadro com 54 de margem); o vídeo dos cartões enche o resto.
+     Movimento do núcleo (os 12 princípios): o cartão pousa (D.pousa), o vídeo vem em arco (D.arco, D.cursor), a frase se escreve
+     no ritmo de mão (D.digita), o herói estoura com antecipação (D.heroi), cascata de 2–3 quadros nas linhas da ficha.
+       ref, seu  os vídeos dos cartões (600x1066, 30 qps, do tamanho da peça) · t  os instantes (JSON; o anuncio.py lê a voz e passa)
+       ticks  os cortes da referência, em s, e dur_ref (15) · tit1  o título do pedido (linhas por |; *marcador*, ~azul~; sem palavrão: o Meta proíbe palavrão em anúncio)
+       dur  a duração da peça · v  os números da ficha (JSON)
+       ?ref=../../videos/x/cartao-ref.mp4&seu=../../videos/x/cartao-seu.mp4&dur=21.47 -->
+<html lang="pt-BR" data-qa="fica">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/editorial.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<script src="../nucleo/cursor.js"></script>
+<script src="../nucleo/papel.js"></script>
+<script>const AR45 = (new URLSearchParams(location.search).get('ar') || '').indexOf('1080x1350') === 0;
+if (AR45) document.write('<style>html,body,#stage,#mundo{height:1350px!important}.lin .c small{display:none!important}</style>');</script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+#stage{padding:0;display:block;overflow:hidden;background:var(--pp)}
+#mundo{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:50% 45%}
+#papel{position:absolute;left:0;top:0}
+.tit{position:absolute;left:72px;width:936px;font:700 96px/1.02 var(--fd);letter-spacing:var(--ls);color:var(--ink);white-space:nowrap;opacity:0}
+.tit i{font-style:normal;color:var(--ac)}
+#t1s{font-weight:600;color:var(--ink6);letter-spacing:-.02em}
+.tit b{font-weight:inherit;padding:0 .1em;margin:0 -.04em;background:linear-gradient(var(--mk),var(--mk)) no-repeat 0 60%/0% 88%;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone}
+/* o selo de quem está trabalhando: o relógio é o do filme */
+#hud{position:absolute;display:flex;align-items:center;gap:14px;padding:11px 18px 8px;z-index:30;font:700 24px/1 var(--fm);letter-spacing:.08em;white-space:nowrap}
+#hud .rec{width:16px;height:16px;border-radius:50%;background:var(--no);border:3px solid var(--ink);box-sizing:border-box}
+#hud-c{color:var(--ink6);margin-left:10px}
+/* os cartões de vídeo */
+#lente{position:absolute;left:0;top:0;width:1080px;height:1920px;perspective:1900px;perspective-origin:50% 55%;pointer-events:none}
+.cv{position:absolute;overflow:hidden;box-sizing:border-box;z-index:20;transform-style:preserve-3d}
+.cv .ah{height:var(--hh);display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:var(--pp);
+  border-bottom:3px solid var(--ink);font:700 25px/1 var(--fm);letter-spacing:.08em;white-space:nowrap}
+.cv .ah s{display:inline-block;width:14px;height:14px;margin-right:9px;border-radius:50%;background:var(--no);text-decoration:none;vertical-align:-1px}
+.cv .ah u{text-decoration:none;padding:5px 9px 4px;border:2px solid var(--ink);border-radius:6px;background:var(--mk);font-size:22px}
+.cv .ah u.cz{background:var(--pp2)}
+.cv .corpo{position:relative;width:100%;overflow:hidden;background:var(--cine)}
+#vaga{position:absolute;box-sizing:border-box;border:5px dashed var(--ink4);border-radius:22px;display:grid;place-items:center;
+  font:600 120px/1 var(--fd);color:var(--ink4);z-index:10;opacity:0}
+/* marcas desenhadas por cima do vídeo da referência: só contorno, nenhuma letra */
+.mk{position:absolute;box-sizing:border-box;border:6px solid var(--mk);border-radius:12px;box-shadow:6px 6px 0 var(--ink);opacity:0;z-index:5}
+.mk.fio{border-radius:4px}
+.mk.cor{border-color:#fff;box-shadow:0 0 0 4px var(--ink),6px 6px 0 4px var(--ink)}
+.cant{position:absolute;width:44px;height:44px;border:0 solid var(--mk);opacity:0;z-index:5;filter:drop-shadow(4px 4px 0 var(--ink))}
+.pt{position:absolute;border-radius:50%;box-sizing:border-box;opacity:0;z-index:6}
+.feixe{position:absolute;left:0;right:0;height:10px;background:var(--mk);box-shadow:0 0 0 3px var(--ink);opacity:0;z-index:6}
+.chip{position:absolute;z-index:8;opacity:0;display:flex;align-items:center;gap:10px;padding:9px 16px 7px;font:700 28px/1 var(--fm);letter-spacing:.06em;white-space:nowrap}
+/* a ficha de estilo */
+#colh{position:absolute;left:65px;width:950px;display:flex;font:700 22px/1 var(--fm);letter-spacing:.1em;color:var(--ink6);opacity:0}
+.lin{position:absolute;left:65px;width:950px;box-sizing:border-box;display:flex;align-items:center;gap:14px;padding:0 20px;overflow:hidden;opacity:0}
+.lin .k{flex:none;width:170px;font:700 26px/1 var(--fm);letter-spacing:.08em;color:var(--ink)}
+.lin .c{flex:none;width:300px;position:relative;line-height:1}
+.lin .c b{display:inline-block;font:800 46px/1 var(--fd);letter-spacing:var(--ls);color:var(--ink);padding:0 .12em;margin:0 -.12em;
+  background:linear-gradient(var(--mk),var(--mk)) no-repeat 0 62%/0% 80%}
+.lin .c small{display:block;margin-top:5px;font:600 21px/1 var(--fm);letter-spacing:.03em;color:var(--ink4);white-space:nowrap}
+.lin .c.vazio2 b{color:var(--ink2);background:none}
+.lin .st{flex:none;margin-left:auto;width:58px;height:58px;border-radius:50%;display:grid;place-items:center;box-sizing:border-box;border:4px solid var(--ink)}
+.lin .st svg{width:34px;height:34px;overflow:visible}
+.lin .st.ok{background:var(--ok)} .lin .st.no{background:var(--no)} .lin .st.mid{background:var(--mk)} .lin .st.pend{background:var(--pp2);border-style:dashed;border-color:var(--ink4)}
+.tira{position:absolute;left:518px;right:92px;top:50%;margin-top:-20px;height:40px;border-bottom:3px solid var(--ink)}
+.tira i{position:absolute;bottom:0;width:6px;height:40px;background:var(--ac);border-radius:2px;transform-origin:50% 100%;transform:scaleY(0)}
+.tira em{position:absolute;bottom:-6px;width:4px;height:52px;background:var(--ink);opacity:0}
+/* o campo de mensagem do Claude Code */
+#campo{position:absolute;left:65px;width:950px;z-index:22;opacity:0}
+#tab{position:absolute;left:0;display:flex;align-items:center;gap:12px;padding:10px 18px 8px;font:700 27px/1 var(--fm);letter-spacing:.06em;white-space:nowrap}
+#tab i{width:16px;height:16px;border-radius:50%;background:var(--ok);border:3px solid var(--ink);box-sizing:border-box}
+#cnt{position:absolute;right:0;height:46px;width:250px;display:flex;align-items:center;justify-content:center;gap:12px;font:700 22px/1 var(--fm);letter-spacing:.1em;color:var(--ink6)}
+#cnt .n{position:relative;width:86px;height:46px}
+#cnt .n b{position:absolute;left:0;right:0;top:0;font:700 44px/46px var(--fd);letter-spacing:-.03em;color:var(--ink);text-align:center}
+#cnt .n b.dois{color:var(--ac);opacity:0}
+#caixa{position:absolute;left:0;right:0;bottom:0;box-sizing:border-box;padding:0 110px 0 28px;overflow:hidden}
+#msg{position:relative;font:600 54px/1 var(--fd);letter-spacing:-.01em;color:var(--ink);white-space:pre}
+#car{position:absolute;z-index:2;width:6px;background:var(--ac);opacity:0}
+#env{position:absolute;right:10px;top:50%;width:64px;height:64px;margin-top:-32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:800 40px/1 var(--fd);box-shadow:none}
+/* a frase gigante: Anton, a 1ª linha em tinta e o herói em azul com borda e sombra dura */
+#gig{position:absolute;left:0;top:0;width:1080px}
+.g1,.g2{position:absolute;left:0;width:1080px;text-align:center;font:400 128px/1 var(--ed-gig);text-transform:uppercase;white-space:nowrap}
+.g1{color:var(--ink);letter-spacing:.012em}
+.g1 .mw{margin:0 .1em}
+.gs{display:inline-block;transform-origin:50% 100%;transform:scaleX(var(--ex,1.12))}
+.g2{font-size:290px;line-height:1;letter-spacing:.035em;filter:drop-shadow(10px 10px 0 var(--ink))}
+.g2 i{display:inline-block;font-style:normal;color:var(--ac);-webkit-text-stroke:9px var(--ink);paint-order:stroke fill;transform-origin:50% 100%}
+</style>
+</head>
+<body>
+<div id="stage"><div id="mundo">
+  <svg id="papel"></svg>
+  <div class="nb" id="hud"><i class="rec"></i><span id="hud-a">CLAUDE CODE</span><span id="hud-b"></span><span id="hud-c">00:00:00</span></div>
+  <div id="tits"></div>
+  <div id="gig"><div class="g1" id="g1"></div><div class="g2" id="g2"></div></div>
+  <div id="campo">
+    <span class="nb cor-ac" id="tab"><i></i><span>CLAUDE CODE</span></span>
+    <span class="nb" id="cnt"><span>ANEXOS</span><span class="n"><b class="um">1/2</b><b class="dois">2/2</b></span></span>
+    <div class="nb" id="caixa"><div id="msg"></div><i id="car"></i><span class="nb cor-ac" id="env">↑</span></div>
+  </div>
+  <div id="ficha"><div id="colh"></div></div>
+  <div id="lente"></div>
+</div></div>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const W = 1080, H = AR45 ? 1350 : 1920, Q = D.QD, dur = D.n('dur', '21.47');
+const md = s => esc(s).replace(/\*([^*]+)\*/g, '<b>$1</b>').replace(/~([^~]+)~/g, '<i>$1</i>');
+const json = (k, d) => { try { return {...d, ...JSON.parse(D.q(k, '{}'))}; } catch (e) { return d; } };
+
+/* ── o desenho de cada quadro: o 9:16 e o 4:5 são duas composições, não uma cortada ── */
+const L = AR45 ? {
+  hud: [54, 54], tit: 112, titFs: 86, tit1: 62, tit1Fs: 100, sub1: [276, 46], g1: [56, 100], g2: [178, 228],
+  campo: {y: 420, h: 150, x: 65}, colh: 214,
+  rows: {y: 246, h: 68, gap: 8, v: 44},
+  cards: {y: 724, w: 436, hdr: 40, bh: 516, x: [65, 579]},
+  hero: {y: -200, s: 1.45}, b4: {y: -90, s: 1.15}, cb: 378,
+} : {
+  hud: [65, 272], tit: 334, titFs: 96, tit1: 280, tit1Fs: 120, sub1: [650, 56], g1: [276, 128], g2: [396, 290],
+  campo: {y: 736, h: 160, x: 65}, colh: 452,
+  rows: {y: 488, h: 76, gap: 12, v: 44},
+  cards: {y: 1030, w: 436, hdr: 44, bh: 775, x: [65, 579]},
+  hero: {y: -66, s: 1.5}, b4: {y: -140, s: 1.15},
+};
+const C = L.cards, RH = L.rows.h;
+const TM = json('t', {b2: 4.87, lugar: 7.02, cor: 8.13, pal: 8.78, zoom: 10.18, b3: 11.47, ff: 12.57, corta: 13.98, z: 16.83, b4: 18.35, pede: 19.54, ajusta: 20.37,
+  w: {achou: .1, uma: .63, edicao: .79, foda: 1.23, manda: 1.95, pro: 2.19, claude: 2.31, code: 2.63, e: 2.99, fala: 3.1, edita: 3.55, o: 3.84, meu: 3.95, assim: 4.19,
+      ele: 4.91, anota: 5.9, tudo: 6.4, nao: 18.4, ficou: 18.6, parecido: 18.8, ritmo: 14.8, legenda2: 15.56, lugar: 16.3, zoom2: 17.0, forte: 17.84}});
+const T = TM, w = TM.w;
+const V = json('v', {ritmo: ['0,73/s', '11 cortes · pausa 0,4 s', '0,85/s', '10 cortes · pausa 0,3 s'], pecas: ['0,53/s', '8 peças · painel 76%', '0,47/s', '5 peças · painel 78%', '0,57/s', '6 peças · painel 78%'],
+  lugar: ['82%', 'no peito', '81%', 'no peito'], cor: ['branca/ouro', 'tinta no papel', 'branca/ouro', 'sans e serifa'], pal: ['1 a 2', 'por vez', '1 a 2', 'por vez'],
+  zoom: ['1,15×', 'no rosto cheio', '1,17×', 'na frase forte'], n: {ref: 8, v1: 5, v2: 6}});
+if (AR45) V.pecas = [V.n.ref + ' peças', '', V.n.v1 + ' peças', '', V.n.v2 + ' peças', ''];   // no 4:5 a linha não tem sublinha: a contagem é o valor
+const TICKS = D.q('ticks', '0.1,1.3,3.2,4.7,6.4,7.3,8.4,9.5,10.6,12.1,13.8').split(',').map(Number), DREF = D.n('dur_ref', '15');
+
+Papel.monta('#papel', W, H, {grade: [Math.round(H * .17), Math.round(H * .70)]});
+const doc = document.documentElement;
+doc.style.setProperty('--hh', C.hdr + 'px');
+
+/* ── os títulos: cada um é uma linha (ou duas, por |), com o marcador e o azul de sempre ── */
+function titulo(id, html, top, fs) {
+  const e = document.createElement('div');
+  e.className = 'tit'; e.id = id; e.style.top = top + 'px'; e.style.fontSize = fs + 'px';
+  e.innerHTML = md(html).split('|').join('<br>');
+  $('tits').appendChild(e);
+  return e;
+}
+titulo('t1', D.q('tit1', AR45 ? 'Achou uma edição|*top*?' : 'Achou uma|edição|*top*?'), L.tit1, L.tit1Fs);
+titulo('t1s', D.q('sub1', 'Copia o estilo no seu vídeo.'), L.sub1[0], L.sub1[1]);
+titulo('t3', 'Ele *anota* tudo:', L.tit, L.titFs);
+titulo('t4', 'Seu vídeo, ~igual~:', L.tit, L.titFs);
+titulo('t5', 'Não ficou ~parecido?~', L.tit, L.titFs);
+$('hud').style.left = L.hud[0] + 'px'; $('hud').style.top = L.hud[1] + 'px';
+$('colh').style.top = L.colh + 'px';
+$('colh').innerHTML = `<span style="width:204px"></span><span style="width:314px">REFERÊNCIA</span><span style="width:314px">SEU VÍDEO</span>`;
+
+/* ── o campo ── */
+const CP = L.campo, bx = {y: CP.y + 56, h: CP.h - 56};
+Object.assign($('campo').style, {top: CP.y + 'px', height: CP.h + 'px'});
+Object.assign($('tab').style, {top: '0px'}); Object.assign($('cnt').style, {top: '0px'});
+$('caixa').style.height = (CP.h - 58) + 'px';
+$('msg').textContent = D.q('pedido', 'edita o meu assim');
+$('msg').style.lineHeight = (CP.h - 58 - 8) + 'px';
+$('car').style.height = '60px';
+
+/* ── os cartões ── */
+const GE = AR45 ? .5 : .5;      // o ponto do vídeo que fica no centro quando o quadro do cartão é mais largo que 9:16 (cover): sobe um pouco no 4:5
+const posVideo = AR45 ? '50% 62%' : '50% 50%';
+function cartao(id, x, rot, rotulo, tag, cls) {
+  const c = document.createElement('div');
+  c.className = 'nb cv'; c.id = id;
+  Object.assign(c.style, {left: x + 'px', top: C.y + 'px', width: C.w + 'px', height: (C.hdr + C.bh) + 'px'});
+  c.innerHTML = `<div class="ah"><span><s></s>${rotulo}</span><u class="${cls || ''}" id="${id}-tag">${tag}</u></div><div class="corpo" id="${id}-c" style="height:${C.bh}px"></div>`;
+  $('lente').appendChild(c);
+  gsap.set(c, {rotationY: rot, transformOrigin: '50% 50%'});
+  const v = D.midia('#' + id + '-c', D.q(id === 'cRef' ? 'ref' : 'seu', ''), id === 'cRef' ? 'referência' : 'seu vídeo', 'cover');
+  if (v) { v.dataset.off = String(Q / 2); v.style.objectPosition = posVideo; }
+  return c;
+}
+cartao('cRef', C.x[0], 6, 'REFERÊNCIA', '15 s', 'cz');
+cartao('cSeu', C.x[1], -6, 'SEU VÍDEO', 'BRUTO', '');
+const vaga = document.createElement('div');
+vaga.id = 'vaga'; vaga.textContent = '+';
+Object.assign(vaga.style, {left: C.x[1] + 'px', top: C.y + 'px', width: C.w + 'px', height: (C.hdr + C.bh) + 'px'});
+$('lente').appendChild(vaga);
+
+/* o ponto do quadro do vídeo (fração da largura e da altura de 1080×1920) no corpo do cartão: cover, com o ponto de ancoragem do posVideo */
+const ANC = AR45 ? .62 : .5;
+function pf(fx, fy) {
+  const s = Math.max(C.w / 1080, C.bh / 1920), vw = 1080 * s, vh = 1920 * s;
+  return [(C.w - vw) * .5 + fx * vw, (C.bh - vh) * ANC + fy * vh];
+}
+function caixa(cl, fx0, fy0, fx1, fy1, pai = 'cRef-c') {
+  const [x0, y0] = pf(fx0, fy0), [x1, y1] = pf(fx1, fy1), e = document.createElement('div');
+  e.className = cl; Object.assign(e.style, {left: x0 + 'px', top: y0 + 'px', width: (x1 - x0) + 'px', height: (y1 - y0) + 'px'});
+  $(pai).appendChild(e); return e;
+}
+/* as marcas da leitura, cada uma no lugar medido no quadro da referência */
+const mLugar = caixa('mk', .17, .775, .83, .86);
+const mCor = caixa('mk', .15, .755, .85, .875);
+const cCor = [caixa('pt', .60, .70, .60, .70), caixa('pt', .70, .70, .70, .70)];
+const mPal = [caixa('mk', .22, .425, .78, .49), caixa('pt', .70, .405, .70, .405), caixa('pt', .78, .405, .78, .405)];
+const brk = [[.175, .415], [.665, .415], [.175, .695], [.665, .695]].map(([fx, fy], i) => {
+  const [x, y] = pf(fx, fy), e = document.createElement('div');
+  e.className = 'cant'; e.style.left = (x - (i % 2 ? 44 : 0)) + 'px'; e.style.top = (y - (i > 1 ? 44 : 0)) + 'px';
+  e.style.borderWidth = `${i > 1 ? 0 : 7}px ${i % 2 ? 7 : 0}px ${i > 1 ? 7 : 0}px ${i % 2 ? 0 : 7}px`;
+  $('cRef-c').appendChild(e); return e;
+});
+const feixe = document.createElement('div'); feixe.className = 'feixe'; $('cRef-c').appendChild(feixe);
+/* o ajuste do B4: a caixa em volta do painel dele (vermelha enquanto faltam peças, verde depois) */
+const bSeu = caixa('mk', .04, AR45 ? .215 : .03, .96, .43, 'cSeu-c');     // a faixa do painel, no cartão dele
+bSeu.style.borderColor = 'var(--no)';
+/* as etiquetas do corte da pausa, no cartão dele */
+function chipEl(id, cor, html, x, y) {
+  const e = document.createElement('div');
+  e.className = 'nb chip ' + cor; e.id = id; e.innerHTML = html; Object.assign(e.style, {left: x + 'px', top: y + 'px'});
+  $('cSeu-c').appendChild(e); return e;
+}
+chipEl('chPausa', 'cor-no', '<span>PAUSA</span><b style="font-size:34px">7 s</b>', 18, 18);
+chipEl('chCorta', 'cor-ok', '<span>✂ CORTADA</span><b style="font-size:34px">−7 s</b>', 18, 18);
+
+/* ── a ficha: 5 linhas, as colunas da referência e do seu vídeo, o estado de cada uma ── */
+const OK = '<svg viewBox="0 0 40 40"><path d="M7 21l9 9 17-20" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const NO = '<svg viewBox="0 0 40 40"><path d="M9 9l22 22M31 9L9 31" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round"/></svg>';
+const MID = '<svg viewBox="0 0 40 40"><path d="M8 15h24M8 26h24" fill="none" stroke="var(--ink)" stroke-width="6" stroke-linecap="round"/></svg>';
+const PEND = '<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="3" fill="var(--ink4)"/></svg>';
+const LINHAS = [['ritmo', 'RITMO'], ['pecas', 'PEÇAS'], ['lugar', 'LUGAR'], ['cor', 'COR'], ['pal', 'PALAVRAS'], ['zoom', 'ZOOM']];
+LINHAS.forEach(([id, rotulo], i) => {
+  const e = document.createElement('div');
+  e.className = 'nb lin'; e.id = 'l-' + id;
+  Object.assign(e.style, {top: (L.rows.y + i * (RH + L.rows.gap)) + 'px', height: RH + 'px'});
+  e.innerHTML = `<span class="k">${rotulo}</span>
+    <span class="c" id="r-${id}"><b>···</b><small></small></span>
+    <span class="c vazio2" id="s-${id}"><b>···</b><small></small></span>
+    <span class="st pend" id="e-${id}">${PEND}</span>` + (id === 'ritmo' ? '<div class="tira" id="tira"></div>' : '');
+  $('ficha').appendChild(e);
+});
+TICKS.forEach(t => { const i = document.createElement('i'); i.style.left = (t / DREF * 100) + '%'; $('tira').appendChild(i); });
+const cabeca = document.createElement('em'); $('tira').appendChild(cabeca);
+const preenche = (cel, v, sub) => { const c = $(cel); c.querySelector('b').textContent = v; c.querySelector('small').textContent = sub || ''; };
+const estado = (id, cls, svg) => { const s = $('e-' + id); s.className = 'st ' + cls; s.innerHTML = svg; };
+
+D.monta(tl => {
+  const cabeTit = ['#t1', '#t1s', '#t3', '#t4', '#t5'];
+  D.cabe(cabeTit.join(','), 44, ['.tit', 1]);    // a coluna do título: 936 px (x 72–1008), o camera de 1,01 não leva a letra pra fora de x 65
+  // o título aparece palavra a palavra, cada uma no instante dela na voz (a imagem se ajusta ao áudio)
+  const sobe = (sel, tempos) => {
+    const el = D.$(sel), ws = D.divide(el);
+    gsap.set(el, {opacity: 1});
+    ws.forEach((p, i) => tl.fromTo(p, {yPercent: 115, rotation: 5, transformOrigin: '0% 100%'},
+      {yPercent: 0, rotation: 0, duration: 13 * Q, ease: 'power3.out'}, D.at(tempos[Math.min(i, tempos.length - 1)])));
+    return ws;
+  };
+  const some = (sel, t, dy = -46) => tl.to(sel, {opacity: 0, y: dy, duration: .2, ease: 'power2.in'}, t);
+  D.camera(dur, 1.0, 1.01);
+  Papel.anda(tl, dur);
+  D.deriva('#cRef', T.b2, dur - .5, {rotationY: 2});
+  D.deriva('#cSeu', T.b2, dur - .5, {rotationY: -2});
+
+  /* o relógio do selo: o do filme, em mm:ss:qq */
+  const rel = $('hud-c');
+  const dois = n => String(Math.floor(n)).padStart(2, '0');
+  D.aoQuadro(() => { const t = tl.time(); rel.textContent = `${dois(t / 60)}:${dois(t % 60)}:${dois((t % 1) * 30)}`; });
+
+  /* ───── B1: o pedido ───── */
+  const t1 = sobe('#t1', [w.achou, w.uma, w.edicao, w.foda]);
+  D.marca('#t1 b', w.foda + .35);
+  sobe('#t1s', [0, 1, 2, 3, 4, 5].map(i => w.foda + .12 + i * .1));
+  // a referência entra no centro, grande (o achado), e na hora de mandar desce pra esquerda, em arco, pro lugar dela
+  const HX = (W - C.w) / 2 - C.x[0], HY = L.hero.y, HS = L.hero.s;
+  tl.fromTo('#cRef', {opacity: 0, x: HX, y: HY + 260, scale: 1, rotation: -3, '--shx': '0px'},
+    {opacity: 1, x: HX, y: HY, scale: HS, rotation: 0, '--shx': D.SH * 1.4 + 'px', duration: .5, ease: 'power3.out', immediateRender: true}, .02);
+  D.cue(.1, 'whoosh');
+  D.arco('#cRef', w.manda - .1, [HX, HY], [0, 0], {dur: .62, flecha: 70, lado: -1});
+  tl.to('#cRef', {scale: 1, duration: .62, ease: 'power3.inOut'}, w.manda - .1);
+  tl.to('#cRef', {'--shx': D.SH + 'px', duration: .4, ease: 'sine.inOut'}, w.manda + .3);
+  // o achado: estrelas estouram em volta do cartão ("Achou!")
+  const ESTRELAS = AR45 ? [[.10, .36, 84], [.89, .42, 70], [.07, .66, 64], [.92, .74, 92], [.13, .90, 60]]
+                        : [[.09, .45, 100], [.90, .39, 76], [.07, .62, 72], [.92, .73, 108], [.10, .85, 66], [.89, .91, 72]];
+  ESTRELAS.forEach(([fx, fy, tam], i) => {
+    const e = document.createElement('div');
+    e.innerHTML = '<svg viewBox="0 0 100 100" width="100%" height="100%"><path d="M50 3L62 38L97 50L62 62L50 97L38 62L3 50L38 38Z" fill="var(--mk)" stroke="var(--ink)" stroke-width="6" stroke-linejoin="round"/></svg>';
+    e.style.cssText = `position:absolute;left:${fx * W - tam / 2}px;top:${fy * H - tam / 2}px;width:${tam}px;height:${tam}px;z-index:15;opacity:0;filter:drop-shadow(5px 5px 0 var(--ink))`;
+    $('mundo').appendChild(e);
+    const t = w.foda - .05 + i * .07;
+    tl.fromTo(e, {opacity: 1, scale: 0, rotation: -40}, {opacity: 1, scale: 1, rotation: 0, duration: .45, ease: D.P.MOLA, immediateRender: false}, t);
+    tl.set(e, {opacity: 0}, 0);
+    tl.set(e, {opacity: 1}, t);
+    tl.to(e, {rotation: i % 2 ? 25 : -25, duration: .9, ease: 'sine.inOut'}, t + .45);
+    tl.to(e, {opacity: 0, scale: .4, duration: .2, ease: 'power2.in'}, w.manda - .2 + i * .02);
+  });
+  D.cue(w.foda - .05, 'pop');
+  tl.fromTo('#vaga', {opacity: 0, scale: .94}, {opacity: 1, scale: 1, duration: .3, ease: 'power3.out', immediateRender: false}, w.manda + .45);
+  // o título e a promessa ficam até a frase gigante tomar o lugar deles (o campo e a aba "CLAUDE CODE" já dizem pra onde vai)
+  some(['#t1', '#t1s'], w.edita - .16);
+  D.pousa('#campo', w.manda + (AR45 ? .55 : .1), {dy: 150, som: 'papel'});   // no 4:5 o cartão grande ocupa a faixa do campo até pousar
+  // as setas que levam a referência ao campo
+  const subida = [0, 1, 2].map(() => {
+    const e = document.createElement('div');
+    e.innerHTML = '<svg viewBox="0 0 60 36" width="70" height="42"><path d="M6 30L30 8l24 22" fill="none" stroke="var(--ac)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    e.style.cssText = `position:absolute;left:${C.x[0] + C.w / 2 - 35}px;top:${C.y - 70}px;opacity:0;z-index:18;filter:drop-shadow(4px 4px 0 var(--ink))`;
+    $('mundo').appendChild(e); return e;
+  });
+  subida.forEach((e, i) => { const t = w.claude - .1 + i * .13; tl.fromTo(e, {opacity: 0, y: 40}, {opacity: 1, y: -(40 + i * 34), duration: .22, ease: 'power2.out', immediateRender: false}, t); tl.to(e, {opacity: 0, duration: .15, ease: 'none'}, t + .22); });
+  D.cue(w.claude - .1, 'whoosh');
+  // o vídeo dele vem em arco até a vaga; o contador vira 2/2
+  const tPousa = w.fala + .08, x0 = 1230 - C.x[1], y0 = C.y + 560 - C.y;
+  const d = .62, S1 = tPousa - d, flecha = 110;
+  gsap.set('#cSeu', {x: x0, y: y0, opacity: 0});
+  D.arco('#cSeu', S1, [x0, y0], [0, 0], {dur: d, flecha, lado: -1});
+  tl.fromTo('#cSeu', {opacity: 0}, {opacity: 1, duration: .1, ease: 'none', immediateRender: false}, S1);
+  tl.fromTo('#cSeu', {scale: 1.5, rotation: 9}, {scale: 1, rotation: -1.2, duration: d, ease: 'power3.inOut', immediateRender: false}, S1);
+  tl.to('#cSeu', {rotation: 0, duration: .25, ease: 'power2.out'}, tPousa);
+  tl.fromTo('#cSeu', {'--shx': '0px'}, {'--shx': D.SH + 'px', duration: d, ease: 'sine.inOut', immediateRender: false}, S1);
+  tl.to('#vaga', {opacity: 0, duration: .1, ease: 'none'}, tPousa);
+  D.cursor('#mundo', [{x: C.x[1] + x0 + 20, y: C.y + y0 + 30, t: tPousa - .7}, {x: C.x[1] + 40, y: C.y + 40, t: tPousa, clica: true}], {sai: tPousa + .25});
+  D.cue(S1, 'whoosh'); D.cue(tPousa, 'thud');
+  tl.to('#cnt .um', {opacity: 0, scale: .7, duration: 3 * Q, ease: 'power2.in'}, tPousa + 2 * Q);
+  tl.fromTo('#cnt .dois', {opacity: 0, scale: .55, y: 8}, {opacity: 1, scale: 1, y: 0, duration: .34, ease: D.P.MOLA, immediateRender: false}, tPousa + 5 * Q);
+  D.cue(tPousa + 5 * Q, 'pop');
+  // a frase se escreve no campo (no ritmo da voz) e estoura em letra gigante: cada palavra quando o campo a termina, o ASSIM como herói
+  const car = $('car'), msg = $('msg');
+  const fimFrase = D.digita('#msg', w.edita - .02, .064);        // a frase termina de se escrever antes do aperto do enviar
+  const quando = new Map();
+  tl.getChildren(false, true, false).forEach(tw => { const e = tw.targets()[0]; if (e && e.classList && e.classList.contains('l')) quando.set(e, tw.startTime()); });
+  const ls = [...msg.children], tm = msg.getBoundingClientRect();
+  ls.forEach(s => { s.style.display = 'inline-block'; });
+  const r = ls.map(s => s.getBoundingClientRect());
+  ls.forEach(s => { s.style.display = 'none'; });
+  const pedido = D.q('pedido', 'edita o meu assim'), pals = [...pedido.matchAll(/\S+/g)].map(m => ({a: m.index, b: m.index + m[0].length - 1}));
+  const tFim = p => quando.get(ls[p.b]) ?? fimFrase;
+  gsap.set(car, {x: r[0].left - tm.left + 28, y: 0});
+  ls.forEach((s, i) => tl.set(car, {x: r[i].right - tm.left + 29, y: 0, opacity: 1}, quando.get(s)));
+  const [gl1, gl2] = D.q('gig', 'EDITA O MEU|ASSIM').split('|');
+  $('g1').style.top = L.g1[0] + 'px'; $('g1').style.fontSize = L.g1[1] + 'px';
+  $('g2').style.top = L.g2[0] + 'px'; $('g2').style.fontSize = L.g2[1] + 'px';
+  $('g1').innerHTML = '<span class="gs">' + gl1.split(' ').map(p => `<span class="mw"><span class="w">${esc(p)}</span></span>`).join(' ') + '</span>';
+  $('g2').innerHTML = '<span class="gs">' + [...gl2].map(l => `<i>${esc(l)}</i>`).join('') + '</span>';
+  document.documentElement.style.setProperty('--ex', AR45 ? 1.0 : 1.1);
+  [...$('g1').querySelectorAll('.w')].forEach((p, i) => tl.fromTo(p, {yPercent: 115, rotation: 5, transformOrigin: '0% 100%'}, {yPercent: 0, rotation: 0, duration: 13 * Q, ease: 'power3.out'}, D.at(tFim(pals[i]) - .02)));
+  D.cue(tFim(pals[0]), 'pop');
+  const tAssim = Math.max(w.assim, (quando.get(ls[pals[pals.length - 1].a + 2]) ?? fimFrase)) + .02;
+  D.heroi('#g2', tAssim);
+  const g2 = [...$('g2').querySelectorAll('i')], tHop = tAssim + D.T.heroi * .5;
+  g2.forEach((l, i) => {
+    const t = tHop + i * 2.5 * Q;
+    tl.to(l, {y: -18, scaleY: 1.06, duration: 6 * Q, ease: 'power2.out'}, t);
+    tl.to(l, {y: 0, scaleY: 1, duration: 5 * Q, ease: 'power2.in'}, t + 6 * Q);
+    tl.to(l, {scaleX: 1.07, scaleY: .93, duration: 2 * Q, ease: 'power2.out'}, t + 11 * Q);
+    tl.to(l, {scaleX: 1, scaleY: 1, duration: .25, ease: D.P.MOLA}, t + 13 * Q);
+  });
+  D.cue(tHop + 11 * Q, 'thud');
+  // o aperto do enviar: a seta vem de baixo; o corte da B2 cai no aperto
+  const ex = CP.x + 950 - 10 - 4 - 32 - 4, ey = bx.y + bx.h / 2;
+  tl.fromTo('#env', {scale: .5, opacity: 0}, {scale: 1, opacity: 1, duration: .3, ease: D.P.MOLA, immediateRender: false}, w.manda + .5);
+  D.cursor('#mundo', [{x: ex - 90, y: ey + 330, t: T.b2 - .86}, {x: ex, y: ey, t: T.b2 - .18, clica: true, alvo: '#env'}], {sai: T.b2 - .02});
+  tl.set(car, {opacity: 0}, T.b2 - .1);
+
+  /* ───── B2: a leitura ───── */
+  tl.to(['#campo', '#gig'], {opacity: 0, y: -40, duration: .22, ease: 'power2.in'}, T.b2 - .1);
+  tl.set('#s-ritmo', {opacity: 0}, 0); tl.set('#s-ritmo', {opacity: 1}, T.b3);
+  tl.to('#tira', {opacity: 0, duration: .2, ease: 'none'}, T.b3);
+  tl.set('#hud-b', {textContent: '· LENDO A REFERÊNCIA'}, 0);
+  D.pousa('#hud', T.b2 + .14, {dy: -26, som: 'pop'});
+  sobe('#t3', [w.ele + .1, w.ele + .3, w.anota, w.tudo]);
+  D.marca('#t3 b', w.anota + .4);
+  tl.to('#cSeu', {opacity: .38, scale: .95, duration: .3, ease: 'power2.out'}, T.b2);
+  tl.fromTo('#cRef', {scale: 1}, {scale: 1.035, duration: .3, ease: 'power2.out', immediateRender: false}, T.b2);
+  tl.to('#colh', {opacity: 1, duration: .2, ease: 'none'}, T.b2 + .3);
+  D.pousa(LINHAS.map(([id]) => '#l-' + id), T.b2 + .34, {dy: 36, s: 1});
+  D.cue(T.b2 + .34, 'papel');
+  // a leitura rápida: o feixe varre o vídeo da referência e cada corte vira uma marca na régua
+  const ler = T.lugar - T.b2;
+  tl.set(feixe, {opacity: 1, top: 0}, T.b2 + .06);
+  tl.to(feixe, {top: C.bh - 10, duration: ler * .5, ease: 'sine.inOut'}, T.b2 + .06);
+  tl.to(feixe, {top: 0, duration: ler * .5, ease: 'sine.inOut'}, T.b2 + .06 + ler * .5);
+  tl.to(feixe, {opacity: 0, duration: .12, ease: 'none'}, T.lugar - .1);
+  D.cue(T.b2 + .1, 'tick-roll', {dur: +(ler - .1).toFixed(2)});
+  const tira = $('tira').getBoundingClientRect(), larg = tira.width || 700;
+  tl.set(cabeca, {opacity: 1}, T.b2 + .06);
+  tl.fromTo(cabeca, {left: 0}, {left: larg - 3, duration: ler - .08, ease: 'none', immediateRender: false}, T.b2 + .06);
+  tl.to(cabeca, {opacity: 0, duration: .1}, T.lugar - .02);
+  [...$('tira').querySelectorAll('i')].forEach((m, i) => tl.to(m, {scaleY: 1, duration: 3 * Q, ease: 'power2.out'}, T.b2 + .06 + (TICKS[i] / DREF) * (ler - .08)));
+  const cont = {v: 0}, nCort = t => TICKS.filter(x => x <= t).length;
+  tl.to(cont, {v: DREF, duration: ler - .08, ease: 'none', onUpdate: () => { preenche('r-ritmo', nCort(cont.v) + ' cortes', ''); }}, T.b2 + .06);
+  tl.fromTo('#r-ritmo b', {backgroundSize: '0% 80%'}, {backgroundSize: '100% 80%', duration: .4, ease: 'power3.inOut', immediateRender: false}, T.b2 + .3);
+  // a linha fecha com o número medido
+  tl.call(() => { preenche('r-ritmo', V.ritmo[0], V.ritmo[1]); }, null, T.lugar - .02);
+  tl.fromTo('#l-ritmo', {scale: 1}, {scale: 1.02, duration: 2 * Q, yoyo: true, repeat: 1, ease: 'power2.out', immediateRender: false}, T.lugar - .02);
+  // cada fatia da ficha: o valor entra com o marcador e a marca é desenhada no vídeo da referência
+  const enche = (id, t, cel, v, sub) => {
+    tl.call(() => preenche(cel, v, sub), null, t);
+    tl.call(() => preenche(cel, '···', ''), null, t - .001);
+    tl.fromTo('#' + cel + ' b', {backgroundSize: '0% 80%'}, {backgroundSize: '100% 80%', duration: .45, ease: 'power3.inOut', immediateRender: false}, t + .02);
+    tl.fromTo('#l-' + id, {scale: 1}, {scale: 1.03, duration: 3 * Q, yoyo: true, repeat: 1, ease: 'power2.out', immediateRender: false}, t);
+    D.cue(t, 'marca');
+  };
+  const marca = (els, t, fim, o = {}) => els.forEach((e, i) => {
+    tl.fromTo(e, {opacity: 0, scale: o.de ?? 1.25}, {opacity: 1, scale: 1, duration: 5 * Q, ease: 'power3.out', immediateRender: false}, t + i * (o.passo ?? 3 * Q));
+    if (fim < dur - .2) tl.to(e, {opacity: 0, duration: .15, ease: 'none'}, fim);
+  });
+  // lugar da legenda
+  tl.call(() => { /* a linha RITMO termina */ }, null, T.lugar);
+  enche('pecas', T.lugar - .06, 'r-pecas', V.pecas[0], V.pecas[1]);
+  enche('lugar', T.lugar + .22, 'r-lugar', V.lugar[0], V.lugar[1]);
+  marca([mLugar], T.lugar + .12, T.cor - .05);
+  // cor
+  enche('cor', T.cor + .1, 'r-cor', V.cor[0], V.cor[1]);
+  // as duas cores que a ficha anota: a letra branca e a serifa dourada (dois quadradinhos de amostra, sem letra, sobre a caixa)
+  const sw1 = cCor[0], sw2 = cCor[1];
+  Object.assign(sw1.style, {width: '44px', height: '44px', borderRadius: '8px', background: '#fff', border: '4px solid var(--ink)', boxShadow: '4px 4px 0 var(--ink)', marginLeft: '-22px', marginTop: '-22px'});
+  Object.assign(sw2.style, {width: '44px', height: '44px', borderRadius: '8px', background: 'var(--mk)', border: '4px solid var(--ink)', boxShadow: '4px 4px 0 var(--ink)', marginLeft: '-22px', marginTop: '-22px'});
+  [sw1, sw2].forEach((e, i) => { const [x, y] = pf(.62 + i * .11, .735); Object.assign(e.style, {left: x + 'px', top: y + 'px'}); });
+  marca([mCor, sw1, sw2], T.cor + .04, T.pal - .04, {passo: 4 * Q});
+  // palavras por linha
+  enche('pal', T.pal + .2, 'r-pal', V.pal[0], V.pal[1]);
+  mPal.slice(1).forEach(e => Object.assign(e.style, {width: '30px', height: '30px', marginLeft: '-15px', marginTop: '-15px', background: 'var(--mk)', border: '4px solid var(--ink)', boxShadow: '3px 3px 0 var(--ink)'}));
+  marca(mPal, T.pal + .15, T.zoom - .05, {passo: 7 * Q, de: 1});
+  // zoom
+  enche('zoom', T.zoom + .28, 'r-zoom', V.zoom[0], V.zoom[1]);
+  marca(brk, T.zoom + .15, T.b3 - .05, {passo: 2 * Q, de: 1.35});
+  tl.to(brk, {scale: 1.08, duration: .9, ease: 'sine.inOut', transformOrigin: '50% 50%'}, T.zoom + .45);
+
+  /* ───── B3: o seu vídeo ───── */
+  tl.set('#hud-b', {textContent: '· EDITANDO O SEU VÍDEO'}, T.b3);
+  some('#t3', T.b3 - .04);
+  sobe('#t4', [w.ai + .12, w.seu, w.video, w.video + .1]);
+  D.marca('#t4 i', w.video + .4);
+  tl.to('#cSeu', {opacity: 1, scale: 1.035, duration: .3, ease: 'power2.out'}, T.b3);
+  tl.to('#cRef', {scale: 1, duration: .3, ease: 'power2.out'}, T.b3);
+  D.cue(T.b3, 'whoosh');
+  // a pausa do bruto passa rápido e é cortada
+  tl.fromTo('#chPausa', {opacity: 0, scale: .6}, {opacity: 1, scale: 1, duration: .3, ease: D.P.MOLA, immediateRender: false}, T.ff);
+  tl.set('#chPausa', {opacity: 0}, T.corta);
+  D.cue(T.ff, 'tick-roll', {dur: +(T.corta - T.ff).toFixed(2)});
+  tl.call(() => { $('cSeu-tag').textContent = 'EDITADO'; $('cSeu-tag').className = ''; }, null, T.corta);
+  tl.call(() => { $('cSeu-tag').textContent = 'BRUTO'; $('cSeu-tag').className = ''; }, null, T.corta - .001);
+  D.carimbo('#chCorta', T.corta + .02, -3);
+  tl.to('#chCorta', {opacity: 0, duration: .2, ease: 'none'}, T.corta + 1.3);
+  // a coluna dele: cada linha na hora da fala
+  const seu = (id, t, v, sub, st, svg) => {
+    tl.call(() => { preenche('s-' + id, v, sub); $('s-' + id).classList.remove('vazio2'); estado(id, st, svg); }, null, t);
+    tl.call(() => { preenche('s-' + id, '···', ''); $('s-' + id).classList.add('vazio2'); estado(id, 'pend', PEND); }, null, t - .001);
+    tl.fromTo('#s-' + id + ' b', {backgroundSize: '0% 80%'}, {backgroundSize: '100% 80%', duration: .45, ease: 'power3.inOut', immediateRender: false}, t + .02);
+    tl.fromTo('#e-' + id, {scale: .4}, {scale: 1, duration: .3, ease: D.P.MOLA, immediateRender: false}, t);
+    D.cue(t, st === 'ok' ? 'certo' : 'pop');
+  };
+  seu('ritmo', w.ritmo + .15, V.ritmo[2], V.ritmo[3], 'ok', OK);
+  seu('cor', w.lugar + .3, V.cor[2], V.cor[3], 'ok', OK);
+  seu('pal', w.lugar + .5, V.pal[2], V.pal[3], 'ok', OK);
+  seu('pecas', w.legenda2 - .02, V.pecas[2], V.pecas[3], 'mid', MID);
+  seu('lugar', w.lugar + .1, V.lugar[2], V.lugar[3], 'ok', OK);
+  seu('zoom', w.forte + .1, V.zoom[2], V.zoom[3], 'ok', OK);
+  const tPun = T.z + .15 + .05;
+  D.cue(tPun, 'zoom-in');
+  tl.fromTo('#cSeu', {scale: 1.035}, {scale: 1.07, duration: 4 * Q, yoyo: true, repeat: 1, ease: 'power2.out', immediateRender: false}, tPun);
+
+  /* ───── B4: o ajuste ───── */
+  tl.set('#hud-b', {textContent: '· COMPARANDO'}, T.b4);
+  some('#t4', T.b4 - .04);
+  sobe('#t5', [w.nao, w.ficou, w.parecido]);
+  D.marca('#t5 i', w.parecido + .35);
+  tl.to('#cSeu', {scale: L.b4.s, y: L.b4.y, duration: .5, ease: 'power3.inOut'}, T.b4);
+  tl.to('#cRef', {scale: L.b4.s, y: L.b4.y, duration: .5, ease: 'power3.inOut'}, T.b4 + .03);
+  // as linhas somem, menos a das peças, que sobe pro primeiro lugar
+  ['ritmo', 'lugar', 'cor', 'pal', 'zoom'].forEach((id, i) => tl.to('#l-' + id, {opacity: 0, y: -30, scale: .96, duration: .2, ease: 'power2.in'}, T.b4 + .02 + i * 2 * Q));
+  tl.to('#l-pecas', {y: -(RH + L.rows.gap), duration: .4, ease: 'power3.inOut'}, T.b4 + .12);
+  tl.to('#colh', {opacity: 0, duration: .15, ease: 'none'}, T.b4);
+  tl.call(() => { estado('pecas', 'no', NO); preenche('s-pecas', V.pecas[2], V.n.v1 + ' peças contra ' + V.n.ref); }, null, w.parecido + .12);
+  tl.call(() => { estado('pecas', 'mid', MID); preenche('s-pecas', V.pecas[2], V.pecas[3]); }, null, w.parecido + .12 - .001);
+  D.cue(w.parecido + .12, 'erro');
+  // a guia: o painel dele, com menos peças que o da referência
+  marca([bSeu], T.b4 + .4, dur + 1, {de: 1.15});
+  // o pedido se escreve no campo
+  const cb = L.cb ?? L.rows.y + RH + 26;
+  tl.set('#campo', {top: cb}, T.b2 + .4);
+  $('msg').dataset.p2 = 'põe mais peças no painel';
+  D.pousa('#campo', T.pede - .3, {dy: 80, som: 'papel'});
+  tl.set('#msg', {}, T.pede - .3);
+  // o campo da B4 é outro texto: o 2º #msg entra depois que o 1º sai
+  const msg2 = document.createElement('div'); msg2.id = 'msg2'; msg2.textContent = 'põe mais peças no painel';
+  msg2.style.cssText = 'position:absolute;left:28px;right:110px;top:0;font:600 50px/' + (CP.h - 58 - 8) + 'px var(--fd);letter-spacing:-.01em;color:var(--ink);white-space:pre;opacity:0';
+  $('caixa').appendChild(msg2);
+  tl.set('#msg', {opacity: 0}, T.b2 - .01);
+  tl.set(msg2, {opacity: 1}, T.pede - .3);
+  const fim2 = D.digita('#msg2', T.pede, .034);
+  tl.to('#cnt', {opacity: 0, duration: .1}, T.pede - .3);
+  tl.to('#tab', {opacity: 1}, T.pede - .3);
+  const ey2 = cb + 56 + (CP.h - 58) / 2;
+  D.cursor('#mundo', [{x: ex - 90, y: ey2 + 360, t: T.ajusta - .72}, {x: ex, y: ey2, t: T.ajusta - .04, clica: true, alvo: '#env'}], {sai: T.ajusta + .3});
+  tl.fromTo('#env', {scale: .5, opacity: 0}, {scale: 1, opacity: 1, duration: .25, ease: D.P.MOLA, immediateRender: false}, T.pede - .1);
+  // o vídeo refeito: o mesmo instante, com mais peças no painel; a caixa vermelha vira verde e a linha das peças fecha
+  tl.set(bSeu, {borderColor: 'var(--ok)'}, T.ajusta + .06);
+  tl.call(() => { estado('pecas', 'ok', OK); preenche('s-pecas', V.pecas[4], V.pecas[5]); }, null, T.ajusta + .1);
+  tl.fromTo('#e-pecas', {scale: .4}, {scale: 1, duration: .3, ease: D.P.MOLA, immediateRender: false}, T.ajusta + .1);
+  tl.fromTo('#s-pecas b', {backgroundSize: '0% 80%'}, {backgroundSize: '100% 80%', duration: .4, ease: 'power3.inOut', immediateRender: false}, T.ajusta + .12);
+  D.cue(T.ajusta + .06, 'stamp'); D.cue(T.ajusta + .12, 'certo');
+  return dur;
+});
+</script>
+</body>
+</html>

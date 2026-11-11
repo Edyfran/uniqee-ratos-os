@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<!-- GANCHO — ícones de vidro que viram e flutuam. 1080x1920, --alpha.
+     A placa de vidro violeta (o acabamento do anel neon e das camadas: borda clara, lado mais escuro,
+     halo e um brilho que passa), com um ícone de traço branco dentro e a etiqueta embaixo. Entra virando
+     em 3D e assenta sem passar do ponto, o traço se desenha, a placa balança devagar no ar e sai encolhendo.
+     O lugar da figurinha de emoji (g_sticker) quando o vídeo pede o nível dos anúncios de edição.
+     Um ou vários: icone|x|y|rotação|etiqueta@t, separados por ;
+       icone  marca (paleta) · caneta (pena de vetor) · brilho · tesoura · legenda · play · imagem; outro nome
+              sai como texto curto dentro da placa
+       tam    o lado da placa (200) · dur
+       ?st=marca|230|560|-8|sua marca@0.3;caneta|850|540|7|seu design@1.6;brilho|860|1010|-6|sua animação@2.9&tam=210&dur=4.2 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+.vd{position:absolute;display:flex;flex-direction:column;align-items:center;gap:22px;opacity:0;perspective:var(--persp)}
+.vd .pl{position:relative;width:var(--tam);height:var(--tam);transform-style:preserve-3d}
+.vd .lado,.vd .face{position:absolute;inset:0;border-radius:28%}
+.vd .lado{background:var(--vidro-lado);transform:translateZ(calc(var(--tam) * -.09))}
+.vd .face{overflow:hidden;background:linear-gradient(150deg,var(--vidro-a),var(--vidro-b));
+  border:3px solid var(--vidro-borda);box-shadow:0 0 60px var(--vidro-halo),inset 0 3px 0 rgba(255,255,255,.55),inset 0 -8px 20px rgba(20,0,90,.35)}
+.vd .face::before{content:'';position:absolute;left:-10%;top:-28%;width:120%;height:62%;border-radius:50%;
+  background:linear-gradient(180deg,rgba(255,255,255,.42),rgba(255,255,255,0))}
+.vd .rs{position:absolute;top:-20%;bottom:-20%;width:34%;left:-60%;transform:skewX(-18deg);
+  background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.55),rgba(255,255,255,0))}
+.vd svg{position:absolute;inset:20%;width:60%;height:60%;overflow:visible;fill:none;stroke:var(--vidro-glifo);stroke-width:1.9;
+  stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 10px rgba(255,255,255,.55))}
+.vd svg .ch{fill:var(--vidro-glifo);stroke:none}
+.vd .tx{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:700 calc(var(--tam) * .32)/1 var(--fd);color:var(--vidro-glifo)}
+.vd .et{padding:14px 24px 15px;border-radius:999px;font:700 48px/1 var(--fd);letter-spacing:-.01em;text-transform:uppercase;white-space:nowrap;
+  color:var(--vidro-glifo);background:linear-gradient(180deg,rgba(40,24,110,.86),rgba(20,10,60,.86));border:2px solid var(--vidro-borda);
+  box-shadow:0 10px 30px rgba(0,0,0,.4)}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+// os ícones em traço, na grade de 24 (o desenho do Feather onde ele existe)
+const ICONES = {
+  marca: '<path d="M12 3a9 9 0 1 0 0 18c1 0 1.8-.8 1.8-1.8 0-.5-.2-.9-.5-1.2-.3-.3-.5-.8-.5-1.2 0-1 .8-1.8 1.8-1.8H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z"/>'
+    + '<circle class="ch" cx="7.5" cy="11" r="1.3"/><circle class="ch" cx="9.6" cy="7.2" r="1.3"/><circle class="ch" cx="14.2" cy="7" r="1.3"/><circle class="ch" cx="16.9" cy="10.4" r="1.3"/>',
+  caneta: '<path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/>',
+  brilho: '<path d="M11 2.5c.6 5.2 2.4 7 7.5 7.5-5.1.6-6.9 2.4-7.5 7.5-.6-5.1-2.4-6.9-7.5-7.5 5.1-.5 6.9-2.3 7.5-7.5z"/><path d="M19 15.5v5M16.5 18h5"/><path d="M5 18.5v3M3.5 20h3"/>',
+  tesoura: '<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.12 15.88"/><path d="M14.47 14.48L20 20"/><path d="M8.12 8.12L12 12"/>',
+  legenda: '<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M7 11h10M7 15h4M14 15h3"/>',
+  play: '<path d="M7 4.5l12 7.5-12 7.5z"/>',
+  imagem: '<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/>',
+};
+const dur = D.n('dur', '4.2'), tam = D.n('tam', '200');
+document.documentElement.style.setProperty('--tam', tam + 'px');
+const st = D.itens('st', 'marca|230|560|-8|sua marca@0.3;caneta|850|540|7|seu design@1.6;brilho|860|1010|-6|sua animação@2.9',
+  ['ic', 'x', 'y', 'rot', 'lg']);
+const stage = document.getElementById('stage');
+const esc = s => String(s).replace(/[&<>]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;'}[c]));
+st.forEach((s, i) => {
+  const d = document.createElement('div');
+  d.className = 'vd'; d.id = 'vd' + i;
+  const dentro = ICONES[s.ic] ? `<svg viewBox="0 0 24 24">${ICONES[s.ic]}</svg>` : `<div class="tx">${esc(s.ic)}</div>`;
+  d.innerHTML = `<div class="pl"><div class="lado"></div><div class="face"><i class="rs"></i>${dentro}</div></div>`
+    + (s.lg ? `<span class="et">${esc(s.lg)}</span>` : '');
+  stage.appendChild(d);
+});
+
+D.monta(tl => {
+  st.forEach((s, i) => {
+    const el = document.getElementById('vd' + i), pl = el.querySelector('.pl');
+    // centra a placa (não a etiqueta) no ponto pedido e segura tudo dentro do quadro
+    const w = el.offsetWidth, h = el.offsetHeight;
+    el.style.left = Math.max(30, Math.min(1080 - 30 - w, (+s.x || 540) - w / 2)) + 'px';
+    el.style.top = Math.max(60, Math.min(1920 - 60 - h, (+s.y || 960) - tam / 2)) + 'px';
+    const rot = parseFloat(s.rot) || 0, lado = (+s.x || 540) < 540 ? 1 : -1, t = D.at(s.t);
+    // vira de lado pro quadro e assenta inclinada pra dentro (o 3D vem da placa de trás)
+    tl.fromTo(el, {opacity: 0}, {opacity: 1, duration: .12, ease: 'none'}, t);
+    tl.fromTo(pl, {rotationY: -75 * lado, rotationX: 25, scale: .55, rotation: rot - 10},
+      {rotationY: 16 * lado, rotationX: 8, scale: 1, rotation: rot, duration: .55, ease: D.P.POUSA}, t);
+    D.cue(s.t, 'pop');
+    const et = el.querySelector('.et');
+    if (et) tl.fromTo(et, {opacity: 0, y: -18, scale: .8}, {opacity: 1, y: 0, scale: 1, duration: .3, ease: D.P.POUSA}, t + .16);
+    // o traço se desenha depois de a placa assentar
+    el.querySelectorAll('svg path, svg rect, svg circle:not(.ch)').forEach(p => {
+      const n = p.getTotalLength();
+      tl.fromTo(p, {strokeDasharray: n, strokeDashoffset: n}, {strokeDashoffset: 0, duration: .45, ease: 'power2.out'}, t + .2);
+    });
+    const ch = el.querySelectorAll('svg .ch');
+    if (ch.length) tl.fromTo(ch, {scale: 0, transformOrigin: '50% 50%'}, {scale: 1, duration: .2, ease: 'back.out(3)', stagger: .06}, t + .45);
+    // o brilho passa pela placa, e a placa balança devagar no ar
+    tl.fromTo(el.querySelector('.rs'), {left: '-60%'}, {left: '130%', duration: .55, ease: 'power1.inOut'}, t + .5);
+    const bal = Math.min(1.6, (dur - .45 - (t + .6)) / 2);
+    if (bal > .3) tl.to(pl, {rotationY: -6 * lado, rotationX: -4, duration: bal, ease: 'sine.inOut', yoyo: true, repeat: 1}, t + .6);
+    D.flutua(el, s.t + .8, dur - .5, 3, i);
+    if (D.q('sai', '1') !== '0') tl.to(el, {scale: 0, opacity: 0, duration: .28, ease: 'back.in(2)'}, dur - .4 + i * .05);
+  });
+  if (D.q('sai', '1') !== '0') D.cue(dur - .4, 'whoosh-out');
+  return dur;
+});
+</script>
+</body>
+</html>

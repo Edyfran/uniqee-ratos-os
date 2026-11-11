@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<!-- GANCHO — enquete. 1080x1920, --alpha. Pergunta + duas opções.
+     As opções caem; no voto, cada uma ENCHE da esquerda até o percentual, o
+     número conta junto, e a vencedora ganha o grifo amarelo e o carimbo ✓.
+     Sem percentual (a=Opção A&b=Opção B), fica só a pergunta — pra pedir voto.
+       ?p=Você faria sozinho ou com agentes?&a=Sozinho|38&b=Com agentes|62&t=0.2&t_voto=1.6&dur=5 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+.zona{position:absolute;left:56px;right:70px}
+.zona.topo{top:220px}
+.zona.centro{top:640px}
+.zona.base{top:1120px}
+.bx{display:flex;flex-direction:column;gap:22px;padding:30px 30px 34px;opacity:0}
+.bx .pg{font:700 64px/1.05 var(--fd);letter-spacing:var(--ls);color:var(--ink);opacity:0;margin-bottom:6px}
+.op{position:relative;display:flex;align-items:center;gap:22px;padding:18px 24px 18px 18px;opacity:0;
+  background:#fff linear-gradient(var(--fill,var(--pp2)),var(--fill,var(--pp2))) no-repeat 0 0/0% 100%;box-shadow:6px 6px 0 var(--ink)}
+.op.win{--fill:var(--mk)}
+.op .ic{width:70px;height:70px;font-size:32px;background:#fff}
+.op .nm{flex:1;min-width:0;font:700 52px/1.05 var(--fd);letter-spacing:var(--ls);white-space:nowrap}
+.op .pc{font:700 48px/1 var(--fm);opacity:0}
+.ok{position:absolute;right:-22px;top:-26px;width:74px;height:74px;border-radius:50%;background:var(--ok);border:var(--bw) solid var(--ink);
+  color:#fff;display:flex;align-items:center;justify-content:center;font:700 36px/1 var(--fd);opacity:0}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="zona" id="z">
+    <div class="bx nb" id="bx">
+      <div class="pg" id="pg"></div>
+      <div class="op nb" id="oa"><span class="ic">A</span><span class="nm" id="na"></span><span class="pc" id="pa"></span></div>
+      <div class="op nb" id="ob"><span class="ic">B</span><span class="nm" id="nb"></span><span class="pc" id="pb"></span></div>
+    </div>
+  </div>
+</div>
+<script>
+const dur = D.n('dur', '5'), t0 = D.n('t', '0.2'), tv = D.n('t_voto', '1.6');
+document.getElementById('z').classList.add(['topo', 'centro', 'base'].includes(D.q('pos')) ? D.q('pos') : 'centro');
+document.getElementById('pg').innerHTML = D.q('p', 'Você faria sozinho ou <b>com agentes</b>?');
+const [A, pA] = D.q('a', 'Sozinho|38').split('|'), [B, pB] = D.q('b', 'Com agentes|62').split('|');
+document.getElementById('na').textContent = A; document.getElementById('nb').textContent = B;
+const temVoto = pA !== undefined && pB !== undefined;
+const va = parseFloat(pA) || 0, vb = parseFloat(pB) || 0;
+const vence = vb >= va ? 'ob' : 'oa';
+if (temVoto) {
+  document.getElementById(vence).classList.add('win');
+  document.getElementById(vence).insertAdjacentHTML('beforeend', '<span class="ok" id="ok">✓</span>');
+}
+
+D.monta(tl => {
+  D.cabe('.pg', 40, '.bx');
+  D.cabe('.op .nm', 30, ['.op', .62]);
+  D.pousa('#bx', t0, {rot: 0, dr: 0, dy: -30});
+  D.titulo('#pg', t0 + .12);
+  D.pousa('#oa', t0 + .45, {dx: -40, rot: D.P.ROT * .6, som: 'pop'});
+  D.pousa('#ob', t0 + .7, {dx: 40, rot: -D.P.ROT * .6, som: 'pop'});
+  if (temVoto) {
+    [['#oa', '#pa', va], ['#ob', '#pb', vb]].forEach(([op, pc, v], i) => {
+      tl.fromTo(op, {backgroundSize: '0% 100%'}, {backgroundSize: v + '% 100%', duration: .9, ease: 'expo.out'}, D.at(tv) + i * .08);
+      tl.fromTo(pc, {opacity: 0}, {opacity: 1, duration: .15}, D.at(tv));
+      D.conta(pc, 0, v, tv, .9, n => Math.round(n) + '%');
+    });
+    tl.fromTo('#ok', {opacity: 0, scale: 2, rotation: -40}, {opacity: 1, scale: 1, rotation: 0, duration: .4, ease: 'back.out(2.6)'}, D.at(tv) + .8);
+    D.cue(tv + .8, 'stamp');
+    tl.to('#' + vence, {scale: 1.04, duration: .14, yoyo: true, repeat: 1, ease: 'power2.out'}, D.at(tv) + .8);
+  }
+  D.sai('#bx', dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

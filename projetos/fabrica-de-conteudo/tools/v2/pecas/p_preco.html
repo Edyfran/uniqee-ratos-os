@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<!-- FORMATO 3 — CTA com fundo, tela cheia, v2. Instância fixa (o tipo é t_preco).
+     Ordem da revelação: informação principal, condição complementar. -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+:root{--t-big:420px}
+#stage{align-items:center;text-align:center}
+.kick{align-self:center;margin-bottom:40px}
+.big{text-shadow:.03em .03em 0 var(--ac)}
+.ou{font:700 44px/1 var(--fm);color:var(--ink4);letter-spacing:.14em;text-transform:uppercase;margin:52px 0 26px;opacity:0}
+.par{font:800 120px/1 var(--fd);letter-spacing:-.03em;padding:.12em .32em .16em;opacity:0}
+.selo{margin-top:110px;padding:26px 44px;font:700 40px/1 var(--fd);opacity:0}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="kick" id="k">acesso vitalício ao treinamento</div>
+  <div class="big" id="v"><small>R$</small>197</div>
+  <div class="ou" id="o">ou</div>
+  <div class="par nb cor-ac" id="p">12× R$ 20,37</div>
+  <div class="selo nb cor-mk" id="s">uma vez, e é seu</div>
+</div>
+<script>
+D.monta(tl => {
+  D.cabe('.big', 160, .94);
+  D.cabe('.par', 80, .9);
+  D.camera(5.3, 1.0, 1.04);
+  D.carimbo('#k', .10);
+  D.heroi('#v', .30);
+  D.entra('#o', 1.15, 12);
+  D.pousa('#p', 1.30, {rot: D.P.ROT, s: 1.1});
+  D.carimbo('#s', 2.20, -D.P.ROT - 2);
+  return 5.3;
+});
+</script>
+</body>
+</html>

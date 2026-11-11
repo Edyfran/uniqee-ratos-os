@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<!-- TIPOGRAFIA — a frase ocupa a tela, uma batida por vez. 1080x1920 ou 1920x1080 (?ar=).
+     Cada batida (|) enche a largura do quadro e chega empurrando a anterior pra
+     cima, cada uma num chão (papel → tinta → azul). *palavra vira o bloco amarelo
+     com sombra dura. @ marca o instante de cada batida; sem @, uma a cada `passo`.
+     fundo=alterna|papel|tinta|azul · ?alfa=1 tira o chão da 1ª batida (sobre o vídeo)
+     varre=1 (Skillry #432): cada palavra entra por baixo de uma faixa amarela que passa por cima dela
+       da esquerda pra direita; o bloco amarelo leva a faixa tinta.
+     empilha=1 (Skillry #399): a batida não empurra a anterior, cai e pousa EM CIMA dela; a frase se
+       constrói de baixo pra cima e a última fica de pé no que as outras montaram.
+     entra=foco (o Joba, pesquisa/referencias-conteudo/joba-esqueca-consistencia.md, proposta 1): NÃO é
+       batida de tela cheia nem legenda. É o termo solto sobre o vídeo, palavra a palavra seguindo a fala
+       (cada | é uma palavra, @ o instante em que ela é dita), cada uma entrando desfocada e ficando nítida
+       em 3 quadros, com o kicker pequeno (kick=) encostado em cima, 3 quadros antes. Sai desfocando.
+       Fica no pé, acima da faixa do player. Transparente (renderize com --alpha); pensada pro tema tinteiro.
+       int=contida|media|ousada: o tamanho (112 / 150 / 200 px), quanto desfoca (10 / 18 / 30 px) e quanto
+       a palavra encolhe ao entrar (1 / 1,08 / 1,25, com a letra se fechando); na ousada a palavra vai no ouro.
+       ?l=Você não|precisa|*programar|pra ter um|*agente&passo=0.45&t0=0.2&dur=3.6
+       lugar=terco-esq|terco-dir tira o termo do meio (o rosto da selfie fica no meio).
+       ?l=Questar@0.4&kick=quest&entra=foco&int=media&dur=1.8&ar=1920x1080 -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+html.h,html.h body,html.h #stage{width:1920px;height:1080px}
+#stage{position:relative;overflow:hidden;padding:0;display:block;background:var(--pp)}
+.bt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-top:10px solid var(--ink)}
+.bt:first-child{border-top:0}
+.bt.papel{background:var(--tex),var(--pp);color:var(--ink);--sb:var(--ink)}
+.bt.tinta{background:var(--ink);color:#fff;--sb:var(--ac)}
+.bt.azul{background:var(--ac);color:#fff;--sb:var(--ink)}
+html.alfa #stage,html.alfa .bt:first-child{background:none}
+.tx{display:flex;align-items:baseline;gap:.22em;white-space:nowrap;font:700 100px/.92 var(--fd);letter-spacing:-.045em}
+.w{display:inline-block}
+.tx{position:relative}
+.vr{position:absolute;background:var(--mk);transform:scaleX(0)}
+.vr.ink{background:var(--ink)}
+/* entra=foco: o termo solto no pé, acima da faixa do player */
+.fo{position:absolute;left:0;right:0;bottom:calc(var(--yt-pe) + 34px);display:flex;flex-direction:column;align-items:center}
+.fo .kk{font:800 var(--kt)/1 var(--fd);color:var(--mk);text-transform:uppercase;letter-spacing:.12em;margin-bottom:.12em}
+.fo .ln{display:flex;gap:.22em;white-space:nowrap;font:900 var(--pt)/.95 var(--fd);text-transform:uppercase;letter-spacing:-.01em;color:var(--ink)}
+.fo .kk,.fo .ln{paint-order:stroke fill;-webkit-text-stroke:.1em var(--ink9);text-shadow:0 .06em 0 var(--ink9)}
+.fo .ln.ouro{color:var(--mk)}
+.fo .w,.fo .kk{opacity:0}
+.w.a{background:var(--mk);color:var(--ink);padding:.02em .16em .08em;border:.045em solid var(--ink);border-radius:.08em;box-shadow:.07em .07em 0 var(--sb)}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+const R = document.documentElement, HZ = D.q('ar', '1080x1920').startsWith('1920');
+if (HZ) R.classList.add('h');
+const W = HZ ? 1920 : 1080, H = HZ ? 1080 : 1920, MARG = HZ ? 140 : 70;
+const t0 = D.n('t0', '0.2'), passo = D.n('passo', '0.45');
+const bats = D.q('l', 'Você não|precisa|*programar|pra ter um|*agente').split('|').map((s, i) => {
+  const [tx, at] = s.split('@'); return {tx: tx.trim(), t: at ? parseFloat(at) : t0 + i * passo};
+}).filter(b => b.tx);
+const fim = bats[bats.length - 1].t;
+const dur = Math.max(fim + .9, D.n('dur', String(+(fim + 1.2).toFixed(2))));
+// entra=foco: outro desenho (o termo solto, sem chão); as batidas de tela cheia ficam no else
+if (D.q('entra', '') === 'foco') {
+  R.classList.add('alfa');
+  const I = {contida: {pt: 112, kt: 44, bl: 10, sc: 1, ls: 0}, media: {pt: 150, kt: 48, bl: 18, sc: 1.08, ls: .06},
+             ousada: {pt: 200, kt: 56, bl: 30, sc: 1.25, ls: .22}}[D.q('int', 'media')] || {};
+  R.style.setProperty('--pt', I.pt + 'px'); R.style.setProperty('--kt', I.kt + 'px');
+  const fo = document.createElement('div'); fo.className = 'fo';
+  const kk = document.createElement('div'); kk.className = 'kk'; kk.textContent = D.q('kick', '');
+  const ln = document.createElement('div'); ln.className = 'ln' + (D.q('int') === 'ousada' ? ' ouro' : '');
+  bats.forEach(b => { b.w = document.createElement('span'); b.w.className = 'w'; b.w.textContent = b.tx.replace(/^\*/, ''); ln.appendChild(b.w); });
+  if (kk.textContent) fo.appendChild(kk);
+  fo.appendChild(ln); document.getElementById('stage').appendChild(fo);
+  // base=N: distância do pé do quadro em px (padrão: acima da faixa do player)
+  if (D.q('base', '')) fo.style.bottom = D.q('base') + 'px';
+  // lugar=terco-esq|terco-dir: o termo sai do meio, fora do rosto de quem fala no meio do quadro
+  if (D.desloc(0)) fo.style.transform = `translateX(${D.desloc(0)}px)`;
+  // 3 quadros de desfoque: nítida no instante dito (t é "está na tela")
+  const Q3 = .1, foco = (el, t) => tl => tl.fromTo(el, {opacity: 0, filter: `blur(${I.bl}px)`, scale: I.sc, letterSpacing: I.ls + 'em'},
+    {opacity: 1, filter: 'blur(0px)', scale: 1, letterSpacing: '0em', duration: Q3, ease: 'none'}, Math.max(0, t - Q3));
+  D.monta(tl => {
+    // até 90% da largura (o D.cabe refaz o HTML e perderia as palavras)
+    // o termo deslocado (terco-esq|dir) só tem o lado curto até a borda: Rampar saía cortado à esquerda (dono, 12/10)
+    const cabe = Math.min(W * .9, 2 * (W / 2 - Math.abs(D.desloc(0))) * .74);
+    // frase de várias palavras que só cabe em letra pequena (< 60% do corpo) empilha, uma palavra por linha:
+    // WILDS UNKNOWN num terço a 50 px não é peça cheia (dono, 12/10: "overlays fracos")
+    // o kicker também não passa do terço: quebra em duas linhas, centrado
+    kk.style.cssText += ';max-width:' + cabe + 'px;text-align:center;white-space:normal;line-height:1.05';
+    let px = I.pt;
+    while (px > 44 && ln.scrollWidth > cabe) { px -= 4; ln.style.fontSize = px + 'px'; }
+    if (px < I.pt * .6 && bats.some(b => b.tx.includes(' '))) {
+      bats.forEach(b => { b.w.innerHTML = b.tx.replace(/^\*/, '').split(' ').join('<br>'); });
+      ln.style.cssText += ';flex-direction:column;align-items:center;gap:0;line-height:.95;text-align:center';
+      px = I.pt; ln.style.fontSize = px + 'px';
+      while (px > 44 && ln.scrollWidth > cabe) { px -= 4; ln.style.fontSize = px + 'px'; }
+    }
+    if (kk.textContent) foco(kk, bats[0].t - Q3)(tl);
+    bats.forEach(b => foco(b.w, b.t)(tl));
+    if (D.q('sai', '1') !== '0') tl.to([kk, ...bats.map(b => b.w)], {opacity: 0, filter: `blur(${I.bl}px)`, duration: .15, ease: 'none'}, dur - .16);
+    return dur;
+  });
+} else {
+const fundo = D.q('fundo', 'alterna'), ciclo = ['papel', 'tinta', 'azul'];
+const st = document.getElementById('stage'), varre = D.q('varre', '0') === '1', empilha = D.q('empilha', '0') === '1';
+bats.forEach((b, i) => {
+  const el = document.createElement('div');
+  el.className = 'bt ' + (fundo === 'alterna' ? ciclo[i % 3] : (ciclo.includes(fundo) ? fundo : 'papel'));
+  const tx = document.createElement('div'); tx.className = 'tx';
+  b.tx.split(/\s+/).forEach(p => { const w = document.createElement('span'), a = p.startsWith('*'); w.className = 'w' + (a ? ' a' : ''); w.textContent = a ? p.slice(1) : p; tx.appendChild(w); });
+  el.appendChild(tx); st.appendChild(el); b.el = el; b.txEl = tx; b.acento = !!tx.querySelector('.a');
+});
+D.monta(tl => {
+  // cada batida enche a largura: mede a 100px e escala até a margem
+  bats.forEach(b => { const fs = Math.min(HZ ? 300 : 340, H * .3, 100 * (W - MARG * 2) / b.txEl.scrollWidth); b.txEl.style.fontSize = fs + 'px'; });
+  // empilhada, cada batida vira uma laje da altura da letra; se a pilha não cabe, todas encolhem juntas
+  const laje = b => parseFloat(b.txEl.style.fontSize) * 1.3;
+  if (empilha) {
+    const k = Math.min(1, H * .86 / bats.reduce((s, b) => s + laje(b), 0));
+    let base = H;
+    bats.forEach(b => {
+      b.txEl.style.fontSize = parseFloat(b.txEl.style.fontSize) * k + 'px';
+      const h = laje(b);
+      Object.assign(b.el.style, {inset: 'auto 0', top: base - h + 'px', height: h + 'px'});
+      base -= h;
+    });
+    if (!R.classList.contains('alfa')) st.style.background = 'var(--tex),var(--pp)';
+  }
+  D.camera(dur, 1, 1.035);
+  bats.forEach((b, i) => {
+    if (empilha) {
+      // cai de cima e pousa na laje de baixo; a pilha inteira sente o peso
+      // pousa em D.at(t) + 0,18; a queda começa no 0 se a batida vem cedo (posição negativa empurra a timeline toda)
+      const ta = Math.max(0, D.at(b.t) - .12);
+      tl.fromTo(b.el, {y: -b.el.offsetTop - b.el.offsetHeight}, {y: 0, duration: Math.max(.1, D.at(b.t) + .18 - ta), ease: 'power3.in'}, ta);
+      if (i > 0) tl.to(bats.slice(0, i).map(x => x.el), {y: 10, duration: .06, yoyo: true, repeat: 1, ease: 'power2.out'}, D.at(b.t) + .18);
+    } else if (i > 0) {
+      tl.fromTo(b.el, {yPercent: 100}, {yPercent: 0, duration: .34, ease: 'power4.out'}, D.at(b.t));
+      tl.to(bats[i - 1].el, {yPercent: -22, duration: .34, ease: 'power4.out'}, D.at(b.t));
+    }
+    b.el.querySelectorAll('.w').forEach((w, k) => {
+      const a = w.classList.contains('a'), t = D.at(b.t) + .04 + k * .05;
+      if (varre) {
+        // a faixa entra da esquerda cobrindo a palavra, a palavra aparece por baixo e a faixa sai pela direita
+        // a faixa é irmã da palavra (filha, sumiria junto com ela), na caixa medida da palavra
+        const vr = document.createElement('i'), f = parseFloat(b.txEl.style.fontSize) * .06;
+        vr.className = 'vr' + (a ? ' ink' : '');
+        Object.assign(vr.style, {left: w.offsetLeft - f + 'px', top: w.offsetTop + 'px', width: w.offsetWidth + 2 * f + 'px', height: w.offsetHeight + 'px'});
+        b.txEl.appendChild(vr);
+        gsap.set(w, {opacity: 0});
+        tl.fromTo(vr, {scaleX: 0, transformOrigin: 'left center'}, {scaleX: 1, duration: .12, ease: 'power2.in'}, t);
+        tl.set(w, {opacity: 1}, t + .12);
+        tl.set(vr, {transformOrigin: 'right center'}, t + .12);
+        tl.to(vr, {scaleX: 0, duration: .2, ease: 'power3.out'}, t + .12);
+        if (a) tl.fromTo(w, {rotation: -7}, {rotation: -2, duration: .42, ease: D.P.HEROI, immediateRender: false}, t + .12);
+        return;
+      }
+      tl.fromTo(w, {opacity: 0, scale: a ? 1.5 : 1.25, rotation: a ? -7 : 0, yPercent: a ? 0 : 30},
+        {opacity: 1, scale: 1, rotation: a ? -2 : 0, yPercent: 0, duration: a ? .42 : .3, ease: a ? D.P.HEROI : 'power4.out'}, t);
+    });
+    D.cue(b.t, b.acento ? 'hit' : empilha ? 'thud' : 'pop');
+  });
+  return dur;
+});
+}  // fim do else (batidas de tela cheia)
+</script>
+</body>
+</html>

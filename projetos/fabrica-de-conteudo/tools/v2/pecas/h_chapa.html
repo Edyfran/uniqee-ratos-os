@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<!-- AULA — a chapa da aula gravada: o papel em volta da tela, a janela com borda tinta e
+     sombra dura, e o rosto num cartão — o que salta do canto por cima da bolinha do OBS, ou o
+     do celular ao lado da tela. 1920x1080, --alpha. Parada. Quem usa é a fábrica (o recurso
+     `chapa`): a tela e o rosto vão por baixo, nos mesmos retângulos, e esta peça por cima.
+     Janela e cartão são buracos no papel.
+       jan  x,y,largura,altura da tela · cam  o cartão da câmera (vazio: sem cartão) · dur
+       ?jan=136,25,1648,1030&cam=1468,822,376,251&dur=0.2 -->
+<html lang="pt-BR" class="h alfa" data-qa="entra-seco fica">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/direcao-h.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+#fundo{position:absolute;inset:0;background:var(--tex),var(--pp)}
+.moldura{position:absolute;border:var(--bw) solid var(--ink);border-radius:var(--raio-s);
+  box-shadow:var(--sh) var(--sh) 0 var(--ink)}
+#cam:not([style]){display:none}
+</style>
+</head>
+<body>
+<div id="stage"><div id="fundo"><div class="moldura" id="jan"></div></div><div class="moldura" id="cam"></div></div>
+<script>
+const dur = D.n('dur', '0.2'), $ = id => document.getElementById(id);
+const ret = (k, d) => { const v = D.q(k, d).split(',').map(Number); return v.length === 4 && v.every(isFinite) ? v : null; };
+const J = ret('jan', '136,25,1648,1030'), C = ret('cam', '');
+// a borda fica por FORA do buraco: o vídeo vai até a beirada, e a linha não come quadro dele
+const poe = (el, [x, y, w, h]) => Object.assign(el.style,
+  {left: `calc(${x}px - var(--bw))`, top: `calc(${y}px - var(--bw))`,
+   width: `calc(${w}px + 2 * var(--bw))`, height: `calc(${h}px + 2 * var(--bw))`});
+poe($('jan'), J);
+if (C) poe($('cam'), C);
+
+// Os buracos no papel. O cartão que salta do canto entra no buraco da janela: a borda e a
+// sombra dela somem atrás dele. O cartão ao lado da tela é um buraco à parte.
+const [x0, y0, x1, y1] = [J[0], J[1], J[0] + J[2], J[1] + J[3]];
+let furos = [[[x0, y0], [x1, y0], [x1, y1], [x0, y1]]];
+if (C) {
+  const [a0, b0, a1, b1] = [C[0], C[1], C[0] + C[2], C[1] + C[3]];
+  if (a0 >= x1 || b0 >= y1 || a1 <= x0 || b1 <= y0) furos.push([[a0, b0], [a1, b0], [a1, b1], [a0, b1]]);
+  // ponytail: dos cartões que encostam na janela, só o do canto de baixo à direita (a zona do
+  // rosto no 16:9); em outro canto o papel cobre a parte que passa da janela
+  else if (a1 > x1 && b1 > y1 && a0 >= x0 && b0 >= y0)
+    furos = [[[x0, y0], [x1, y0], [x1, b0], [a1, b0], [a1, b1], [a0, b1], [a0, y1], [x0, y1]]];
+}
+const p = ([x, y]) => `${x}px ${y}px`;
+// cada buraco sai do canto e volta pra ele: a costura não tem área, e o evenodd fura o resto
+$('fundo').style.clipPath = `polygon(evenodd, 0 0, 1920px 0, 1920px 1080px, 0 1080px, 0 0, ${
+  furos.map(f => [...f, f[0]].map(p).join(', ') + ', 0 0').join(', ')})`;
+
+D.monta(() => dur);
+</script>
+</body>
+</html>

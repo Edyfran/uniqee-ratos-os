@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<!-- ENSAIO — citação com recorte de artigo. 1920x1080, --alpha (camada frente).
+     O recorte cai torto no lado livre, a citação sobe por palavra, rápida, e o
+     trecho em <b> é grifado. Com ?img= entra o print do artigo no lugar do texto.
+       ?fonte=The Verge&data=mar 2025&cit=A maior parte... <b>explicar bem</b>.&autor=— trecho de reportagem&img=&lado=dir&t0=0.2&dur=5 -->
+<html lang="pt-BR" class="h alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/direcao-h.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<script src="../nucleo/ensaio.js"></script>
+<style>
+.ct{position:absolute;top:170px;width:820px;padding:0 0 30px;overflow:hidden;opacity:0}
+.cab{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:16px 28px;border-bottom:3px solid var(--ink);background:#F4F2EC}
+.cab b{font:700 24px/1 var(--fd);letter-spacing:.04em;text-transform:uppercase;color:var(--ink)}
+.cab span{font:600 20px/1 var(--fm);color:var(--ink4)}
+.q{padding:26px 34px 0;font:500 44px/1.28 var(--fd);letter-spacing:-.02em;color:var(--ink);text-wrap:pretty;opacity:0}
+.q::before{content:'\201C';display:block;font:700 120px/.62 var(--fd);color:var(--ac);margin-bottom:4px}
+.im{position:relative;height:430px;margin:24px 28px 0;border:3px solid var(--ink);border-radius:8px;overflow:hidden}
+.au{padding:22px 34px 0;font:600 22px/1.3 var(--fm);color:var(--ink6)}
+.au:empty{display:none}
+</style>
+</head>
+<body>
+<div id="stage"><div class="ct nb" id="ct" data-c="frente"><div class="cab"><b id="fo"></b><span id="dt"></span></div><div class="q" id="q"></div><div class="au" id="au"></div></div></div>
+<script>
+const dur = D.n('dur', '5'), t0 = D.n('t0', '0.2'), $ = id => document.getElementById(id);
+const p = E.pessoa('dir');
+$('ct').style.left = (p.lado === 'esq' ? p.r + 60 : 140) + 'px';
+$('fo').textContent = D.q('fonte', 'The Verge');
+$('dt').textContent = D.q('data', 'mar 2025');
+$('au').textContent = D.q('autor', '— trecho de reportagem');
+const img = D.q('img', '');
+if (img) { $('q').outerHTML = '<div class="im" id="im"></div>'; D.midia('#im', img, 'print do artigo'); }
+else $('q').innerHTML = D.q('cit', 'A maior parte do trabalho com IA não é escrever código. É <b class="mkr">explicar bem o que você quer</b>.');
+D.monta(tl => {
+  D.pousa('#ct', t0, {rot: -1.2, dy: -60, som: 'pop'});
+  if (!img) { const ws = D.palavras('#q', t0 + .25, .035); D.marca('#q b', D.at(t0 + .25) + ws.length * .035 + .2); }
+  D.sai('#ct', dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

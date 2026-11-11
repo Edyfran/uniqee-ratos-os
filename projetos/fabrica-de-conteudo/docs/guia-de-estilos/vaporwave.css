@@ -1,0 +1,47 @@
+/* Vaporwave: pôr do sol de computador antigo. Céu roxo que desce pro rosa, um sol listrado e
+   o chão em grade, cartão roxo de filete ciano com sombra rosa, letra larga e espaçada.
+   Copie para marca/tema.css e troque as quatro cores (docs/guia-de-estilos.md).
+   As letras moram em tools/video-use/assets/fontes/: copie cada arquivo do url() pra
+   marca/fontes/, com o <Família>-OFL.txt do lado. */
+
+@font-face{font-family:'Marca';font-weight:500 700;src:url(fontes/Montserrat[wght].ttf) format('truetype')}
+@font-face{font-family:'MarcaApoio';font-weight:300 500;src:url(fontes/Jost-Variable.ttf) format('truetype')}
+
+html.marca{
+  /* as quatro cores: céu (escuro), letra (clara), bloco (rosa), marcador (ciano) */
+  --pp:#2A1352; --ink:#FFF0FB; --ac:#E0459B; --mk:#7FF3FF;
+  --sur:color-mix(in srgb,var(--pp) 80%,var(--ac)); --ink9:var(--pp);
+  --ink6:color-mix(in srgb,var(--ink) 70%,var(--pp)); --ink4:color-mix(in srgb,var(--ink) 48%,var(--pp));
+  --ink2:color-mix(in srgb,var(--ink) 18%,var(--pp));
+  --ac2:color-mix(in srgb,var(--ac) 30%,var(--pp)); --act:color-mix(in srgb,var(--ac) 40%,var(--pp));
+  --no2:color-mix(in srgb,var(--no) 25%,var(--pp));
+  --fd:'Marca',system-ui,sans-serif; --fm:'MarcaApoio',system-ui,sans-serif; --ls:.06em;
+
+  /* a forma: filete ciano, sombra rosa, canto médio; o céu, o sol listrado e a grade no chão */
+  --bw:2px; --sh:9px; --sombra:var(--ac); --raio:14px; --raio-s:8px; --lado:var(--ac);
+  --tex:repeating-linear-gradient(180deg,transparent 0 26px,color-mix(in srgb,var(--pp) 70%,var(--ac)) 26px 34px) 50% 63%/560px 230px no-repeat,
+        radial-gradient(circle at 50% 100%,#FFD36E 0 52%,var(--ac) 76%,transparent 76.4%) 50% 63%/560px 280px no-repeat,
+        repeating-linear-gradient(180deg,color-mix(in srgb,var(--mk) 55%,transparent) 0 2px,transparent 2px 64px) 0 100%/100% 30% no-repeat,
+        repeating-linear-gradient(90deg,color-mix(in srgb,var(--mk) 40%,transparent) 0 2px,transparent 2px 90px) 0 100%/100% 30% no-repeat,
+        linear-gradient(180deg,var(--pp) 0%,color-mix(in srgb,var(--pp) 55%,var(--ac)) 70%,var(--pp) 70.1%);
+  font-synthesis:none;
+
+  /* o reel editorial e a capa: o painel também escurece */
+  --ed-sans:'Marca',system-ui,sans-serif;
+  --ed-pp:var(--pp); --ed-pp-luz:color-mix(in srgb,var(--pp) 80%,var(--ac)); --ed-folha:transparent;
+  --ed-tx:var(--ink);
+  --ed-dg-apaga-tx:linear-gradient(180deg,#FFFFFF 0%,rgba(255,255,255,.82) 42%,rgba(255,255,255,.2) 95%);
+  --ed-dg-azul:linear-gradient(180deg,color-mix(in srgb,var(--ac) 40%,white) 0%,var(--ac) 70%);
+  --ed-dg-ouro:linear-gradient(180deg,color-mix(in srgb,var(--mk) 30%,white) 8%,var(--mk) 58%,color-mix(in srgb,var(--mk) 70%,black) 100%);
+  --ed-dg-some-azul:linear-gradient(180deg,var(--ac) 0%,color-mix(in srgb,var(--ac) 55%,transparent) 55%,color-mix(in srgb,var(--ac) 6%,transparent) 100%);
+  --ed-dg-some-ouro:linear-gradient(180deg,var(--mk) 0%,color-mix(in srgb,var(--mk) 55%,transparent) 55%,color-mix(in srgb,var(--mk) 6%,transparent) 100%);
+}
+html.marca body{color:var(--ink)}
+html.marca .nb{border-color:var(--mk)}
+html.marca .nb.cor-ac{color:#fff}
+html.marca .nb.cor-mk{color:var(--ink9)}
+html.marca .nb.cor-ink{background:var(--ink9);color:var(--ink)}
+html.marca .hd,html.marca .big{text-shadow:.05em .05em 0 var(--ac),.1em .1em 0 color-mix(in srgb,var(--mk) 70%,transparent)}
+html.marca .hd b,html.marca .mkr{color:var(--ink9);text-shadow:none}
+html.marca .kick{background:none;color:var(--mk);border-color:var(--mk);box-shadow:none;letter-spacing:.4em}
+html.marca .ic{background:none;color:var(--mk);border-color:var(--mk)}

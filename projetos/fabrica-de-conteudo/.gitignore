@@ -1,0 +1,6 @@
+.venv/
+.env.local
+.fabrica/
+__pycache__/
+.pytest_cache/
+conferencia.txt

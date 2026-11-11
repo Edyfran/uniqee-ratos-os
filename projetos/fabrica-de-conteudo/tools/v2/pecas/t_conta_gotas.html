@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<!-- TEXTO / COR — conta-gotas: uma barra com 6 chips de cor, o código hex embaixo de cada um. Os chips entram em fila e um
+     conta-gotas passa por eles, mergulha em cada um e deixa o hex. É a paleta que o Claude tira do quadro e aplica ao
+     vídeo (a imagem esfria; essa mudança é do `grade.py`, não desta peça). ~1,2 s de ação. 1080x1920, --alpha.
+       cores  os hex, separados por vírgula, sem # (até 6; padrão: uma paleta fria)
+       kick   a etiqueta do cartão (paleta, vazia = sem) · y  o topo do cartão em px (1180) · w  a largura (960)
+       t0 · sai  quando sai (1.8) · dur
+       ?cores=0B1620,2F4858,4F7A94,7FA8BE,B5D3DF,E8F1F5&kick=paleta&y=1180&t0=0.1&dur=2.2 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+.cd{position:absolute;left:60px;padding:30px 28px 26px;display:flex;flex-direction:column;gap:20px}
+.cd .kick{margin:0;opacity:1}
+.rw{position:relative;display:flex;justify-content:space-between;padding-top:70px}
+.ch{display:flex;flex-direction:column;align-items:center;gap:14px;width:136px}
+.sw{width:128px;height:128px;border-radius:var(--raio);border:var(--bw) solid var(--ink);background:var(--c)}
+.hx{font:700 24px/1 var(--fm);letter-spacing:.01em;color:var(--ink);opacity:0;white-space:nowrap;text-transform:uppercase}
+.cg{position:absolute;left:0;top:0;width:104px;height:104px;overflow:visible;fill:#fff;stroke:var(--ink);stroke-width:1.6;
+  stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(5px 5px 0 var(--ink));opacity:0}
+</style>
+</head>
+<body>
+<div id="stage"><div class="cd nb" id="cd"><div class="kick" id="k"></div><div class="rw" id="rw">
+  <svg class="cg" id="cg" viewBox="0 0 24 24"><path d="M2 22l1-1h3l9-9"/><path d="M3 21v-3l9-9"/><path d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3z"/></svg>
+</div></div></div>
+<script>
+const $ = id => document.getElementById(id);
+const dur = D.n('dur', '2.2'), t0 = D.n('t0', '0.1'), sai = D.n('sai', '1.8');
+const hex = D.q('cores', '0B1620,2F4858,4F7A94,7FA8BE,B5D3DF,E8F1F5').split(',')
+  .map(s => s.trim().replace(/^#/, '').toUpperCase()).filter(s => /^[0-9A-F]{6}$/.test(s)).slice(0, 6);
+$('k').textContent = D.q('kick', 'paleta');
+$('cd').style.top = D.n('y', '1180') + 'px'; $('cd').style.width = D.n('w', '960') + 'px';
+$('rw').insertAdjacentHTML('beforeend', hex.map(h => `<div class="ch"><div class="sw" style="--c:#${h}"></div><div class="hx">#${h}</div></div>`).join(''));
+
+D.monta(tl => {
+  const chs = [...document.querySelectorAll('.ch')], sws = chs.map(c => c.firstChild), hxs = chs.map(c => c.lastChild), cg = $('cg');
+  D.pousa('#cd', t0, {dy: 90, dr: 0});
+  const s0 = D.at(t0) + .22, passo = .12, S = 104;
+  // a ponta do conta-gotas é o canto de baixo à esquerda do desenho (2,22 de 24)
+  const ponta = i => ({x: chs[i].offsetLeft + chs[i].offsetWidth / 2 - S * 2 / 24, y: sws[i].offsetTop - S * 22 / 24 - 8});
+  const p0 = ponta(0);
+  tl.fromTo(cg, {x: p0.x - 130, y: p0.y - 90, opacity: 0, rotation: -12}, {x: p0.x, y: p0.y, opacity: 1, rotation: 0, duration: .22, ease: 'power3.out'}, s0 - .12);
+  chs.forEach((c, i) => {
+    const s = s0 + i * passo, p = ponta(i);
+    // o chip entra um instante antes de o conta-gotas chegar
+    tl.fromTo(sws[i], {scale: 0, opacity: 0}, {scale: 1, opacity: 1, duration: .24, ease: 'back.out(2)', transformOrigin: '50% 100%'}, s - .02);
+    if (i) tl.to(cg, {x: p.x, duration: passo * .75, ease: 'power2.inOut'}, s - passo * .5);
+    tl.to(cg, {y: p.y + 14, duration: .05, ease: 'power2.in'}, s + .02);
+    tl.to(cg, {y: p.y, duration: .09, ease: 'power3.out'}, s + .07);
+    tl.fromTo(hxs[i], {opacity: 0, y: 8}, {opacity: 1, y: 0, duration: .16, ease: 'power3.out'}, s + .05);
+    D.cue(s + .05, 'click');
+  });
+  // acabou: o conta-gotas sai pela direita, de cima
+  const fim = s0 + hex.length * passo;
+  tl.to(cg, {x: '+=140', y: '-=110', opacity: 0, rotation: 10, duration: .24, ease: 'power2.in'}, fim + .1);
+  D.sai('#cd', sai);
+  return dur;
+});
+</script>
+</body>
+</html>

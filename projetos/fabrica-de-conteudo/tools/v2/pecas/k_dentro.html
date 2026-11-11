@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<!-- TIPOGRAFIA — a frase se abre e as fotos entram no meio dela. 1080x1920 ou 1920x1080 (?ar=), --alpha.
+     Da prompt-motion #14 (06/10/2026) saiu o movimento; o código e o texto são nossos.
+     A frase está inteira no cartão quase no 1º quadro (regra do gancho no topo). No `abre`, as
+     palavras se afastam onde está o [] e as fotos entram pela fresta, uma por batida, empilhadas
+     com borda e sombra dura. *palavra é o marcador; com troca=, ela troca nas batidas: a palavra
+     sai por cima, a nova sobe, e o bloco amarelo estica ou encolhe até ela (a linha se acomoda).
+     | quebra a linha · _ vira espaço na *palavra · img= fotos separadas por vírgula (url ou relativa à peça)
+     forma=reel (cartão em pé, capa de vídeo) | bola (rosto) · pos=topo|centro · tam= o corpo máximo (encolhe até caber)
+     ?l=Seus [] Reels|saem *prontos&troca=legendados,com_capa&img=../midia/vitrine-semana.jpg,../midia/vitrine-cracha.jpg,../midia/vitrine-a-pergunta.jpg&t0=0.1&abre=0.55&t_troca=1.7&passo_troca=0.75&dur=4.2 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+html.h,html.h body,html.h #stage{width:1920px;height:1080px}
+#stage{background:none;padding:0;display:block}
+.zona{position:absolute;left:64px;right:64px;top:150px;display:flex;justify-content:center}
+.zona.centro{top:0;bottom:0;align-items:center}
+html.h .zona{left:140px;right:140px;top:90px}
+html.h .zona.centro{top:0}
+.card{max-width:100%;padding:.3em .5em .36em;opacity:0;font-weight:700;line-height:1.06;letter-spacing:var(--ls);color:var(--ink)}
+.ln{display:flex;justify-content:center;align-items:center;column-gap:.24em;white-space:nowrap}
+.ln + .ln{margin-top:.08em}
+/* a fresta: fechada, a margem negativa come o vão que sobraria entre as duas palavras */
+.fs{flex:none;display:flex;justify-content:center;align-items:center;width:0;margin-left:-.24em}
+.ft{flex:none;border:var(--bw) solid var(--ink);background:var(--ink2) center 30%/cover no-repeat;opacity:0;
+  box-shadow:calc(var(--sh)*.45) calc(var(--sh)*.45) 0 var(--ink)}
+.ft + .ft{margin-left:-.26em}
+.ft.reel{width:.78em;height:1.38em;border-radius:var(--raio-s)}
+.ft.bola{width:1.05em;height:1.05em;border-radius:50%;background-position:center 22%}
+/* o marcador que troca: a caixa corta, a palavra corre por dentro */
+.tc{flex:none;position:relative;overflow:hidden;height:1.3em;background:var(--mk);
+  border:.045em solid var(--ink);border-radius:.08em;box-shadow:.07em .07em 0 var(--ink)}
+.tw{position:absolute;left:.16em;top:.12em;white-space:nowrap}   /* .12: o descendente do g e o acento cabem, e a linha da letra bate com a vizinha */
+</style>
+</head>
+<body>
+<div id="stage"><div class="zona" id="z"><div class="card nb" id="c"></div></div></div>
+<script>
+const R = document.documentElement, HZ = D.q('ar', '1080x1920').startsWith('1920');
+if (HZ) R.classList.add('h');
+if (D.q('pos') === 'centro') document.getElementById('z').classList.add('centro');
+const t0 = D.n('t0', '0.1'), abre = D.n('abre', '0.55'), tTroca = D.n('t_troca', '1.7'), passoT = D.n('passo_troca', '0.75');
+const forma = D.q('forma', 'reel') === 'bola' ? 'bola' : 'reel';
+const imgs = D.q('img', '../midia/vitrine-semana.jpg,../midia/vitrine-cracha.jpg,../midia/vitrine-a-pergunta.jpg').split(',').map(s => s.trim()).filter(Boolean);
+const trocas = D.q('troca', 'legendados,com_capa').split(',').map(s => s.trim().replace(/_/g, ' ')).filter(Boolean);
+const card = document.getElementById('c');
+let fresta = null, fotos = [], tc = null, tws = [];
+D.q('l', 'Seus [] Reels|saem *prontos').split('|').forEach(l => {
+  const ln = document.createElement('div'); ln.className = 'ln';
+  l.trim().split(/\s+/).filter(Boolean).forEach(p => {
+    if (p === '[]' && !fresta) {
+      fresta = document.createElement('span'); fresta.className = 'fs';
+      imgs.forEach(u => { const f = document.createElement('i'); f.className = 'ft ' + forma; f.style.backgroundImage = `url("${u}")`; fresta.appendChild(f); fotos.push(f); });
+      ln.appendChild(fresta);
+    } else if (p.startsWith('*') && !tc) {
+      tc = document.createElement('span'); tc.className = 'tc';
+      const p0 = p.slice(1).replace(/_/g, ' ');
+      [p0, ...trocas.filter(w => w !== p0)].forEach(w => { const s = document.createElement('span'); s.className = 'tw'; s.textContent = w; tc.appendChild(s); tws.push(s); });
+      ln.appendChild(tc);
+    } else {
+      const w = document.createElement('span'); w.className = 'w'; w.textContent = p; ln.appendChild(w);
+    }
+  });
+  card.appendChild(ln);
+});
+// as fotos precisam estar carregadas antes do primeiro quadro (o D.monta espera <img>, não fundo de CSS)
+window.__folha = Promise.all([window.__folha, ...imgs.map(u => new Promise(r => { const i = new Image(); i.onload = i.onerror = r; i.src = u; setTimeout(r, 6000); }))]);
+
+D.monta(tl => {
+  // mede ABERTA (fresta na largura final, marcador na palavra mais larga) e encolhe até cada linha caber
+  const lado = forma === 'bola' ? 1.05 : .78, abertaEm = fotos.length ? fotos.length * lado - (fotos.length - 1) * .26 : 0;
+  let px = D.n('tam', '150');
+  const larg = () => tws.map(s => s.offsetWidth / px + .41);   // .16 de respiro + .045 de borda, dos dois lados
+  const mede = () => {
+    card.style.fontSize = px + 'px';
+    if (fresta) Object.assign(fresta.style, {width: abertaEm + 'em', marginLeft: '0'});
+    if (tc) tc.style.width = Math.max(...larg()) + 'em';
+  };
+  mede();
+  while (px > 44 && [...card.children].some(l => l.scrollWidth > card.parentElement.clientWidth - px - 8)) { px -= 2; mede(); }
+  const tw = larg().map(e => e * px);
+  if (fresta) gsap.set(fresta, {width: 0, marginLeft: -.24 * px});
+  if (tc) gsap.set(tc, {width: tw[0]});
+
+  D.pousa('#c', t0, {rot: D.P.ROT * .6, dy: -24});
+  if (fresta) {
+    tl.to(fresta, {width: abertaEm * px, marginLeft: 0, duration: .45, ease: 'power4.out'}, D.at(abre));
+    const giro = forma === 'reel' ? [-4, 3, -2, 4, -3] : [0];
+    fotos.forEach((f, i) => {
+      const t = abre + .1 + i * .09, r = giro[i % giro.length];
+      tl.fromTo(f, {opacity: 0, scale: .3, yPercent: 45, rotation: r * 3}, {opacity: 1, scale: 1, yPercent: 0, rotation: r, duration: .38, ease: D.P.POUSA}, D.at(t));
+      D.cue(t, 'pop');
+    });
+  }
+  let fim = abre + .8;
+  tws.forEach((s, k) => {
+    if (!k) return;
+    const t = tTroca + (k - 1) * passoT;
+    tl.fromTo(tws[k - 1], {yPercent: 0}, {yPercent: -115, duration: .16, ease: D.P.SAI, immediateRender: false}, D.at(t));
+    tl.fromTo(s, {yPercent: 115}, {yPercent: 0, duration: .36, ease: 'power4.out'}, D.at(t) + .06);
+    // cresce antes da nova entrar e encolhe depois da velha sair: nas duas ordens, nenhuma é cortada
+    tl.to(tc, {width: tw[k], duration: .3, ease: 'power4.out'}, D.at(t) + (tw[k] > tw[k - 1] ? 0 : .1));
+    D.cue(t, 'swish');
+    fim = t;
+  });
+  const dur = Math.max(fim + 1.1, D.n('dur', String(+(fim + 1.4).toFixed(2))));
+  D.flutua('#c', abre + .6, dur - .45, .6);
+  D.sai('#c', dur - .4);
+  return dur;
+});
+</script>
+</body>
+</html>

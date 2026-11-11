@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<!-- EFEITO 3D — quebra de moldura (clone da ficha 11, "frame break", do anúncio De25fKeTRl7). O vídeo encolhe a 0,60 em 4 quadros, com borrão,
+     e vira um cartão de Reels sobre um fundo escuro e borrado feito do próprio vídeo; a interface é a do app (Reels, câmera, coração, comentário,
+     enviar, três pontos, avatar, nome, Seguir e a legenda). Teia de rachaduras no topo (só em f359); em f360 tudo que está acima da linha dos ombros já é
+     uma nuvem de uns 200 cacos de vidro cinza de meio tom EM 3D (three.js, vendor/three; 129 espalhados, 22 menores em volta da cabeça, que saem mais devagar e somem antes, e 47 pequenos e rápidos que saem de trás da cabeça de f364 em diante), pontudos, triângulos e quadriláteros de tamanhos variados, o comprido apontando pra cabeça: saem dela,
+     crescem em direção à câmera (a perspectiva os leva de 1,1x a uns 3x), giram, mudam de brilho com a orientação (luz de cima à direita), deixam riscos radiais
+     nos primeiros quadros (obturador de 1,1 quadro, que não olha pra antes do estouro), mexem até f369 e somem em f371. Todos já estão a 100% em f360 em volta da cabeça (as placas nascem 34% maiores e chegam ao tamanho em 2 quadros) e os mais perto dela voam mais depressa: as laterais da cabeça esvaziam em f366. A pessoa (cabeça, boné, pescoço) fica
+     inteira por cima do escuro, e embaixo o cartão segue com a borda de cima serrilhada. Os cacos levam a textura do vídeo SEM a pessoa (vidro de parede,
+     não de rosto). O borrão é de verdade (média de subquadros). Desenhada só pelo tempo (seek): o mesmo quadro sai igual em qualquer render.
+     1080x1920, OPACA (substitui o plano: o cartão e o fundo escuro cobrem o quadro; o selo vai por cima, no plano). Pede o vídeo-base (`v`, que a peça
+     lê como textura) e o recorte da pessoa (`m`). t=0 é o quadro em que o encolhimento começa (f352 da ref); o estouro cai em `qb` quadros depois
+     (8 = f360); corte seco no fim (`dur`).
+       v     o vídeo-base (o que está embaixo do plano: a mesma foto ou o avatar) · voff  o instante dele em que t=0 cai, em s (0)
+       m     o recorte da pessoa: PNG (cinza ou alfa, 255 = pessoa) ou vídeo com a mesma janela do `v` · mv 1 = `m` é um vídeo (0)
+       yc    a linha dos ombros em px do vídeo, acima dela vira caco (1010 na foto do dono; a ref tem ~980)
+       nome  o perfil da interface (seu_perfil) · seg o texto do botão (Seguir) · leg a legenda (a legenda do seu Reel) · av o avatar (imagem)
+       cab   a cabeça em px do vídeo, "cx,cy,rx,ry" (520,735,200,300): nenhum caco nasce em cima dela · rach  onde a teia de rachaduras nasce, em px do vídeo (800,300: alto à direita, fora do rosto) · cacos quantos cacos no laço principal (129; o grupo de perto da cabeça, `CK.Nn`, e o dos rápidos, `CK.N3`, vêm a mais)
+       dur   a duração (0.933 = f352 a f380) · qb o quadro do estouro, depois de t=0 (8) · k o número de subquadros do borrão (24)
+     O three vem de ../vendor/three/three.min.js (global T3); sem CDN. O render abre a peça por file://, com --allow-file-access-from-files.
+       etiqueta: quebra-de-moldura, cartao-de-reels, estilhacos-3d, atras-da-pessoa
+       ?v=../../../docs/guia-de-estilos/pop.jpg&m=../../../docs/guia-de-estilos/pop.jpg&dur=0.933 -->
+<html lang="pt-BR" class="alfa" data-qa="entra-seco fica">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<script src="../vendor/three/three.min.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block;position:relative;overflow:hidden}
+#gl{position:absolute;left:-4000px;top:0;width:1080px;height:1920px}
+#acc{position:absolute;left:0;top:0;width:1080px;height:1920px;display:block}
+.vv{position:absolute;left:-4000px;top:0;width:8px;height:14px}
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="gl" width="1080" height="1920"></canvas><canvas id="acc" width="1080" height="1920"></canvas></div>
+<script>
+const dur = D.n('dur', '0.933'), QB = D.n('qb', '8'), KSUB = Math.round(D.n('k', '24')), YC = D.n('yc', '1010');
+const SRC = D.q('v', ''), VOFF = D.n('voff', '0'), MSRC = D.q('m', ''), MVID = D.q('mv', '0') === '1';
+const NOME = D.q('nome', 'seu_perfil'), SEG = D.q('seg', 'Seguir'), LEG = D.q('leg', 'a legenda do seu Reel'), AVSRC = D.q('av', '');
+const T = window.T3, W = 1080, H = 1920, FOV = 30, RAD = Math.PI / 180, DCAM = (H / 2) / Math.tan(FOV * RAD / 2);
+const clamp = (x, a, b) => Math.min(b, Math.max(a, x)), lerp = (a, b, t) => a + (b - a) * t, sm = t => t * t * (3 - 2 * t);
+const prog = (q, a, b) => clamp((q - a) / (b - a), 0, 1), eo = x => 1 - Math.pow(1 - x, 3);
+const lin = (K, q) => { const n = K.length; if (q <= K[0][0]) return K[0].slice(1); if (q >= K[n - 1][0]) return K[n - 1].slice(1); let i = 1; while (K[i][0] < q) i++;
+  const t = (q - K[i - 1][0]) / (K[i][0] - K[i - 1][0]); return K[i].slice(1).map((v, j) => lerp(K[i - 1][j + 1], v, t)); };
+const css = v => { const g = document.createElement('canvas').getContext('2d'); g.fillStyle = getComputedStyle(document.documentElement).getPropertyValue(v).trim(); return g.fillStyle; };
+const GR = {cod2: css('--cod2'), i8: css('--ink8')};   // os cinzas do núcleo
+const rng = s => () => (s = (s * 16807) % 2147483647) / 2147483647;
+
+// o cartão: escala e centro a cada quadro, medidos na ref pelos olhos (Vision): 1,00 · 0,85 · 0,71 · 0,63 · 0,60 (f352 a f356); o centro vai de (540,960) a (563,755)
+const CARD = [[0, 1, 540, 960], [1, .85, 545, 846], [2, .71, 558, 804], [3, .63, 563, 769], [4, .6, 563, 755], [30, .61, 563, 755]];
+const card = q => lin(CARD, q);                                  // [esc, cx, cy]
+const BX = 540, BY = 450;                                        // o centro do estouro: a cabeça, em px do quadro
+
+// ---- as fontes de imagem: o vídeo-base (textura) e o recorte ----
+const stage = document.getElementById('stage');
+function criaVideo(src) { const v = document.createElement('video'); v.className = 'vv'; v.src = src; v.muted = true; v.playsInline = true; v.preload = 'auto'; v.dataset.off = VOFF; stage.appendChild(v); D._videos.push(v); return v; }
+const vid = SRC ? criaVideo(SRC) : null, mvid = (MSRC && MVID) ? criaVideo(MSRC) : null;
+const mimg = new Image(); const mCarrega = (MSRC && !MVID) ? new Promise(r => { mimg.onload = r; mimg.onerror = r; mimg.src = MSRC; }) : Promise.resolve();
+const avimg = new Image(); const avCarrega = AVSRC ? new Promise(r => { avimg.onload = r; avimg.onerror = r; avimg.src = AVSRC; }) : Promise.resolve();
+const cv2 = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+const vcv = cv2(W, H), vg = vcv.getContext('2d'), pcv = cv2(W, H), pg = pcv.getContext('2d'), mcv = cv2(W, H), mg = mcv.getContext('2d', {willReadFrequently: true});
+let matteOk = false;
+function atualizaFontes() {                                      // o quadro atual do vídeo e o recorte, no tamanho do quadro
+  vg.clearRect(0, 0, W, H); if (vid && vid.readyState >= 2) vg.drawImage(vid, 0, 0, W, H); else { vg.fillStyle = GR.cod2; vg.fillRect(0, 0, W, H); }
+  if (mvid && mvid.readyState >= 2) { mg.clearRect(0, 0, W, H); mg.drawImage(mvid, 0, 0, W, H); paraAlfa(); }
+}
+function paraAlfa() {                                            // se o recorte veio em cinza (sem alfa), o cinza vira o alfa
+  const d = mg.getImageData(0, 0, W, H), p = d.data; let opaco = true; for (let i = 3; i < p.length; i += 4 * 997) if (p[i] < 250) { opaco = false; break; }
+  if (opaco) for (let i = 0; i < p.length; i += 4) { p[i + 3] = p[i]; p[i] = p[i + 1] = p[i + 2] = 255; }
+  mg.putImageData(d, 0, 0); matteOk = true;
+}
+function matteDaImagem() { if (!mimg.naturalWidth) return; mg.clearRect(0, 0, W, H); mg.drawImage(mimg, 0, 0, W, H); paraAlfa(); }
+function pessoa() {                                              // o vídeo vezes o recorte: a pessoa solta, em px do quadro
+  pg.globalCompositeOperation = 'source-over'; pg.clearRect(0, 0, W, H); pg.drawImage(vcv, 0, 0);
+  pg.globalCompositeOperation = 'destination-in'; pg.drawImage(mcv, 0, 0); pg.globalCompositeOperation = 'source-over';
+}
+
+// ---- a linha serrilhada de cima do cartão, depois do estouro (px do VÍDEO: o cartão leva a linha junto) ----
+const DENTE = (() => { const r = rng(11), pts = []; let x = -20; while (x < W + 40) { pts.push([x, YC + (r() < .5 ? -1 : 1) * (6 + r() * 20) + (pts.length % 2 ? 14 : -4)]); x += 34 + r() * 46; } return pts; })();
+const yDente = x => { let i = 1; while (i < DENTE.length - 1 && DENTE[i][0] < x) i++; const a = DENTE[i - 1], b = DENTE[i]; return lerp(a[1], b[1], clamp((x - a[0]) / (b[0] - a[0]), 0, 1)); };
+
+// ---- os cacos (three): o cartão de cima da linha dos ombros se parte num mosaico (Voronoi: células menores em volta da cabeça, maiores nos cantos) de uns 200 cacos de vidro cinza (129 espalhados, 22 menores perto da cabeça e 47 rápidos);
+// no estouro eles saem da cabeça, voam pra câmera (a perspectiva os faz crescer de 1,1x a uns 4x), giram um pouco e somem em f372. Sem borda branca: a ref não tem. ----
+const glc = document.getElementById('gl'), acc = document.getElementById('acc'), actx = acc.getContext('2d');
+const renderer = new T.WebGLRenderer({canvas: glc, antialias: true, alpha: true, premultipliedAlpha: true, preserveDrawingBuffer: true});
+renderer.setPixelRatio(1); renderer.setSize(W, H, false); renderer.setClearColor(0x000000, 0); renderer.toneMapping = T.NoToneMapping;
+const scene = new T.Scene(), camera = new T.PerspectiveCamera(FOV, W / H, 200, 12000); camera.position.set(0, 0, DCAM);
+const scv = cv2(W, H), sg = scv.getContext('2d'), wcv = cv2(W, H), wg = wcv.getContext('2d'), vul = cv2(W, H), vg_ = vul.getContext('2d');   // scv: o vídeo cinza e claro do caco (vidro de parede, não de rosto); wcv: o vídeo sem a pessoa; vul: o vulto dela alargado
+const cardTex = new T.CanvasTexture(scv); cardTex.colorSpace = T.SRGBColorSpace; cardTex.anisotropy = 4;
+const CAB = D.q('cab', '520,735,200,300').split(',').map(Number);            // a cabeça em px do vídeo: centro e raios (nenhuma semente cai nela)
+const BXF = 239 + .6 * CAB[0], BYF = 179 + .6 * CAB[1];                      // o centro do estouro em px do quadro (o cartão assenta em (239,179) a 0,60)
+camera.setViewOffset(W, H, 540 - BXF, 960 - BYF, W, H);                       // o eixo da câmera passa pela cabeça: o voo pra câmera sai dela
+const N_CACOS = Math.round(D.n('cacos', '129'));                               // quantos cacos
+const tris = [];                                                              // os cacos em px do vídeo (a teia de rachaduras nasce deles)
+// os números abaixo saíram de um ajuste, num simulador dos 13 quadros (f360 a f372), da cobertura por região (topo, em volta da cabeça, bordas), do brilho dos cacos (média e p90, que a ref mantém a 60 a 78 e 77 a 106) e do movimento contra a ref, conferido no lado a lado de verdade:
+// bt e ct são o brilho e o contraste da textura (vidro de meio tom, sem o creme estourado), bn o brilho do grupo de perto, mnear a pressa dele e fnear o quanto ele some antes, fx quanto a saída do lado direito atrasa (negativo: adianta; a ref esvazia a esquerda primeiro até f366 e a direita some antes de f368), vg o quanto o vidro apaga perto das bordas laterais e vy0/vy1 a partir de que altura (o topo fica)
+const CK = {dmin: 40.61, pfrac: .09607, Lp0: 21.54, Lp1: 53.22, L0: 94.26, L1: 69.94, Lexp: .8236, b0: .6888, b1: .7401, bt: 1.206, ct: .6114, m0: .7198, m1: .3032, mn: 2.678, md: 193.1, de: .1957, dd: 422.1, dep: 1.6, la: .6855, ld: .4112, S0: .9914, rate: .245, vel: 58.65, rot: 7.1, vida: 11.67, o0: 1, f0: 8.68, f1: 11.8, tb: 11.59, bl: 2.109, gp: .7551, pr: 0, fe: 2, s0: .4205, ts: 1.024, mr: .9963, Nn: 22, a1: 1.151, a2: 2.38, Ln0: 100, Ln1: 140.0, mnear: .5573, bn: 1.802, fnear: .2836, fx: -0.6105, vg: .7595, xv0: 237.2, xv1: 529.3, vy0: 89.98, vy1: 439.0, ta: 2.7, aa: .1614, vj: 1.196, rot2: 0, N3: 47, a3a: .2581, a3b: 1.067, L3a: 30, L3b: 24.75, ds3: 5.013, dj3: .7535, m3: 1.947, b3: .6864};
+let MARCA = 0, MARCA3 = 1e9;
+const cacosGeo = (() => { const r = rng(21), out = [], cs = [];                                      // triângulos e quadriláteros irregulares, o comprido na direção da cabeça (os riscos radiais da ref), de pequeno a grande
+  let tent = 0;
+  while (out.length < N_CACOS && tent++ < 6000) {
+    const x = 30 + r() * (W - 60), y = 30 + r() * (YC - 60), dx = x - CAB[0], dy = y - CAB[1];
+    if ((dx / (CAB[2] * 1.12)) ** 2 + (dy / (CAB[3] * 1.05)) ** 2 < 1) continue;                      // nenhum nasce em cima da cabeça
+    if (cs.some(c => Math.hypot(c[0] - x, c[1] - y) < CK.dmin)) continue;
+    const grande = r(), L = grande < CK.pfrac ? CK.Lp0 + r() * CK.Lp1 : CK.L0 + Math.pow(r(), CK.Lexp) * CK.L1, Wd = L * (.3 + r() * .5), a0 = Math.atan2(dy, dx) + (r() - .5) * .6, ca = Math.cos(a0), sa = Math.sin(a0);
+    const pts = r() < .35 ? [[L * .5, (r() - .5) * Wd * .5], [-L * .1, Wd * (.4 + r() * .15)], [-L * .5, (r() - .5) * Wd * .4], [-L * .05, -Wd * (.4 + r() * .15)]]
+                          : [[L * (.35 + r() * .15), (r() - .5) * Wd * .5], [-L * .5, Wd * (.35 + r() * .2)], [-L * (.4 + r() * .1), -Wd * (.3 + r() * .25)]];
+    const v = pts.map(([u, w]) => [clamp(x + u * ca - w * sa, -20, W + 20), clamp(y + u * sa + w * ca, -20, YC + 20)]);
+    cs.push([x, y]); out.push(v); }
+  MARCA = out.length;                                                                                  // os de perto da cabeça: pequenos, escuros, saem depressa (a nuvem da ref enche o vão em volta dela)
+  for (let nn = 0, tent2 = 0; nn < CK.Nn && tent2++ < 4000;) {
+    const t = r() * 2 * Math.PI, f = CK.a1 + r() * (CK.a2 - CK.a1), x = CAB[0] + CAB[2] * f * Math.cos(t), y = CAB[1] + CAB[3] * f * Math.sin(t);
+    if (!(x > 30 && x < W - 30 && y > 30 && y < YC - 30)) continue;
+    if (cs.some(c => Math.hypot(c[0] - x, c[1] - y) < CK.dmin * .75)) continue;
+    const dx = x - CAB[0], dy = y - CAB[1], L = CK.Ln0 + r() * CK.Ln1, Wd = L * (.3 + r() * .5), a0 = Math.atan2(dy, dx) + (r() - .5) * .6, ca = Math.cos(a0), sa = Math.sin(a0);
+    const pts = [[L * (.35 + r() * .15), (r() - .5) * Wd * .5], [-L * .5, Wd * (.35 + r() * .2)], [-L * (.4 + r() * .1), -Wd * (.3 + r() * .25)]];
+    out.push(pts.map(([u, w]) => [clamp(x + u * ca - w * sa, -20, W + 20), clamp(y + u * sa + w * ca, -20, YC + 20)])); cs.push([x, y]); nn++; }
+  MARCA3 = out.length;                                                                                 // os rápidos: pequenos, saem de trás da cabeça depois do estouro (f364 em diante) e cruzam o topo depressa (a ref segue soltando cacos até f368)
+  for (let n3 = 0, tent3 = 0; n3 < CK.N3 && tent3++ < 4000;) {
+    const t = r() * 2 * Math.PI, f = CK.a3a + r() * (CK.a3b - CK.a3a), x = CAB[0] + CAB[2] * f * Math.cos(t), y = CAB[1] + CAB[3] * f * Math.sin(t);
+    if (!(x > 30 && x < W - 30 && y > 30 && y < YC - 30)) continue;
+    if (cs.some(c => Math.hypot(c[0] - x, c[1] - y) < CK.dmin * .4)) continue;
+    const dx = x - CAB[0], dy = y - CAB[1], L = CK.L3a + r() * CK.L3b, Wd = L * (.3 + r() * .5), a0 = Math.atan2(dy, dx) + (r() - .5) * .6, ca = Math.cos(a0), sa = Math.sin(a0);
+    const pts = [[L * (.35 + r() * .15), (r() - .5) * Wd * .5], [-L * .5, Wd * (.35 + r() * .2)], [-L * (.4 + r() * .1), -Wd * (.3 + r() * .25)]];
+    out.push(pts.map(([u, w]) => [clamp(x + u * ca - w * sa, -20, W + 20), clamp(y + u * sa + w * ca, -20, YC + 20)])); cs.push([x, y]); n3++; }
+  return out; })();
+cacosGeo.forEach(v => tris.push(v));
+const shards = cacosGeo.map((t, k) => {
+  const cx = t.reduce((a, p) => a + p[0], 0) / t.length, cy = t.reduce((a, p) => a + p[1], 0) / t.length;
+  const sh = new T.Shape(); t.forEach((p, i) => sh[i ? 'lineTo' : 'moveTo'](p[0] - cx, -(p[1] - cy))); sh.closePath();
+  const geo = new T.ExtrudeGeometry(sh, {depth: 6, bevelEnabled: false, UVGenerator: {
+    generateTopUV: (g, v, a, b, c) => [a, b, c].map(i => new T.Vector2((v[i * 3] + cx) / W, 1 - (-v[i * 3 + 1] + cy) / H)),
+    generateSideWallUV: () => [new T.Vector2(0, 0), new T.Vector2(1, 0), new T.Vector2(1, 1), new T.Vector2(0, 1)]}});
+  const near = k >= MARCA, r = rng(100 + k), b = (CK.b0 + CK.b1 * r()) * (near ? CK.bn : 1), mat = new T.MeshBasicMaterial({map: cardTex, color: new T.Color(b, b * .98, b * .86), transparent: true, side: T.DoubleSide, toneMapped: false}), g = new T.Group();
+  g.add(new T.Mesh(geo, [mat, new T.MeshBasicMaterial({color: 0x1a1d24, transparent: true})]));
+  scene.add(g);
+  const cxf = 239 + .6 * cx, cyf = 179 + .6 * cy, dist = Math.hypot(cxf - BXF, cyf - BYF) + 1;
+  let de = CK.de * Math.pow(1 - Math.min(1, dist / CK.dd), CK.dep) * (.55 + .6 * r()), m = (CK.m0 + CK.m1 * r()) * (CK.mn - (CK.mn - 1) * Math.min(1, dist / CK.md)) * (1 + CK.pr * de) * (near ? CK.mnear : 1) * (cxf > BXF ? CK.mr : 1);   // quem sai mais tarde voa mais depressa (pr); os da direita um pouco mais (a ref esvazia a direita da cabeça antes)
+  const ax = [r() - .5, r() - .5, r() - .5], w = (r() - .5) * 2 + (r() < .5 ? -.6 : .6), rj = r(), g3 = k >= MARCA3;
+  if (g3) { de = CK.ds3 + rj * CK.dj3; m *= CK.m3; }
+  return {g, mat, b: g3 ? b * CK.b3 : b, near, cx, cy, dx: (cxf - BXF) / dist, dy: (cyf - BYF) / dist, m, de, ax, w};
+});
+// depois de f363 (ta) a expansão ACELERA (a ref acelera até f368, a 1,11 a 1,13 por quadro) e os cacos giram mais depressa (rot2): a ref muda de forma entre quadros (correlação 0,4 a 0,6)
+// no estouro o cartão e a pessoa não se mexem: vão POR CIMA da média dos subquadros, uma vez só (somados 24 vezes em 8 bits, o laptop e a manga viravam degraus de 24 níveis: faixas rosa e marrom de f360 a f369)
+// o estado dos cacos no quadro q (QB = f360): cada um sai no seu instante (os de perto da cabeça um pouco depois), a escala de perspectiva sobe em linha reta (1,1x a uns 3x), gira
+// e é sombreado pela orientação (a luz de cima à direita: o brilho de cada caco muda a cada quadro, como na ref); o movimento freia em f369 e eles somem até f371
+const gCaco = (q, de) => { const t = (q - QB - de) * 10 / (10 - de); if (t <= 0) return 0; if (t > CK.ta) return Math.pow(CK.ta, CK.gp) + CK.vj * CK.gp * Math.pow(CK.ta, CK.gp - 1) * (t - CK.ta) + .5 * CK.aa * (t - CK.ta) * (t - CK.ta); if (t <= CK.tb) return Math.pow(t, CK.gp); const d = Math.min(t - CK.tb, CK.bl); return Math.pow(CK.tb, CK.gp) + (CK.bl / 3) * Math.pow(CK.tb, CK.gp - 1) * CK.gp * (1 - Math.pow(1 - d / CK.bl, 3)); };
+const LUZ = new T.Vector3(.35, .55, .76).normalize(), nrm = new T.Vector3();
+function cacos(q) {
+  const [s, ccx, ccy] = card(q);
+  shards.forEach(k => {
+    k.g.visible = q >= QB + k.de - .01 && q < QB + CK.vida;
+    if (!k.g.visible) return;
+    const gg = gCaco(q, k.de), S = CK.S0 + CK.rate * gg * k.m, z = DCAM * (1 - 1 / S);              // a escala pedida vira a profundidade
+    const px = ccx + s * (k.cx - 540) + k.dx * CK.vel * (S - CK.S0), py = ccy + s * (k.cy - 960) + k.dy * CK.vel * (S - CK.S0);
+    k.g.position.set(px - BXF, BYF - py, z); k.g.scale.setScalar(s * (1 + CK.s0 * Math.exp(-Math.max(0, q - QB - k.de) / CK.ts)));   // os cacos nascem maiores (placas que se partem) e chegam ao tamanho certo em ~2 quadros
+    const tq = (q - QB - k.de) * 10 / (10 - k.de), ang = k.w * RAD * (CK.rot * gg + CK.rot2 * Math.pow(Math.max(0, tq - CK.ta), 2) / 2); k.g.rotation.set(k.ax[0] * ang * 1.6, k.ax[1] * ang * 1.6, k.ax[2] * ang);
+    nrm.set(0, 0, 1).applyEuler(k.g.rotation); if (nrm.z < 0) nrm.negate();
+    const sh = CK.la + CK.ld * Math.max(0, nrm.dot(LUZ)); k.mat.color.setRGB(k.b * sh, k.b * sh * .98, k.b * sh * .86);
+    const ys = BYF + (py - BYF) * S, fe = CK.fe * clamp((ys - 30) / 250, 0, 1);                      // quem está mais embaixo (perto da cabeça) some antes; os cacos do alto, nos cantos, ficam até f371
+    const xs = BXF + (px - BXF) * S, fn = (k.near ? CK.fnear : 0) - CK.fx * clamp((xs - 540) / 540, -1, 1);   // o grupo de perto some antes, o lado direito um pouco depois do esquerdo (a ref esvazia a esquerda primeiro); perto das bordas do quadro o vidro some (a ref não solta cacos pelos lados)
+    const op = (CK.o0 + (1 - CK.o0) * sm(prog(q, QB + k.de, QB + k.de + 1.2))) * (1 - sm(prog(q, QB + CK.f0 - fe - fn, QB + CK.f1 - fe - fn))) * (1 - CK.vg * sm(clamp((Math.abs(xs - 540) - CK.xv0) / (CK.xv1 - CK.xv0), 0, 1)) * sm(clamp((ys - CK.vy0) / (CK.vy1 - CK.vy0), 0, 1)));
+    k.mat.opacity = op; k.g.children[0].material[1].opacity = op;
+  });
+}
+
+// as rachaduras finas de f359: uma teia irregular no alto à direita, fora do rosto (px do vídeo)
+const RACHA = (() => { const r = rng(33), O = D.q('rach', '800,300').split(',').map(Number), L = []; 
+  for (let k = 0; k < 9; k++) { const ang = (-Math.PI * .95 + k * (Math.PI * .95 / 8)) + (r() - .5) * .25 - .1, n = 3 + Math.floor(r() * 3), comp = 150 + r() * 230; let x = O[0], y = O[1], a = ang; const pts = [[x, y]];
+    for (let i = 0; i < n; i++) { a += (r() - .5) * .55; x += Math.cos(a) * comp / n; y += Math.sin(a) * comp / n; pts.push([x, y]); }
+    L.push(pts); if (r() < .6) { const j = 1 + Math.floor(r() * (pts.length - 1)); let a2 = a + (r() < .5 ? -1 : 1) * (.5 + r() * .5), x2 = pts[j][0], y2 = pts[j][1]; const q2 = [[x2, y2]]; for (let i = 0; i < 2; i++) { x2 += Math.cos(a2) * 55; y2 += Math.sin(a2) * 55; a2 += (r() - .5) * .5; q2.push([x2, y2]); } L.push(q2); } }
+  for (let k = 0; k < 3; k++) { const rr_ = 70 + k * 60, pts = []; for (let i = 0; i <= 6; i++) { const a = -Math.PI * .95 + i * (Math.PI * .85 / 6) + (r() - .5) * .1, rad = rr_ * (.85 + r() * .3); pts.push([O[0] + Math.cos(a) * rad, O[1] + Math.sin(a) * rad]); } L.push(pts); }
+  return L; })();
+
+// ---- a interface de Reels, em px do quadro com o cartão a 0,60 (o app de verdade: ícones de traço fino, Seguir de contorno) ----
+function interface_(g, q, ox, oy) {
+  const a = prog(q, 4.6, 5.4); if (a <= 0) return;
+  g.save(); g.globalAlpha = a; g.translate(ox, oy);
+  const BR = '#fff';
+  g.fillStyle = BR; g.font = '700 23px system-ui, -apple-system, sans-serif'; g.textBaseline = 'alphabetic'; g.fillText('Reels', 255, 240);
+  // câmera
+  g.strokeStyle = BR; g.lineWidth = 2.8; g.lineJoin = 'round'; g.lineCap = 'round'; g.save(); g.translate(835, 230); g.scale(1.4, 1.4); g.lineWidth = 2; g.beginPath(); g.roundRect(-13, -10, 26, 20, 5); g.stroke(); g.beginPath(); g.arc(0, 0, 6, 0, 7); g.stroke(); g.beginPath(); g.moveTo(-6, -10); g.lineTo(-4, -14); g.lineTo(4, -14); g.lineTo(6, -10); g.stroke(); g.restore();
+  // coluna da direita: ícones de traço fino a 1,6x do que eu tinha (a ref mede uns 30 px)
+  const X = 827, ic = (cx, cy, f) => { g.save(); g.translate(cx, cy); g.scale(1.6, 1.6); g.lineWidth = 1.75; g.strokeStyle = BR; g.fillStyle = BR; f(); g.restore(); };
+  ic(X, 972, () => { g.beginPath(); g.moveTo(0, 12); g.bezierCurveTo(-24, -4, -20, -20, -8, -20); g.bezierCurveTo(-2, -20, 0, -15, 0, -12); g.bezierCurveTo(0, -15, 2, -20, 8, -20); g.bezierCurveTo(20, -20, 24, -4, 0, 12); g.stroke(); });     // coração
+  ic(X, 1067, () => { g.beginPath(); g.arc(0, -1, 13, .45 * Math.PI, 2.45 * Math.PI, false); g.lineTo(-13, 14); g.lineTo(-6, 10); g.closePath(); g.stroke(); });                                                       // comentário
+  ic(X, 1156, () => { g.beginPath(); g.moveTo(-14, -8); g.lineTo(15, 0); g.lineTo(-12, 10); g.lineTo(-6, 0); g.closePath(); g.stroke(); g.beginPath(); g.moveTo(-6, 0); g.lineTo(15, 0); g.stroke(); });                // enviar
+  ic(X, 1228, () => { [-9, 0, 9].forEach(x => { g.beginPath(); g.arc(x, 0, 2.3, 0, 7); g.fill(); }); });                                                                                                      // três pontos na horizontal
+  // gradiente embaixo do cartão
+  const gr = g.createLinearGradient(0, 1130, 0, 1332); gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, 'rgba(0,0,0,.6)'); g.fillStyle = gr; g.fillRect(236, 1130, 648, 202);
+  // avatar, nome, seguir, legenda
+  g.save(); g.beginPath(); g.arc(288, 1206, 27, 0, 7); g.clip(); g.fillStyle = GR.i8; g.fillRect(260, 1178, 56, 56);
+  if (avimg.naturalWidth) { const s = Math.max(56 / avimg.naturalWidth, 56 / avimg.naturalHeight); g.drawImage(avimg, 288 - avimg.naturalWidth * s / 2, 1206 - avimg.naturalHeight * s / 2, avimg.naturalWidth * s, avimg.naturalHeight * s); } g.restore();
+  g.strokeStyle = 'rgba(255,255,255,.85)'; g.lineWidth = 2; g.beginPath(); g.arc(288, 1206, 27, 0, 7); g.stroke();
+  g.fillStyle = BR; g.font = '700 21px system-ui, -apple-system, sans-serif'; g.fillText(NOME, 327, 1212); const nw = g.measureText(NOME).width;
+  g.strokeStyle = BR; g.lineWidth = 1.8; g.beginPath(); g.roundRect(327 + nw + 14, 1186, 18 + g.measureText(SEG).width + 16, 32, 9); g.stroke(); g.font = '600 18px system-ui, -apple-system, sans-serif'; g.fillText(SEG, 327 + nw + 14 + 14, 1208);
+  g.font = '500 21px system-ui, -apple-system, sans-serif'; g.fillText(LEG, 265, 1268);
+  g.restore();
+}
+
+// ---- um quadro ----
+function trajeto(g, x0, y0, s, q) { g.beginPath(); g.roundRect(x0, y0, W * s, H * s, 28); }
+const RUIDO = (() => { const c = cv2(256, 256), g = c.getContext('2d'), d = g.createImageData(256, 256); const r = rng(7); for (let i = 0; i < d.data.length; i += 4) { const v = Math.floor(r() * 255); d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255; } g.putImageData(d, 0, 0); return c; })();
+let nQuadro = 0, bgKey = ''; const bgc = cv2(W, H), bgg = bgc.getContext('2d');
+function fundo(q, estourou) {                                    // o fundo escuro e borrado: só muda de um quadro pro outro, não entre os subquadros (o desfoque de 96 px é o que pesa)
+  const ab = sm(prog(q, .1, 1.3)), key = nQuadro + '|' + (estourou ? 1 : 0) + '|' + ab.toFixed(3); if (key === bgKey) return bgc; bgKey = key;
+  bgg.clearRect(0, 0, W, H); bgg.save(); bgg.globalAlpha = ab; bgg.filter = 'blur(' + (estourou ? 96 : 70) + 'px) grayscale(.75) brightness(1.9)'; bgg.drawImage(wcv, -260, -420, W + 520, H + 840); bgg.restore();   // o vídeo sem a pessoa, mole e cinza
+  bgg.fillStyle = `rgba(5,6,9,${(estourou ? .5 : .7) * ab})`; bgg.fillRect(0, 0, W, H);
+  const vg2 = bgg.createRadialGradient(540, 900, 300, 540, 900, 1250); vg2.addColorStop(0, 'rgba(0,0,0,0)'); vg2.addColorStop(1, `rgba(0,0,0,${.45 * ab})`); bgg.fillStyle = vg2; bgg.fillRect(0, 0, W, H);
+  bgg.save(); bgg.globalAlpha = .03 * ab; bgg.fillStyle = bgg.createPattern(RUIDO, 'repeat'); bgg.fillRect(0, 0, W, H); bgg.restore();     // um fio de ruído quebra as faixas do degradê
+  return bgc;
+}
+function compoe(q, g, so) {                                      // so = 'fundo' (fundo e cacos) ou 'cartao' (cartão, interface, borda e pessoa); sem so, os dois
+  const [s, cx, cy] = card(q), x0 = cx - 540 * s, y0 = cy - 960 * s;
+  const estourou = q >= QB;
+  if (so !== 'cartao') {
+    g.clearRect(0, 0, W, H);
+    g.drawImage(fundo(q, estourou), 0, 0);                                    // o fundo: o próprio vídeo, grande, muito borrado e escuro (some a parede de ripas; o cartão se lê contra ele)
+    // os cacos, atrás do cartão e da pessoa
+    if (estourou) { renderer.render(scene, camera); g.save(); g.filter = 'blur(1.4px)'; g.drawImage(glc, 0, 0); g.restore(); }
+    if (so === 'fundo') return;
+  }
+  const recorte = () => { g.beginPath(); g.moveTo(x0 - 4, y0 + H * s + 4); DENTE.forEach(([x, y]) => g.lineTo(x0 + x * s, y0 + y * s)); g.lineTo(x0 + W * s + 4, y0 + H * s + 4); g.closePath(); };
+  // o cartão: sombra funda, o vídeo, o véu de baixo e a interface
+  g.save(); trajeto(g, x0, y0, s, q);
+  if (!estourou) { g.shadowColor = 'rgba(0,0,0,.65)'; g.shadowBlur = 60 * Math.min(1, (1 - s) * 5); g.shadowOffsetY = 26 * Math.min(1, (1 - s) * 5); g.fillStyle = '#000'; g.fill(); g.shadowColor = 'transparent'; }
+  g.clip();
+  if (estourou) { recorte(); g.clip(); }
+  g.drawImage(vcv, x0, y0, W * s, H * s);
+  if (!estourou && q > 6.5 && q < QB) {                                       // f359: poucas linhas brancas finas e irregulares, no alto à direita
+    const b = prog(q, 6.5, 7.1); g.strokeStyle = `rgba(255,255,255,${.95 * b})`; g.lineWidth = 1.3; g.lineJoin = 'round'; g.lineCap = 'round';
+    RACHA.forEach(pts => { g.beginPath(); pts.forEach((p, i) => g[i ? 'lineTo' : 'moveTo'](x0 + p[0] * s, y0 + p[1] * s)); g.stroke(); }); }
+  g.restore();
+  // a interface de Reels (a de cima vai embora com os cacos) e a borda de vidro
+  g.save(); trajeto(g, x0, y0, s, q); g.clip(); if (estourou) { recorte(); g.clip(); }
+  interface_(g, q, (x0 - 236), (y0 - 180)); g.restore();
+  if (!estourou) { g.save(); trajeto(g, x0, y0, s, q); g.strokeStyle = 'rgba(255,255,255,.34)'; g.lineWidth = 2; g.stroke(); g.restore(); }
+  else {                                                                      // depois do estouro a borda de vidro clara segue a linha serrilhada e as laterais; 4 lascas ficam presas nas laterais
+    g.save(); recorte(); g.clip(); trajeto(g, x0, y0, s, q); g.strokeStyle = 'rgba(255,255,255,.62)'; g.lineWidth = 3; g.stroke(); g.restore();
+    g.save(); trajeto(g, x0, y0, s, q); g.clip(); g.beginPath(); DENTE.forEach(([x, y], i) => g[i ? 'lineTo' : 'moveTo'](x0 + x * s, y0 + y * s)); g.strokeStyle = 'rgba(255,255,255,.9)'; g.lineWidth = 2.6; g.lineJoin = 'round'; g.stroke(); g.restore();
+    [[-1, 1030, 40, 70, 0], [-1, 1105, 30, 44, 1], [1, 1020, 36, 60, 0], [1, 1100, 28, 46, 1]].forEach(([lado, yl, w, h, inv]) => {  // [lado, y do quadro, largura, altura, inclinação]
+      const xb = lado < 0 ? x0 : x0 + W * s, yb = yl - 179 + y0;
+      g.beginPath(); g.moveTo(xb, yb); g.lineTo(xb + lado * w, yb + (inv ? h * .35 : 0)); g.lineTo(xb + lado * w * .25, yb + h); g.closePath();
+      g.fillStyle = 'rgba(235,240,250,.5)'; g.fill(); g.strokeStyle = 'rgba(255,255,255,.85)'; g.lineWidth = 1.6; g.stroke(); }); }
+  // a pessoa, inteira, por cima do escuro: só o que está acima da linha dos ombros (embaixo é o próprio cartão)
+  if (estourou && matteOk) { g.save(); g.beginPath(); g.moveTo(x0 - 4, y0 - 4); g.lineTo(x0 + W * s + 4, y0 - 4); for (let i = DENTE.length - 1; i >= 0; i--) g.lineTo(x0 + DENTE[i][0] * s, y0 + (DENTE[i][1] + 5) * s); g.closePath(); g.clip();
+    g.drawImage(pcv, x0, y0, W * s, H * s); g.restore(); }
+}
+function quadroQ(q, g) { compoe(q, g); }
+function semPessoa() {                                           // o vídeo com o vulto da pessoa coberto pela cor média da parede ao redor (a textura dos cacos não leva rosto)
+  wg.globalCompositeOperation = 'source-over'; wg.drawImage(vcv, 0, 0);
+  if (!matteOk) return;
+  vg_.clearRect(0, 0, W, H); vg_.globalCompositeOperation = 'source-over';
+  for (let a = 0; a < 6.28; a += .52) vg_.drawImage(mcv, Math.cos(a) * 14, Math.sin(a) * 14);
+  vg_.globalCompositeOperation = 'source-in'; vg_.fillStyle = 'rgb(30,31,38)'; vg_.fillRect(0, 0, W, H); vg_.globalCompositeOperation = 'source-over';
+  wg.filter = 'blur(6px)'; wg.drawImage(vul, 0, 0); wg.filter = 'none';
+}
+function quadro(t) {
+  const q = t * 30 + 1e-6; nQuadro++; atualizaFontes(); if (mimg.naturalWidth && !mvid) matteDaImagem(); semPessoa(); sg.clearRect(0, 0, W, H); sg.filter = 'blur(3px) grayscale(.65) brightness(' + CK.bt + ') contrast(' + CK.ct + ')'; sg.drawImage(wcv, 0, 0); sg.filter = 'none'; sg.fillStyle = 'rgba(205,212,225,.18)'; sg.fillRect(0, 0, W, H); if (matteOk) pessoa(); cardTex.needsUpdate = true;
+  actx.globalCompositeOperation = 'source-over'; actx.globalAlpha = 1; actx.clearRect(0, 0, W, H);
+  const encolhe = q > .1 && q < 3.6, estoura = q > QB - .2 && q < QB + 9.5;
+  if (!(encolhe || estoura) || KSUB < 2) { cacos(q); compoe(q, actx); return; }
+  const tmp = quadro.tmp || (quadro.tmp = cv2(W, H)), tg = tmp.getContext('2d'), K = encolhe ? Math.min(KSUB, 14) : KSUB;
+  const obt = encolhe ? (q < 4 ? .9 : .5) : (q < QB + 3 ? 1.1 : q < QB + 8 ? .6 : .4);          // o estouro: obturador longo (os riscos radiais da ref) e que não olha pra antes do estouro
+  const q0 = estoura ? Math.max(QB, q - obt / 2) : q - obt / 2, q1 = q + obt / 2;
+  actx.globalCompositeOperation = 'lighter'; actx.globalAlpha = 1 / K;
+  const soFundo = estoura && !encolhe ? 'fundo' : undefined;       // no estouro o cartão e a pessoa não se mexem: vão por cima, uma vez só. Somados 24 vezes em 8 bits eles viravam degraus de 24 níveis (faixas rosa e marrom no laptop)
+  for (let i = 0; i < K; i++) { const qq = q0 + (i / (K - 1)) * (q1 - q0); cacos(qq); compoe(qq, tg, soFundo); actx.drawImage(tmp, 0, 0); }
+  actx.globalAlpha = 1; actx.globalCompositeOperation = 'source-over';
+  if (soFundo) compoe(q, actx, 'cartao');
+}
+
+let tlRef = null;
+Promise.all([mCarrega, avCarrega, document.fonts.load('700 23px system-ui, -apple-system, sans-serif'), document.fonts.load('500 21px system-ui, -apple-system, sans-serif')]).then(() => {
+  D.monta(tl => {
+    tlRef = tl;
+    tl.to({}, {duration: dur}, 0);
+    D.aoQuadro(() => quadro(tl.time()));
+    // o vídeo termina de buscar depois do quadro: refaz o quadro com o que chegou (o seek do vídeo é assíncrono)
+    [vid, mvid].forEach(v => v && v.addEventListener('seeked', () => quadro(tl.time())));
+    renderer.compile(scene, camera); quadro(0);
+    D.cue(0, 'whoosh'); D.cue(QB / 30, 'impact'); D.cue(QB / 30 + .03, 'shimmer');
+    return dur;
+  });
+});
+</script>
+</body>
+</html>

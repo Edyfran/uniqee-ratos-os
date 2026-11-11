@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<!-- GANCHO — as abas: as janelas da edição se empilham, e um pedido só engole todas. 1080x1920, --alpha.
+     Cada janela chega de trás da câmera (grande, e cai no lugar com a sombra), cada vez mais
+     rápido, uma por cima da outra, e o placar conta. É a sobrecarga de quem só queria postar. Em
+     `t_varre` o campo do pedido pousa embaixo e as janelas voam pra dentro dele, da última pra
+     primeira; o placar vira 1. As janelas são genéricas: nome de arquivo e um desenho do que tem
+     dentro, nenhuma tela ou logo de ferramenta de ninguém. Da referência (Skillry #432, as janelas
+     que se empilham vindo de trás da câmera) saiu só o movimento.
+       abas    "nome|tipo@t;…" — tipo: faixas · linhas · onda · quadro · lista; t é quando ela ESTÁ lá
+       t_varre quando o pedido engole tudo (-1: não engole) · pedido  o texto do campo
+       rot     o placar (ABAS ABERTAS) · rot2  ele depois de varrer (PEDIDO) · y  o topo do campo (1330) · dur
+       ?abas=corte_v3|faixas@0.3;legenda.srt|linhas@0.75;trilha|onda@1.1;capa_final|quadro@1.4;roteiro|lista@1.65;efeitos|faixas@1.85;capa_final2|quadro@2.0;legenda_ok.srt|linhas@2.12&t_varre=2.8&pedido=edita esse vídeo pra mim&dur=4.3 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+.ab{position:absolute;width:600px;height:400px;overflow:hidden;opacity:0;display:flex;flex-direction:column}
+.ab .bar{flex:none;height:72px;display:flex;align-items:center;gap:18px;padding:0 22px;background:var(--ink);color:#fff;
+  font:600 40px/1 var(--fm);white-space:nowrap}
+.ab .bar i{flex:none;width:26px;height:26px;border-radius:6px;background:var(--mk);border:3px solid var(--sur)}
+.ab .cp{flex:1;position:relative;margin:26px}
+.cp .lin{height:26px;border-radius:6px;background:var(--ink2);margin-bottom:22px}
+.cp .tr{height:62px;margin-bottom:18px;position:relative;border-radius:8px;background:var(--pp2)}
+.cp .tr b{position:absolute;top:8px;bottom:8px;border-radius:6px;border:3px solid var(--ink)}
+.cp .on{position:absolute;inset:0;display:flex;align-items:center;gap:8px}
+.cp .on b{flex:1;background:var(--ink);border-radius:4px}
+.cp .qd{position:absolute;inset:0;border:3px solid var(--ink4);border-radius:8px;
+  background:repeating-linear-gradient(135deg,#E9E6DF 0 18px,#F4F2EC 18px 36px)}
+.cp .ck{display:flex;align-items:center;gap:20px;margin-bottom:24px}
+.cp .ck u{flex:none;width:38px;height:38px;border:4px solid var(--ink);border-radius:6px}
+.cp .ck b{height:24px;border-radius:6px;background:var(--ink2)}
+#pl{position:absolute;left:60px;top:150px;display:flex;align-items:center;gap:22px;padding:14px 18px 14px 26px;opacity:0;
+  font:700 44px/1 var(--fm);letter-spacing:.06em;white-space:nowrap}
+#pl b{min-width:96px;text-align:center;padding:10px 14px 8px;background:var(--mk);border:var(--bw) solid var(--ink);border-radius:var(--raio-s);font:800 60px/1 var(--fd)}
+#campo{position:absolute;left:60px;right:60px;min-height:150px;padding:34px 140px 34px 40px;border-radius:40px;opacity:0;
+  font:600 54px/1.15 var(--fd);letter-spacing:-.01em;color:var(--ink)}
+#campo span{position:absolute;right:28px;top:50%;margin-top:-46px;width:92px;height:92px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font:800 56px/1 var(--fd)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="nb" id="pl"><span id="plr"></span><b id="pln">0</b></div>
+  <div class="nb" id="campo"><em id="ct" style="font-style:normal"></em><span class="nb cor-ok">✓</span></div>
+</div>
+<script>
+const $ = id => document.getElementById(id), st = $('stage');
+const dur = D.n('dur', '4.3'), tVarre = D.n('t_varre', '2.8'), Y = D.n('y', '1330');
+const abas = D.itens('abas', 'corte_v3|faixas@0.3;legenda.srt|linhas@0.75;trilha|onda@1.1;capa_final|quadro@1.4;roteiro|lista@1.65;efeitos|faixas@1.85;capa_final2|quadro@2.0;legenda_ok.srt|linhas@2.12', ['nome', 'tipo']);
+const rot = D.q('rot', 'ABAS ABERTAS'), rot2 = D.q('rot2', 'PEDIDO');
+$('plr').textContent = rot;
+$('ct').textContent = D.q('pedido', 'edita esse vídeo pra mim');
+// um número que se repete igual a cada render: o lugar, o giro e o desenho de cada janela
+const sorte = i => { const x = Math.sin(i * 12.9898 + 4.1) * 43758.5453; return x - Math.floor(x); };
+const CORES = ['var(--ac)', 'var(--mk)', 'var(--sur)'];
+const corpo = (tipo, i) => {
+  if (tipo === 'linhas') return [.92, .7, .84, .5, .76].map(w => `<div class="lin" style="width:${w * 100}%"></div>`).join('');
+  if (tipo === 'onda') return '<div class="on">' + Array.from({length: 22}, (_, k) => `<b style="height:${18 + 78 * Math.abs(Math.sin(k * .9 + i))}%"></b>`).join('') + '</div>';
+  if (tipo === 'quadro') return '<div class="qd"></div>';
+  if (tipo === 'lista') return [.6, .8, .45].map((w, k) => `<div class="ck"><u style="background:${k ? 'none' : 'var(--ok)'}"></u><b style="width:${w * 80}%"></b></div>`).join('');
+  return [0, 1, 2].map(k => `<div class="tr">${[0, 1, 2].map(j => {
+    const l = 4 + j * 32 + sorte(i * 9 + k * 3 + j) * 10, w = 14 + sorte(i * 7 + k + j) * 14;
+    return `<b style="left:${l}%;width:${w}%;background:${CORES[(k + j) % 3]}"></b>`; }).join('')}</div>`).join('');
+};
+const els = abas.map((a, i) => {
+  const el = document.createElement('div');
+  el.className = 'ab nb';
+  el.innerHTML = `<div class="bar"><i></i><span>${a.nome}</span></div><div class="cp">${corpo(a.tipo, i)}</div>`;
+  // espalhadas pela razão áurea: nenhuma cai em cima da anterior, e juntas cobrem o quadro
+  el.style.left = 30 + ((i * .618 + .15) % 1) * (1080 - 600 - 60) + 'px';
+  el.style.top = 290 + ((i * .382 + sorte(i) * .2) % 1) * (Y - 60 - 400 - 290) + 'px';
+  el.style.zIndex = i + 1;
+  st.appendChild(el);
+  return el;
+});
+
+D.monta(tl => {
+  const campo = $('campo');
+  campo.style.top = Y + 'px';
+  D.pousa('#pl', Math.max(.05, abas[0].t - .15), {som: 'pop'});
+  // de trás da câmera: grande e sem chão, cai no lugar e a sombra aterrissa
+  els.forEach((el, i) => {
+    const t = D.at(abas[i].t), g = (sorte(i + 20) - .5) * 10;
+    tl.fromTo(el, {opacity: 0, scale: 2.1, rotation: g * 2.2, '--shx': '0px'},
+      {opacity: 1, scale: 1, rotation: g, '--shx': D.SH + 'px', duration: .34, ease: D.P.POUSA}, t);
+    tl.set('#pln', {textContent: i + 1}, abas[i].t);
+    tl.to('#pln', {scale: 1.25, duration: .08, yoyo: true, repeat: 1}, abas[i].t);
+    D.cue(abas[i].t, i % 2 ? 'click' : 'pop');
+  });
+  if (tVarre >= 0) {
+    D.pousa(campo, tVarre - .35, {som: 'pop'});
+    // a última que chegou é a primeira a entrar no campo
+    const cx = 540, cy = Y + campo.offsetHeight / 2;
+    [...els].reverse().forEach((el, k) => {
+      const dx = cx - (el.offsetLeft + 300), dy = cy - (el.offsetTop + 200);
+      tl.to(el, {x: dx, y: dy, scale: .06, rotation: '+=40', duration: .42, ease: 'power3.in'}, D.at(tVarre) + k * .035);
+      tl.to(el, {opacity: 0, duration: .08}, D.at(tVarre) + k * .035 + .36);
+    });
+    D.cue(D.at(tVarre), 'whoosh');
+    const fimV = D.at(tVarre) + els.length * .035 + .42;
+    tl.set('#plr', {textContent: rot2}, fimV);
+    tl.set('#pln', {textContent: 1}, fimV);
+    tl.to(campo, {scale: 1.04, duration: .1, yoyo: true, repeat: 1}, fimV);
+    tl.fromTo('#campo span', {scale: 0}, {scale: 1, duration: .3, ease: D.P.MOLA, immediateRender: false}, fimV);
+    D.cue(fimV, 'certo');
+    gsap.set('#campo span', {scale: 0});
+  }
+  D.sai(['#pl', '#campo', ...els], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

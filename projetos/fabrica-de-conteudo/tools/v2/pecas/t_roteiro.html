@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<!-- FRASE — o roteiro que se escreve. 1080x1920, --alpha.
+     Uma folha cai e o roteiro se escreve nela, linha a linha, letra a letra e rápido, com o cursor
+     andando. Depois, quando a voz diz uma linha, ela ganha o marcador amarelo e a anterior apaga: a
+     folha vira o teleprompter do vídeo. É a prova de que o texto nasceu antes da voz.
+       linhas   "texto@t;texto@t" — t é quando a linha é dita (o marcador anda); sem @t, só se escreve
+       titulo   o que vai no cabeçalho da folha · t0  quando a folha cai (0.1) · escreve  quanto tempo
+                leva pra escrever tudo (1.0) · y  o topo da folha (430) · alto  a altura mínima da folha, em px
+                (a folha inteira, com papel sobrando embaixo das linhas) · dur
+     ?linhas=Esse reel nasceu de um pedido.@1.7;Agora, o meu rosto.@3.2;Agora, as cenas.;Agora, a edição.;E a capa.&titulo=reel · Fábrica de Conteúdo&t0=0.1&escreve=1.0&dur=4.5 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block;position:relative;overflow:hidden}
+.folha{position:absolute;left:70px;right:70px;padding:30px 44px 40px;opacity:0}
+.cab{display:flex;align-items:center;gap:18px;padding-bottom:22px;margin-bottom:26px;border-bottom:var(--bw) solid var(--ink)}
+.cab b{font:700 30px/1 var(--fm);letter-spacing:.12em;text-transform:uppercase;color:var(--ink);background:var(--mk);
+  border:var(--bw) solid var(--ink);border-radius:var(--raio-s);padding:.4em .6em .34em}
+.cab span{font:600 30px/1 var(--fm);letter-spacing:.06em;color:var(--ink4);white-space:nowrap}
+.ln{font:700 50px/1.32 var(--fd);letter-spacing:var(--ls);color:var(--ink);white-space:nowrap}
+.ln .tx{padding:0 .12em;margin:0 -.12em;border-radius:.12em;background:linear-gradient(var(--mk),var(--mk)) no-repeat 0 60%/0% 82%}
+.ln .l{display:none}
+.cur{display:inline-block;width:.42em;height:.95em;margin-left:.04em;vertical-align:-.12em;background:var(--ac)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="folha nb" id="fl">
+    <div class="cab"><b>roteiro</b><span id="tit"></span></div>
+    <div id="ls"></div>
+  </div>
+</div>
+<script>
+const dur = D.n('dur', '4.5'), t0 = D.n('t0', '0.1'), escreve = D.n('escreve', '1.0');
+const LS = D.q('linhas', 'Esse reel nasceu de um pedido.@1.7;Agora, o meu rosto.@3.2;Agora, as cenas.;Agora, a edição.;E a capa.')
+  .split(';').filter(Boolean).map(s => { const [tx, t] = s.split('@'); return {tx, t: t === undefined ? null : parseFloat(t)}; });
+const $ = id => document.getElementById(id);
+$('fl').style.top = D.n('y', '430') + 'px';
+if (D.q('alto')) $('fl').style.minHeight = D.n('alto', '0') + 'px';
+$('tit').textContent = D.q('titulo', 'reel · Fábrica de Conteúdo');
+$('ls').innerHTML = LS.map((l, i) => `<div class="ln" id="l${i}"><span class="tx" id="x${i}"></span></div>`).join('');
+
+D.monta(tl => {
+  LS.forEach((l, i) => { $('x' + i).textContent = l.tx; });
+  D.cabe('.ln', 40, ['.folha', 1]);
+  D.pousa('#fl', t0, {rot: -.6, som: 'papel'});
+  // escreve tudo em `escreve` s, letra a letra, com o cursor no fim do que já saiu
+  const total = LS.reduce((n, l) => n + [...l.tx].length, 0), passo = escreve / Math.max(1, total);
+  let t = t0 + .2;
+  LS.forEach((l, i) => {
+    const el = $('x' + i), tx = el.textContent, a = t;
+    el.textContent = '';
+    [...tx].forEach(ch => { const s = document.createElement('span'); s.className = 'l'; s.textContent = ch; el.appendChild(s); });
+    el.querySelectorAll('.l').forEach((s, k) => tl.set(s, {display: 'inline'}, a + k * passo));
+    t += [...tx].length * passo;
+    // um cursor por linha, aceso só enquanto ela se escreve (a última segura um instante)
+    const cur = document.createElement('span'); cur.className = 'cur'; cur.style.display = 'none'; el.after(cur);
+    tl.set(cur, {display: 'inline-block'}, a);
+    tl.set(cur, {display: 'none'}, i < LS.length - 1 ? t : t + .25);
+  });
+  D.cue(t0 + .2, 'type', {dur: +(t - t0 - .2).toFixed(3)});
+  // a linha dita ganha o marcador; a que já foi dita apaga
+  const ditas = LS.map((l, i) => [l.t, i]).filter(([x]) => x !== null && x < dur);
+  ditas.forEach(([x, i], k) => {
+    tl.to('#x' + i, {backgroundSize: '100% 82%', duration: .3, ease: 'power3.inOut'}, D.at(x));
+    if (k) tl.to('#x' + ditas[k - 1][1], {backgroundSize: '0% 82%', color: 'var(--ink4)', duration: .2}, D.at(x));
+  });
+  D.sai('#fl', dur - .4);
+  return dur;
+});
+</script>
+</body>
+</html>

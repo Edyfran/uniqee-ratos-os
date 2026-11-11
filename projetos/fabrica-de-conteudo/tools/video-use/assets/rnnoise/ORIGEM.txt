@@ -1,0 +1,8 @@
+sh.rnnn — modelo "somnolent-hogwash" do rnnoise-nu (ruído de gravação, sinal de fala).
+
+Origem: https://github.com/GregorR/rnnoise-models
+O README do repositório diz: "With the exception of the tools/ directory and this
+file, none of this work is creative and thus none of it is subject to copyright."
+
+Os cinco modelos do repositório estão em tools/quadro/public/rnnoise. Só o sh viaja:
+é o que o trata_voz.py usa, medido como o que mais separa a fala do ar.

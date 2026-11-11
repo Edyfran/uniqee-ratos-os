@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<!-- TRANSIÇÃO — rasgo de raio: um raio branco nasce no meio do quadro, racha em dois e os dois correm até as bordas
+     (~1080 px/s, linear, sem clarão de tela inteira); entre eles o quadro escurece. O plano mais fechado que o rasgo
+     revela é zoom de câmera no plano, não desta peça (window.__corte = o instante em que o zoom entra). Clone do efeito 04
+     da referência Deps_-cz-Fg. 1080x1920, --alpha.
+       x  o centro de onde abrem (560) · t0 quando nasce (0.025) · dur (0.55)
+       ?x=560&t0=0.025&dur=0.55 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px;background:transparent}
+#stage{padding:0;display:block;overflow:hidden;background:none;position:relative}
+#velo{position:absolute;top:0;height:1920px;background:rgba(5,6,8,.22);opacity:0}
+.rz{position:absolute;left:0;top:0;width:1080px;height:1920px;overflow:visible}
+.rz svg{position:absolute;left:-60px;top:0;width:1200px;height:1920px;overflow:visible}
+.rz path{fill:none;stroke:#fff;stroke-width:6;stroke-linejoin:round;stroke-linecap:round}
+.rz .g{stroke-width:18;stroke:rgba(255,255,255,.28);filter:blur(5px)}
+.rz{opacity:0}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="velo"></div>
+  <div class="rz" id="rl"><svg viewBox="-60 0 1200 1920" id="sl"></svg></div>
+  <div class="rz" id="rr"><svg viewBox="-60 0 1200 1920" id="sr"></svg></div>
+</div>
+<script>
+const X0 = D.n('x', '560'), t0 = D.n('t0', '0.025'), dur = Math.max(.5, D.n('dur', '0.55'));
+// raio em zigue-zague, sempre o mesmo desenho (sem acaso), de cima a baixo
+// raio serrilhado: passo curto, desvio largo, de vez em quando um tranco; sempre o mesmo desenho
+const pts = (seed) => { let s = seed, p = [], x = X0; for (let y = 0; y <= 1920; y += 22) { s = (s * 9301 + 49297) % 233280; const r = s / 233280 - .5; x += r * 46 + (r > .4 ? 30 : r < -.4 ? -30 : 0); x += (X0 - x) * .08; p.push(x.toFixed(0) + ',' + y); } return 'M' + p.join(' L'); };
+for (const [id, seed] of [['sl', 7], ['sr', 23]]) {
+  const d = pts(seed);
+  document.getElementById(id).innerHTML = '<path class="g" d="' + d + '"/><path d="' + d + '"/>';
+}
+window.__corte = t0 + .2;
+D.monta(tl => {
+  const V = 1080;               // px por segundo, cada lado
+  const L = {x: 0}, R = {x: 0};
+  gsap.set('#rl,#rr', {x: 0});
+  // nasce no meio: a janela vertical abre de 430-1430 pra tela toda no primeiro quadro-e-meio
+  gsap.set('#rl,#rr', {clipPath: 'inset(430px 0px 490px 0px)'});
+  tl.set('#rl,#rr', {opacity: 1}, t0); D.cue(t0, 'swish');
+  tl.to('#rl,#rr', {clipPath: 'inset(0px 0px 0px 0px)', duration: .125, ease: 'none'}, t0);
+  const sep = t0 + .1, fim = t0 + .5;
+  tl.to('#rl', {x: -(V * .5 + 40), duration: fim - sep, ease: 'none'}, sep);
+  tl.to('#rr', {x: (V * .5 + 40), duration: fim - sep, ease: 'none'}, sep);
+  // o escuro entre os dois raios
+  const velo = document.getElementById('velo');
+  const P = {a: X0, b: X0};
+  tl.set('#velo', {opacity: 1}, sep);
+  tl.to(P, {a: X0 - (V * .5 + 40), b: X0 + (V * .5 + 40), duration: fim - sep, ease: 'none',
+    onUpdate: () => { velo.style.left = P.a + 'px'; velo.style.width = Math.max(0, P.b - P.a) + 'px'; }}, sep);
+  tl.set('#rl,#rr,#velo', {opacity: 0}, fim);
+  return dur;
+});
+</script>
+</body>
+</html>

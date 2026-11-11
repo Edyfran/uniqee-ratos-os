@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<!-- ENSAIO — pausa com título de parte (ato 1, 2, 3). 1920x1080, --alpha, EM CAMADAS.
+     Um campo tinta varre o quadro ATRÁS da pessoa, e pede ao compositor que ela
+     fique em preto e branco. O número do ato bate e o título sobe no lado livre.
+       ?ato=2&hd=O custo escondido&sub=o que ninguém coloca na conta&lado=dir&t0=0.2&dur=3.5 -->
+<html lang="pt-BR" class="h alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/direcao-h.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<script src="../nucleo/ensaio.js"></script>
+<style>
+.fd{position:absolute;inset:0;background:radial-gradient(circle,rgba(255,255,255,.07) 2px,transparent 2.6px) 0 0/36px 36px,var(--ink)}
+.tx{position:absolute;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:26px}
+.at{padding:12px 20px 10px;font:700 30px/1 var(--fm);letter-spacing:.16em;text-transform:uppercase;border-radius:var(--raio-s);opacity:0}
+.tx .hd{font-size:140px;color:#fff;margin:0}
+.sb{font:600 28px/1.3 var(--fm);color:var(--cod-cm);opacity:0}
+.sb:empty{display:none}
+</style>
+</head>
+<body>
+<div id="stage"><div class="fd" id="fd" data-c="tras"></div><div class="tx" id="tx" data-c="tras"><div class="at nb cor-mk" id="at"></div><div class="hd" id="hd"></div><div class="sb" id="sb"></div></div></div>
+<script>
+const dur = D.n('dur', '3.5'), t0 = D.n('t0', '0.2'), $ = id => document.getElementById(id);
+const p = E.pessoa('dir'), esq = p.lado === 'esq';
+Object.assign($('tx').style, esq ? {left: (p.r + 40) + 'px', width: (1800 - p.r - 40) + 'px'} : {left: '140px', width: (p.l - 180) + 'px'});
+$('at').textContent = 'ato ' + D.q('ato', '2');
+$('hd').innerHTML = D.q('hd', 'O custo escondido');
+$('sb').textContent = D.q('sub', 'o que ninguém coloca na conta');
+E.video(t0 + .2, dur - .3, 'pb');
+D.monta(tl => {
+  tl.fromTo('#fd', {clipPath: 'inset(0 100% 0 0)'}, {clipPath: 'inset(0 0% 0 0)', duration: .6, ease: 'power3.inOut'}, D.at(t0));
+  D.cue(t0, 'whoosh');
+  D.carimbo('#at', t0 + .45, 0);
+  D.titulo('#hd', t0 + .55, .07);
+  D.entra('#sb', t0 + .9, 14);
+  if (D.q('sai', '1') !== '0') { D.sai(['#at', '#hd', '#sb'], dur - .6); tl.to('#fd', {clipPath: 'inset(0 0 0 100%)', duration: .45, ease: 'power3.in'}, dur - .45); }
+  return dur;
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<!-- FRASE — a semana pronta: um vídeo por dia. 1080x1920, --alpha.
+     A folha da semana no papel: no alto, "A SEMANA pronta" e o placar N/7; embaixo, sete janelas
+     9:16, uma por dia, e a nota no oitavo lugar. Cada dia sai da janela dele num cartão grande
+     (a janela à esquerda, o dia e o letreiro à direita), a tampa amarela sobe e o vídeo do dia
+     aparece; depois a tampa desce e o cartão volta pra janela, que fica cheia. A folha some 0,02 s antes
+     do `abre` (o cartão já cobre a tela) e volta no `fecha`. Com 7/7, a frase do
+     fim entra por cima, e no fim a folha sai. As janelas são buracos: quem põe o vídeo nelas é a
+     composição (deriva.py, modo janelas), nos mesmos retângulos e nos mesmos tempos.
+       dias   "SEG|o meu *avatar*|abre|fecha;…" (/ quebra a linha): em `abre` a tampa sobe (o vídeo do dia na janela
+              grande); em `fecha` ela já desceu (a folha volta, com a janela do dia cheia)
+       cel    "x,y,w,h;…" as sete janelas · ncel  "x,y,w,h" a da nota · win  "x,y,w,h" a janela do cartão
+       titulo (A SEMANA) · marca (pronta) · nota "linha|linha" · fecho "linha|linha" (*grifo*)
+       t_fim  quando a frase do fim entra (-1: não entra) · t_sai  quando a folha sai (-1) · dur
+       Parâmetro ausente cai no exemplo: o plano passa todos
+     ?dias=SEG|o meu *avatar*|1.2|2.6;TER|a minha voz, *clonada*|3.6|5.0&t_fim=5.8&t_sai=7.4&dur=8 -->
+<html lang="pt-BR" class="alfa" data-qa="entra-seco">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block;position:relative;overflow:hidden}
+.ab{position:absolute}
+.cab{left:65px;right:65px;top:280px;height:100px;display:flex;align-items:center;gap:22px}
+.cab .tt{padding:10px 24px 14px;font:700 64px/1 var(--fd);letter-spacing:var(--ls)}
+.cab .mc{font:700 64px/1 var(--fd);letter-spacing:var(--ls);color:var(--ink)}
+.cab .pl{margin-left:auto;padding:12px 22px;font:700 52px/1 var(--fm);color:var(--ink)}
+.dl{font:700 40px/1 var(--fm);letter-spacing:.08em;color:var(--ink);display:flex;align-items:center;gap:10px}
+.dl .ok{color:var(--ok);opacity:0}
+.cel{border:var(--bw) solid var(--ink);border-radius:var(--raio);box-shadow:var(--sh) var(--sh) 0 var(--ink)}
+.vz{position:absolute;inset:0;border-radius:calc(var(--raio) - 4px);background:var(--pp2);display:flex;align-items:center;
+  justify-content:center;font:700 120px/1 var(--fd);color:var(--ink2)}
+.nota{display:flex;flex-direction:column;justify-content:center;gap:10px;padding:20px 18px}
+.nota .n1{font:700 52px/1 var(--fd);white-space:nowrap;letter-spacing:var(--ls)}
+.nota .n2{font:700 44px/1.05 var(--fd);letter-spacing:-.01em}
+.card{overflow:hidden;border:var(--bw) solid var(--ink);border-radius:var(--raio);background:transparent;opacity:0;
+  box-shadow:var(--shx,var(--sh)) var(--shx,var(--sh)) 0 var(--ink);transform-origin:0 0}
+.jan{position:absolute;border:var(--bw) solid var(--ink);border-radius:var(--raio-s);box-shadow:0 0 0 2400px var(--sur)}
+.tampa{position:absolute;inset:-2px;background:var(--mk);display:flex;align-items:center;justify-content:center;
+  font:700 150px/1 var(--fd);letter-spacing:var(--ls);color:var(--ink);transform-origin:50% 0}
+.tx{position:absolute;display:flex;flex-direction:column;gap:26px}
+.tx .d{font:700 150px/.9 var(--fd);letter-spacing:-.04em;color:var(--ink)}
+.tx .r{font:700 58px/1.08 var(--fd);letter-spacing:var(--ls);color:var(--ink)}
+.tx .r b{background-size:0% 86%}
+.tx .i{margin-top:auto;font:700 36px/1 var(--fm);color:var(--ink6)}
+b{font-weight:inherit;padding:0 .08em;margin:0 -.03em;background:linear-gradient(var(--mk),var(--mk)) no-repeat 0 62%/100% 86%;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone}
+.fim{left:65px;right:65px;top:560px;padding:44px 46px 50px;opacity:0}
+.fim .f{font:700 70px/1.1 var(--fd);letter-spacing:var(--ls);color:var(--ink)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="ab cab" id="folha-topo"><span class="tt nb cor-ac" id="tt"></span><span class="mc"><b id="mc"></b></span>
+    <span class="pl nb" id="pl"><span class="jn" id="pn">0</span>/7</span></div>
+  <div class="ab" id="grade" style="inset:0"></div>
+</div>
+<script>
+const dur = D.n('dur', '8'), tFim = D.n('t_fim', '5.8'), tSai = D.n('t_sai', '7.4');
+const $ = id => document.getElementById(id);
+const rect = s => s.split(',').map(Number);
+const DIAS = D.q('dias', 'SEG|o meu *avatar*|1.2|2.6;TER|a minha voz, *clonada*|3.6|5.0').split(';').filter(Boolean)
+  .map(s => { const [d, r, a, f] = s.split('|'); return {d, r, a: +a, f: +f}; });
+const CEL = D.q('cel', '65,442,206,366;313,442,206,366;561,442,206,366;809,442,206,366;313,876,206,366;561,876,206,366;809,876,206,366')
+  .split(';').filter(Boolean).map(rect);
+const NCEL = D.q('ncel', '65,876,206,366');
+const [wx, wy, ww, wh] = rect(D.q('win', '89,424,446,792'));
+const NOMES = ['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB', 'DOM'];
+const grifo = s => s.replace(/\*([^*]+)\*/g, '<b>$1</b>');
+$('tt').textContent = D.q('titulo', 'A SEMANA');
+$('mc').textContent = D.q('marca', 'pronta');
+const g = $('grade');
+CEL.slice(0, 7).forEach(([x, y, w, h], i) => {
+  g.insertAdjacentHTML('beforeend', `<div class="ab dl" style="left:${x}px;top:${y - 50}px" id="dl${i}">${NOMES[i]}<span class="ok" id="ok${i}">✓</span></div>` +
+    `<div class="ab cel" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px"><div class="vz" id="vz${i}">${i + 1}</div></div>`);
+});
+if (NCEL) {
+  const [x, y, w, h] = rect(NCEL), [n1, n2] = D.q('nota', '7 vídeos|nenhum gravado').split('|');
+  g.insertAdjacentHTML('beforeend', `<div class="ab nota nb cor-mk" id="nota" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px">` +
+    `<span class="n1">${n1 || ''}</span><span class="n2">${n2 || ''}</span></div>`);
+}
+// o cartão grande: a janela do vídeo à esquerda, o dia e o letreiro à direita
+const cx = wx - 24, cy = wy - 24, cw = 1015 - cx, ch = wh + 48;
+DIAS.forEach((o, k) => {
+  $('stage').insertAdjacentHTML('beforeend', `<div class="ab card" id="c${k}" style="left:${cx}px;top:${cy}px;width:${cw}px;height:${ch}px">` +
+    `<div class="jan" style="left:20px;top:20px;width:${ww + 8}px;height:${wh + 8}px"><div class="tampa" id="tp${k}">${o.d}</div></div>` +
+    `<div class="tx" style="left:${ww + 72}px;right:40px;top:40px;bottom:36px"><span class="d">${o.d}</span>` +
+    `<span class="r">${o.r.split('/').map(grifo).join('<br>')}</span><span class="i">${k + 1}/7</span></div></div>`);
+});
+$('stage').insertAdjacentHTML('beforeend', `<div class="ab fim nb" id="fim"><div class="f" id="ff">${D.q('fecho', 'Tudo saiu de|um *pedido em português*|pro meu agente de|inteligência artificial.').split('|').map(grifo).join('<br>')}</div></div>`);
+
+D.monta(tl => {
+  D.cabe('.tx .r', 44, ['.tx', 1]);
+  D.cabe('#ff', 48, ['.fim', 1]);
+  D.cabe('.nota .n1', 36, ['.nota', 1]);
+  // a folha está no quadro 0 (o gancho é a semana vazia); o grifo do "pronta" varre logo
+  D.marca('#mc', .25);
+  const n = {v: 0};
+  DIAS.forEach((o, k) => {
+    const i = NOMES.indexOf(o.d), c = CEL[i] || CEL[k];
+    // o cartão sai da janela do dia: começa do tamanho dela e cresce até o lugar dele
+    const s = Math.min(c[2] / cw, c[3] / ch), x0 = c[0] + c[2] / 2 - cw * s / 2 - cx, y0 = c[1] + c[3] / 2 - ch * s / 2 - cy;
+    const voa = .3, el = '#c' + k;
+    tl.fromTo(el, {x: x0, y: y0, scale: s, '--shx': '0px'},
+      {x: 0, y: 0, scale: 1, '--shx': D.SH + 'px', duration: voa, ease: D.P.EASE}, o.a - voa - .03);
+    tl.set(el, {opacity: 1}, o.a - voa - .03);
+    D.cue(o.a - voa - .03, 'whoosh');
+    // por baixo do cartão a folha some; quem segura a tela é ele
+    tl.set('#grade', {opacity: 0}, o.a - .02);
+    tl.fromTo('#tp' + k, {scaleY: 1}, {scaleY: 0, duration: .15, ease: 'power3.in'}, o.a);
+    D.cue(o.a, 'swish');
+    D.palavras(el + ' .r', o.a + .05, .06);
+    D.marca(el + ' .r b', o.a + .4);
+    tl.fromTo('#tp' + k, {scaleY: 0, transformOrigin: '50% 100%'}, {scaleY: 1, duration: .12, ease: 'power3.out', immediateRender: false}, o.f - .12);
+    tl.set('#grade', {opacity: 1}, o.f);
+    tl.set('#vz' + i, {opacity: 0}, o.f);
+    tl.to(el, {x: x0, y: y0, scale: s, '--shx': '0px', duration: .15, ease: D.P.SAI}, o.f);
+    tl.set(el, {opacity: 0}, o.f + .15);
+    // a janela do dia cheia: o ✓ bate e o placar conta
+    tl.fromTo('#ok' + i, {opacity: 0, scale: 1.8}, {opacity: 1, scale: 1, duration: .25, ease: 'back.out(2.4)'}, o.f + .1);
+    D.cue(o.f + .12, 'certo');
+    tl.to(n, {v: k + 1, duration: .01, onUpdate: () => { $('pn').textContent = Math.round(n.v); }}, o.f + .12);
+    tl.fromTo('#pl', {scale: 1}, {scale: 1.12, duration: .12, yoyo: true, repeat: 1, ease: 'power2.out'}, o.f + .12);
+  });
+  // a nota está no quadro 0 (é a promessa do gancho) e bate de novo quando a semana fecha
+  gsap.set('#nota', {rotation: 3});
+  if (DIAS.length === 7 && NCEL) {
+    tl.fromTo('#nota', {scale: 1}, {scale: 1.12, duration: .14, yoyo: true, repeat: 1, ease: 'power2.out'}, DIAS[6].f + .5);
+    D.cue(DIAS[6].f + .5, 'stamp');
+  }
+  if (tFim >= 0 && tFim < dur) {
+    D.pousa('#fim', tFim, {rot: -1, som: 'pop'});
+    D.marca('#ff b', tFim + .35);
+  }
+  if (tSai >= 0 && tSai < dur) {
+    tl.to(['#folha-topo', '#grade', '#fim'], {opacity: 0, y: -60, duration: .3, ease: D.P.SAI, stagger: .05}, tSai);
+    D.cue(tSai, 'whoosh-out');
+  }
+  return dur;
+});
+</script>
+</body>
+</html>

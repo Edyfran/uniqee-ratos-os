@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<!-- ENSAIO — a palavra que marca a virada do vídeo. 1920x1080, --alpha, EM CAMADAS.
+     Uma palavra só, gigante, sobe por máscara ATRÁS da pessoa, cruzando o quadro.
+     Pede ao compositor uma aproximação curta (zoom 1 → 1,05). Uma vez por vídeo.
+       ?palavra=mas&kick=a virada&sub=&lado=centro&t0=0.2&dur=3 -->
+<html lang="pt-BR" class="h alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/direcao-h.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<script src="../nucleo/ensaio.js"></script>
+<style>
+.pv{position:absolute;left:80px;right:80px;top:230px;text-align:center;overflow:hidden;padding:20px 0 60px}
+.pv b{display:inline-block;font:700 480px/.84 var(--fd);letter-spacing:-.05em;text-transform:uppercase;color:var(--mk);-webkit-text-stroke:8px var(--ink);text-shadow:18px 18px 0 var(--ink);white-space:nowrap}
+.fr{position:absolute;left:120px;top:110px;display:flex;flex-direction:column;align-items:flex-start;gap:14px}
+.fr .kick{margin:0}
+.sb{padding:14px 20px 12px;font:700 30px/1.1 var(--fd);border-radius:var(--raio-s);opacity:0}
+.sb:empty{display:none}
+</style>
+</head>
+<body>
+<div id="stage"><div class="pv" data-c="tras"><b id="pv"></b></div><div class="fr" data-c="frente"><div class="kick" id="k"></div><div class="sb nb cor-ink" id="sb"></div></div></div>
+<script>
+const dur = D.n('dur', '3'), t0 = D.n('t0', '0.2'), $ = id => document.getElementById(id);
+E.pessoa('centro');
+$('pv').textContent = D.q('palavra', 'mas');
+$('k').textContent = D.q('kick', 'a virada');
+$('sb').textContent = D.q('sub', '');
+E.video(t0, dur - .3, 'zoom', {de: 1, para: 1.05, entra: .5});
+D.monta(tl => {
+  D.cabe('#pv', 160, '.pv');
+  tl.fromTo('#pv', {yPercent: 128, scale: 1.08}, {yPercent: 0, scale: 1, duration: .7, ease: 'power4.out'}, D.at(t0));
+  D.cue(t0, 'impact');
+  D.cue(t0, 'sub-drop');
+  D.carimbo('#k', t0 + .35, 0);
+  if ($('sb').textContent) D.pousa('#sb', t0 + .5, {dy: -20});
+  if (D.q('sai', '1') !== '0') { tl.to('#pv', {yPercent: -128, duration: .4, ease: 'power3.in'}, dur - .45); D.sai(['#k', '#sb'], dur - .45); }
+  return dur;
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<!-- PROVA — a capa pronta. 1080x1920, --alpha. Entra no quadro congelado: o clarão do obturador,
+     a capa (a imagem 9:16 que a fábrica fez) cobre a tela inteira, como se o quadro virasse ela,
+     e encolhe girando até virar um cartão (borda tinta, sombra dura amarela) sobre o vídeo
+     escurecido. O selo bate no canto do cartão. Sai devolvendo o vídeo.
+       img     a capa, 9:16 · selo  o texto do selo (o ✓ vem junto) · esc  o tamanho do cartão
+       y       o centro do cartão, em px · rot  o giro dele · t_selo  quando o selo bate (o cartão assenta em t0 + 0,58)
+       esc0, y0  o tamanho e o centro de onde a capa parte (padrão 1 e 960: a tela inteira). No anúncio, a
+               partida menor e mais alta deixa o título da capa na zona segura o tempo todo
+     ?img=../midia/capa-exemplo.jpg&selo=CAPA&esc=0.58&y=1080&rot=-4&t0=0.05&t_selo=0.62&dur=1.4 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+.vela{position:absolute;inset:0;background:var(--ink);opacity:0}
+/* o cartão nasce do tamanho da tela; a borda e a sombra crescem enquanto ele encolhe */
+.ca{position:absolute;left:0;top:0;width:1080px;height:1920px;overflow:hidden;opacity:0;background:var(--ink)}
+.ca .mid,.ca .vazio{position:absolute;inset:0;width:100%;height:100%}
+.ca .bo{position:absolute;inset:0;border:16px solid var(--ink);border-radius:inherit;opacity:0}
+.se{position:absolute;display:flex;align-items:center;gap:.3em;padding:16px 28px;font:700 64px/1 var(--fd);
+  letter-spacing:var(--ls);white-space:nowrap;opacity:0}
+.cl{position:absolute;inset:0;background:#fff;opacity:0}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="vela" id="ve"></div>
+  <div class="ca" id="ca"><i class="bo"></i></div>
+  <div class="se nb cor-ok" id="se"><span>✓</span><span id="st"></span></div>
+  <div class="cl" id="cl"></div>
+</div>
+<script>
+const dur = D.n('dur', '1.4'), t0 = D.n('t0', '0.05'), ts = D.n('t_selo', '0.62');
+const esc = D.n('esc', '0.58'), y = D.n('y', '1080'), rot = D.n('rot', '-4');
+const esc0 = D.n('esc0', '1'), y0 = D.n('y0', '960');
+const ca = document.getElementById('ca'), se = document.getElementById('se');
+D.midia('#ca', D.q('img'), 'a capa', 'cover');
+ca.appendChild(ca.querySelector('.bo'));         // a borda por cima da imagem
+document.getElementById('st').textContent = D.q('selo', 'CAPA');
+
+D.monta(tl => {
+  const enc = .5, mk = D.css('--mk'), sh = 34;
+  // o selo no canto de cima, à direita, do cartão já assentado (o giro é pequeno: a conta ignora)
+  const w = 1080 * esc, h = 1920 * esc;
+  se.style.left = Math.min(1080 - 30 - se.offsetWidth, 540 + w / 2 - se.offsetWidth + 40) + 'px';
+  se.style.top = Math.max(40, y - h / 2 - se.offsetHeight / 2) + 'px';
+  // o clarão cobre a troca do quadro pela capa
+  tl.fromTo('#cl', {opacity: .9}, {opacity: 0, duration: .22, ease: 'power2.out', immediateRender: false}, t0);
+  tl.set(ca, {opacity: 1}, t0);
+  D.cue(t0, 'obturador');
+  tl.fromTo(ca, {scale: esc0, rotation: 0, y: y0 - 960, borderRadius: 0, boxShadow: `0px 0px 0px ${mk}`},
+    {scale: esc, rotation: rot, y: y - 960, borderRadius: 40, boxShadow: `${sh}px ${sh}px 0px ${mk}`,
+     duration: enc, ease: 'power3.inOut'}, t0 + .08);
+  tl.fromTo('#ca .bo', {opacity: 0}, {opacity: 1, duration: enc * .6, ease: 'none'}, t0 + .08 + enc * .4);
+  tl.fromTo('#ve', {opacity: 0}, {opacity: .6, duration: enc, ease: 'power2.out'}, t0 + .08);
+  D.carimbo('#se', ts, 4);
+  // a saída é do cartão no tamanho dele (o D.sai devolveria a escala 0,94 a quem está em 0,58)
+  if (D.q('sai', '1') !== '0') {
+    D.cue(dur - .38, 'whoosh-out');
+    tl.to(ca, {opacity: 0, y: y - 960 + 70, scale: esc * .94, duration: .3, ease: D.P.SAI}, dur - .38);
+    tl.to(['#se', '#ve'], {opacity: 0, duration: .26, ease: 'power2.in'}, dur - .34);
+  }
+  return dur;
+});
+</script>
+</body>
+</html>

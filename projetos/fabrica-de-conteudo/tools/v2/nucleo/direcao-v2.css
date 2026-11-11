@@ -1,0 +1,200 @@
+/* Direção visual v2 — neobrutal com mola. FECHADA: 2a + fundo 3c
+   (tokens do Carimbo, Space Grotesk, amarelo #F2C744, papel branco pontilhado).
+   Mesma regra da v1: painel importa isto e NÃO redeclara cor, fonte nem medida.
+
+   A linguagem:
+   - borda preta grossa + sombra DURA deslocada (sem blur) em tudo que é objeto;
+   - papel branco pontilhado — herança do deck, com textura pra não ser tela vazia;
+   - azul é o acento de BLOCO (o que a pessoa recebe, o que muda);
+     amarelo é o MARCADOR: a palavra grifada, a etiqueta, o foco que anda;
+   - verde e vermelho seguem sinal, não decoração. */
+
+@font-face{font-family:'Barlow Semi Condensed';font-weight:500;font-style:normal;src:url(fontes/BarlowSemiCondensed-Medium.ttf) format('truetype')}
+@font-face{font-family:'Barlow Semi Condensed';font-weight:500;font-style:italic;src:url(fontes/BarlowSemiCondensed-MediumItalic.ttf) format('truetype')}
+@font-face{font-family:'Barlow Semi Condensed';font-weight:700;font-style:normal;src:url(fontes/BarlowSemiCondensed-Bold.ttf) format('truetype')}
+@font-face{font-family:'Barlow Condensed';font-weight:600;font-style:normal;src:url(fontes/BarlowCondensed-SemiBold.ttf) format('truetype')}
+
+:root{
+  --pp:#FFFFFF; --dot:rgba(11,13,18,.10);
+  --tex:radial-gradient(circle,var(--dot) 2px,transparent 2.6px) 0 0/36px 36px;
+  --sur:#FFFFFF;
+  --ink:#0B0D12; --ink9:#0B0D12; --ink6:#3B3F4A; --ink4:#7C808B; --ink2:#D9D4C8;
+  --ac:#0640fb; --ac2:#DCE4FF; --act:#C9D6FF;
+  --mk:#F2C744;
+  --ok:#17A354; --no:#E1432F; --no2:#FFE0D9;
+  /* apoio: papel sombreado, e o editor escuro das aulas (código, captura) */
+  --pp2:#ECE8DF; --ink8:#2A2F3D; --cine:#050608; --cine-tx:#8A8F9A;
+  /* material da carta de Lorcana (g_traduz): o pergaminho da caixa de texto e a tinta impressa nele */
+  --carta-papel:#EBCA88; --carta-tinta:#22170E;
+  /* a letra da carta: o texto de regras é Brandon Text/Grotesque condensada (fonte comercial, pela
+     comunidade de proxies); a gratuita mais próxima é a Barlow Semi Condensed, e a etiqueta da
+     habilidade, a Barlow Condensed (OFL, em fontes/) */
+  --fc:'Barlow Semi Condensed',sans-serif; --fc-tag:'Barlow Condensed',sans-serif;
+  --cod:#12151C; --cod2:#1C1F26; --cod-tx:#E8EAF0; --cod-cm:#9AA0AD; --cod-ln:#4E535D; --cod-kw:#8FA8FF; --cod-nm:#FF9B85;
+  --fd:'Space Grotesk',system-ui,sans-serif; --fx:100%; --ls:-.035em;
+  --fm:'IBM Plex Mono',ui-monospace,monospace;
+  --bw:4px; --sh:10px; --raio:12px; --raio-s:8px;
+
+  /* escala: o piso do celular não muda (ver v1) */
+  --piso:58px; --t-hd:96px; --t-big:330px; --t-item:60px; --t-apoio:38px; --t-kick:30px;
+  --pad:36px; --marg:90px;
+
+  /* 3D (D.palco3d, D.espessura): a lente e o corpo de toda peça que gira. 1800px na largura
+     de 1080 é um campo de ~33°: o ponto de fuga aparece sem deformar; o lado é a borda que
+     ganhou espessura */
+  --persp:1800px; --esp:10px; --lado:var(--ink);
+
+  /* vidro (g_vidro): o acabamento do anel neon e das camadas de vidro dos anúncios de edição — a placa
+     violeta translúcida, a borda clara, o lado mais escuro e o halo. Exceção à sombra dura, como o e_editorial */
+  --vidro-a:rgba(150,128,255,.78); --vidro-b:rgba(70,40,210,.70); --vidro-lado:#2A137A;
+  --vidro-borda:rgba(255,255,255,.62); --vidro-halo:rgba(120,90,255,.55); --vidro-glifo:#FFFFFF;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{overflow:hidden;background:var(--pp)}
+body{font-family:var(--fd);font-stretch:var(--fx)}
+#stage{position:relative;background:var(--tex),var(--pp);
+  display:flex;flex-direction:column;justify-content:center;padding:var(--pad) var(--marg);
+  font-stretch:var(--fx)}
+
+/* Objeto neobrutal. `--shx` é a distância da sombra, e é ANIMÁVEL: o D.pousa
+   começa em 0 (a peça no ar, sem chão) e termina em --sh (a peça aterrissou).
+   `--sx`/`--sy`: a mesma sombra com o giro da peça desfeito, que o núcleo escreve a cada
+   quadro quando a peça gira (D._sombras): a luz não gira com a peça. */
+.nb{background:var(--sur);border:var(--bw) solid var(--ink);border-radius:var(--raio);
+  box-shadow:var(--sx,var(--shx,var(--sh))) var(--sy,var(--shx,var(--sh))) 0 var(--sombra,var(--ink))}
+.nb.cor-ac{background:var(--ac);color:#fff}
+.nb.cor-mk{background:var(--mk);color:var(--ink)}
+.nb.cor-ink{background:var(--ink);color:#fff}
+.nb.cor-ink{box-shadow:var(--sx,var(--shx,var(--sh))) var(--sy,var(--shx,var(--sh))) 0 var(--mk)}
+/* sinal como objeto: verde é valor/lucro, vermelho é custo/prejuízo — nunca enfeite */
+.nb.cor-ok{background:var(--ok);color:#fff}
+.nb.cor-no{background:var(--no);color:#fff}
+
+/* Etiqueta: carimbo amarelo. Situa, não informa. */
+.kick{align-self:flex-start;display:inline-block;font:700 var(--t-kick)/1 var(--fm);
+  letter-spacing:.12em;text-transform:uppercase;color:var(--ink);background:var(--mk);
+  border:var(--bw) solid var(--ink);border-radius:var(--raio-s);padding:.42em .66em .36em;
+  margin-bottom:30px;opacity:0;
+  box-shadow:calc(var(--sh)*.5) calc(var(--sh)*.5) 0 var(--sombra,var(--ink))}
+.kick:empty{display:none}
+
+/* A frase. <b> é a palavra GRIFADA (marcador que varre), <i> é a palavra azul.
+   Continua valendo: uma ênfase por frase. */
+.hd{font:900 var(--t-hd)/1.02 var(--fd);font-stretch:var(--fx);letter-spacing:var(--ls);
+  color:var(--ink);margin-bottom:44px;opacity:0}
+.hd b,.mkr{font-weight:inherit;padding:0 .1em;margin:0 -.04em;
+  background:linear-gradient(var(--mk),var(--mk)) no-repeat 0 60%/0% 88%;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone}
+.hd i{font-style:normal;color:var(--ac)}
+
+.big{font:900 var(--t-big)/.86 var(--fd);font-stretch:var(--fx);letter-spacing:-.05em;
+  color:var(--ink);opacity:0}
+.big small{font-size:.34em;font-weight:800;vertical-align:.5em;margin-right:.06em;letter-spacing:-.02em}
+
+/* Selo de índice: quadrado amarelo com número mono. */
+.ic{flex:none;display:flex;align-items:center;justify-content:center;width:72px;height:72px;
+  background:var(--mk);border:var(--bw) solid var(--ink);border-radius:var(--raio-s);
+  font:700 30px/1 var(--fm);color:var(--ink)}
+
+.item{display:flex;align-items:center;gap:24px;padding:24px 30px;opacity:0}
+.item .nm{font:800 var(--t-item)/1.08 var(--fd);letter-spacing:var(--ls);color:var(--ink);
+  flex:1;min-width:0}
+.item .de{font:600 var(--t-apoio)/1.2 var(--fm);color:var(--ink6);text-align:right}
+
+.btn{display:flex;align-items:center;justify-content:center;gap:.4em;
+  background:var(--ac);color:#fff;border:var(--bw) solid var(--ink);border-radius:var(--raio);
+  box-shadow:var(--shx,var(--sh)) var(--shx,var(--sh)) 0 var(--ink);
+  font:900 64px/1 var(--fd);letter-spacing:-.01em}
+
+/* Máscara por palavra (D.palavras). O respiro de .1em embaixo e .08em em cima
+   é o que não corta descendente nem acento de maiúscula. */
+.mw{display:inline-block;overflow:hidden;vertical-align:top;
+  padding:.08em .02em .12em;margin:-.08em -.02em -.12em}
+.w{display:inline-block}
+
+/* peça de tela cheia sem papel (?alfa=1) */
+html.alfa,html.alfa body{background:transparent}
+html.alfa #stage{background:none}
+/* ?boneco=1 — a pessoa de mentira atrás da peça que vai por cima do vídeo (a biblioteca do aluno).
+   O D.monta põe o #boneco no fundo do #stage e faz nele o que o compositor faria com o take. */
+#boneco,#boneco div{position:absolute;inset:0;pointer-events:none}
+#boneco{z-index:-1}
+#boneco div div div{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 90'%3E%3Cdefs%3E%3ClinearGradient id='g' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%238a8e95'/%3E%3Cstop offset='1' stop-color='%235c6067'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='160' height='90' fill='url%28%23g%29'/%3E%3Cg fill='%23b6bac0'%3E%3Cellipse cx='80' cy='33' rx='10' ry='12'/%3E%3Cpath d='M77 42h6v10h-6z'/%3E%3Cpath d='M48 90c0-24 8-34 20-36h24c12 2 20 12 20 36z'/%3E%3C/g%3E%3Ctext x='5' y='9' font-size='5' font-family='monospace' font-weight='700' fill='%23e2e4e7'%3ESEU V%C3%8DDEO%3C/text%3E%3C/svg%3E") 0 0/100% 100%}
+#boneco.v div div div{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 90 160'%3E%3Cdefs%3E%3ClinearGradient id='g' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%238a8e95'/%3E%3Cstop offset='1' stop-color='%235c6067'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='90' height='160' fill='url%28%23g%29'/%3E%3Cg fill='%23b6bac0'%3E%3Cellipse cx='45' cy='60' rx='15' ry='18'/%3E%3Cpath d='M40 74h10v16H40z'/%3E%3Cpath d='M2 160C2 118 14 100 32 96h26c18 4 30 22 30 64z'/%3E%3C/g%3E%3Ctext x='6' y='11' font-size='5.5' font-family='monospace' font-weight='700' fill='%23e2e4e7'%3ESEU V%C3%8DDEO%3C/text%3E%3C/svg%3E")}
+
+/* 3D (D.espessura): os lados, as costas e a sombra dura viram placas atrás da face; a luz
+   (D.luz) é chapada, uma cor por face, sem degradê */
+.d3{transform-style:preserve-3d}
+.d3-face{position:absolute;display:block;background:var(--lado);pointer-events:none}
+.d3-sombra{position:absolute;inset:0;display:block;border-radius:inherit;background:var(--sombra,var(--ink));
+  transform:translate3d(var(--shx,var(--sh)),var(--shx,var(--sh)),var(--fundo3d))}
+.d3-luz{position:absolute;inset:0;display:block;border-radius:inherit;pointer-events:none;opacity:0;background:var(--ink)}
+.d3-luz.clara{background:#fff}
+
+/* captura real (D.midia) e o marcador de onde ela entra */
+.mid{display:block;width:100%;height:100%}
+.vazio{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  background:repeating-linear-gradient(135deg,#E9E6DF 0 18px,#F4F2EC 18px 36px)}
+.vazio span{font:600 30px/1 var(--fm);letter-spacing:.12em;text-transform:uppercase;color:var(--ink4);
+  background:#fff;border:3px solid var(--ink4);border-radius:6px;padding:.5em .7em}
+
+/* ?tema=tinta — o mesmo sistema sobre o chão tinta. Os objetos (.nb) continuam
+   brancos com borda tinta; muda o chão e a sombra dura, que vira amarela pra
+   existir sobre o escuro. Texto solto no chão (.hd, .big) vira branco; a
+   palavra grifada continua tinta sobre o amarelo. */
+html.tinta{--pp:#0B0D12;--dot:rgba(255,255,255,.07);--sombra:var(--mk);--lado:var(--ink6)}
+html.tinta .hd,html.tinta .big{color:#fff}
+html.tinta .hd b,html.tinta .mkr{color:var(--ink)}
+html.tinta .nb.cor-ink{border-color:#3B3F4A}
+
+/* ?tema=tinteiro — o canal de Lorcana, direção 12a "Tinteiro noturno" (Claude Design,
+   29/09/2026). OUTRA MARCA: não é a
+   direção Ninja, e só o estilo lorcana-curto pede este tema.
+   - o chão é o fundo do tinteiro, liso; o objeto é painel ameixa-escuro com borda OURO,
+     CHAPADO (sem a sombra dura: `--sh` zera e o D.pousa pousa sem sombra);
+   - texto creme; o ouro é o marcador (etiqueta, palavra grifada) e leva letra escura;
+   - ameixa é o bloco de acento; verde e vermelho continuam sinal (valor e custo).
+   A fonte (Unbounded) o direcao-v2.js injeta quando o tema pede. */
+html.tinteiro{--pp:#120C1A;--dot:rgba(255,243,223,.05);--tex:none;--sur:#221733;
+  --ink:#FFF3DF;--ink9:#120C1A;--ink6:#CDBFE0;--ink4:#8C7FA8;--ink2:#3A2D52;
+  --ac:#5B2B78;--ac2:#3A1F55;--act:#4A2A6A;--mk:#E8AE4F;
+  --ok:#2FB36F;--no:#E5484D;--no2:#3A1820;
+  --fd:'Unbounded',system-ui,sans-serif;--fx:100%;--ls:-.01em;
+  --sh:0px;--sombra:transparent;--raio:16px;--raio-s:10px;
+  /* as seis tintas do Lorcana (a cor da mancha), de pesquisa/lorcana/marca/tinteiro.css */
+  --t-ambar:#F2A516;--t-ametista:#7B3F9E;--t-esmeralda:#2E9E48;--t-rubi:#D1123F;--t-safira:#1C8FD1;--t-aco:#8A9BA8}
+/* texto sem cor própria herdava o preto do navegador — no painel escuro, sumia */
+html.tinteiro body{color:var(--ink)}
+html.tinteiro .nb{border-color:var(--mk)}
+html.tinteiro .nb.cor-ac{color:var(--ink)}
+html.tinteiro .nb.cor-ink{background:var(--ink9)}
+html.tinteiro .nb.cor-mk,html.tinteiro .kick,html.tinteiro .ic,
+html.tinteiro .hd b,html.tinteiro .mkr{color:var(--ink9)}
+html.tinteiro .kick,html.tinteiro .ic{border-color:transparent}
+
+/* ?tema=neon — o vidro roxo sobre estúdio escuro, em tela inteira: a mecânica do anúncio de edição do
+   concorrente (videos/fabrica/avatar-camadas/REF.md, 08/10/2026), pras peças de interface em vidro
+   (t_vidro, i_editor, i_passos, r_guia). O acabamento da placa é o do --vidro-* (g_vidro); aqui entram
+   o painel escuro translúcido, o título em degradê e a letra. Só o anúncio com avatar pede este tema.
+   - texto branco; o lilás é o acento (a 2ª linha do título, a palavra ativa, o item aceso);
+   - a letra é a DM Sans pesada e a mono é a JetBrains Mono (o direcao-v2.js injeta as duas). */
+html.neon{--pp:#0A0614;--dot:transparent;--tex:none;
+  --ink:#FFFFFF;--ink9:#0A0614;--ink6:#CFC8EE;--ink4:#9088B8;--ink2:rgba(255,255,255,.22);
+  --ac:#7C5CFF;--ac2:#A78BFA;--act:#C4B5FD;--mk:#A78BFA;--ok:#4ADE80;--no:#F87171;
+  --fd:'DM Sans',system-ui,sans-serif;--fx:100%;--ls:-.035em;--fm:'JetBrains Mono',ui-monospace,monospace;
+  --sh:0px;--sombra:transparent;--raio:30px;--raio-s:16px;
+  --painel:linear-gradient(165deg,rgba(60,40,140,.42),rgba(22,12,52,.78));--painel-borda:rgba(210,198,255,.34);
+  --painel-brilho:0 0 50px rgba(110,80,255,.35);--gr-ac:linear-gradient(180deg,#E4DAFF 0%,#A78BFA 48%,#7C5CFF 100%)}
+html.neon body{color:var(--ink)}
+
+
+/* ?tema=capa — o chão azul-marinho da capa do Reel. Só a cor e a sombra; a grade, o título em faixa e os ícones de app do
+   cartão moram em cartao.css (html.capa). Sombra dura de tinta some sobre o escuro, então vira luz azul. */
+html.capa{--pp:#050A24;--dot:transparent;--tex:none;--sh:0px;--sombra:transparent;--ed-sans:'Inter',system-ui,sans-serif}
+
+/* 920x730 — o painel da tela dividida (e_dividida hospeda a peça num iframe). A peça que serve ao painel desenha o
+   cartão dela rente à borda (a moldura é do painel) e usa --pn-f pra letra. Peça de 1080x1920 que não conhece o painel
+   não ganha nada daqui. */
+html.pn,html.pn body,html.pn #stage{width:920px;height:730px}
+html.pn{--pn-f:34px}

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<!-- INTERFACE — a TV com a tela mudando: o que a fala conta acontece NA tela, não num texto sobre ela. Desenho genérico (formas e cores do estilo,
+     nenhuma marca nem aparelho real). 1080x1920 (tela cheia) e 920x730 (o painel da e_dividida). --alpha. O cartão já está na tela no quadro 0.
+     modo=limpa    a tela com anúncio (faixa, dois cartões "AD") e a limpa: o X cai em cada anúncio, ele some, os apps fecham o vão e entra o título
+     modo=instala  a tela vazia, a barra de instalação enche e os apps da tela inicial nova pousam, um a um
+     modo=compat   a tela inicial pronta e, embaixo, os selos (`sel`) batendo um por um, cada um com ✓
+       rot  a etiqueta no alto (SUA TV) · antes  o que a etiqueta embaixo diz antes (COM ANÚNCIO) · depois  e depois (SEM ANÚNCIO) · tit  o título que aparece na tela limpa (Início)
+       sel  os selos do modo compat, separados por ; (Android TV;Google TV) · lab  o texto da barra do modo instala (Instalando…) · t_troca  o segundo da virada (1.6) · dur
+     etiqueta: tv, demonstracao, tela, antes-depois
+       ?modo=limpa&rot=sua TV&antes=COM ANÚNCIO&depois=SEM ANÚNCIO&tit=Início&t_troca=1.6&dur=5 -->
+<html lang="pt-BR" class="alfa" data-qa="entra-seco fica">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+html.pn,html.pn body,html.pn #stage{width:920px;height:730px}
+#stage{position:relative;overflow:hidden;padding:0;display:block;--tw:840px}
+html.pn #stage{--tw:780px}
+.cx{position:absolute;left:60px;top:300px;width:960px;height:880px;background:var(--sur)}
+html.pn .cx{left:0;top:0;width:920px;height:730px;border:0;border-radius:0;box-shadow:none!important}
+.kk{position:absolute;left:36px;top:30px;font:700 30px/1 var(--fm);letter-spacing:.12em;text-transform:uppercase;padding:.42em .66em .36em;
+  background:var(--mk);color:var(--ink9);border:var(--bw) solid var(--ink);border-radius:var(--raio-s)}
+html.pn .kk{left:28px;top:24px;font-size:24px}
+.tv{position:absolute;left:50%;top:132px;width:var(--tw);margin-left:calc(var(--tw)/-2);aspect-ratio:16/9;background:var(--ink8);border:calc(var(--bw)*2) solid var(--ink);border-radius:calc(var(--raio)*1.4);padding:14px}
+html.pn .tv{top:88px;padding:10px}
+.tv:after{content:"";position:absolute;left:34%;right:34%;bottom:-34px;height:20px;background:var(--ink);border-radius:0 0 8px 8px}
+.sc{position:relative;width:100%;height:100%;overflow:hidden;background:linear-gradient(135deg,var(--ac),var(--ac2));border-radius:calc(var(--raio-s)*.6)}
+.ab{position:absolute}
+.ban{left:5%;top:8%;width:90%;height:38%;background:repeating-linear-gradient(135deg,var(--mk) 0 22px,var(--pp2) 22px 44px);border:3px solid var(--ink);display:flex;align-items:center;justify-content:center}
+.ban b{font:700 var(--tt,40px)/1 var(--fm);letter-spacing:.18em;color:var(--ink9);background:var(--mk);padding:.3em .6em}
+.tl{width:15%;height:30%;top:56%;border:3px solid var(--ink);border-radius:calc(var(--raio-s)*.8);background:var(--sur)}
+.tl i{position:absolute;inset:22%;display:block}
+.tl .g1{background:var(--ac);border-radius:50%}
+.tl .g2{background:var(--mk);clip-path:polygon(50% 0,100% 100%,0 100%)}
+.tl .g3{background:var(--ok);border-radius:18%}
+.tl .g4{background:var(--no);border-radius:50% 50% 12% 12%}
+.tl .g5{background:var(--ink);clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+.tl s{position:absolute;right:-3px;top:-3px;padding:2px 7px;font:700 var(--ta,22px)/1.1 var(--fm);text-decoration:none;background:var(--no);color:#fff;border:2px solid var(--ink)}
+.xx{width:34%;aspect-ratio:1;opacity:0}
+.xx:before,.xx:after{content:"";position:absolute;left:0;right:0;top:calc(50% - 5px);height:10px;border-radius:5px;background:var(--no);box-shadow:0 0 0 3px var(--ink)}
+.xx:before{transform:rotate(45deg)}.xx:after{transform:rotate(-45deg)}
+.til{position:absolute;left:0;right:0;top:20%;text-align:center;font:700 var(--tt2,64px)/1 var(--fd);letter-spacing:var(--ls);color:var(--ink9);opacity:0}
+.pb{left:20%;width:60%;top:44%;height:44px;border:3px solid var(--ink);background:var(--sur);border-radius:calc(var(--raio-s)*.6);overflow:hidden}
+.pb i{display:block;height:100%;width:0;background:var(--ac)}
+.pl{left:20%;width:60%;top:30%;text-align:center;font:700 var(--ta2,30px)/1 var(--fm);letter-spacing:.1em;text-transform:uppercase;color:var(--ink9)}
+.st{position:absolute;left:0;right:0;bottom:44px;display:flex;justify-content:center;gap:18px}
+html.pn .st{bottom:22px}
+.st .ch{font:700 46px/1 var(--fd);letter-spacing:var(--ls);padding:.38em .8em .32em;white-space:nowrap}
+html.pn .st .ch{font-size:36px}
+.st .dp{position:absolute;opacity:0}
+.sl{position:absolute;left:0;right:0;bottom:130px;display:flex;justify-content:center;gap:26px}
+html.pn .sl{bottom:80px}
+.sl .ch{font:700 52px/1 var(--fd);letter-spacing:var(--ls);padding:.4em .9em .34em;white-space:nowrap;opacity:0}
+html.pn .sl .ch{font-size:40px}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="cx nb" id="cx">
+    <span class="kk" id="kk"></span>
+    <div class="tv"><div class="sc" id="sc"></div></div>
+    <div class="st" id="st"></div>
+    <div class="sl" id="sl"></div>
+  </div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const MODO = D.q('modo', 'limpa'), dur = D.n('dur', '5'), TT = D.n('t_troca', '1.6');
+const PN = document.documentElement.classList.contains('pn');
+$('kk').textContent = D.q('rot', 'sua TV');
+if (!D.q('rot', 'sua TV')) $('kk').remove();
+const sc = $('sc');
+const add = (cls, html = '', st = '') => { sc.insertAdjacentHTML('beforeend', `<div class="ab ${cls}" ${st ? `style="${st}"` : ''}>${html}</div>`); return sc.lastElementChild; };
+// os apps: formas simples, sem marca; a posição (em % da tela) antes e depois da limpeza
+const APPS = [['g1', 0], ['g2', 0], ['g3', 0], ['g4', 0], ['g5', 0]];
+const FORMA = (g, ad) => `<i class="${g}"></i>` + (ad ? '<s>AD</s>' : '');
+const TXT = {t: D.q('tit', 'Início')};
+sc.style.setProperty('--tt', PN ? '30px' : '40px'); sc.style.setProperty('--ta', PN ? '16px' : '22px');
+sc.style.setProperty('--tt2', PN ? '52px' : '64px'); sc.style.setProperty('--ta2', PN ? '30px' : '40px');
+let pecas = {};
+if (MODO === 'limpa') {
+  add('ban', '<b>ANÚNCIO</b>'); sc.lastElementChild.id = 'ban';
+  const xs = [4, 23, 42, 61, 80];                   // antes: 5 cartões; 0 e 2 são anúncio
+  const ads = [0, 2];
+  xs.forEach((x, i) => { const e = add('tl', FORMA(APPS[i][0], ads.includes(i)), `left:${x}%`); e.id = 'tl' + i; });
+  ads.forEach(i => { const e = add('xx', '', `left:${[4, 42][ads.indexOf(i)] + 7.5 - 0}%;top:62%`); e.id = 'xx' + i; });
+  add('til', TXT.t); sc.lastElementChild.id = 'til';
+} else if (MODO === 'instala') {
+  add('pl', D.q('lab', 'Instalando…')); sc.lastElementChild.id = 'pl';
+  add('pb', '<i id="pi"></i>'); sc.lastElementChild.id = 'pb';
+  [8, 24, 40, 56, 72].forEach((x, i) => { const e = add('tl', FORMA(APPS[i][0], false), `left:${x + 2}%;top:50%;opacity:0`); e.id = 'tl' + i; });
+  add('til', TXT.t); sc.lastElementChild.id = 'til';
+} else {
+  add('til', TXT.t, 'opacity:1;top:14%'); sc.lastElementChild.id = 'til';
+  [8, 24, 40, 56, 72].forEach((x, i) => { const e = add('tl', FORMA(APPS[i][0], false), `left:${x + 2}%;top:44%`); e.id = 'tl' + i; });
+  D.q('sel', 'Android TV;Google TV').split(';').filter(Boolean).forEach((s, i) => {
+    $('sl').insertAdjacentHTML('beforeend', `<span class="ch nb ${i % 2 ? 'cor-mk' : 'cor-ac'}" id="sl${i}">✓ ${s.replace(/[<>&]/g, '')}</span>`);
+  });
+}
+if (MODO !== 'compat') {
+  const a = D.q('antes', MODO === 'limpa' ? 'COM ANÚNCIO' : ''), d = D.q('depois', MODO === 'limpa' ? 'SEM ANÚNCIO' : '');
+  if (a || d) $('st').innerHTML = `<span class="ch nb cor-no" id="sa">${a}</span><span class="ch nb cor-ok dp" id="sd">${d}</span>`;
+}
+D.monta(tl => {
+  if (MODO === 'limpa') {
+    const ts = [0, 2];
+    ts.forEach((i, k) => {
+      const t = TT + k * .35;
+      tl.fromTo('#xx' + i, {scale: 0, opacity: 1}, {scale: 1, opacity: 1, duration: .16, ease: 'back.out(2.4)', immediateRender: false}, t);
+      tl.to('#tl' + i, {scale: 0, opacity: 0, duration: .22, ease: 'power2.in'}, t + .22);
+      tl.to('#xx' + i, {opacity: 0, duration: .12, ease: 'none'}, t + .3);
+      D.cue(t, 'stamp');
+    });
+    const t1 = TT + .25;
+    tl.fromTo('#ban', {scaleY: 1, opacity: 1}, {scaleY: 0, opacity: 0, duration: .26, ease: 'power3.in', transformOrigin: '50% 0%', immediateRender: false}, t1);
+    // os apps que sobram fecham o vão e sobem, centrados
+    const sobra = [1, 3, 4], alvo = [24, 42, 60];
+    sobra.forEach((i, k) => tl.to('#tl' + i, {left: alvo[k] + '%', top: '44%', duration: .45, ease: 'power3.inOut'}, TT + .75));
+    tl.fromTo('#til', {opacity: 0, y: 14}, {opacity: 1, y: 0, duration: .3, ease: 'power3.out', immediateRender: false}, TT + .85);
+    tl.set('#sa', {display: 'none'}, TT + .75); tl.set('#sd', {opacity: 1, position: 'static'}, TT + .75);
+    D.cue(TT + .75, 'certo');
+  } else if (MODO === 'instala') {
+    const t0 = .5, d = Math.max(.9, TT - t0);
+    tl.to('#pi', {width: '100%', duration: d, ease: 'power1.inOut'}, t0);
+    D.cue(t0, 'tick');
+    const t1 = t0 + d + .1;
+    tl.set(['#pl', '#pb'], {opacity: 0}, t1);
+    tl.fromTo('#til', {opacity: 0, y: 14}, {opacity: 1, y: 0, duration: .3, ease: 'power3.out', immediateRender: false}, t1);
+    [0, 1, 2, 3, 4].forEach(i => { tl.fromTo('#tl' + i, {opacity: 0, y: 26, scale: .8}, {opacity: 1, y: 0, scale: 1, duration: .3, ease: 'back.out(1.8)', immediateRender: false}, t1 + .15 + i * .14); D.cue(t1 + .15 + i * .14, 'pop'); });
+    tl.set('#sa', {display: 'none'}, t1); tl.set('#sd', {opacity: 1, position: 'static'}, t1 + .15);
+  } else {
+    D.q('sel', 'Android TV;Google TV').split(';').filter(Boolean).forEach((s, i) => {
+      const t = TT * .5 + i * .45;
+      tl.fromTo('#sl' + i, {opacity: 0, scale: .6, y: 20}, {opacity: 1, scale: 1, y: 0, duration: .3, ease: 'back.out(2)', immediateRender: false}, t);
+      D.cue(t, 'stamp');
+    });
+  }
+  return dur;
+});
+</script>
+</body>
+</html>

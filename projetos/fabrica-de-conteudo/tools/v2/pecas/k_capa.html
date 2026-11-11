@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<!-- TIPOGRAFIA — a capa que sai pronta: duas palavras em papel e a miniatura que vira a capa se montando.
+     1080x1920, o mesmo papel, a mesma grade e o mesmo código de barras da k_objeto. O quadro 0 é o último
+     quadro da bancada (`de`, uma imagem): ela sai (recolhe 2 quadros e se vai, acelerando) e a miniatura que
+     estava na linha do tempo (`chip`, x,y,w,h dela no quadro) é o objeto carregado: comprime, sai da trilha e
+     sobe em arco (D.arco) crescendo até o retângulo da capa (`fim`), com a sombra de quem está no ar. Pousa
+     com o soco de câmera (D.soco, D.reage) e o thud; no mesmo quadro o obturador estala e o quadro do vídeo
+     (`mini`) vira a capa de verdade (`capa`, o g_capa_nick com monta=1 gravado em vídeo): o fundo acende, o
+     rosto sobe, os ícones giram de fora, a marca, o título bate e a faixa varre, com os sons dela. "A capa sai"
+     sobe palavra a palavra enquanto a miniatura voa; "pronta." é o herói (D.heroi) e cai quando a capa fecha.
+     O cartão (a capa) fica no retângulo `fim` sem giro e sem título em volta: é o que a batida seguinte
+     (r_cheia) usa como pôster do celular. Texto que se lê dentro da área segura (x 65–1015, y 270–1250); o
+     rosto, a marca e o título da capa caem em y 750–1200 (a capa da zona do Reels: tb=680, tm=70).
+       l1  a linha de apoio (A capa sai) · l2  a palavra de cor (pronta.) · cor (ac | mk)
+       de  a imagem do quadro 0, a bancada (vazio: a peça começa limpa) · mini  o quadro do vídeo que vira a capa
+       capa  o vídeo da capa montando (ou uma imagem) · t_cv  quando ele começa (0.78)
+       chip  o retângulo da miniatura no quadro 0 (849,1607,17,30) · fim  o da capa (292,626,496,882) · rr  o raio (41)
+       t_sai  a bancada sai (0.04) · t_voa  a miniatura parte (0.14) · t_pousa  ela pousa (0.74)
+       dy  quanto o título sobe ou desce (0; a palavra de cor encolhe pra caber em 72 % da largura) · ?ar=1080x1350  o 4:5 de verdade
+       t_fecha  a capa fecha e "pronta." cai (2.2) · cod  o código de barras · dur  (3.5)
+       ?l1=A capa sai&l2=pronta.&cor=ac&mini=../midia/vitrine-camadas.jpg&capa=../midia/capa-exemplo.jpg&dur=3.5 -->
+<html lang="pt-BR" data-qa="entra-seco">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<script>if ((new URLSearchParams(location.search).get('ar') || '').indexOf('1080x1350') === 0) document.write('<style>html,body,#stage,#mundo{height:1350px!important}</style>');</script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+#stage{padding:0;display:block;overflow:hidden;background:var(--pp)}
+#mundo{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:50% 45%}
+#papel,#grade{position:absolute;left:0;top:0}
+.l1{position:absolute;left:100px;top:282px;font:700 96px/1 var(--fd);letter-spacing:var(--ls);color:var(--ink);white-space:nowrap}
+.l1 .w{margin-right:.24em}
+.l2{position:absolute;left:88px;top:344px;font:700 224px/.92 var(--fd);letter-spacing:-.05em;white-space:nowrap;
+  opacity:0;transform-origin:0 100%}
+.l2.ac{color:var(--ac)} .l2.mk{color:var(--mk);-webkit-text-stroke:8px var(--ink);paint-order:stroke fill}
+#codigo{position:absolute;right:65px;top:286px;width:230px;text-align:right;opacity:0}
+#codigo svg{display:block;margin-left:auto}
+#codigo span{display:block;margin-top:10px;font:600 24px/1 var(--fm);letter-spacing:.12em;color:var(--ink6)}
+/* a bancada do quadro 0, por cima de tudo, até sair */
+#de{position:absolute;left:0;top:0;width:1080px;height:1920px;z-index:4}
+/* a capa: posição (arco) e escala > o celular de canto redondo, com a sombra macia das referências. A sombra
+   de quem está no ar é maior e mais clara; assentada, é a do celular do editado (r_bancada) */
+#pc{position:absolute;z-index:6;opacity:0}
+.cel{position:absolute;inset:0;overflow:hidden;background:var(--cine);border-radius:var(--rr);
+  box-shadow:0 var(--so,38px) var(--sb,70px) -18px rgba(11,13,18,var(--sa,.44)),0 12px 26px -8px rgba(11,13,18,.22)}
+.cel .mid{position:absolute;inset:0}
+#vid{opacity:0}
+#flash{position:absolute;inset:0;background:#fff;opacity:0}
+</style>
+</head>
+<body>
+<div id="stage"><div id="mundo">
+  <svg id="papel" width="1080" height="1920"></svg>
+  <svg id="grade" width="1080" height="1920"></svg>
+  <div id="codigo"></div>
+  <div class="l1" id="l1"></div>
+  <div class="l2" id="l2"></div>
+  <div id="pc"><div class="cel" id="cartao"></div></div>
+</div></div>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const ret = (k, d) => D.q(k, d).split(',').map(Number);
+const W = 1080, H = 1920, Q = D.QD, dur = D.n('dur', '3.5');
+
+// o papel com a luz da bancada (o mesmo da k_objeto), a grade fina e o código de barras
+$('papel').innerHTML = `<defs>
+  <pattern id="pt" width="36" height="36" patternUnits="userSpaceOnUse"><circle cx="18" cy="18" r="2.2" fill="rgba(11,13,18,.07)"/></pattern>
+  <radialGradient id="la"><stop offset="0" style="stop-color:var(--mk);stop-opacity:.42"/><stop offset=".55" style="stop-color:var(--mk);stop-opacity:.14"/><stop offset="1" style="stop-color:var(--mk);stop-opacity:0"/></radialGradient>
+  <radialGradient id="lb2"><stop offset="0" style="stop-color:var(--ac);stop-opacity:.16"/><stop offset="1" style="stop-color:var(--ac);stop-opacity:0"/></radialGradient>
+  <radialGradient id="lc"><stop offset="0" style="stop-color:var(--mk);stop-opacity:.30"/><stop offset="1" style="stop-color:var(--mk);stop-opacity:0"/></radialGradient></defs>
+  <rect width="${W}" height="${H}" style="fill:var(--pp)"/>
+  <circle id="luz-a" cx="860" cy="520" r="760" fill="url(#la)"/>
+  <circle id="luz-b" cx="120" cy="1180" r="640" fill="url(#lb2)"/>
+  <circle id="luz-c" cx="170" cy="280" r="520" fill="url(#lc)"/>
+  <rect width="${W}" height="${H}" fill="url(#pt)"/>`;
+$('grade').innerHTML = `<defs>
+  <pattern id="gr" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M60 0H0V60" fill="none" style="stroke:var(--ink)" stroke-opacity=".2" stroke-width="1.6"/></pattern>
+  <radialGradient id="gm" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff"/><stop offset=".6" stop-color="#fff" stop-opacity=".85"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+  <mask id="gk"><rect x="-40" y="330" width="1160" height="1080" fill="url(#gm)"/></mask></defs>
+  <rect x="-40" y="330" width="1160" height="1080" fill="url(#gr)" mask="url(#gk)"/>`;
+const LARG = [3, 2, 5, 2, 2, 4, 3, 6, 2, 3, 4, 2, 5, 3, 2, 2, 6, 3, 4, 2, 3, 5, 2, 4, 3, 2, 2, 5, 3, 4, 2, 6, 2, 3, 3, 2];
+let bx = 0, barras = '';
+LARG.forEach((w, i) => { w = Math.round(w * 1.2); if (i % 2 === 0 && bx + w <= 230) barras += `<rect x="${bx}" y="0" width="${w}" height="68"/>`; bx += w; });
+$('codigo').innerHTML = `<svg width="230" height="68" viewBox="0 0 230 68" style="fill:var(--ink)">${barras}</svg><span>${esc(D.q('cod', 'FC·0018·CAPA'))}</span>`;
+
+$('l1').textContent = D.q('l1', 'A capa sai');
+$('l2').textContent = D.q('l2', 'pronta.');
+const DY = D.n('dy', 0);
+$('l1').style.top = 282 + DY + 'px'; $('l2').style.top = 344 + DY + 'px'; $('codigo').style.top = 286 + DY + 'px';
+$('l2').classList.add(D.q('cor', 'ac'));
+
+// a capa: o retângulo final, o raio, e o que mora dentro (o quadro do vídeo, a capa montando e o clarão do obturador)
+const [fx, fy, fw, fh] = ret('fim', '292,626,496,882'), [cx0, cy0, cw, ch] = ret('chip', '849,1607,17,30');
+Object.assign($('pc').style, {left: fx + 'px', top: fy + 'px', width: fw + 'px', height: fh + 'px'});
+document.documentElement.style.setProperty('--rr', D.n('rr', '41') + 'px');
+D.midia('#cartao', D.q('mini', ''), 'o quadro');
+const vid = D.midia('#cartao', D.q('capa', ''), 'a capa');
+if (vid) { vid.id = 'vid'; }
+$('cartao').insertAdjacentHTML('beforeend', '<div id="flash"></div>');
+if (D.q('de', '')) $('mundo').insertAdjacentHTML('beforeend', `<img id="de" alt="" src="${esc(D.q('de', ''))}">`);
+
+D.monta(tl => {
+  D.cabe('#l2', 60, ['#stage', .72]);       // "thumbnails." não cabe em 224 px
+  const tS = D.n('t_sai', '0.04'), tV = D.n('t_voa', '0.14'), tP = D.n('t_pousa', '0.74'), tF = D.n('t_fecha', '2.2');
+  const tCv = D.n('t_cv', String(tP + .04));
+  if (vid && vid.tagName === 'VIDEO') vid.dataset.off = String(-tCv + Q / 2);
+
+  D.camera(dur, 1.0, 1.02);
+
+  // 1. a bancada sai inteira: recolhe 2 quadros e se vai acelerando (a saída dura o que a entrada durou)
+  if (D.q('de', '')) {
+    tl.to('#de', {scale: .985, duration: 2 * Q, ease: 'power2.out'}, tS);
+    tl.to('#de', {opacity: 0, y: 46, scale: .93, duration: .3, ease: D.P.SAI}, tS + 2 * Q);
+    D.cue(tS + 2 * Q, 'whoosh-out');
+  }
+
+  // 2. a miniatura é o objeto carregado: parte do centro dela, na trilha (cx0, cy0), e vai ao centro da capa
+  const gx = fx + fw / 2, gy = fy + fh / 2, s0 = Math.max(cw / fw, ch / fh);
+  const x0 = cx0 + cw / 2 - gx, y0 = cy0 + ch / 2 - gy, voo = tP - tV;
+  gsap.set('#pc', {x: x0, y: y0, scale: s0, transformOrigin: '50% 50%'});
+  tl.set('#pc', {opacity: 1}, tS);
+  tl.set('#cartao', {'--so': '10px', '--sb': '16px', '--sa': .0}, 0);
+  // antecipa: comprime 3 quadros (a trilha o solta), e parte
+  tl.to('#pc', {scale: s0 * .8, duration: tV - tS, ease: 'power2.out'}, tS);
+  D.arco('#pc', tV, [x0, y0], [0, 0], {dur: voo, flecha: 110, lado: 1, ease: 'power2.inOut'});
+  tl.to('#pc', {scale: 1, duration: voo, ease: 'power3.out'}, tV);
+  // gira pro lado do arco e assenta por último (Lasseter: até na reta o objeto gira)
+  tl.to('#pc', {rotation: -9, duration: voo * .45, ease: 'power2.out'}, tV);
+  tl.to('#pc', {rotation: 0, duration: voo * .55 + 5 * Q, ease: 'power3.out'}, tV + voo * .45);
+  D.cue(tV, 'whoosh');
+  // a sombra de quem está no ar: aparece grande e clara, e pousa (a macia, 2 quadros depois do corpo)
+  tl.to('#cartao', {'--so': '86px', '--sb': '120px', '--sa': .26, duration: voo * .5, ease: 'power2.out'}, tV);
+  tl.to('#cartao', {'--so': '38px', '--sb': '70px', '--sa': .44, duration: 5 * Q, ease: 'power2.out'}, tP + 2 * Q);
+
+  // 3. o pouso: o soco de câmera e o palco que acusa; no mesmo quadro o obturador, e o quadro vira a capa
+  D.soco('#mundo', tP, 1.03, 1);
+  D.reage(tP, 16);
+  D.cue(tP, 'thud');
+  tl.fromTo('#flash', {opacity: .7}, {opacity: 0, duration: .2, ease: 'power2.out', immediateRender: false}, tP + Q);
+  D.cue(tP + Q, 'obturador');
+  if (vid) tl.set('#vid', {opacity: 1}, tCv - Q / 2);
+  // os sons da capa montando (g_capa_nick monta=1, no tempo do vídeo já acelerado por quem o gravou): vêm do json dela
+  JSON.parse(D.q('cues_capa', '[]')).forEach(c => D.cue(tCv + c.t, c.tipo));
+
+  // 4. as palavras: a de apoio sobe enquanto a miniatura voa; a de cor é o herói e cai quando a capa fecha
+  tl.to('#codigo', {opacity: 1, duration: .2, ease: 'power2.out'}, D.at(tS + .6));
+  D.palavras('#l1', tS + .6);
+  D.heroi('#l2', tF);
+  D.cue(tF + .2, 'certo');
+
+  // 5. as duas saem antes do fim: a batida seguinte começa na capa sozinha
+  D.sai(['#l1', '#l2', '#codigo'], dur - .42);
+
+  // ambiente: a luz anda (a mesma deriva da k_objeto) e a capa fica parada no fim
+  tl.to('#luz-a', {attr: {cx: 820, cy: 560}, duration: dur, ease: 'sine.inOut'}, 0);
+  tl.to('#luz-c', {attr: {cx: 200, cy: 320}, duration: dur, ease: 'sine.inOut'}, 0);
+  return dur;
+});
+</script>
+</body>
+</html>

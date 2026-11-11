@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<!-- EFEITO — a tela dividida do vídeo de celular: o visual (print, imagem, logo) num painel em cima, o cartão de baixo, e a pessoa recortada NA FRENTE do cartão com a cabeça passando da borda de cima. 1080x1920, em camadas (data-c): a pessoa entra entre `tras` e `frente`, pelo recorte.py.
+     Geometria medida na ref do dono (S.dividida de De3s_A.js): cartão x 80..1000, topo y 1340, sangra embaixo, cantos 70 px, borda de tinta 6, sombra dura azul 12; cabelo y ~1064, queixo ~1686; painel do visual y 205..935; a legenda da `dividida` termina em y 1040 (caixa até 1032 + sombra de 8).
+     Quatro layouts, por trecho (o quarto, `cartao`, é o de quando o recorte da pessoa não presta: a pessoa INTEIRA, com o fundo do bruto, dentro do cartão de baixo; o ffmpeg põe o vídeo dela no vão do cartão, que a camada `tras` deixa aberto): `dividida` (painel + cartão, pessoa por cima) · `cheia` (o visual na tela toda, sem pessoa; a legenda fica em y 1250..1500) · `rosto` (a camada tras vazia: aparece o take, como hoje) · `cartao` (painel em cima e o cartão de baixo, de canto arredondado, borda e sombra do estilo, como o da `dividida` mas mais alto: x 80..1000, topo y 1060, sangra embaixo; o vão do cartão é transparente, a legenda é a mesma da `dividida`).
+       txt  texto no painel, no lugar da imagem (`*grifo*` vira marcador) · tag  etiqueta pequena em cima do texto ("CITAÇÃO · @fulano") · num  número grande no painel, com suf (o que vem depois) e rot (o rótulo embaixo); número inteiro SOBE de 0 até o valor (contador) ·
+       img  URL da imagem do visual (file:// ou relativa; sem ela, o marcador listrado) · lay  layout único (dividida|cheia|rosto) ·
+       peca  uma PEÇA animada da biblioteca no painel da `dividida` (i_terminal, i_tv, d_grade, d_linha…), pq  os parâmetros dela (a query, `a=1&b=2`; renderiza em ar=920x730, sem papel). A peça toca na timeline desta: o tempo dela é o tempo daqui menos a entrada do trecho
+       seg  trechos "t0,t1,layout;t0,t1,layout" (vence o lay; cada layout muda em corte seco) · leg  legenda de exemplo (a real vem da legendar; aqui só marca a zona) · dur  segundos
+     etiqueta: tela-dividida, atras-da-pessoa
+     ?img=../midia/exemplo-print.png&lay=dividida&leg=Prova na tela&dur=5 -->
+<html lang="pt-BR" class="alfa" data-qa="entra-seco fica">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<script src="../nucleo/ensaio.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block;position:relative;overflow:hidden}
+#tras,#frente{position:absolute;inset:0}
+html.c-tras [data-c="frente"],html.c-frente [data-c="tras"]{visibility:hidden}
+.fundo{position:absolute;inset:0;background:var(--tex),var(--pp);opacity:0}
+/* as cores são as quatro do estilo (chão --pp, letra --ink, bloco --ac, marcador --mk); a forma (borda, sombra, canto) também: Luxo fica sem sombra e de canto reto */
+.cartao{position:absolute;left:80px;top:1340px;width:920px;height:700px;border-radius:calc(var(--raio)*5.8);background:var(--ink2);border:calc(var(--bw)*1.5) solid var(--ink);box-shadow:calc(var(--sh)*1.2) calc(var(--sh)*1.2) 0 var(--sombra,var(--ac));opacity:0}
+.painel{position:absolute;left:80px;top:205px;width:920px;height:730px;overflow:hidden;background:var(--sur);border-radius:calc(var(--raio)*2.5);box-shadow:calc(var(--sh)*1.2) calc(var(--sh)*1.2) 0 var(--sombra,var(--ac));opacity:0}
+.painel::after{content:"";position:absolute;inset:0;border:calc(var(--bw)*1.5) solid var(--ink);border-radius:inherit;pointer-events:none;z-index:9}
+.painel iframe{position:absolute;left:0;top:0;width:920px;height:730px;border:0;background:transparent}
+.cartao.vaz{background:transparent;top:1060px;height:1000px}
+.cheia{position:absolute;left:0;top:0;width:1080px;height:1920px;overflow:hidden;background:var(--tex),var(--pp);opacity:0}
+.painel .mid,.cheia .mid{position:absolute;inset:0;width:100%;height:100%}
+.vazio{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(45deg,var(--pp2) 0 24px,var(--ink2) 24px 48px)}
+.vazio span{font:700 44px/1 var(--fm);color:var(--ink6)}
+.txt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;padding:60px 70px;text-align:center;background:var(--sur);color:var(--ink)}
+.txt .tg{font:700 34px/1 var(--fm);letter-spacing:.12em;text-transform:uppercase;padding:10px 18px;background:var(--mk);color:var(--ink9);border:var(--bw) solid var(--ink)}
+.txt .tx{font:700 88px/1.08 var(--fd);letter-spacing:var(--ls);color:var(--ink)}
+.txt .tx.longo{font-size:64px}
+.txt .tx i{font-style:normal;color:var(--ink9);background:linear-gradient(var(--mk),var(--mk)) no-repeat 0 62%/100% 80%}
+.txt .nm{font:900 300px/.95 var(--fd);letter-spacing:var(--ls);color:var(--cor-num,var(--ink))}
+.txt .nm small{font-size:150px}
+.txt .rt{font:700 54px/1.1 var(--fd);color:var(--ink6)}
+.leg{position:absolute;left:80px;width:920px;text-align:center;opacity:0}
+.leg b{display:inline-block;padding:10px 26px;background:var(--mk);border:var(--bw) solid var(--ink);box-shadow:calc(var(--sh)*.8) calc(var(--sh)*.8) 0 var(--sombra,var(--ink));font:700 64px/1.1 var(--fd);letter-spacing:var(--ls);color:var(--ink9)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="tras" data-c="tras"></div>
+  <div id="frente" data-c="frente"></div>
+</div>
+<script>
+const dur = D.n('dur', '5'), PECA = D.q('peca', ''), PQ = D.q('pq', ''), IMG = D.q('img', ''), LEG = D.q('leg', ''), TXT = D.q('txt', ''), TAG = D.q('tag', ''), NUM = D.q('num', ''), SUF = D.q('suf', ''), ROT = D.q('rot', '');
+// cor sobre cor: o número no painel só usa o bloco do estilo se ele lê sobre o painel (razão ≥ 3); senão, a letra. Roda depois de a marca carregar (dentro do D.monta). Mede a cor calculada (o color-mix sai como `color(srgb …)`).
+const lum = c => { const m = (c.match(/[\d.]+/g) || []).map(Number); const v = c.startsWith('color(') ? m.slice(-3) : m.slice(0, 3).map(x => x / 255);
+  const l = v.map(x => x <= .03928 ? x / 12.92 : ((x + .055) / 1.055) ** 2.4); return .2126 * l[0] + .7152 * l[1] + .0722 * l[2]; };
+const razao = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + .05) / (y + .05); };
+const cor = (prop, onde) => { const e = document.createElement('i'); e.style.cssText = 'position:absolute;visibility:hidden;color:var(' + prop + ')'; (onde || document.body).appendChild(e);
+  const c = getComputedStyle(e).color; e.remove(); return c; };
+const esc = t => t.replace(/[&<>]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;'}[c]));
+// o conteúdo de um painel: texto, número ou a imagem (o que vier, nessa ordem)
+const conteudo = sel => {
+  if (!TXT && !NUM) return D.midia(sel, IMG, 'imagem do visual', 'cover');
+  const e = document.createElement('div'); e.className = 'txt';
+  e.innerHTML = (TAG ? `<div class="tg">${esc(TAG)}</div>` : '') +
+    (NUM ? `<div class="nm"><span id="nmv">${esc(NUM)}</span>${SUF ? ` <small>${esc(SUF)}</small>` : ''}</div>${ROT ? `<div class="rt">${esc(ROT)}</div>` : ''}`
+         : `<div class="tx${TXT.length > 70 ? ' longo' : ''}">${esc(TXT).replace(/\*([^*]+)\*/g, '<i>$1</i>')}</div>`);
+  document.querySelector(sel).appendChild(e);
+};
+const SEG = (D.q('seg', '') || `0,${dur},${D.q('lay', 'dividida')}`).split(';').map(s => { const [a, b, l] = s.split(','); return {a: +a, b: +b, l}; });
+const LAYOUTS = ['dividida', 'cheia', 'rosto', 'cartao'];
+const CARTAO = {x: 80, y: 1060, w: 920, h: 1000};      // o vão do layout `cartao` (o mesmo que o tela_dividida.py usa pra pôr o vídeo)
+SEG.forEach(s => { if (!LAYOUTS.includes(s.l)) throw new Error('layout desconhecido: ' + s.l); });
+const tras = document.getElementById('tras'), frente = document.getElementById('frente');
+const mk = (pai, cls, id) => { const e = document.createElement('div'); e.className = cls; if (id) e.id = id; pai.appendChild(e); return e; };
+const temL = l => SEG.some(s => s.l === l);
+// a legenda: uma por layout (a zona muda), só a do layout da vez aparece
+const LEGY = {dividida: [932, 1032], cartao: [932, 1032], cheia: [1250, 1492]};
+const legs = {};
+['dividida', 'cartao', 'cheia'].forEach(l => { if (!temL(l) || !LEG) return;
+  const e = mk(frente, 'leg'); e.style.top = LEGY[l][0] + 'px'; e.style.height = (LEGY[l][1] - LEGY[l][0]) + 'px';
+  e.style.display = 'flex'; e.style.alignItems = 'flex-end'; e.style.justifyContent = 'center'; e.innerHTML = '<b></b>'; e.firstChild.textContent = LEG; legs[l] = e; });
+// a peça hospedada: um iframe no painel, com a timeline presa à daqui (quadro a quadro, buscável); só o painel da `dividida` hospeda
+let filha = null;
+const hospeda = () => new Promise(ok => {
+  const f = document.createElement('iframe'), q = new URLSearchParams(PQ);
+  if (D.q('tema', '')) q.set('tema', D.q('tema', ''));
+  q.set('ar', '920x730'); q.set('alfa', '1'); q.set('dur', String(dur)); q.set('sai', '0');
+  f.src = PECA + '.html?' + q;
+  document.getElementById('painel').appendChild(f);
+  const t0 = Date.now(), espera = () => { try { if (f.contentWindow.__ready && f.contentWindow.__tl) { filha = f.contentWindow; return ok(); } } catch (e) {}
+    if (Date.now() - t0 > 20000) throw new Error('a peça ' + PECA + ' não ficou pronta no painel'); setTimeout(espera, 40); };
+  f.addEventListener('load', espera);
+});
+if (temL('dividida') || temL('cartao')) {
+  if (temL('dividida')) { mk(tras, 'fundo', 'fundo'); mk(tras, 'cartao', 'cartao'); }
+  if (temL('cartao')) { mk(tras, 'fundo vazado', 'fundoC'); mk(tras, 'cartao vaz', 'cartaoC'); }
+  mk(tras, 'painel', 'painel'); if (!PECA) conteudo('#painel');
+}
+if (temL('cheia')) { mk(tras, 'cheia', 'cheia'); conteudo('#cheia'); }
+const monta = () => D.monta(tl => {
+  { const sur = cor('--sur'), ac = cor('--ac'); document.documentElement.style.setProperty('--cor-num', razao(ac, sur) >= 3 ? 'var(--ac)' : 'var(--ink)'); }
+  if (temL('cartao')) {      // o fundo com o vão do cartão aberto (mesmo canto do cartão, no estilo); o vídeo da pessoa aparece por ele
+    const r = parseFloat(getComputedStyle(document.getElementById('cartaoC')).borderTopLeftRadius) || 0, {x, y, w, h} = CARTAO;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920"><path fill-rule="evenodd" d="M0 0H1080V1920H0Z M${x + r} ${y}H${x + w - r}A${r} ${r} 0 0 1 ${x + w} ${y + r}V${y + h - r}A${r} ${r} 0 0 1 ${x + w - r} ${y + h}H${x + r}A${r} ${r} 0 0 1 ${x} ${y + h - r}V${y + r}A${r} ${r} 0 0 1 ${x + r} ${y}Z"/></svg>`;
+    const f = document.getElementById('fundoC'); f.style.cssText += `;-webkit-mask:url("data:image/svg+xml,${encodeURIComponent(svg)}") 0 0/100% 100%;mask:url("data:image/svg+xml,${encodeURIComponent(svg)}") 0 0/100% 100%`;
+  }
+  if (filha) { const a0 = Math.min(...SEG.filter(s => s.l === 'dividida' || s.l === 'cartao').map(s => s.a)); D.aoQuadro(() => filha.__tl.time(Math.max(0, tl.time() - a0), false)); }
+  // corte seco: cada layout liga no t0 e desliga no t1 (set, sem fade: o corte é o da batida)
+  const liga = (sel, a, b) => { if (!sel) return; tl.set(sel, {opacity: 1}, a); if (b < dur - .01) tl.set(sel, {opacity: 0}, b); };
+  const E = {dividida: ['#fundo', '#cartao', '#painel', legs.dividida], cartao: ['#fundoC', '#cartaoC', '#painel', legs.cartao], cheia: ['#cheia', legs.cheia]};
+  SEG.forEach(s => (E[s.l] || []).forEach(sel => liga(typeof sel === 'string' ? document.querySelector(sel) : sel, s.a, s.b)));
+  // o número sobe até o valor durante o trecho todo (nunca em menos de 1,2 s)
+  if (/^\d+$/.test(NUM) && document.getElementById('nmv')) {
+    const o = {v: 0}, a = Math.min(...SEG.filter(s => s.l !== 'rosto').map(s => s.a));
+    tl.to(o, {v: +NUM, duration: Math.max(1.2, (SEG.filter(s => s.l !== 'rosto')[0].b - a) - .6), ease: 'power1.out', onUpdate: () => { document.getElementById('nmv').textContent = Math.round(o.v); }}, a + .1);
+  }
+  // o painel pousa na entrada de cada trecho dividida (mola curta, sem quicar); o cartão fica quieto
+  SEG.filter(s => s.l === 'dividida' || s.l === 'cartao').forEach(s => tl.fromTo('#painel', {y: 40}, {y: 0, duration: .3, ease: 'power3.out', immediateRender: false}, s.a));
+  return dur;
+});
+(PECA && (temL('dividida') || temL('cartao')) ? hospeda() : Promise.resolve()).then(monta);
+</script>
+</body>
+</html>

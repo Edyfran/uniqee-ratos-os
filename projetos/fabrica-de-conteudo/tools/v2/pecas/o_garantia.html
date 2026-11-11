@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<!-- OFERTA — garantia. 1080x1920, --alpha. UMA peça, estável, que acompanha a
+     explicação inteira — não um painel por frase. O selo bate como carimbo,
+     a frase sobe, e depois ela NÃO se mexe: garantia que flutua lê como incerta.
+       ?dias=7&l1=de garantia&l2=devolução sem pergunta&pos=topo&t=0.3&dur=6 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+.zona{position:absolute;left:56px;right:70px}
+.zona.topo{top:240px}
+.zona.centro{top:800px}
+.zona.base{top:1300px}
+.gar{display:flex;align-items:center;gap:32px;padding:26px 34px 26px 26px;opacity:0}
+.selo{flex:none;width:210px;height:210px;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0}
+.selo b{font:700 132px/.84 var(--fd);color:#fff;letter-spacing:-.05em}
+.selo span{font:700 30px/1 var(--fm);letter-spacing:.18em;color:var(--mk);margin-top:10px;text-transform:uppercase}
+.gar .tx{flex:1;min-width:0}
+.gar h3{font:700 66px/1.02 var(--fd);letter-spacing:var(--ls);color:var(--ink);opacity:0}
+.gar p{font:600 40px/1.18 var(--fd);color:var(--ink6);margin-top:12px;opacity:0}
+.gar p:empty{display:none}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="zona" id="z">
+    <div class="gar nb" id="g">
+      <div class="selo nb cor-ac" id="s"><b id="sd"></b><span id="su"></span></div>
+      <div class="tx"><h3 id="h"></h3><p id="p"></p></div>
+    </div>
+  </div>
+</div>
+<script>
+const dur = D.n('dur', '6'), t0 = D.n('t', '0.3'), dias = D.q('dias', '7');
+document.getElementById('z').classList.add(['topo', 'centro', 'base'].includes(D.q('pos')) ? D.q('pos') : 'topo');
+document.getElementById('sd').textContent = dias;
+document.getElementById('su').textContent = D.q('un', dias === '1' ? 'dia' : 'dias');
+document.getElementById('h').innerHTML = D.q('l1', 'de garantia');
+document.getElementById('p').textContent = D.q('l2', '');
+
+D.monta(tl => {
+  D.cabe('.gar h3', 40, '.tx');
+  D.cabe('.gar p', 26, '.tx');
+  D.pousa('#g', t0, {rot: 0, dr: 0, dx: -40, dy: -20});
+  D.carimbo('#s', t0 + .22, -3);
+  D.palavras('#h', t0 + .38);
+  D.palavras('#p', t0 + .62);
+  D.sai('#g', dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

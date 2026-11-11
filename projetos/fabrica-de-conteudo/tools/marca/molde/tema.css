@@ -1,0 +1,39 @@
+/* A marca de TROQUE-NOME, por cima do núcleo da fábrica.
+
+   Vale em toda peça que sai com ?tema=marca: os estilos da marca (estilos.json) pedem
+   desenho.tema = marca, e o tools/v2/nucleo/direcao-v2.js carrega esta folha depois do
+   núcleo. Só redeclare token. A forma das peças (borda, sombra, movimento) é do núcleo e
+   melhora junto quando o kit atualiza.
+
+   Os papéis, os mesmos do núcleo (tools/v2/nucleo/direcao-v2.css):
+     --pp    o chão (papel)                 --ink   a letra e a borda
+     --ac    o bloco: o que a pessoa recebe --mk    o marcador: palavra grifada, etiqueta
+     --ok    confirma; --no  custo ou perda. Sinal, nunca enfeite
+     --fd    a letra das peças              --ed-sans  a da fala do reel editorial e da capa
+   O resto (o bloco claro, os degradês dentro da letra do reel editorial) sai do --ac e do
+   --mk, pelo color-mix: troque as quatro cores e a letra, e o sistema inteiro acompanha.
+
+   Chão escuro: troque --pp e --ink, e copie as regras de texto solto do tema tinteiro
+   (direcao-v2.css, html.tinteiro body e .hd), trocando tinteiro por marca.
+
+   A letra: o arquivo mora em fontes/, ao lado desta folha, e o caminho é relativo a ela.
+   Só fonte que o cliente pode usar em vídeo comercial (a dele, comprada, ou OFL, como as
+   do Google Fonts), com a licença junto na pasta. */
+
+@font-face{font-family:'Marca';font-weight:100 900;src:url(fontes/TROQUE.ttf) format('truetype')}
+
+html.marca{
+  --pp:#TROQUE; --ink:#TROQUE; --ac:#TROQUE; --mk:#TROQUE;
+  --ink9:var(--ink); --sur:var(--pp);
+  --ac2:color-mix(in srgb,var(--ac) 16%,white); --act:color-mix(in srgb,var(--ac) 26%,white);
+  --fd:'Marca',system-ui,sans-serif; --ls:-.02em;
+
+  /* o reel editorial (e_editorial) e a capa (g_capa_nick) */
+  --ed-sans:'Marca',system-ui,sans-serif;
+  --ed-pp:color-mix(in srgb,var(--pp) 94%,var(--ink)); --ed-pp-luz:var(--pp);
+  --ed-tx:var(--ink);
+  --ed-dg-azul:linear-gradient(180deg,color-mix(in srgb,var(--ac) 50%,white) 0%,var(--ac) 70%);
+  --ed-dg-ouro:linear-gradient(180deg,color-mix(in srgb,var(--mk) 30%,white) 8%,var(--mk) 58%,color-mix(in srgb,var(--mk) 80%,black) 100%);
+  --ed-dg-some-azul:linear-gradient(180deg,var(--ac) 0%,color-mix(in srgb,var(--ac) 55%,transparent) 55%,color-mix(in srgb,var(--ac) 6%,transparent) 100%);
+  --ed-dg-some-ouro:linear-gradient(180deg,var(--mk) 0%,color-mix(in srgb,var(--mk) 55%,transparent) 55%,color-mix(in srgb,var(--mk) 6%,transparent) 100%);
+}

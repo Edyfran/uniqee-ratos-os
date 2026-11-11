@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<!-- FORMATO 3 — o botão, v2. 1200x260, renderize com --alpha. txt= troca o texto do botão (COMEÇAR MINHA EQUIPE).
+     ?txt=COMEÇAR MINHA EQUIPE
+     Mudou: a peça deixa espaço pra sombra dura dentro do quadro, então NÃO
+     entra mais com máscara de canto arredondado — entra como peça alfa.
+     O botão cai e assenta; na batida de "agora" ele é APERTADO (afunda na
+     sombra e volta), o brilho passa e a seta empurra. Depois respira. -->
+<html data-qa="fica" lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1200px;height:260px;background:transparent}
+#stage{width:1200px;height:260px;padding:0;background:none;display:block}
+/* margem de 18px em volta: a respiração (1.02) e o quique da entrada crescem
+   pra dentro do quadro, e a sombra dura cabe à direita e embaixo */
+.btn{position:absolute;left:18px;top:14px;width:calc(1200px - 36px - var(--sh));height:calc(260px - 28px - var(--sh));overflow:hidden;opacity:0}
+.btn .rt{position:relative;z-index:1;font:900 70px/1 var(--fd);font-stretch:var(--fx);letter-spacing:-.01em}
+.seta{position:relative;z-index:1;width:92px;height:92px;display:flex;align-items:center;justify-content:center;margin-left:14px;
+  background:var(--mk);color:var(--ink);border:var(--bw) solid var(--ink);border-radius:var(--raio-s);font:900 54px/1 var(--fd)}
+.luz{position:absolute;top:-30%;left:-30%;width:16%;height:160%;background:rgba(255,255,255,.3);transform:skewX(-18deg)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="btn" id="b">
+    <div class="luz" id="l"></div>
+    <span class="rt" id="rt"></span>
+    <span class="seta" id="se">→</span>
+  </div>
+</div>
+<script>
+document.getElementById('rt').textContent = D.q('txt', 'COMEÇAR MINHA EQUIPE');
+D.monta(tl => {
+  D.cabe('.btn .rt', 48, ['.btn', .8]);
+  D.pousa('#b', .12, {dy: -30, s: 1.015, dr: 0});
+  D.palavras('#rt', .2, .06);
+  tl.fromTo('#se', {scale: .2, rotation: -40}, {scale: 1, rotation: 0, duration: .4, ease: 'back.out(3)'}, .34);
+  // o clique: afunda na sombra e volta com mola
+  tl.to('#b', {x: D.SH, y: D.SH, '--shx': '0px', duration: .1, ease: 'power2.out'}, .7);
+  tl.to('#b', {x: 0, y: 0, '--shx': D.SH + 'px', duration: .45, ease: D.P.MOLA}, .8);
+  tl.fromTo('#l', {x: 0}, {x: 1500, duration: .8, ease: 'power2.inOut'}, .75);
+  tl.to('#se', {x: 14, duration: .16, ease: 'power2.out', yoyo: true, repeat: 3}, .9);
+  D.respira('#b', 1.7, 3.5, 1.02);
+  return 3.5;
+});
+</script>
+</body>
+</html>

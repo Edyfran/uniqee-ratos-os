@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<!-- PROVA — o editado em tela cheia: a capa vira o pôster do celular, o play aperta e o vídeo toma o quadro.
+     1080x1920, opaca. O quadro 0 é o último quadro da k_capa: o mesmo papel com a mesma luz, e o celular de canto
+     redondo (`fim`) com a capa como pôster. Daí o celular contrai 9 % (antecipação, 4 quadros) e o botão play
+     (marcador amarelo, borda tinta, sombra dura) cai em cima da capa; a seta (D.cursor) chega em arco, para 2
+     quadros e aperta, e o botão afunda. Um quadro depois do clique o vídeo (`v`) começa a tocar e o celular cresce
+     até 1080×1920 em 14 quadros: o canto vai a zero, a sombra some, a contração solta junto (o estouro da mola),
+     e a câmera recua de 1,02 a 1. Sem peça por cima: quem fala, legenda e dá zoom é o próprio vídeo (a tela
+     limpa da aula). O áudio é de quem monta: o vídeo do celular fica mudo aqui.
+       v  o vídeo do editado, 1080×1920 (todo quadro chave) · poster  a capa (imagem 9:16)
+       fim  o retângulo do celular (292,626,496,882) · rr  o raio dele (41)
+       t_play  o clique (0.36); o vídeo começa 3 quadros depois e o celular cresce junto · cresce  quadros do crescimento (14)
+       dur  (4)
+       ?v=../midia/vitrine-camadas.jpg&poster=../midia/capa-exemplo.jpg&dur=4 -->
+<html lang="pt-BR" data-qa="entra-seco">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<script src="../nucleo/cursor.js"></script>
+<script>if ((new URLSearchParams(location.search).get('ar') || '').indexOf('1080x1350') === 0) document.write('<style>html,body,#stage,#mundo{height:1350px!important}</style>');</script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+#stage{padding:0;display:block;overflow:hidden;background:var(--pp)}
+#mundo{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:50% 45%}
+#papel{position:absolute;left:0;top:0}
+/* o celular: a caixa (left, top, width, height) cresce de verdade, pro vídeo e o pôster ficarem nítidos em
+   qualquer tamanho; a contração é o transform dele */
+#pc{position:absolute;z-index:6}
+.cel{position:absolute;inset:0;overflow:hidden;background:var(--cine);border-radius:var(--rr);
+  box-shadow:0 var(--so,38px) var(--sb,70px) -18px rgba(11,13,18,var(--sa,.44)),0 12px 26px -8px rgba(11,13,18,var(--sa2,.22))}
+.cel .mid{position:absolute;inset:0}
+#vid{opacity:0}
+#play{position:absolute;left:50%;top:50%;width:156px;height:156px;margin:-78px 0 0 -78px;border-radius:50%;
+  display:grid;place-items:center;z-index:3;opacity:0}
+#play svg{width:64px;height:64px;margin-left:8px;overflow:visible}
+</style>
+</head>
+<body>
+<div id="stage"><div id="mundo">
+  <svg id="papel" width="1080" height="1920"></svg>
+  <div id="pc"><div class="cel" id="cartao"></div><div class="nb cor-mk" id="play"><svg viewBox="0 0 64 64"><path d="M10 4 58 32 10 60Z" fill="var(--ink)" stroke="var(--ink)" stroke-width="6" stroke-linejoin="round"/></svg></div></div>
+</div></div>
+<script>
+const $ = id => document.getElementById(id);
+const ret = (k, d) => D.q(k, d).split(',').map(Number);
+const W = 1080, H = innerHeight, Q = D.QD, dur = D.n('dur', '4');   // ?ar=1080x1350: o 4:5 de verdade
+
+// o mesmo papel, a mesma grade de luz da k_capa; a luz já parte de onde a k_capa a deixou
+$('papel').innerHTML = `<defs>
+  <pattern id="pt" width="36" height="36" patternUnits="userSpaceOnUse"><circle cx="18" cy="18" r="2.2" fill="rgba(11,13,18,.07)"/></pattern>
+  <radialGradient id="la"><stop offset="0" style="stop-color:var(--mk);stop-opacity:.42"/><stop offset=".55" style="stop-color:var(--mk);stop-opacity:.14"/><stop offset="1" style="stop-color:var(--mk);stop-opacity:0"/></radialGradient>
+  <radialGradient id="lb2"><stop offset="0" style="stop-color:var(--ac);stop-opacity:.16"/><stop offset="1" style="stop-color:var(--ac);stop-opacity:0"/></radialGradient>
+  <radialGradient id="lc"><stop offset="0" style="stop-color:var(--mk);stop-opacity:.30"/><stop offset="1" style="stop-color:var(--mk);stop-opacity:0"/></radialGradient></defs>
+  <rect width="${W}" height="${H}" style="fill:var(--pp)"/>
+  <circle id="luz-a" cx="820" cy="560" r="760" fill="url(#la)"/>
+  <circle id="luz-b" cx="120" cy="1180" r="640" fill="url(#lb2)"/>
+  <circle id="luz-c" cx="200" cy="320" r="520" fill="url(#lc)"/>
+  <rect width="${W}" height="${H}" fill="url(#pt)"/>`;
+
+const [fx, fy, fw, fh] = ret('fim', '292,626,496,882'), rr = D.n('rr', '41');
+Object.assign($('pc').style, {left: fx + 'px', top: fy + 'px', width: fw + 'px', height: fh + 'px'});
+document.documentElement.style.setProperty('--rr', rr + 'px');
+D.midia('#cartao', D.q('poster', ''), 'a capa');
+const vid = D.midia('#cartao', D.q('v', ''), 'o editado');
+if (vid) vid.id = 'vid';
+
+D.monta(tl => {
+  const tT = D.n('t_play', '0.36'), tG = tT + 3 * Q, nG = D.n('cresce', '14') * Q;
+  if (vid && vid.tagName === 'VIDEO') vid.dataset.off = String(-tG + Q / 2);
+
+  // a câmera chega na k_capa em 1,02 e recua a 1 junto com o crescimento
+  D.camera(tG + nG, 1.02, 1.0);
+
+  // 1. antecipa: o celular contrai 9 % em 4 quadros e segura; o botão cai em cima da capa
+  tl.to('#pc', {scale: .91, duration: 4 * Q, ease: 'power2.out'}, .06);
+  D.pousa('#play', .24, {som: 'pop'});
+
+  // 2. a seta chega, para 2 quadros e aperta o botão; o botão afunda (D.cursor) e some no quadro seguinte
+  const bx = fx + fw / 2, by = fy + fh / 2;
+  D.cursor('#mundo', [{x: 900, y: 1500, t: .04}, {x: bx + 6, y: by + 8, t: tT, clica: true, alvo: '#play'}], {tam: 104, sai: tT + .22});
+  tl.to('#play', {opacity: 0, duration: 3 * Q, ease: 'power2.in'}, tT + 3 * Q);
+
+  // 3. o vídeo toca e o celular cresce até a tela inteira; a contração solta no mesmo tempo (a mola do estouro)
+  if (vid) tl.set('#vid', {opacity: 1}, tG - Q / 2);
+  tl.to('#pc', {scale: 1, duration: nG * .8, ease: 'power3.out'}, tG);
+  tl.to('#pc', {left: 0, top: 0, width: W, height: H, duration: nG, ease: 'power3.inOut'}, tG);
+  tl.to('#cartao', {borderRadius: 0, duration: nG, ease: 'power3.inOut'}, tG);
+  tl.to('#cartao', {'--sa': 0, '--sa2': 0, duration: nG * .7, ease: 'power2.in'}, tG);
+  D.cue(tG, 'whoosh');
+  tl.to('#luz-a', {attr: {cx: 780, cy: 600}, duration: dur, ease: 'sine.inOut'}, 0);
+  tl.to('#luz-c', {attr: {cx: 230, cy: 360}, duration: dur, ease: 'sine.inOut'}, 0);
+  return dur;
+});
+</script>
+</body>
+</html>

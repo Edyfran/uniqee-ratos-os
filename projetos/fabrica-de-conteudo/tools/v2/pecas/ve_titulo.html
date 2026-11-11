@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<!-- ENSAIO — title drop em sanduíche, com a pessoa NO MEIO e o FUNDO REAL.
+     1920x1080, --alpha, EM CAMADAS. Uma linha do título passa ATRÁS de você e a
+     outra NA FRENTE; cada uma anda numa velocidade (parallax). O fundo do take
+     continua lá.
+       ?l1=Faturei&l2=1 milhão&frente=2&kick=um ensaio&sub=e o que isso me ensinou&estilo=cor&t0=0.2&dur=4.5
+     estilo:
+       cor       clarão de 2 quadros, as linhas batem grandes e assentam; corte seco
+       contorno  a de trás só em contorno, a da frente cheia; entra suave, sai em fade
+       capa      a de trás GIGANTE, sangrando nas bordas (capa de revista); a da frente vira etiqueta
+       cruza     as linhas entram de lados opostos e seguem derivando, uma contra a outra
+     campo=1   põe o campo tinta atrás e deixa você em P&B (a versão original)
+     frente    quais linhas vão na frente (1, 2, 12 ou nada) -->
+<html lang="pt-BR" class="h alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/direcao-h.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<script src="../nucleo/ensaio.js"></script>
+<style>
+.fd{position:absolute;inset:0;background:radial-gradient(circle,rgba(255,255,255,.06) 2px,transparent 2.6px) 0 0/36px 36px,var(--ink);opacity:0}
+.ln{position:absolute;left:60px;right:60px;text-align:center;opacity:0}
+.ln b{display:inline-block;font:700 300px/.86 var(--fd);letter-spacing:-.055em;text-transform:uppercase;white-space:nowrap}
+#l1{top:40px}
+#l2{top:540px}
+#l1 b{color:#fff;-webkit-text-stroke:6px var(--ink);text-shadow:14px 14px 0 var(--ink)}
+#l2 b{color:var(--mk);-webkit-text-stroke:6px var(--ink);text-shadow:16px 16px 0 var(--ink)}
+/* contorno: a de trás some no fundo, só o traço; a da frente é cheia e branca */
+.e-contorno #l1 b{color:transparent;-webkit-text-stroke:5px #fff;text-shadow:none}
+.e-contorno #l2 b{color:#fff;-webkit-text-stroke:0;text-shadow:10px 10px 0 var(--ink)}
+/* capa: a de trás maior que o quadro, sangrando; a da frente é etiqueta */
+.e-capa #l1{left:-400px;right:-400px;top:-10px}
+.e-capa #l1 b{font-size:560px;letter-spacing:-.065em;-webkit-text-stroke:0;text-shadow:none;color:#fff}
+.e-capa #l2{top:700px}
+.e-capa #l2 b{font:700 76px/1 var(--fd);letter-spacing:-.02em;text-transform:none;color:var(--ink);-webkit-text-stroke:0;text-shadow:none;background:var(--mk);border:var(--bw) solid var(--ink);border-radius:var(--raio);box-shadow:10px 10px 0 var(--ink);padding:20px 34px 24px}
+/* cruza: sem traço grosso, sombra dura menor — é o movimento que chama */
+.e-cruza #l1 b{-webkit-text-stroke:0;text-shadow:10px 10px 0 rgba(11,13,18,.6)}
+.e-cruza #l2 b{-webkit-text-stroke:5px var(--ink);text-shadow:12px 12px 0 var(--ink)}
+.kk{position:absolute;left:0;right:0;top:36px;display:flex;justify-content:center}
+.e-capa .kk{justify-content:flex-start;left:120px}
+.kk .kick{margin:0}
+.sb{position:absolute;left:0;right:0;top:820px;display:flex;justify-content:center}
+.sb span{padding:14px 24px 12px;font:700 30px/1 var(--fm);letter-spacing:.04em;background:#fff;color:var(--ink);border:var(--bw) solid var(--ink);border-radius:var(--raio-s);box-shadow:6px 6px 0 var(--ink);opacity:0}
+.sb span:empty{display:none}
+.fl{position:absolute;inset:0;background:#fff;opacity:0}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="fd" id="fd" data-c="tras"></div>
+  <div class="ln" id="l1"><b id="b1"></b></div>
+  <div class="ln" id="l2"><b id="b2"></b></div>
+  <div class="kk" data-c="frente"><div class="kick" id="k"></div></div>
+  <div class="sb" data-c="frente"><span id="sb"></span></div>
+  <div class="fl" id="fl" data-c="frente"></div>
+</div>
+<script>
+const dur = D.n('dur', '4.5'), t0 = D.n('t0', '0.2'), $ = id => document.getElementById(id);
+const est = ['cor', 'contorno', 'capa', 'cruza'].includes(D.q('estilo')) ? D.q('estilo') : 'cor';
+const campo = D.q('campo', '0') === '1';
+document.documentElement.classList.add('e-' + est);
+E.pessoa('centro');
+const fr = D.q('frente', '2');
+['1', '2'].forEach(n => $('l' + n).dataset.c = fr.includes(n) ? 'frente' : 'tras');
+$('b1').textContent = D.q('l1', 'Faturei');
+$('b2').textContent = D.q('l2', '1 milhão');
+$('k').textContent = D.q('kick', 'um ensaio');
+if (est === 'capa') $('l1').dataset.qa = 'ignora';   // a capa sangra nas bordas de propósito
+$('sb').textContent = est === 'capa' ? '' : D.q('sub', 'e o que isso me ensinou');
+if (!$('b1').textContent) $('l1').remove();
+const tc = D.at(t0), fim = dur - .08, seco = est === 'cor' || est === 'capa';
+if (campo) E.video(tc, fim, 'pb');
+E.video(tc, fim, 'zoom', {de: seco ? 1.04 : 1, para: seco ? 1.09 : 1.05, entra: fim - tc});
+D.monta(tl => {
+  if (est !== 'capa') D.cabe('#b1', 120, '#l1');
+  D.cabe('#b2', 60, '#l2');
+  if (campo) tl.set('#fd', {opacity: 1}, tc);
+  if (seco) { tl.fromTo('#fl', {opacity: est === 'capa' ? .7 : 1}, {opacity: 0, duration: .14, ease: 'power2.out', immediateRender: false}, tc); D.cue(t0, 'riser'); D.cue(t0, 'boom'); }
+  const vel = n => fr.includes(n) ? 1.06 : 1.03;   // a da frente aproxima mais: parallax
+  const hold = (id, t, extra = {}) => tl.to(id, {scale: vel(id.slice(-1)), duration: fim - t, ease: 'none', ...extra}, t);
+  if (est === 'cor') {
+    ['#l1', '#l2'].forEach((id, i) => { if (!$(id.slice(1))) return; const t = tc + .06 + i * .24; tl.fromTo(id, {opacity: 0, scale: 1.35}, {opacity: 1, scale: 1, duration: .32, ease: 'power4.out'}, t); hold(id, t + .32); });
+    D.cue(t0 + .3, 'stamp');
+  } else if (est === 'contorno') {
+    ['#l1', '#l2'].forEach((id, i) => { if (!$(id.slice(1))) return; const t = tc + i * .35; tl.fromTo(id, {opacity: 0, scale: 1.08, y: 14}, {opacity: 1, scale: 1, y: 0, duration: .8, ease: 'power3.out'}, t); hold(id, t + .8); });
+    D.cue(t0, 'swish');
+  } else if (est === 'capa') {
+    if ($('l1')) { tl.fromTo('#l1', {opacity: 0, scale: 1.12}, {opacity: 1, scale: 1, duration: .5, ease: 'power4.out'}, tc + .04); tl.to('#l1', {scale: 1.03, duration: fim - tc - .54, ease: 'none'}, tc + .54); }
+    D.pousa('#l2', t0 + .45, {rot: -2, dy: -60, dr: -7, s: 1.1, ease: D.P.HEROI, som: 'stamp'});
+  } else {
+    const cr = (id, de, deriva, t) => { if (!$(id.slice(1))) return; tl.fromTo(id, {opacity: 0, x: de}, {opacity: 1, x: 0, duration: .8, ease: 'power4.out'}, t); tl.to(id, {x: deriva, duration: fim - t - .8, ease: 'none'}, t + .8); };
+    cr('#l1', -700, 40, tc);
+    cr('#l2', 700, -70, tc + .12);
+    D.cue(t0, 'whoosh');
+  }
+  D.carimbo('#k', t0 + .6, 0);
+  tl.fromTo('#sb', {opacity: 0, y: 16}, {opacity: 1, y: 0, duration: .4, ease: D.P.EASE}, tc + .75);
+  if (seco) { tl.set(['#fd', '.ln', '.kick', '#sb'], {opacity: 0}, fim); D.cue(fim, 'whoosh-out'); }
+  else if (est === 'contorno') tl.to(['.ln', '.kick', '#sb'], {opacity: 0, duration: .35, ease: 'power1.in'}, dur - .4);
+  else { tl.to('#l1', {x: '+=900', opacity: 0, duration: .4, ease: 'power3.in'}, dur - .45); tl.to('#l2', {x: '-=900', opacity: 0, duration: .4, ease: 'power3.in'}, dur - .45); tl.to(['.kick', '#sb'], {opacity: 0, duration: .25}, dur - .4); D.cue(dur - .45, 'whoosh-out'); }
+  return dur;
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<!-- PROVA — o mesmo take, bruto × editado, lado a lado. 1080x1920.
+     Duas colunas em pé: à esquerda o bruto em preto e branco, à direita o mesmo take editado. Cada coluna mostra o
+     quadro 9:16 inteiro na escala `esc`, então rosto e legenda ficam dentro da zona do Reels (y 270–1250). No bruto,
+     um ✕ vermelho bate por tentativa que travou e o ✓ verde na que ficou; em cima, a frase gigante (Anton, amarela,
+     borda de tinta e sombra dura) bate atravessando as duas colunas. Em `t_toma` o editado empurra a costura pra
+     esquerda e toma o quadro inteiro. É o gancho que bate seco: no quadro 0 as duas colunas já estão na tela.
+     Imagem ou vídeo nas duas (o vídeo segue a timeline). Da referência (o "com e sem lado a lado" do estudo
+     pesquisa/referencias-organico/instagram-0810, mecânica 1) saiu só o movimento.
+       a   o bruto (esquerda) · b  o editado (direita) · esc  a escala do quadro 9:16 na coluna (.75)
+       xa, xb  quanto o quadro anda na coluna, em px, pra centrar o rosto (0)
+       ta  a etiqueta do bruto (BRUTO 1:32) · tb  a do editado (EDITADO 0:19) · topo  o y das etiquetas (300)
+       x   quantos ✕ (6) · ok  o rótulo do ✓ da tentativa que ficou (vazio: sem ✓) · t_x  o primeiro ✕ · y_x (1090)
+       l   a frase gigante · y_l  o topo dela (420) · h_l  a altura da letra (210) · larg  a largura máxima (900) · t_l
+       t_toma  quando o editado toma o quadro (-1: as duas colunas até o fim) · dur
+       ?a=../midia/lupa-antes.jpg&b=../midia/lupa-depois.jpg&ta=BRUTO 1:32&tb=EDITADO 0:19&x=6&ok=a 7ª&t_x=0.1&l=1 pedido.&t_l=0.45&t_toma=1.7&dur=2.4 -->
+<html lang="pt-BR" data-qa="entra-seco">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/editorial.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+#stage{padding:0;display:block;overflow:hidden;background:var(--ink)}
+.col{position:absolute;top:0;height:1920px;overflow:hidden;background:var(--ink)}
+.col .cam{position:absolute}
+#ca .cam{filter:grayscale(1) contrast(1.12) brightness(.92)}
+/* a costura: a borda de tinta do editado, que anda com ele */
+#cb{border-left:calc(var(--bw)*3) solid var(--ink);box-shadow:-6px 0 0 var(--mk)}
+.tag{position:absolute;display:flex;align-items:center;gap:12px;padding:14px 18px 12px;opacity:0;
+  font:700 44px/1 var(--fm);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.tag i{width:24px;height:24px;border-radius:50%;background:var(--no);border:3px solid var(--ink);flex:none}
+.xs{position:absolute;display:flex;flex-wrap:wrap;gap:14px}
+.xs b{display:grid;place-items:center;width:84px;height:84px;font:700 54px/1 var(--fd);opacity:0}
+.xs .fica{width:auto;padding:0 20px;gap:10px;display:flex;align-items:center;font-size:44px}
+/* a frase gigante: a letra da nossa direção (a voz `gigante` da e_editorial com `cor`), preenchida no marcador */
+.gig{position:absolute;left:0;top:0;white-space:nowrap;filter:drop-shadow(10px 10px 0 var(--ink))}
+.gig i{display:inline-block;font:400 100px/1 var(--ed-gig);font-style:normal;text-transform:uppercase;color:var(--mk);
+  -webkit-text-stroke:8px var(--ink);paint-order:stroke fill;transform-origin:50% 100%}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="col" id="ca"><div class="cam" id="ma"></div></div>
+  <div class="col" id="cb"><div class="cam" id="mb"></div></div>
+  <div class="tag nb" id="ta"><i></i><span></span></div>
+  <div class="tag nb cor-mk" id="tb"><span></span></div>
+  <div class="xs" id="xs"></div>
+  <div class="gig" id="gig"></div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const dur = D.n('dur', '2.4'), E = D.n('esc', '.75'), topo = D.n('topo', '300');
+const tToma = D.n('t_toma', '1.7'), tX = D.n('t_x', '0.1'), tL = D.n('t_l', '0.45');
+const W = 1080 * E, H = 1920 * E;
+D.midia('#ma', D.q('a', '../midia/lupa-antes.jpg'), 'bruto');
+D.midia('#mb', D.q('b', '../midia/lupa-depois.jpg'), 'editado');
+// cada quadro inteiro na escala `esc`, no meio da coluna de 540 (mais o ajuste do rosto)
+const poe = (id, dx) => Object.assign($(id).style, {width: W + 'px', height: H + 'px', left: (540 - W) / 2 + dx + 'px', top: (1920 - H) / 2 + 'px'});
+poe('ma', D.n('xa', '0')); poe('mb', D.n('xb', '0'));
+Object.assign($('ca').style, {left: '0px', width: '540px'});
+Object.assign($('cb').style, {left: '540px', width: '540px'});
+$('ta').querySelector('span').textContent = D.q('ta', 'BRUTO 1:32');
+$('tb').querySelector('span').textContent = '✓ ' + D.q('tb', 'EDITADO 0:19');
+// a zona do Reels começa em x 65; a do editado cabe até 1015 com o texto de até 14 letras
+Object.assign($('ta').style, {left: '65px', top: topo + 'px'});
+Object.assign($('tb').style, {left: '566px', top: topo + 'px'});
+// os ✕ das tentativas que travaram e o ✓ da que ficou, em fila sob o rosto do bruto
+const nx = Math.round(D.n('x', '6')), ok = D.q('ok', 'a 7ª');
+$('xs').innerHTML = Array.from({length: nx}, () => '<b class="nb cor-no">✕</b>').join('') +
+  (ok ? `<b class="nb cor-ok fica">✓ ${esc(ok)}</b>` : '');
+Object.assign($('xs').style, {left: '65px', top: D.n('y_x', '1090') + 'px', width: '450px'});
+const frase = D.q('l', '1 pedido.');
+$('gig').innerHTML = [...frase].map(l => l === ' ' ? '<i>&nbsp;</i>' : `<i>${esc(l)}</i>`).join('');
+
+D.monta(tl => {
+  // a frase estica até `larg` de largura e `h_l` de altura de letra, medida na tinta da caixa alta (como a voz gigante)
+  const g = $('gig'), ls = [...g.children];
+  if (frase) {
+    const cx = document.createElement('canvas').getContext('2d');
+    cx.font = '400 100px ' + D.css('--ed-gig').split(',')[0];
+    const m = cx.measureText(frase.toUpperCase());
+    const alt = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent, topoTinta = 100 * .5 + (m.fontBoundingBoxAscent - m.fontBoundingBoxDescent) / 2 - m.actualBoundingBoxAscent;
+    const sx = Math.min(D.n('larg', '900') / g.getBoundingClientRect().width, D.n('h_l', '210') / alt * 1.15), sy = D.n('h_l', '210') / alt;
+    Object.assign(g.style, {transform: `scale(${sx.toFixed(4)},${sy.toFixed(4)})`, transformOrigin: '0 0'});
+    const larg = g.getBoundingClientRect().width;
+    Object.assign(g.style, {left: (540 - larg / 2) + 'px', top: (D.n('y_l', '420') - topoTinta * sy) + 'px'});
+    tl.fromTo(ls, {yPercent: 70, scaleY: .5, opacity: 0}, {yPercent: 0, scaleY: 1, opacity: 1, duration: .38,
+      ease: 'expo.out', stagger: .03}, D.at(tL));
+    D.cue(D.at(tL), 'whoosh'); D.cue(tL, 'impact');
+  }
+  // as etiquetas já estão na tela no quadro 0 (o gancho bate seco)
+  tl.set(['#ta', '#tb'], {opacity: 1}, 0);
+  [...$('xs').children].forEach((b, i) => {
+    const t = tX + i * .09;
+    tl.fromTo(b, {opacity: 0, scale: 1.35, rotation: -14}, {opacity: 1, scale: 1, rotation: i % 2 ? 4 : -4,
+      duration: .22, ease: D.P.POUSA}, t);
+    D.cue(t, b.classList.contains('fica') ? 'certo' : 'erro');
+  });
+  if (tToma >= 0) {
+    // o editado empurra a costura pra esquerda e o quadro dele cresce até a tela inteira; o bruto sai junto
+    const d = .5, t = D.at(tToma);
+    tl.to('#cb', {left: 0, width: 1080, duration: d, ease: 'power3.inOut'}, t);
+    tl.to('#mb', {width: 1080, height: 1920, left: 0, top: 0, duration: d, ease: 'power3.inOut'}, t);
+    tl.to('#ca', {x: -360, duration: d, ease: 'power3.inOut'}, t);
+    tl.to(['#ta', '#xs'], {x: -40, opacity: 0, duration: .25, ease: 'power3.in'}, t);
+    tl.to('#tb', {left: 65, duration: d, ease: 'power3.inOut'}, t);
+    tl.to('#cb', {borderLeftWidth: 0, boxShadow: '0px 0 0 rgba(0,0,0,0)', duration: .12}, t + d - .12);
+    D.cue(t, 'whoosh');
+    if (frase) tl.to(ls, {yPercent: -40, opacity: 0, duration: .2, ease: 'power2.in', stagger: .012}, t);
+    D.sai(['#tb'], dur - .35);
+  }
+  return dur;
+});
+</script>
+</body>
+</html>

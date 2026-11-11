@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<!-- INTERFACE — caixa de conversa do Claude (app, tema escuro) com dois anexos. Fica com a cara do app, não com a da Fábrica:
+     caixa escura de canto redondo, asterisco laranja, "Como posso ajudar hoje?", chips com miniatura/nome/duração, "+" e o botão
+     de enviar creme. Entra por fade curto (sem deslizar), o 1º anexo pousa, o 2º chega de cima e da direita, e a linha branca de
+     envio corre na borda de baixo. Sai por corte. Miniaturas: quadros do nosso avatar (midia/avatar-th1.jpg, th2).
+     Clone do efeito 09 da referência Deps_-cz-Fg (medido a 30 qps). 1080x1920, --alpha.
+     cab=Fábrica de Conteúdo põe um cabeçalho no topo da caixa · logo=0 tira o asterisco do app (o texto de ph volta pra esquerda).
+       a1 · a2  nomes · d1 · d2  duração e resolução · ph  o texto vazio · x  y  o canto da caixa (70, 1061) · dur (2.77)
+       ?a1=bruto_1.mp4&a2=bruto_2.mp4&d1=0:37 · 4K&d2=0:22 · 4K&ph=Como posso ajudar hoje?&dur=2.77 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px;background:transparent}
+#stage{padding:0;display:block;overflow:hidden;background:none;position:relative;font-family:Inter,-apple-system,"Helvetica Neue",Arial,sans-serif}
+/* cinzas do tema escuro do Claude (medidos na referência) */
+#cx{position:absolute;width:898px;height:379px;border-radius:40px;opacity:0;background:#121619;box-sizing:border-box;
+  border:1.5px solid #2a2f33;box-shadow:0 10px 40px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.04)}
+#st{position:absolute;left:34px;top:28px;width:52px;height:52px}
+#ph{position:absolute;left:107px;top:30px;font:400 38px/52px Inter,sans-serif;color:#8a8e91;white-space:nowrap;letter-spacing:-.005em}
+.ch{position:absolute;top:116px;width:404px;height:142px;border:1.5px solid #2c3135;border-radius:22px;background:#1c2023;opacity:0;box-sizing:border-box}
+.ch .th{position:absolute;left:16px;top:16px;width:108px;height:108px;border-radius:12px;object-fit:cover}
+.ch b{position:absolute;left:142px;top:34px;font:500 32px/40px Inter,sans-serif;color:#ececea;white-space:nowrap;letter-spacing:-.01em}
+.ch s{position:absolute;left:142px;top:78px;text-decoration:none;font:400 25px/30px "Geist Mono","IBM Plex Mono",monospace;color:#8a8e91;white-space:nowrap}
+#mais{position:absolute;left:32px;top:287px;width:62px;height:62px;border-radius:50%;border:2px solid #4b5156;box-sizing:border-box}
+#mais:before,#mais:after{content:"";position:absolute;background:#b9bcbe;left:50%;top:50%;transform:translate(-50%,-50%)}
+#mais:before{width:22px;height:2.5px}#mais:after{width:2.5px;height:22px}
+#env{position:absolute;left:802px;top:282px;width:66px;height:66px;border-radius:14px;background:#f5f0e6;display:flex;align-items:center;justify-content:center}
+#env svg{width:34px;height:34px}
+#lin{position:absolute;left:1px;bottom:10px;height:4px;width:0;background:#fff;border-radius:2px}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="cx">
+    <svg id="st" viewBox="0 0 52 52"><g fill="#e8704f"><rect x="23" y="2" width="6" height="48" rx="3"/><rect x="23" y="2" width="6" height="48" rx="3" transform="rotate(60 26 26)"/><rect x="23" y="2" width="6" height="48" rx="3" transform="rotate(120 26 26)"/></g></svg>
+    <div id="ph"></div>
+    <div class="ch" id="c1"><img class="th" src="../midia/avatar-th1.jpg" alt=""><b id="n1"></b><s id="e1"></s></div>
+    <div class="ch" id="c2"><img class="th" src="../midia/avatar-th2.jpg" alt=""><b id="n2"></b><s id="e2"></s></div>
+    <div id="mais"></div>
+    <div id="env"><svg viewBox="0 0 34 34" fill="none" stroke="#111" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 28V7M8 15L17 6L26 15"/></svg></div>
+    <div id="lin"></div>
+  </div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const dur = D.n('dur', '2.77'), X = D.n('x', '70'), Y = D.n('y', '1061');
+$('n1').textContent = D.q('a1', 'bruto_1.mp4'); $('e1').textContent = D.q('d1', '0:37 · 4K');
+$('n2').textContent = D.q('a2', 'bruto_2.mp4'); $('e2').textContent = D.q('d2', '0:22 · 4K');
+$('ph').textContent = D.q('ph', 'Como posso ajudar hoje?');
+// cab= põe um cabeçalho no topo da caixa (ex.: Fábrica de Conteúdo); logo=0 tira o asterisco do app
+if (D.q('logo', '1') === '0') { $('st').style.display = 'none'; $('ph').style.left = '34px'; }
+if (D.q('cab', '')) $('cx').insertAdjacentHTML('afterbegin', '<div style="position:absolute;left:0;top:-104px;padding:0 34px;height:84px;display:flex;align-items:center;gap:18px;border-radius:26px;background:#121619;border:1.5px solid #2a2f33;font:600 42px/1 Inter,sans-serif;color:#ececea;white-space:nowrap"><i style="width:30px;height:30px;border-radius:8px;background:#F2C744;display:block"></i>' + D.q('cab', '').replace(/</g, '&lt;') + '</div>');
+Object.assign($('cx').style, {left: X + 'px', top: Y + 'px'});
+$('c1').style.left = '32px'; $('c2').style.left = '460px';
+D.monta(tl => {
+  tl.fromTo('#cx', {opacity: 0}, {opacity: 1, duration: .13, ease: 'none'}, .12); D.cue(.12, 'pop');
+  tl.fromTo('#c1', {opacity: 0, y: 14, scale: .96}, {opacity: 1, y: 0, scale: 1, duration: .1, ease: 'power2.out'}, .97); D.cue(.97, 'pop');
+  tl.fromTo('#c2', {opacity: 0, x: 22, y: -22}, {opacity: 1, x: 0, y: 0, duration: .1, ease: 'power2.out'}, 1.15); D.cue(1.15, 'pop');
+  const L = Math.max(1.3, dur - .2);
+  tl.to('#lin', {width: 878, duration: .17, ease: 'none'}, L); D.cue(L, 'swish');
+  tl.set('#cx', {opacity: 0}, dur - .04);
+  return dur;
+});
+</script>
+</body>
+</html>

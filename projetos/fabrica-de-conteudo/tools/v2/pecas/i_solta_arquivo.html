@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<!-- INTERFACE — solta o arquivo: a caixa tracejada já aberta, o chip do arquivo cai dentro (a borda fecha), o chip
+     some e a miniatura vira o cartão vertical do bruto (tag RAW), com a pílula da duração embaixo. Sai por corte.
+     Clone do efeito 07 da referência Dej8homsIzp. 1080x1920, --alpha. Coluna esquerda (x 65-670), longe do painel.
+       txt  o texto da caixa · arq  o nome do arquivo (em caixa alta) · info  a linha mono do chip · tag  a tag do cartão (RAW)
+       dura  o número da pílula (0:21) · pil  o resto da pílula (de bruto) · foto  a imagem vertical (miniatura e cartão)
+       x  y  o canto da caixa (65, 302) · t0  quando entra (0.05) · dur (1.34)
+       ?txt=Arrasta o bruto aqui&arq=gravação-bruta.mp4&info=0:21 · 25,9 MB · 1080x1920&tag=RAW&dura=0:21&pil=de bruto&t0=0.05&dur=1.34 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+#cx{position:absolute;width:605px;height:657px;border-radius:20px;opacity:0;--sombra:var(--mk);
+  background:color-mix(in srgb,color-mix(in srgb,var(--ac) 24%,var(--ink)) 50%,transparent);border:4px dashed var(--pp2)}
+#cx .bj{position:absolute;left:0;right:0;top:254px;display:flex;flex-direction:column;align-items:center;gap:26px;color:var(--pp2)}
+#cx .bj b{font:700 30px/1 var(--fd);letter-spacing:-.01em}
+#chip{position:absolute;width:584px;height:186px;left:73px;top:160px;opacity:0;display:flex;align-items:center;gap:26px;padding:0 24px;
+  border-radius:var(--raio)}
+#chip img{flex:none;width:92px;height:148px;object-fit:cover;border:3px solid var(--ink);border-radius:8px}
+#chip .nm{font:700 28px/1.15 var(--fd);letter-spacing:-.01em;word-break:break-all;text-transform:uppercase}
+#chip .nf{margin-top:10px;font:600 19px/1 var(--fm);color:var(--ink4);letter-spacing:.02em;white-space:nowrap}
+#cart{position:absolute;left:190px;top:324px;width:355px;height:660px;opacity:0;padding:8px;border-radius:40px;--sombra:var(--mk);background:var(--pp)}
+#cart img{width:100%;height:100%;object-fit:cover;border-radius:30px;display:block}
+#cart .tg{position:absolute;right:26px;top:30px;padding:7px 11px 5px;font:700 20px/1 var(--fm);letter-spacing:.14em;
+  color:#fff;background:var(--ink);border-radius:var(--raio-s)}
+#pil{position:absolute;left:173px;top:985px;width:367px;height:56px;opacity:0;display:flex;align-items:center;justify-content:center;
+  border-radius:28px;font:700 30px/1 var(--fd);letter-spacing:-.01em;white-space:nowrap;gap:.3em}
+#pil b{color:var(--ac)}
+#var{position:absolute;left:65px;top:1300px;height:6px;width:0;background:var(--ink);opacity:0}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="nb" id="cx"><div class="bj">
+    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></svg>
+    <b id="txt"></b></div></div>
+  <div class="nb" id="chip"><img id="i1"><div><div class="nm" id="arq"></div><div class="nf" id="inf"></div></div></div>
+  <div class="nb" id="cart"><img id="i2"><span class="tg" id="tag"></span></div>
+  <div id="var"></div>
+  <div class="nb" id="pil"><b id="dura"></b><span id="pr"></span></div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const dur = D.n('dur', '1.34'), t0 = D.n('t0', '0.05');
+const foto = D.q('foto', '../midia/perfil-avatar.png');
+$('i1').src = $('i2').src = foto;
+$('txt').textContent = D.q('txt', 'Arrasta o bruto aqui');
+$('arq').textContent = D.q('arq', 'gravação-bruta.mp4');
+$('inf').textContent = D.q('info', '0:21 · 25,9 MB · 1080x1920');
+$('tag').textContent = D.q('tag', 'RAW'); $('dura').textContent = D.q('dura', '0:21'); $('pr').textContent = D.q('pil', 'de bruto');
+Object.assign($('cx').style, {left: D.n('x', '65') + 'px', top: D.n('y', '302') + 'px'});
+
+D.monta(tl => {
+  const cx = D.n('y', '302');
+  // o tempo da referência (1,0 s): parada .25, queda .125, cartão .25, pílula .25. A nossa janela é maior: estica a parada.
+  const tChip = t0 + .3, tCai = tChip + .06, tPouso = tCai + .16, tCart = tPouso + .12, tPil = tCart + .22, tSai = dur - .06;
+  tl.fromTo('#cx', {opacity: 0, scale: .97}, {opacity: 1, scale: 1, duration: .1, ease: 'power3.out'}, t0);
+  D.cue(t0, 'pop');
+  // o chip aparece no alto e cai acelerando (queda com gravidade, sem quique)
+  tl.set('#chip', {opacity: 1}, tChip);
+  tl.fromTo('#chip', {y: 0}, {y: 380, duration: tPouso - tCai, ease: 'power2.in'}, tCai);
+  D.cue(tPouso, 'thud');
+  // a borda tracejada fecha e a caixa escurece
+  tl.set('#cx', {borderStyle: 'solid', borderColor: D.css('--pp2'), backgroundColor: "color-mix(in srgb,color-mix(in srgb,var(--ac) 16%,var(--ink)) 55%,transparent)"}, tPouso);
+  tl.to('#cx .bj', {opacity: .25, duration: .1}, tPouso);
+  // o chip esmaece e a miniatura vira o cartão, que cresce no centro
+  tl.to('#chip', {opacity: 0, duration: .12, ease: 'none'}, tCart);
+  tl.fromTo('#cart', {opacity: 0, scale: .48, y: -40}, {opacity: 1, scale: 1, y: 0, duration: .26, ease: 'power3.out'}, tCart);
+  D.cue(tCart, 'whoosh');
+  tl.fromTo('#pil', {opacity: 0, y: 10}, {opacity: 1, y: 0, duration: .1, ease: 'power3.out'}, tPil);
+  // saída: o cartão fica translúcido e a varredura escura corta a tela, como a referência
+  const tV = dur * .88;
+  tl.set(['#cx', '#cart', '#pil', '#chip'], {opacity: 0}, tV);
+  tl.set('#var', {opacity: 1, left: 30, width: 1020}, tV);
+  tl.set('#var', {opacity: 0}, dur - .02);
+  return dur;
+});
+</script>
+</body>
+</html>

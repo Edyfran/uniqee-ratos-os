@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<!-- OFERTA — os números do pacote: o que vem, contado no kit, em três formas. 1080x1920 (ou 1080x1350
+     pelo ?ar=), tela cheia.
+     Tudo mora numa `caixa` (no 9:16, a zona segura do anúncio, sem a coluna dos botões): o cabeçalho,
+     o corpo, o fecho amarelo e a chamada azul, empilhados; as linhas dividem a altura que sobra. O
+     corpo é a `forma`:
+       heroi  o primeiro número num bloco azul, que gira em 3D na entrada (?i3d=) enquanto conta, e os
+              outros numa lista já apagada no quadro 0: a cada batida um acende, o número conta e o ✓ bate
+       nota   a nota do que vem: a tira de papel de caixa já está lá com o título, e uma linha sai da
+              impressora por batida; embaixo do corte, o acesso e a garantia, e o carimbo
+       antes  antes e depois: a coluna de quem monta sozinho no 0 e a da fábrica, num bloco amarelo que
+              desce, ganhando o número linha a linha
+     Com pronto=1 é o estado final parado (o estático).
+       n        "número|rótulo|detalhe;…" (o detalhe só aparece no herói) · forma (heroi)
+       caixa    "x,y,w,h" (65,270,890,980)
+       titulo   heroi: o bloco azul do alto · antes: a frase, "/" quebra, *grifo* · nota: o título da tira
+       logo     imagem, à direita do bloco do título (heroi) · loja · data · tot "RÓTULO|valor;…" · carimbo (nota)
+       ca · cb · zero   as colunas do antes e o valor da coluna A (0)
+       fecho    a faixa amarela (*grifo*; vazio: não tem) · cta  a chamada azul, com a seta (vazio: não tem)
+       t0 (0.2) · passo (0.45) · t_fecho · t_cta · dur · pronto
+     ?n=300|técnicas de câmera|pras cenas geradas;111|peças de motion;34|efeitos sonoros;8|estilos de edição;7|skills da fábrica&forma=heroi&titulo=TUDO QUE VEM&fecho=Garantia de *7 dias* · acesso na hora&cta=Toca em Saiba mais&dur=6 -->
+<html lang="pt-BR" data-qa="entra-seco fica">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:100vh}
+#stage{width:1080px;height:100vh;padding:0;display:block;position:relative;overflow:hidden}
+#box{position:absolute;display:flex;flex-direction:column;gap:calc(14px*var(--u))}
+.u{font-size:calc(var(--px)*var(--u))}
+b{font-weight:inherit;padding:0 .08em;margin:0 -.03em;background:linear-gradient(var(--mk),var(--mk)) no-repeat 0 62%/100% 86%;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone}
+/* o cabeçalho: o bloco azul e a marca (heroi), ou a frase (antes) */
+.cab{flex:none;display:flex;align-items:center;gap:20px}
+.cab .tt{padding:.14em .36em .2em;font:700 calc(60px*var(--u))/1 var(--fd);letter-spacing:var(--ls);white-space:nowrap}
+.cab .fr{font:700 calc(60px*var(--u))/1.08 var(--fd);letter-spacing:var(--ls);color:var(--ink)}
+.cab .logo{margin-left:auto;height:calc(72px*var(--u));max-width:42%;object-fit:contain;object-position:right center}
+.corpo{flex:1;min-height:0;display:flex;flex-direction:column;gap:calc(14px*var(--u))}
+/* heroi */
+.heroi{flex:none;display:flex;align-items:center;gap:calc(26px*var(--u));padding:calc(14px*var(--u)) calc(30px*var(--u));
+  transform-origin:50% 50%}
+.heroi .hn{font:700 calc(200px*var(--u))/.86 var(--fd);letter-spacing:-.05em;color:#fff;white-space:nowrap;
+  font-variant-numeric:tabular-nums}
+.heroi .hr{flex:1;display:flex;flex-direction:column;gap:calc(8px*var(--u));min-width:0}
+.heroi .hl{font:700 calc(54px*var(--u))/1.02 var(--fd);letter-spacing:var(--ls);color:#fff;text-wrap:balance}
+.heroi .hx{font:600 calc(44px*var(--u))/1.05 var(--fd);letter-spacing:var(--ls);color:var(--act)}
+.lista{flex:1;min-height:0;display:flex;flex-direction:column;padding:0 calc(22px*var(--u))}
+.ln{flex:1;min-height:0;display:flex;align-items:center;gap:calc(22px*var(--u))}
+.ln + .ln{border-top:3px solid var(--ink2)}
+.ln .num{flex:none;width:calc(130px*var(--u));text-align:right;font:700 calc(60px*var(--u))/1 var(--fd);letter-spacing:-.03em;
+  color:var(--ink4);font-variant-numeric:tabular-nums}
+.ln .rt{flex:1;min-width:0;font:700 calc(48px*var(--u))/1 var(--fd);letter-spacing:var(--ls);color:var(--ink4);white-space:nowrap}
+.ln .ok{flex:none;width:calc(54px*var(--u));height:calc(54px*var(--u));border-radius:50%;background:var(--ok);border:var(--bw) solid var(--ink);
+  color:#fff;display:flex;align-items:center;justify-content:center;font:700 calc(28px*var(--u))/1 var(--fd);opacity:0}
+.ln.aceso .num{color:var(--ac)} .ln.aceso .rt{color:var(--ink)} .ln.aceso .ok{opacity:1}
+/* nota: a tira do r_nota, com a serrilha embaixo e a sombra que segue os dentes */
+.nota{flex:1;min-height:0;position:relative;margin-bottom:calc(30px*var(--u));filter:drop-shadow(var(--sh) var(--sh) 0 var(--ink))}
+.fundo{position:absolute;inset:0;
+  -webkit-mask:linear-gradient(#000 0 0) top/100% calc(100% - 19px) no-repeat,
+    conic-gradient(from -45deg at bottom,transparent,#000 1deg 89deg,transparent 90deg) bottom/40px 20px repeat-x}
+.fundo.tinta{background:var(--ink)}
+.fundo.papel{inset:var(--bw) var(--bw) var(--bw) var(--bw);background:var(--pp)}
+.nota .cx{position:absolute;inset:0;display:flex;flex-direction:column;padding:calc(24px*var(--u)) calc(40px*var(--u)) calc(52px*var(--u))}
+.nota .topo{display:flex;justify-content:space-between;font:700 calc(34px*var(--u))/1 var(--fm);letter-spacing:.06em;color:var(--ink6)}
+.nota .ntt{margin-top:calc(14px*var(--u));font:700 calc(60px*var(--u))/1.04 var(--fd);letter-spacing:var(--ls);text-transform:uppercase;color:var(--ink);white-space:nowrap}
+.corte{flex:none;height:0;border-top:var(--bw) dashed var(--ink);margin:calc(14px*var(--u)) 0 calc(4px*var(--u))}
+.corte.g{border-top-width:calc(var(--bw)*1.75)}
+.nl{flex:1;min-height:0;display:flex;align-items:center;gap:14px;white-space:nowrap}
+.nl .rt{font:700 calc(44px*var(--u))/1 var(--fd);text-transform:uppercase;color:var(--ink)}
+.nl .pt{flex:1;min-width:24px;border-bottom:5px dotted var(--ink4);transform:translateY(10px)}
+.nl .vl{font:700 calc(50px*var(--u))/1 var(--fm);color:var(--ink)}
+.nl.tot .vl{background:var(--mk);border:var(--bw) solid var(--ink);border-radius:var(--raio-s);padding:4px 12px}
+.carimbo{position:absolute;left:calc(30px*var(--u));bottom:calc(-22px*var(--u));padding:.32em .5em .26em;
+  font:700 calc(40px*var(--u))/1 var(--fm);letter-spacing:.04em;white-space:nowrap;transform-origin:50% 50%}
+/* antes: a tabela do o_comparativo, de pé; a coluna B ganha o bloco amarelo */
+.tab{flex:1;min-height:0;position:relative;display:flex;flex-direction:column;padding:calc(8px*var(--u)) calc(18px*var(--u)) calc(10px*var(--u))}
+.tr{flex:1;min-height:0;position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1fr) calc(120px*var(--u)) calc(176px*var(--u));align-items:center}
+.tr + .tr{border-top:3px solid var(--ink2)}
+.tr.th{flex:none;height:calc(64px*var(--u));border-top:0}
+.tr .rt{font:700 calc(46px*var(--u))/1 var(--fd);letter-spacing:var(--ls);color:var(--ink);white-space:nowrap;padding-right:10px}
+.tr .va{text-align:center;font:600 calc(52px*var(--u))/1 var(--fm);color:var(--ink4)}
+.tr .vb{text-align:center;font:700 calc(58px*var(--u))/1 var(--fd);letter-spacing:-.03em;color:var(--ink);font-variant-numeric:tabular-nums}
+.th .va,.th .vb{font:700 calc(24px*var(--u))/1 var(--fm);letter-spacing:0;color:var(--ink6);text-transform:uppercase}
+.th .vb{color:var(--ink)}
+.col{position:absolute;z-index:0;top:calc(4px*var(--u));right:calc(18px*var(--u));width:calc(176px*var(--u));bottom:calc(6px*var(--u));
+  background:var(--mk);border:var(--bw) solid var(--ink);border-radius:var(--raio);transform-origin:50% 0}
+/* o fim */
+.fim{flex:none;display:flex;align-items:center;justify-content:center;padding:calc(8px*var(--u)) 14px;
+  font:700 calc(54px*var(--u))/1.05 var(--fd);letter-spacing:var(--ls);white-space:nowrap}
+.fim b{background:none;padding:0;margin:0}
+.cta{flex:none;display:flex;align-items:center;justify-content:center;gap:18px;height:calc(76px*var(--u));
+  font:700 calc(52px*var(--u))/1 var(--fd);letter-spacing:var(--ls);white-space:nowrap}
+</style>
+</head>
+<body>
+<div id="stage"><div id="box"></div></div>
+<script>
+const PRONTO = D.q('pronto', '') === '1', FORMA = D.q('forma', 'heroi');
+const dur = D.n('dur', '6'), T0 = D.n('t0', '.2'), PASSO = D.n('passo', '.45');
+const $ = id => document.getElementById(id);
+const grifo = s => s.replace(/\*([^*]+)\*/g, '<b>$1</b>');
+const N = D.q('n', '300|técnicas de câmera|pras cenas geradas;111|peças de motion;34|efeitos sonoros;8|estilos de edição;7|skills da fábrica')
+  .split(';').filter(Boolean).map(s => { const [v, r, d] = s.split('|'); return {v, r: r || '', d: d || ''}; });
+const [bx, by, bw, bh] = D.q('caixa', '65,270,890,980').split(',').map(Number);
+document.documentElement.style.setProperty('--u', Math.min(bw / 890, bh / 980).toFixed(4));
+const box = $('box');
+Object.assign(box.style, {left: bx + 'px', top: by + 'px', width: bw + 'px', height: bh + 'px'});
+const add = h => box.insertAdjacentHTML('beforeend', h);
+
+const tit = D.q('titulo', 'TUDO QUE VEM'), logo = D.q('logo', '');
+if (FORMA === 'heroi' && (tit || logo))
+  add(`<div class="cab" id="cab">${tit ? `<span class="tt nb cor-ac">${tit}</span>` : ''}${logo ? `<img class="logo" src="${logo}" alt="">` : ''}</div>`);
+if (FORMA === 'antes' && tit) add(`<div class="cab" id="cab"><span class="fr" id="fr">${tit.split('/').map(grifo).join('<br>')}</span></div>`);
+add('<div class="corpo" id="corpo"></div>');
+const corpo = $('corpo'), em = h => corpo.insertAdjacentHTML('beforeend', h);
+// o número cresce até o valor: "1.240" e "300" contam; o que não é número fica como está
+const valor = s => parseInt(s.replace(/\D/g, ''), 10);
+const fmt = (s, n) => isNaN(valor(s)) ? s : Math.round(n).toLocaleString('pt-BR');
+
+if (FORMA === 'heroi') {
+  const [h, ...resto] = N;
+  em(`<div class="heroi nb cor-ac" id="heroi"><span class="hn" id="hn">${h.v}</span><div class="hr">` +
+     `<span class="hl" id="hl">${h.r}</span>${h.d ? `<span class="hx" id="hx">${h.d}</span>` : ''}</div></div>` +
+     `<div class="lista nb" id="lista">${resto.map((o, k) => `<div class="ln" id="ln${k}"><span class="num" id="nu${k}">${o.v}</span>` +
+     `<span class="rt">${o.r}</span><span class="ok">✓</span></div>`).join('')}</div>`);
+}
+const TOT = FORMA === 'nota' ? D.q('tot', 'ACESSO|NA HORA;GARANTIA|7 DIAS').split(';').filter(Boolean).map(s => s.split('|')) : [];
+if (FORMA === 'nota') {
+  const linha = (rt, vl, cls, id) => `<div class="nl${cls}" id="${id}"><span class="rt">${rt}</span><span class="pt"></span><span class="vl">${vl}</span></div>`;
+  em(`<div class="nota" id="nota"><div class="fundo tinta"></div><div class="fundo papel"></div><div class="cx">` +
+     `<div class="topo"><span>${D.q('loja', 'FÁBRICA DE CONTEÚDO')}</span><span>${D.q('data', '04/10/2026')}</span></div>` +
+     `<div class="ntt" id="ntt">${tit}</div><div class="corte"></div>` +
+     N.map((o, k) => linha(o.r, o.v, '', 'nl' + k)).join('') +
+     (TOT.length ? '<div class="corte g" id="cg"></div>' + TOT.map(([r, v], k) => linha(r, v, ' tot', 'tt' + k)).join('') : '') +
+     `</div>${D.q('carimbo', 'CONTADO NO PACOTE') ? `<div class="carimbo nb cor-mk" id="carimbo">${D.q('carimbo', 'CONTADO NO PACOTE')}</div>` : ''}</div>`);
+}
+if (FORMA === 'antes') {
+  em(`<div class="tab nb" id="tab"><div class="col" id="col"></div>` +
+     `<div class="tr th"><span></span><span class="va">${D.q('ca', 'sozinho')}</span><span class="vb">${D.q('cb', 'na Fábrica')}</span></div>` +
+     N.map((o, k) => `<div class="tr" id="tr${k}"><span class="rt">${o.r}</span><span class="va">${D.q('zero', '0')}</span>` +
+       `<span class="vb" id="vb${k}">${o.v}</span></div>`).join('') + '</div>');
+}
+const fe = D.q('fecho', 'Garantia de *7 dias* · acesso na hora'), cta = D.q('cta', 'Toca em Saiba mais');
+if (fe) add(`<div class="fim nb cor-mk" id="fim"><span id="ff">${grifo(fe)}</span></div>`);
+if (cta) add(`<div class="cta nb cor-ac" id="cta">${cta} →</div>`);
+
+D.monta(tl => {
+  // a medida é a da própria caixa do texto: com a escala fracionária (--u), o padding da caixa de fora
+  // sai em subpixel e a linha que cabe passava por 0,3 px e encolhia até o mínimo
+  const larg = ['#box', 1];
+  D.cabe('.cab .tt', 40, ['.cab', logo ? .56 : 1]);
+  D.cabe('.cab .fr', 44, larg);
+  D.cabe('.heroi .hx', 34, ['.hx', .94]);
+  D.cabe('.ln .rt', 40, ['.rt', 1]);
+  D.cabe('.nota .ntt', 40, ['.ntt', 1]);
+  D.cabe('.nl .rt', 32, ['.nl', .8]);
+  D.cabe('.tr .rt', 34, ['.rt', 1]);
+  D.cabe('#ff', 40, ['.fim', 1]);
+  D.cabe('.cta', 40, larg);
+  // o fim pousa 0,6 s depois do último item, e a chamada 0,6 s depois dele
+  const ult = FORMA === 'heroi' ? T0 + 1.1 + (N.length - 2) * PASSO
+    : FORMA === 'nota' ? T0 + (N.length + TOT.length - 1) * PASSO + .15 : T0 + N.length * PASSO;
+  const fimT = D.n('t_fecho', String(ult + .6)), ctaT = D.n('t_cta', String(fimT + .6));
+  if (PRONTO) {
+    // o estático: tudo aceso, a fita inteira, o bloco cheio
+    document.querySelectorAll('.ln').forEach(el => el.classList.add('aceso'));
+    gsap.set('#fim', {rotation: -1});
+    gsap.set('#cta', {rotation: 1});
+    gsap.set('#carimbo', {rotation: -6});
+    return dur;
+  }
+  // o cabeçalho e o corpo já estão no quadro 0 (o gancho é ver o que vem); o fim e a chamada pousam
+  gsap.set(['#fim', '#cta'], {opacity: 0});
+  if (FORMA === 'heroi') {
+    // o herói gira em 3D até assentar enquanto o número conta, e a câmera não para depois
+    D.palco3d('#corpo');
+    D.espessura('#heroi');
+    tl.fromTo('#heroi', {rotationY: -32, rotationX: 12, scale: .9}, {rotationY: 0, rotationX: 0, scale: 1, duration: .8, ease: D.P.POUSA}, 0);
+    D.conta('#hn', 0, valor(N[0].v), T0, 1.0, n => fmt(N[0].v, n));
+    D.deriva('#heroi', T0 + 1.1, dur - .3, {rotationY: 7, rotationX: -3});
+    N.slice(1).forEach((o, k) => {
+      const t = T0 + 1.1 + k * PASSO, v = valor(o.v);
+      tl.set(`#ln${k} .num`, {color: '#0640fb'}, t);
+      tl.set(`#ln${k} .rt`, {color: '#0B0D12'}, t);
+      tl.fromTo(`#ln${k} .ok`, {opacity: 0, scale: 1.8}, {opacity: 1, scale: 1, duration: .25, ease: 'back.out(2.4)'}, t);
+      tl.fromTo(`#ln${k} .rt`, {x: -10}, {x: 0, duration: .25, ease: D.P.EASE}, t);
+      if (!isNaN(v)) {
+        // a lista apagada começa no 0 e enche: cada linha conta até o número dela quando acende
+        const c = {n: 0}, el = $('nu' + k);
+        el.textContent = fmt(o.v, 0);
+        tl.fromTo(c, {n: 0}, {n: v, duration: .35, ease: 'expo.out', onUpdate: () => { el.textContent = fmt(o.v, c.n); }}, t);
+      }
+      D.cue(t, 'certo');
+    });
+  }
+  if (FORMA === 'nota') {
+    // a tira assenta com o título; cada linha sai da cabeça de impressão, da esquerda pra direita
+    tl.fromTo('#nota', {scale: 1.04, rotation: -1}, {scale: 1, rotation: 0, duration: .3, ease: 'back.out(2)'}, 0);
+    D.cue(0, 'papel');
+    const imprime = (el, t, p = .28) => {
+      // a máscara passa da linha: a caixa amarela do total é mais alta que ela e perdia a borda
+      tl.fromTo(el, {clipPath: 'inset(-30px 100% -30px -30px)'}, {clipPath: 'inset(-30px -30px -30px -30px)', duration: p, ease: 'none', immediateRender: true}, D.at(t));
+      D.cue(t, 'type', {dur: p});
+    };
+    N.forEach((o, k) => imprime('#nl' + k, T0 + k * PASSO));
+    const tt = [...document.querySelectorAll('.nl.tot')];
+    gsap.set('#cg', {opacity: 0});
+    tl.set('#cg', {opacity: 1}, D.at(T0 + N.length * PASSO));
+    tt.forEach((el, k) => {
+      const t = T0 + (N.length + k) * PASSO + .15;
+      imprime(el, t, .3);
+      tl.fromTo(el.querySelector('.vl'), {scale: 1.25}, {scale: 1, duration: .3, ease: 'back.out(2.4)', transformOrigin: 'right center'}, D.at(t) + .3);
+    });
+    D.carimbo('#carimbo', fimT, -6);
+  }
+  if (FORMA === 'antes') {
+    // a coluna da fábrica desce, e cada linha troca o vazio pelo número
+    tl.fromTo('#col', {scaleY: 0}, {scaleY: 1, duration: N.length * PASSO, ease: 'none'}, T0);
+    N.forEach((o, k) => {
+      const t = T0 + (k + 1) * PASSO, v = valor(o.v), el = $('vb' + k);
+      if (!isNaN(v)) D.conta(el, 0, v, t, .35, n => fmt(o.v, n));
+      else D.entra(el, t, 10);
+    });
+  }
+  if (fe) D.pousa('#fim', fimT, {rot: -1, som: 'stamp'});
+  if (cta) D.pousa('#cta', ctaT, {rot: 1, som: 'pop'});
+  return dur;
+});
+</script>
+</body>
+</html>

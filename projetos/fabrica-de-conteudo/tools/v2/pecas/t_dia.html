@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<!-- TIPO — linha do tempo que avança, v2. 1440x1028.
+     Trilho grosso que enche de azul; cada evento é pinado no instante em que é
+     DITO — a bolinha estala e solta uma onda. O último não pina: a tarefa CAI
+     do dia, tomba, perde o chão, e ganha o carimbo "amanhã".
+       ?ev=senta pra fazer@0.9;chega mensagem@2.7&cai=o que você ia fazer@10.8&dur=13 -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1440px;height:1028px}
+#stage{padding:44px var(--marg);justify-content:center}
+.hd{font-size:80px;margin-bottom:0}
+.trilho{position:relative;height:230px;margin-top:56px}
+.veio{position:absolute;left:0;right:0;top:12px;height:36px;overflow:hidden;border-radius:999px}
+.cheio{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--ac)}
+.ev{position:absolute;top:30px;opacity:0}
+.ev .bola{position:absolute;left:-22px;top:-22px;width:44px;height:44px;border-radius:50%;
+  background:var(--mk);border:var(--bw) solid var(--ink)}
+.ev .onda{position:absolute;left:-22px;top:-22px;width:44px;height:44px;border-radius:50%;
+  border:var(--bw) solid var(--ink);opacity:0}
+.ev span{position:absolute;top:44px;left:-150px;width:300px;text-align:center;
+  font:700 var(--piso)/1.12 var(--fd);color:var(--ink);letter-spacing:var(--ls)}
+.ev.fim .bola{background:var(--sur)}
+.ev.fim span{color:var(--ink4)}
+.cai{position:absolute;left:0;right:0;top:236px;display:flex;align-items:center;gap:22px;padding:22px 30px;opacity:0}
+.cai .tt{font:800 56px/1.1 var(--fd);color:var(--ink);flex:1;letter-spacing:var(--ls)}
+.cai .bg{padding:14px 24px;border-radius:var(--raio-s);background:var(--no);color:#fff;
+  border:var(--bw) solid var(--ink);font:700 36px/1 var(--fm);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;opacity:0}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="kick" id="k"></div>
+  <div class="hd" id="h"></div>
+  <div class="trilho" id="tr"><div class="veio nb" id="vi"><div class="cheio" id="ch"></div></div></div>
+</div>
+<script>
+const dur = D.n('dur', '13');
+document.getElementById('k').textContent = D.q('kick', 'um dia qualquer');
+document.getElementById('h').innerHTML = D.q('hd', 'Você senta pra fazer<br>uma coisa. E o <b>dia vai</b>.');
+const evs = D.itens('ev', 'senta pra fazer@0.9;chega mensagem@2.7;lembra do post@5.4;confere o anúncio@7.2;o dia acabou@8.9', ['tx']);
+const cai = D.q('cai', 'o que você ia fazer@10.8').split('@');
+const tr = document.getElementById('tr');
+const pos = i => 6 + i * 88 / Math.max(1, evs.length - 1);
+evs.forEach((e, i) => {
+  const d = document.createElement('div');
+  d.className = 'ev' + (i === evs.length - 1 && D.q('fim') !== '0' ? ' fim' : '');
+  d.id = 'ev' + i; d.style.left = pos(i) + '%';
+  d.innerHTML = `<i class="onda"></i><i class="bola"></i><span>${e.tx}</span>`;
+  tr.appendChild(d);
+});
+const dc = document.createElement('div');
+dc.className = 'cai nb'; dc.id = 'cai';
+dc.innerHTML = `<span class="tt">${cai[0]}</span><span class="bg" id="cb">amanhã</span>`;
+tr.appendChild(dc);
+
+D.monta(tl => {
+  D.cabe('.hd', 46);
+  D.cabe('.cai .tt', 32, ['.cai', .7]);
+  D.camera(dur, 1.0, 1.025);
+  D.carimbo('#k', .10);
+  D.titulo('#h', .22);
+  D.pousa('#vi', .5, {dy: -20, dr: 0});
+  const t0 = evs[0].t, t1 = evs[evs.length - 1].t;
+  tl.fromTo('#ch', {width: pos(0) + '%'}, {width: pos(evs.length - 1) + '%', duration: t1 - t0, ease: 'sine.inOut'}, t0);
+  evs.forEach((e, i) => {
+    tl.fromTo('#ev' + i, {opacity: 0, y: -24}, {opacity: 1, y: 0, duration: D.P.ENT, ease: D.P.MOLA}, D.at(e.t));
+    tl.fromTo('#ev' + i + ' .bola', {scale: .2}, {scale: 1, duration: .4, ease: 'back.out(3)'}, D.at(e.t));
+    tl.fromTo('#ev' + i + ' .onda', {scale: 1, opacity: .9}, {scale: 2.6, opacity: 0, duration: .6, ease: 'power2.out'}, e.t);
+  });
+  const tc = parseFloat(cai[1]);
+  D.pousa('#cai', tc, {dy: -30});
+  D.carimbo('#cb', tc + .35, 4);
+  tl.to('#cai', {y: 30, rotation: 2, '--shx': '0px', duration: .7, ease: 'power2.in'}, tc + .9);
+  D.sai(['#k', '#h', '#tr'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

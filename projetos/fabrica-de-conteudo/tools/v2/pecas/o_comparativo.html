@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<!-- OFERTA — comparativo em tabela. 1440x1028 (painel 40%) ou ?ar=1080x1920.
+     Duas colunas. A coluna B é a que ganha: um bloco amarelo com sombra dura
+     cresce atrás dela a cada linha que entra — o olho desce junto. A coluna A
+     fica em tinta apagada. O total, se houver, é o herói.
+       ?ca=Contratar&cb=Com agentes&it=Suporte|R$ 1.500/mês|agente@0.5;Programador|R$ 3.000/mês|agente@1.4
+        &tot=Por mês|R$ 4.500|—@2.6&dur=5 -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1440px;height:1028px}
+#stage{padding:40px var(--marg);justify-content:center}
+.hd{font-size:72px;margin-bottom:30px}
+.hd:empty{display:none}
+.tab{position:relative;--ca:380px;--cb:400px}
+.lin{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1fr) var(--ca) var(--cb);align-items:center}
+.lin > *{padding:22px 26px;min-width:0}
+.cab{padding-bottom:6px}
+.cab .ta{justify-self:start;font:700 30px/1 var(--fm);letter-spacing:.1em;text-transform:uppercase;color:var(--ink4);
+  border:var(--bw) solid var(--ink4);border-radius:var(--raio-s);padding:.42em .6em .36em;margin-left:26px;opacity:0}
+.cab .tb{justify-self:start;font:700 30px/1 var(--fm);letter-spacing:.1em;text-transform:uppercase;margin-left:26px;
+  padding:.42em .6em .36em;border-radius:var(--raio-s);opacity:0}
+.row{border-top:calc(var(--bw)*.75) solid var(--ink)}
+.row .cr{font:700 52px/1.05 var(--fd);letter-spacing:var(--ls);color:var(--ink);opacity:0;white-space:nowrap}
+.row .va{font:600 40px/1.1 var(--fm);color:var(--ink4);opacity:0;white-space:nowrap}
+.row .vb{font:700 48px/1.05 var(--fd);letter-spacing:var(--ls);color:var(--ink);opacity:0;white-space:nowrap}
+.row.tot{border-top-width:calc(var(--bw)*1.75)}
+.row.tot .cr{font-size:44px;font-family:var(--fm);letter-spacing:.08em;text-transform:uppercase}
+.row.tot .va{font-size:52px;color:var(--ink6)}
+.row.tot .vb{font-size:64px}
+.col{position:absolute;z-index:0;top:0;right:0;width:var(--cb);height:0;background:var(--mk);
+  border:var(--bw) solid var(--ink);border-radius:var(--raio);opacity:0}
+html.v,html.v body,html.v #stage{width:1080px;height:1920px}
+html.v #stage{padding:0 56px}
+html.v .tab{--ca:300px;--cb:320px}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="kick" id="k"></div>
+  <div class="hd" id="h"></div>
+  <div class="tab" id="tb">
+    <div class="col" id="col"></div>
+    <div class="lin cab" id="cab"><span></span><span class="ta" id="ca"></span><span class="tb nb cor-ac" id="cb"></span></div>
+  </div>
+</div>
+<script>
+const dur = D.n('dur', '5');
+document.getElementById('k').textContent = D.q('kick', '');
+document.getElementById('h').innerHTML = D.q('hd', '');
+document.getElementById('ca').textContent = D.q('ca', 'Contratar');
+document.getElementById('cb').textContent = D.q('cb', 'Com agentes');
+const its = D.itens('it', 'Suporte|R$ 1.500/mês|agente@0.5;Programador|R$ 3.000/mês|agente@1.3;Anúncios|gestor + verba|agente@2.1', ['cr', 'a', 'b']);
+const tot = D.q('tot') ? D.itens('tot', '', ['cr', 'a', 'b'])[0] : null;
+const tb = document.getElementById('tb');
+const linhas = its.map((x, i) => ({...x, id: 'r' + i})).concat(tot ? [{...tot, id: 'rt', tot: true}] : []);
+linhas.forEach(x => {
+  const d = document.createElement('div');
+  d.className = 'lin row' + (x.tot ? ' tot' : ''); d.id = x.id;
+  d.innerHTML = `<span class="cr">${x.cr}</span><span class="va">${x.a || ''}</span><span class="vb">${x.b || ''}</span>`;
+  tb.appendChild(d);
+});
+
+D.monta(tl => {
+  D.cabe('.hd', 44);
+  D.cabe('.row .cr', 30, '.cr');
+  D.cabe('.row .va', 24, '.va');
+  D.cabe('.row .vb', 28, '.vb');
+  const cab = document.getElementById('cab');
+  const topo = cab.offsetTop - 8, col = document.getElementById('col');
+  gsap.set(col, {top: topo, height: cab.offsetHeight + 16});
+  D.camera(dur, 1.0, 1.02);
+  if (D.q('kick')) D.carimbo('#k', .06);
+  if (D.q('hd')) D.titulo('#h', .15);
+  tl.fromTo('#ca', {opacity: 0, y: -16}, {opacity: 1, y: 0, duration: D.P.ENT, ease: D.P.EASE}, .25);
+  D.carimbo('#cb', .4, D.P.ROT);
+  tl.fromTo(col, {opacity: 0}, {opacity: 1, duration: .25}, D.at(.45));
+  linhas.forEach(x => {
+    const r = document.getElementById(x.id);
+    tl.fromTo(`#${x.id} .cr`, {opacity: 0, x: -30}, {opacity: 1, x: 0, duration: D.P.ENT, ease: D.P.EASE}, D.at(x.t));
+    tl.fromTo(`#${x.id} .va`, {opacity: 0}, {opacity: 1, duration: .3}, D.at(x.t) + .08);
+    // o bloco amarelo desce até o fim desta linha, e a célula B assenta nele
+    tl.to(col, {height: r.offsetTop + r.offsetHeight - topo + 10, duration: .5, ease: D.P.MOLA}, D.at(x.t) + .1);
+    if (x.tot) D.heroi(`#${x.id} .vb`, x.t + .22);
+    else {
+      tl.fromTo(`#${x.id} .vb`, {opacity: 0, scale: .6, rotation: -6}, {opacity: 1, scale: 1, rotation: 0, duration: .42, ease: 'back.out(2.6)'}, D.at(x.t) + .22);
+      D.cue(x.t + .22, 'pop');
+    }
+  });
+  D.sai(['#k', '#h', '#tb'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

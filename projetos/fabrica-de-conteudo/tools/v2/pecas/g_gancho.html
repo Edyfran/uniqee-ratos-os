@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<!-- GANCHO — os 3 primeiros segundos. 1080x1920, --alpha.
+     A frase ESTÁ INTEIRA NO PRIMEIRO QUADRO — ele é o único que sempre é visto.
+     O "bate" vem do assentar: no quadro 0 as lajes estão um pouco maiores e sem
+     chão; em 0,3s encolhem e a sombra dura nasce. Legível do quadro 0 ao fim.
+     Uma laje por linha. Prefixo * = laje azul, _ = laje amarela, <b> = grifo.
+       ?l=Eu demiti|*4 funcionários|_e contratei agentes&pos=topo&tam=96&dur=3 -->
+<html data-qa="entra-seco" lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+.zona{position:absolute;left:50px;right:64px;display:flex;flex-direction:column;align-items:center;gap:20px}
+.zona.topo{top:190px}
+.zona.centro{top:0;bottom:0;justify-content:center}
+.zona.base{bottom:330px}
+.ln{display:inline-block;font:700 var(--tam,96px)/1.02 var(--fd);letter-spacing:var(--ls);text-transform:uppercase;
+  padding:.08em .3em .14em;text-align:center;white-space:nowrap}
+.ln b{font-weight:inherit;padding:0 .08em;background:linear-gradient(var(--mk),var(--mk)) no-repeat 0 60%/0% 88%}
+</style>
+</head>
+<body>
+<div id="stage"><div class="zona" id="z"></div></div>
+<script>
+const dur = D.n('dur', '3');
+const z = document.getElementById('z');
+z.classList.add(['topo', 'centro', 'base'].includes(D.q('pos')) ? D.q('pos') : 'topo');
+document.documentElement.style.setProperty('--tam', D.q('tam', '96') + 'px');
+D.q('l', 'Eu demiti|*4 funcionários|_e contratei agentes').split('|').forEach((s, i) => {
+  const cor = s[0] === '*' ? ' cor-ac' : s[0] === '_' ? ' cor-mk' : '';
+  const d = document.createElement('div');
+  d.className = 'ln nb' + cor; d.id = 'l' + i;
+  d.innerHTML = cor ? s.slice(1) : s;
+  z.appendChild(d);
+});
+
+D.monta(tl => {
+  D.cabe('.ln', 48, '.zona');
+  const ls = [...document.querySelectorAll('.ln')];
+  ls.forEach((el, i) => {
+    const rot = (D.P.ROT || -1.2) * (i % 2 ? -1 : 1) * .9;
+    tl.fromTo(el, {scale: 1.07, rotation: rot * 2.5, '--shx': '0px'},
+      {scale: 1, rotation: rot, '--shx': D.SH + 'px', duration: .34, ease: D.P.MOLA}, i * .04);
+  });
+  D.cue(0, 'impact');
+  D.marca('.ln b', .45);
+  D.flutua(ls, .6, dur - .45, .9);
+  D.sai(ls, dur - .4);
+  return dur;
+});
+</script>
+</body>
+</html>

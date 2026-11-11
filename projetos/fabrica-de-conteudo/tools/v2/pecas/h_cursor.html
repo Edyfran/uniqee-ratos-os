@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<!-- AULA — cursor destacado + anel no clique. 1920x1080, --alpha.
+     Um halo amarelo segue o cursor da gravação pelos pontos dados; no clique
+     ele afunda e solta um anel. Com |texto, a etiqueta do clique aparece do lado.
+     Pontos em fração da tela, no tempo em que o cursor ESTÁ lá; ! = clique:
+       ?pts=0.5,0.55@0.2;0.62,0.42@0.9;0.875,0.124@1.7!|executar&t0=0.2&dur=3 -->
+<html lang="pt-BR" class="h alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/direcao-h.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+.halo,.anel{position:absolute;left:0;top:0;width:96px;height:96px;margin:-48px 0 0 -48px;border-radius:50%;opacity:0}
+.halo{background:rgba(242,199,68,.42);border:3px solid var(--ink)}
+.anel{border:6px solid var(--mk);box-shadow:0 0 0 2px var(--ink)}
+.rt{position:absolute;padding:10px 16px 8px;font:700 24px/1 var(--fm);letter-spacing:.06em;text-transform:uppercase;border-radius:var(--raio-s);white-space:nowrap;opacity:0}
+</style>
+</head>
+<body>
+<div id="stage"><div class="halo" id="h"></div></div>
+<script>
+const dur = D.n('dur', '3'), $ = id => document.getElementById(id);
+const pts = D.q('pts', '0.5,0.55@0.2;0.62,0.42@0.9;0.875,0.124@1.7!|executar').split(';').filter(Boolean).map(s => {
+  const [a, rot] = s.split('|'), [xy, tt] = a.split('@'), [x, y] = xy.split(',').map(Number);
+  return {x: x * 1920, y: y * 1080, t: parseFloat(tt), clic: tt.includes('!'), rot};
+});
+
+D.monta(tl => {
+  const h = $('h'), st = $('stage');
+  gsap.set(h, {x: pts[0].x, y: pts[0].y});
+  tl.fromTo(h, {opacity: 0, scale: .4}, {opacity: 1, scale: 1, duration: .3, ease: D.P.MOLA}, D.at(pts[0].t));
+  pts.forEach((p, i) => {
+    if (i > 0) { const d = Math.max(.25, Math.min(.7, p.t - pts[i - 1].t - .05)); tl.to(h, {x: p.x, y: p.y, duration: d, ease: 'power2.inOut'}, p.t - d); }
+    if (p.clic) {
+      const a = document.createElement('div'); a.className = 'anel'; st.appendChild(a); gsap.set(a, {x: p.x, y: p.y});
+      tl.fromTo(a, {opacity: 1, scale: .5}, {opacity: 0, scale: 2.1, duration: .55, ease: 'power2.out', immediateRender: false}, p.t);
+      tl.to(h, {scale: .78, duration: .07, ease: 'power2.out'}, p.t);
+      tl.to(h, {scale: 1, duration: .35, ease: D.P.MOLA}, p.t + .07);
+      D.cue(p.t, 'mouse');
+    }
+    if (p.rot) {
+      const r = document.createElement('div'); r.className = 'rt nb cor-mk'; r.textContent = p.rot; st.appendChild(r);
+      r.style.left = (p.x > 1500 ? p.x - 60 - r.offsetWidth : p.x + 60) + 'px'; r.style.top = (p.y + 44) + 'px';
+      D.carimbo(r, p.t + .12, 0);
+    }
+  });
+  if (D.q('sai', '1') !== '0') tl.to('#stage > *', {opacity: 0, duration: .25, ease: 'power2.in'}, dur - .3);
+  return dur;
+});
+</script>
+</body>
+</html>

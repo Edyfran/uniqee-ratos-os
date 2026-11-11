@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<!-- Preço cheio, v2. 1080x1920. Valor, parcela, e o selo verde do que a pessoa recebe. -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+#stage{align-items:center;padding:0 90px}
+.kick{align-self:center;margin-bottom:40px}
+.big{text-shadow:.03em .03em 0 var(--ac)}
+.big small{font-size:120px;margin-right:14px}
+.ou{font:700 42px/1 var(--fm);color:var(--ink4);letter-spacing:.14em;text-transform:uppercase;margin:50px 0 24px;opacity:0}
+.par{font:800 108px/1 var(--fd);letter-spacing:-.03em;padding:.12em .32em .16em;opacity:0}
+.linha{width:260px;height:14px;background:var(--ink);margin:84px 0 72px}
+.selos{display:flex;flex-direction:column;gap:22px;width:100%;max-width:880px}
+.selo{display:flex;align-items:center;gap:26px;padding:30px 36px;opacity:0}
+.selo .tick{width:60px;height:60px;border-radius:var(--raio-s);background:var(--ok);border:var(--bw) solid var(--ink);flex:none;
+  display:flex;align-items:center;justify-content:center;color:#fff;font:900 30px/1 var(--fd)}
+.selo span{font:800 46px/1.05 var(--fd);color:var(--ink);letter-spacing:var(--ls)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="kick" id="k">acesso vitalício ao treinamento</div>
+  <div class="big" id="v"><small>R$</small>197</div>
+  <div class="ou" id="o">ou</div>
+  <div class="par nb cor-ac" id="p">12× R$ 20,37</div>
+  <div class="linha" id="l"></div>
+  <div class="selos">
+    <div class="selo nb" id="s1"><span class="tick">✓</span><span>Compra única, acesso vitalício</span></div>
+  </div>
+</div>
+<script>
+D.monta(tl => {
+  D.cabe('.big', 160, .96);
+  D.cabe('.par', 60, .9);
+  D.cabe('.selo span', 30, ['.selo', .8]);
+  D.camera(5.3, 1.0, 1.035);
+  D.carimbo('#k', .1);
+  D.heroi('#v', .3);
+  D.entra('#o', 1.0, 12);
+  D.pousa('#p', 1.15, {rot: D.P.ROT, s: 1.1});
+  tl.fromTo('#l', {scaleX: 0}, {scaleX: 1, duration: .45, ease: D.P.EASE}, 1.5);
+  D.pousa('#s1', 1.7, {dx: -34, rot: D.inclina(0) * .5});
+  tl.fromTo('#s1 .tick', {scale: .2, rotation: -30}, {scale: 1, rotation: 0, duration: .4, ease: 'back.out(3)'}, 1.78);
+  return 5.3;
+});
+</script>
+</body>
+</html>

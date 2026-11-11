@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<!-- ENSAIO — title drop QUIET · troca de foco. 1920x1080, --alpha, EM CAMADAS.
+     O fundo do take sai de foco devagar (a pessoa continua nítida: o compositor
+     desfoca só o fundo, pelo recorte), escurece um pouco, e o título aparece
+     no vão acima da cabeça, ATRÁS de você, nítido, saindo do desfoque. Parece profundidade de campo.
+       ?titulo=Faturei 1 milhão&sub=e o que isso me ensinou&t0=0.2&dur=5 -->
+<html lang="pt-BR" class="h alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/direcao-h.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<script src="../nucleo/ensaio.js"></script>
+<style>
+.veu{position:absolute;inset:0;background:linear-gradient(rgba(5,6,8,.18),rgba(5,6,8,.5));opacity:0}
+/* no vão acima da cabeça: nada do título cai na coluna do rosto */
+.tt{position:absolute;left:60px;right:60px;top:84px;text-align:center;opacity:0}
+.tt b{display:inline-block;font:600 170px/.9 var(--fd);letter-spacing:-.035em;color:#fff;white-space:nowrap}
+.sb{position:absolute;left:0;right:0;top:268px;text-align:center;font:500 24px/1 var(--fm);letter-spacing:.32em;text-transform:uppercase;color:rgba(255,255,255,.82);padding-left:.32em;opacity:0}
+.sb:empty{display:none}
+</style>
+</head>
+<body>
+<div id="stage"><div class="veu" id="veu" data-c="tras"></div><div class="tt" id="tt" data-c="tras"><b id="tb"></b></div><div class="sb" id="sb" data-c="frente"></div></div>
+<script>
+const dur = D.n('dur', '5'), t0 = D.n('t0', '0.2'), $ = id => document.getElementById(id);
+E.pessoa('centro');
+$('tb').textContent = D.q('titulo', 'Faturei 1 milhão');
+$('sb').textContent = D.q('sub', 'e o que isso me ensinou');
+const fim = dur - .9;
+E.video(t0, dur, 'desfoca', {px: 14, entra: 1.2, sai: .9});
+E.video(t0, dur, 'zoom', {de: 1, para: 1.025, entra: dur - t0});
+D.monta(tl => {
+  D.cabe('#tb', 100, '.tt');
+  tl.fromTo('#veu', {opacity: 0}, {opacity: 1, duration: 1.2, ease: 'power1.inOut'}, t0);
+  D.cue(t0 + 1.2, 'swell');   // termina com o fundo já fora de foco
+  D.cue(t0 + .9, 'shimmer');
+  tl.fromTo('#tt', {opacity: 0, y: 24, filter: 'blur(14px)'}, {opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.5, ease: 'power2.out'}, t0 + .55);
+  tl.to('#tt', {scale: 1.03, duration: dur - t0 - 2, ease: 'none'}, t0 + 2.05);
+  tl.fromTo('#sb', {opacity: 0}, {opacity: 1, duration: 1, ease: 'power1.out'}, t0 + 1.3);
+  if (D.q('sai', '1') !== '0') {
+    tl.to(['#tt', '#sb'], {opacity: 0, filter: 'blur(10px)', duration: .7, ease: 'power1.in'}, fim);
+    tl.to('#veu', {opacity: 0, duration: .8, ease: 'power1.inOut'}, fim + .1);
+  }
+  return dur;
+});
+</script>
+</body>
+</html>

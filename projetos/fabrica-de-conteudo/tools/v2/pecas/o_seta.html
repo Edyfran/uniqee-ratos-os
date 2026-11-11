@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<!-- OFERTA — seta pro botão real do player. 1080x1920, --alpha.
+     A ponta da seta fica em `alvo` (px no quadro 1080x1920) e ela vem da
+     direção `de`. Chega, empurra na direção do alvo em ritmo lento, e um anel
+     pulsa sobre o ponto — discreto, sem piscar o quadro inteiro.
+       ?alvo=540,1700&de=cima&rot=o botão está aqui&t=0.2&dur=5 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+.eixo{position:absolute;width:180px;height:290px}
+.seta{position:absolute;left:0;top:0;width:180px;height:260px;opacity:0}
+.seta svg{width:100%;height:100%;overflow:visible;display:block}
+.corpo{fill:var(--mk);stroke:var(--ink);stroke-width:8;stroke-linejoin:round}
+.sombra{fill:var(--ink)}
+.anel{position:absolute;width:170px;height:170px;margin:-85px 0 0 -85px;border-radius:50%;
+  border:8px solid var(--ink);opacity:0}
+.anel.b{border-color:var(--mk)}
+.tag{position:absolute;padding:16px 24px;font:700 40px/1 var(--fm);letter-spacing:.06em;text-transform:uppercase;
+  white-space:nowrap;border-radius:var(--raio-s);opacity:0}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="anel" id="a1"></div><div class="anel b" id="a2"></div>
+  <div class="eixo" id="ex"><div class="seta" id="st">
+    <svg viewBox="0 0 180 260"><polygon class="sombra" transform="translate(10 10)" points="58,4 122,4 122,146 174,146 90,254 6,146 58,146"></polygon><polygon class="corpo" points="58,4 122,4 122,146 174,146 90,254 6,146 58,146"></polygon></svg>
+  </div></div>
+  <div class="tag nb cor-ink" id="tg"></div>
+</div>
+<script>
+const dur = D.n('dur', '5'), t0 = D.n('t', '0.2');
+const [ax, ay] = D.q('alvo', '540,1700').split(',').map(Number);
+const de = D.q('de', 'cima');
+// vetor de onde a seta VEM (a ponta aponta pro lado contrário)
+const V = {cima: [0, -1], baixo: [0, 1], esquerda: [-1, 0], direita: [1, 0]}[de] || [0, -1];
+const ROT = {cima: 0, baixo: 180, esquerda: -90, direita: 90}[de] ?? 0;
+const GAP = 30;
+const ex = document.getElementById('ex');
+// o eixo tem a ponta em (90, 260+GAP); gira em torno dela
+ex.style.left = (ax - 90) + 'px';
+ex.style.top = (ay - 260 - GAP) + 'px';
+ex.style.transformOrigin = `90px ${260 + GAP}px`;
+ex.style.transform = `rotate(${ROT}deg)`;
+['a1', 'a2'].forEach(id => { const a = document.getElementById(id); a.style.left = ax + 'px'; a.style.top = ay + 'px'; });
+const tg = document.getElementById('tg');
+tg.textContent = D.q('rot', 'o botão está aqui');
+// `pilula=1`: só a etiqueta, centrada em `alvo`, no tamanho `tam` (px), pulsando — o "Toque em Saiba mais ↓" do HERO6 (08/10),
+// onde a seta e o anel cobririam a legenda
+const PIL = D.q('pilula') === '1';
+if (D.q('tam')) { tg.style.fontSize = D.n('tam', '40') + 'px'; tg.style.padding = (D.n('tam', '40') * .4) + 'px ' + (D.n('tam', '40') * .6) + 'px'; }
+if (PIL) ['st', 'a1', 'a2'].forEach(id => document.getElementById(id).style.display = 'none');
+
+D.monta(tl => {
+  // a etiqueta fica depois da base da seta, na mesma linha, dentro do quadro
+  const L = 260 + GAP + 70, bx = ax + V[0] * L, by = ay + V[1] * L;
+  const w = tg.offsetWidth, h = tg.offsetHeight;
+  let lx = bx - w / 2 + V[0] * w / 2, ly = by - h / 2 + V[1] * h / 2;
+  lx = Math.max(40, Math.min(1080 - 40 - w, lx)); ly = Math.max(60, Math.min(1920 - 60 - h, ly));
+  if (PIL) { lx = ax - w / 2; ly = ay - h / 2; }
+  tg.style.left = lx + 'px'; tg.style.top = ly + 'px';
+
+  tl.fromTo('#st', {opacity: 0, y: -140}, {opacity: 1, y: 0, duration: D.P.ENT * 1.3, ease: D.P.MOLA}, D.at(t0));
+  D.cue(t0, 'pop');
+  D.carimbo('#tg', t0 + .3, D.P.ROT);
+  // empurra na direção do alvo: y local, porque o eixo já está girado
+  const n = Math.floor((dur - .6 - (t0 + .5)) / .9);
+  if (n > 0) tl.to('#st', {y: 26, duration: .45, ease: 'sine.inOut', yoyo: true, repeat: n * 2 - 1}, t0 + .5);
+  D.pulsa(['#a1', '#a2'], t0 + .35, dur - .5, 1.2);
+  if (PIL) tl.to('#tg', {scale: 1.06, duration: .45, ease: 'sine.inOut', yoyo: true, repeat: Math.max(1, Math.floor((dur - t0 - 1.2) / .45) | 1)}, t0 + .9);
+  D.sai(['#st', '#tg'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

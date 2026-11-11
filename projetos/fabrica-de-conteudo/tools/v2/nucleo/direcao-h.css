@@ -1,0 +1,44 @@
+/* 16:9 — YouTube e aulas. Carrega DEPOIS do direcao-v2.css e só mexe em
+   medida: cor, fonte e movimento continuam os da v2.
+
+   Dose: contido na aula (sombra 8, sem inclinação, peça pequena e no canto),
+   forte nos ganchos (abertura, capítulo e recap usam a escala cheia).
+
+   ZONA DO ROSTO: canto inferior direito, 440×280 a 40px das bordas
+   (x 1440–1880, y 760–1040). Peça alfa não entra ali: é onde fica a bolha do
+   apresentador quando a tela está compartilhada.
+
+   FAIXA DO PLAYER: os 184px de baixo (y 896–1080) são da barra de progresso e
+   dos controles do YouTube. Nada importante ali, em peça alfa ou opaca; fundo
+   puro pode (data-qa="fundo"). A conta está no LEIA-ME; o --yt-pe (e o D.PE)
+   vêm do direcao-v2.js, 0 fora do 16:9. */
+html.h{--piso:32px;--t-hd:84px;--t-big:260px;--t-item:40px;--t-apoio:28px;--t-kick:22px;
+  --sh:8px;--pad:64px;--marg:120px}
+html.h,html.h body{width:1920px;height:1080px}
+html.h #stage{width:1920px;height:1080px;padding:0;display:block}
+html.h .kick{margin-bottom:24px}
+html.h .hd{text-wrap:balance}
+/* vídeo-ensaio em camadas (ensaio.js): cada passe mostra só a sua camada */
+html.c-tras [data-c="frente"],html.c-frente [data-c="tras"]{visibility:hidden!important}
+
+/* PIP — ele na tela (?pip=1). A peça de tela cheia encolhe pra esquerda e deixa à direita a moldura de um
+   cartão 4:5 (672x840), onde o v2.sobre põe o recorte do vídeo. Os números moram no estilo
+   (helpers/estilo.py, desenho.pip.janela) e aqui: o test_lesson_overlays confere que são os mesmos. */
+html.pip{--pip-x:1188px;--pip-y:60px;--pip-w:672px;--pip-h:840px;--pip-dir:780px}
+html.pip #pipm{position:absolute;left:calc(var(--pip-x) - 6px);top:calc(var(--pip-y) - 6px);width:calc(var(--pip-w) + 12px);
+  height:calc(var(--pip-h) + 12px);border:6px solid var(--ink);background:var(--ink);box-shadow:var(--sh) var(--sh) 0 var(--ink)}
+html.pip .lc,html.pip .cc,html.pip .fc{left:60px;right:var(--pip-dir);top:60px}
+html.pip .lc .hd,html.pip .fc .hd{font-size:72px;margin-bottom:20px}
+html.pip .cc{top:60px;grid-template-columns:1fr 90px 1fr}
+html.pip .col .tt{padding:22px 22px;font-size:54px}
+html.pip .col .it{padding:0 18px;gap:16px}
+html.pip .col .it .ic{width:60px;height:60px;font-size:38px}
+html.pip .col .it .nm{font-size:40px}
+html.pip .vs{width:80px;height:80px}
+html.pip .fl{flex-direction:column;align-items:stretch}
+html.pip .nd{flex:none;height:auto;flex-direction:row;justify-content:flex-start;gap:28px;padding:20px 28px;text-align:left}
+html.pip .nd .nm{font-size:64px}
+html.pip .nd .de{font-size:38px}
+html.pip .sg{width:60px;height:46px;align-self:center;transform:rotate(90deg)}
+html.pip #jan{zoom:.66;left:91px;top:82px}   /* janela alta (?alto=1162): ~74% do quadro, ao lado do cartão dele */
+img.lg{height:1em;width:1em;vertical-align:-.14em;margin-right:.22em;display:inline-block}

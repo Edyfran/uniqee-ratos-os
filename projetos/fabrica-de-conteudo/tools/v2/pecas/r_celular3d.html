@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<!-- PROVA 3D — o celular que voa pela borda esquerda e flutua em cima do ombro, com a página do produto rolando por um dedo (clone da ficha 06,
+     "phone mockup", do anúncio De25fKeTRl7; do original saiu o movimento, o desenho é o nosso). three.js de verdade (vendor/three): corpo
+     EXTRUDADO de cantos redondos com aro metálico de espessura visível, vidro preto, ilha dinâmica, tela com a página, faixa de brilho
+     diagonal, disco de toque e sombra suave no ombro. A cena é alfa. O balanço é em 3D (rolagem, guinada e arfada de poucos graus) e o
+     borrão é de verdade: os quadros da entrada e do deslize são a média de subquadros (obturador aberto), não filtro.
+     1080x1920, --alpha. Desenhada só pelo tempo (seek): o mesmo quadro sai igual em qualquer render. t=0 é o quadro em que o celular
+     ENTRA (f188 da ref): 3 quadros de borrão pela esquerda, já parado no 4º; o dedo aparece 2 quadros antes de `ts`, o deslize dura 5
+     quadros; o corte é seco no fim (`dur`). Estique só a parte parada: `ts` e `dur` em segundos, a entrada e o deslize ficam em quadros.
+     Sem `tela` a peça desenha uma página de exemplo (hero tinta e uma lista de três itens);
+     com `tela` (um print em pé, 242x~1900) ela rola no lugar. `foto` põe o quadro do vídeo no cartãozinho do hero.
+       dur   a duração (1.133 = f188 a f221) · ts quando o dedo começa a deslizar, em s (0.5)
+       x  y  o centro do celular em f200 (q=12), em px do quadro (218, 1002); ele sobe 0,67 px por quadro, como a ref · esc a escala (1) · fim 1 = o celular fica até o último quadro (padrão)
+       tela  a imagem da página (opcional) · foto  a imagem do cartãozinho (opcional) · k  o número de subquadros do borrão (16)
+       sombra 1 = a sombra suave no ombro (1) · brilho 1 = a faixa de brilho diagonal (1)
+     O three vem de ../vendor/three/three.min.js (global T3); sem CDN. O render abre a peça por file://, com --allow-file-access-from-files:
+     é ele que deixa a textura da imagem subir.
+       etiqueta: celular-3d, objeto-3d, tela-que-rola
+       ?dur=1.133&ts=0.5&x=222&y=988 -->
+<html lang="pt-BR" class="alfa" data-qa="entra-seco fica">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<script src="../vendor/three/three.min.js"></script>
+<style>
+@font-face{font-family:'Anton';font-style:normal;font-weight:400;src:url(../nucleo/fontes/Anton-Regular.ttf) format('truetype')}
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block;position:relative;overflow:hidden}
+#gl{position:absolute;left:-4000px;top:0;width:1080px;height:1920px}
+#acc{position:absolute;left:0;top:0;width:1080px;height:1920px;display:block}
+</style>
+</head>
+<body>
+<div id="stage"><canvas id="gl" width="1080" height="1920"></canvas><canvas id="acc" width="1080" height="1920"></canvas></div>
+<script>
+const dur = D.n('dur', '1.133'), TS = D.n('ts', '0.5'), PX = D.n('x', '218'), PY = D.n('y', '1002'), ESC = D.n('esc', '1');
+const KSUB = Math.round(D.n('k', '16')), SOMB = D.n('sombra', '1'), BRIL = D.n('brilho', '1'), FIM = D.n('fim', '1');
+const TELA = D.q('tela', ''), FOTO = D.q('foto', '');
+const T = window.T3, W = 1080, H = 1920, FOV = 40, RAD = Math.PI / 180, DCAM = (H / 2) / Math.tan(FOV * RAD / 2);   // 1 unidade = 1 px no plano z=0
+const clamp = (x, a, b) => Math.min(b, Math.max(a, x)), lerp = (a, b, t) => a + (b - a) * t, sm = t => t * t * (3 - 2 * t);
+const prog = (q, a, b) => clamp((q - a) / (b - a), 0, 1), eo = x => 1 - Math.pow(1 - x, 3);
+// Hermite com tangente de Catmull-Rom: passa pelas chaves sem parar nelas
+const spl = (K, q) => { const n = K.length; if (q <= K[0][0]) return K[0].slice(1); if (q >= K[n - 1][0]) return K[n - 1].slice(1);
+  let i = 1; while (K[i][0] < q) i++;
+  const a = K[i - 1], b = K[i], h = b[0] - a[0], t = (q - a[0]) / h, t2 = t * t, t3 = t2 * t;
+  return a.slice(1).map((v0, j) => { const v1 = b[j + 1];
+    const m0 = i > 1 ? (v1 - K[i - 2][j + 1]) / (b[0] - K[i - 2][0]) : (v1 - v0) / h, m1 = i < n - 1 ? (K[i + 1][j + 1] - v0) / (K[i + 1][0] - a[0]) : (v1 - v0) / h;
+    return (2 * t3 - 3 * t2 + 1) * v0 + (t3 - 2 * t2 + t) * h * m0 + (-2 * t3 + 3 * t2) * v1 + (t3 - t2) * h * m1; }); };
+const css = v => { const g = document.createElement('canvas').getContext('2d'); g.fillStyle = getComputedStyle(document.documentElement).getPropertyValue(v).trim(); return g.fillStyle; };
+const INK = css('--ink'), AZ = css('--ac'), MK = css('--mk'), AZ2 = css('--ac2');
+const FD = getComputedStyle(document.documentElement).getPropertyValue('--fd').trim() || 'sans-serif';
+const GR = {cm: css('--cod-cm'), tx: css('--cod-tx'), i4: css('--ink4'), i6: css('--ink6'), cod: css('--cod'), cod2: css('--cod2'), ln: css('--cod-ln'), i8: css('--ink8'), cine: css('--cine')};   // os cinzas do núcleo
+
+// ---- as medidas do celular (px do quadro): a caixa lida na ref é 260x530 com a rolagem e o aro, então o corpo é 234x514; cantos de 38, 26 de espessura (o aro aparece uns 4 px na direita), 7 de moldura de vidro ----
+const PW_ = 234, PH_ = 514, ESP = 26, RC = 38, MOLD = 7, SW = PW_ - 2 * MOLD, SH = PH_ - 2 * MOLD;
+// a página: 2x, 484 de largura; a tela mostra 484x1000 dela
+const PGW = 484, PGH_VIS = Math.round(SH * 2 * 484 / (SW * 2)), HERO_H = 1000, BRANCO_Y = 1030, PAGE_H = 2000, SCROLL_MAX = 982;
+const BARRA_H = 96;
+
+// ---- a página do produto (2x). Texto de exemplo: troque pela sua página com tela= ----
+function carregaImg(url) { return new Promise(res => { if (!url) return res(null); const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = url; }); }
+function desenhaPagina(foto, tela) {
+  const cv = document.createElement('canvas'); cv.width = PGW; cv.height = PAGE_H; const g = cv.getContext('2d');
+  if (tela) { g.fillStyle = '#fff'; g.fillRect(0, 0, PGW, PAGE_H); const h = tela.naturalHeight * PGW / tela.naturalWidth; g.drawImage(tela, 0, 0, PGW, h); return cv; }
+  const rr = (x, y, w, h, r) => { g.beginPath(); g.roundRect(x, y, w, h, r); };
+  // hero: chão tinta com um brilho azul no canto
+  g.fillStyle = INK; g.fillRect(0, 0, PGW, HERO_H);
+  const gl = g.createRadialGradient(PGW * .95, 90, 10, PGW * .95, 90, 420); gl.addColorStop(0, 'rgba(6,64,251,.55)'); gl.addColorStop(1, 'rgba(6,64,251,0)');
+  g.fillStyle = gl; g.fillRect(0, 0, PGW, 560);
+  g.fillStyle = MK; g.beginPath(); g.arc(38, 112, 7, 0, 7); g.fill();
+  g.fillStyle = GR.cm; g.font = '600 21px "IBM Plex Mono",monospace'; g.fillText('SEU PRODUTO', 56, 120);
+  g.textBaseline = 'alphabetic'; g.fillStyle = '#fff'; g.font = '400 84px Anton';
+  g.fillText('SUA PÁGINA', 32, 262);
+  g.fillStyle = MK; g.fillRect(24, 286, 372, 90); g.fillStyle = INK; g.fillText('ROLANDO', 32, 356);
+  g.fillStyle = '#fff'; g.fillText('NO CELULAR.', 32, 450);
+  g.fillStyle = GR.tx; g.font = `600 23px ${FD}`; ['troque este texto', 'passando um print da', 'sua página em `tela`', '(imagem em pé).'].forEach((s, i) => g.fillText(s, 32, 520 + i * 33));
+  // o cartãozinho do vídeo, em pé, à direita
+  const CX0 = PGW - 178, CY0 = 500;
+  g.save(); rr(CX0, CY0, 150, 270, 22); g.clip(); g.fillStyle = GR.cod; g.fillRect(CX0, CY0, 150, 270);
+  if (foto) { const s = Math.max(150 / foto.naturalWidth, 270 / foto.naturalHeight); g.drawImage(foto, CX0 + 75 - foto.naturalWidth * s / 2, CY0 + 135 - foto.naturalHeight * s / 2, foto.naturalWidth * s, foto.naturalHeight * s); }
+  g.restore(); g.lineWidth = 4; g.strokeStyle = '#fff'; rr(CX0, CY0, 150, 270, 22); g.stroke();
+  [[CX0 + 38, CY0 + 238], [CX0 + 112, CY0 + 238]].forEach(([cx, cy], i) => { g.fillStyle = 'rgba(11,13,18,.75)'; g.beginPath(); g.arc(cx, cy, 17, 0, 7); g.fill(); g.fillStyle = '#fff';
+    if (i) { g.fillRect(cx - 6, cy - 7, 4, 14); g.fillRect(cx + 2, cy - 7, 4, 14); } else { g.beginPath(); g.moveTo(cx - 5, cy - 8); g.lineTo(cx + 8, cy); g.lineTo(cx - 5, cy + 8); g.fill(); } });
+  g.fillStyle = GR.cm; g.font = '600 20px "IBM Plex Mono",monospace'; g.fillText('PRINT EM PÉ', 32, 836); g.fillText('PASSE tela=', 32, 866);
+  // seção branca, com o ponto do papel
+  g.fillStyle = '#fff'; g.fillRect(0, BRANCO_Y - 8, PGW, PAGE_H - BRANCO_Y + 8);
+  g.fillStyle = 'rgba(11,13,18,.10)'; for (let y = BRANCO_Y + 14; y < PAGE_H; y += 36) for (let x = 14; x < PGW; x += 36) { g.beginPath(); g.arc(x, y, 2, 0, 7); g.fill(); }
+  g.fillStyle = INK; g.fillRect(0, BRANCO_Y - 8, PGW, 8);
+  g.fillStyle = GR.i4; g.font = '600 20px "IBM Plex Mono",monospace'; g.fillText('EM DESTAQUE', 32, BRANCO_Y + 62);
+  g.fillStyle = INK; g.font = '400 54px Anton'; g.fillText('O QUE VEM AQUI', 32, BRANCO_Y + 126);
+  const itens = [['01', 'PRIMEIRO ITEM', 'Troque estes textos passando', 'a imagem da sua página em `tela`.'], ['02', 'SEGUNDO ITEM', 'O celular rola a página', 'no lugar, com o dedo.'], ['03', 'TERCEIRO ITEM', 'Um print em pé,', 'de uns 242 x 1900 px.']];
+  itens.forEach(([n, t, a, b], i) => { const y = BRANCO_Y + 190 + i * 196;
+    g.fillStyle = INK; g.fillRect(36, y + 6, 62, 62); g.fillStyle = AZ; g.fillRect(30, y, 62, 62); g.strokeStyle = INK; g.lineWidth = 4; g.strokeRect(30, y, 62, 62);
+    g.fillStyle = '#fff'; g.font = '400 36px Anton'; g.fillText(n, 42, y + 46);
+    g.fillStyle = INK; g.font = '400 38px Anton'; g.fillText(t, 114, y + 42);
+    g.fillStyle = GR.i6; g.font = `600 22px ${FD}`; g.fillText(a, 114, y + 82); g.fillText(b, 114, y + 112); });
+  return cv;
+}
+function desenhaBarra() {                                    // a barra fixa do rodapé: o botão que não rola
+  const cv = document.createElement('canvas'); cv.width = PGW; cv.height = BARRA_H; const g = cv.getContext('2d');
+  g.fillStyle = INK; g.fillRect(0, 0, PGW, BARRA_H); g.fillStyle = 'rgba(255,255,255,.22)'; g.fillRect(0, 0, PGW, 2);
+  g.fillStyle = MK; g.beginPath(); g.roundRect(26, 16, PGW - 52, 62, 14); g.fill(); g.strokeStyle = '#fff'; g.lineWidth = 0;
+  g.fillStyle = INK; g.font = '400 34px Anton'; g.textAlign = 'center'; g.fillText('SEU BOTÃO', PGW / 2, 60); return cv;
+}
+
+// ---- three: renderer, câmera, luz e o celular ----
+const glc = document.getElementById('gl'), acc = document.getElementById('acc'), actx = acc.getContext('2d');
+const renderer = new T.WebGLRenderer({canvas: glc, antialias: true, alpha: true, premultipliedAlpha: true, preserveDrawingBuffer: true});
+renderer.setPixelRatio(1); renderer.setSize(W, H, false); renderer.setClearColor(0x000000, 0); renderer.toneMapping = T.NoToneMapping;
+const scene = new T.Scene(), camera = new T.PerspectiveCamera(FOV, W / H, 200, 12000);
+camera.position.set(0, 0, DCAM); camera.lookAt(0, 0, 0);
+const maxAn = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+const pm = new T.PMREMGenerator(renderer); scene.environment = pm.fromScene(new T.RoomEnvironment(), 0.03).texture;
+scene.add(new T.HemisphereLight(0xffffff, 0x8a8f99, .8)); const luzK = new T.DirectionalLight(0xffffff, 1.4); luzK.position.set(-300, 500, 700); scene.add(luzK);
+
+function formaRR(w, h, r) { const s = new T.Shape(), x = -w / 2, y = -h / 2;
+  s.moveTo(x + r, y); s.lineTo(x + w - r, y); s.absarc(x + w - r, y + r, r, -Math.PI / 2, 0, false); s.lineTo(x + w, y + h - r); s.absarc(x + w - r, y + h - r, r, 0, Math.PI / 2, false);
+  s.lineTo(x + r, y + h); s.absarc(x + r, y + h - r, r, Math.PI / 2, Math.PI, false); s.lineTo(x, y + r); s.absarc(x + r, y + r, r, Math.PI, 1.5 * Math.PI, false); return s; }
+function geoPlano(w, h, r) { const g = new T.ShapeGeometry(formaRR(w, h, r), 24), p = g.attributes.position, uv = g.attributes.uv;
+  for (let i = 0; i < p.count; i++) uv.setXY(i, p.getX(i) / w + .5, p.getY(i) / h + .5); return g; }
+const tex = cv => { const t = new T.CanvasTexture(cv); t.colorSpace = T.SRGBColorSpace; t.anisotropy = maxAn; t.generateMipmaps = true; t.minFilter = T.LinearMipmapLinearFilter; return t; };
+
+const phone = new T.Group(); phone.rotation.order = 'YXZ'; scene.add(phone);
+// o corpo: extrudado do contorno de cantos redondos; o aro (lado) é metal, as tampas são vidro preto
+const mAro = new T.MeshStandardMaterial({color: 0x3b3d43, metalness: .85, roughness: .52, envMapIntensity: .5});   // cinza quase preto: na ref o aro é fino e escuro, só o lado direito pega um pouco de luz
+const mVid = new T.MeshPhysicalMaterial({color: 0x07080b, roughness: .22, metalness: 0, clearcoat: 1, clearcoatRoughness: .12});
+const corpo = new T.ExtrudeGeometry(formaRR(PW_ - 6, PH_ - 6, RC - 3), {depth: ESP - 6, bevelEnabled: true, bevelThickness: 3, bevelSize: 3, bevelSegments: 5, curveSegments: 20});
+corpo.translate(0, 0, -(ESP - 6) / 2); phone.add(new T.Mesh(corpo, [mVid, mAro]));
+const ZF = ESP / 2 + .6;                                           // a frente do vidro
+const mBarra = new T.MeshBasicMaterial({map: null, toneMapped: false});
+const telaMat = new T.MeshBasicMaterial({color: 0xffffff, toneMapped: false});
+const telaMesh = new T.Mesh(geoPlano(SW, SH, RC - MOLD), telaMat); telaMesh.position.z = ZF; phone.add(telaMesh);
+const barraMesh = new T.Mesh(new T.PlaneGeometry(SW, BARRA_H / 2), mBarra);     // a barra fixa, 2x → px do quadro
+barraMesh.position.set(0, -SH / 2 + BARRA_H / 4, ZF + .2); phone.add(barraMesh);
+const ilha = new T.Mesh(new T.ShapeGeometry(formaRR(78, 22, 11), 12), new T.MeshBasicMaterial({color: 0x000000})); ilha.position.set(0, SH / 2 - 21, ZF + .5); phone.add(ilha);
+// o disco de toque: cinza translúcido com anel branco
+const disco = new T.Group(); disco.position.z = ZF + .8; phone.add(disco);
+const mDisco = new T.MeshBasicMaterial({color: 0x8d9097, transparent: true, opacity: 0, depthWrite: false}), mAnel = new T.MeshBasicMaterial({color: 0xffffff, transparent: true, opacity: 0, depthWrite: false});
+disco.add(new T.Mesh(new T.CircleGeometry(24, 40), mDisco), new T.Mesh(new T.RingGeometry(21, 25, 48), mAnel));
+// o brilho: um feixe fino e inclinado que cruza o vidro do canto de cima à esquerda ao de baixo à direita em 3 quadros (f196 a f198); desenhado a cada quadro numa tela pequena
+const bv = document.createElement('canvas'); bv.width = 132; bv.height = 300; const bg2 = bv.getContext('2d');
+const mBril = new T.MeshBasicMaterial({map: null, transparent: true, opacity: 0, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false});
+const tBril = tex(bv); mBril.map = tBril;
+const brilho = new T.Mesh(geoPlano(SW, SH, RC - MOLD), mBril); brilho.position.z = ZF + 1; phone.add(brilho);
+function desenhaBrilho(bq) {
+  bg2.clearRect(0, 0, 132, 300); if (bq <= 0 || bq >= 1) { mBril.opacity = 0; return; }
+  bg2.save(); bg2.translate(66, 150); bg2.rotate(-.85);                  // o eixo x vai para cima e à direita (a direção do feixe); o y, para baixo e à direita (o caminho dele)
+  const c = lerp(-170, 205, bq), wd = 22, gr = bg2.createLinearGradient(0, c - wd, 0, c + wd);
+  gr.addColorStop(0, 'rgba(255,255,255,0)'); gr.addColorStop(.28, 'rgba(255,255,255,.22)'); gr.addColorStop(.5, 'rgba(255,255,255,1)'); gr.addColorStop(.72, 'rgba(255,255,255,.22)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  bg2.fillStyle = gr; bg2.fillRect(-260, c - wd, 520, 2 * wd); bg2.restore(); tBril.needsUpdate = true; mBril.opacity = BRIL > 0 ? 1 : 0;
+}
+// a sombra suave no ombro: o contorno do celular borrado, deslocado pra baixo e pra direita, atrás
+const sv = document.createElement('canvas'); sv.width = 256; sv.height = 512; { const g = sv.getContext('2d'); g.filter = 'blur(14px)'; g.fillStyle = '#000'; g.beginPath(); g.roundRect(40, 40, 176, 432, 30); g.fill(); }
+const sombra = new T.Mesh(new T.PlaneGeometry(PW_ * 1.45, PH_ * 1.2), new T.MeshBasicMaterial({map: tex(sv), transparent: true, opacity: .5, depthWrite: false})); sombra.visible = SOMB > 0; scene.add(sombra);
+
+// ---- a pose a cada quadro q (q=0 é o quadro em que o celular entra) ----
+const resto = q => { const t = q / 30;                            // a ref varia ±8 px em y e ±5 px em x por causa do balanço em 3D: poucos graus
+  return [PX + 2 * Math.sin(t * 6.1 + .4), PY - .67 * (q - 12) + 2.2 * Math.sin(t * 5.9 + 1.2), 2.6 + 1.5 * Math.sin(t * 6.6 + .6), -10 + 2.4 * Math.sin(t * 4.8 + .2), 2 * Math.sin(t * 3.9 + 1.1)]; };   // x y rolagem guinada arfada
+const R3 = resto(3);
+const ENT = [[-1, -30, 1110, 34, 88, 10], [0, 78, 1050, 27, 66, 7], [1, 178, 1024, 8, 20, 2.5], [2, 217, 1010, 5, 0, 1.2], [3, ...R3]];
+const pose = q => q < 3 ? spl(ENT, q) : resto(q);
+// o dedo e o deslize
+const Q0 = TS * 30;                                            // o quadro em que a página começa a andar
+// a rolagem é um empurrão que acelera e freia (medido na ref: a primeira linha branca da tela sobe 1197, 1046, 923, 828, 781, 757 px em f204 a f209):
+// fração do percurso a cada quadro depois de Q0 (f203), passando pelas chaves sem parar nelas
+const KS = [[-1, 0], [0, .02], [1, .12], [2, .40], [3, .66], [4, .85], [5, .95], [6, 1], [7, 1]];
+const scrollQ = q => SCROLL_MAX * clamp(spl(KS, q - Q0 + .15)[0], 0, 1);
+// o dedo (lido na ref): em f201 e f202 a 75% da altura da tela, contando de cima; f203 nada; f204 e f205 a 46%; f206 nada. y: distância do centro, em fração da tela, pra cima
+const dedoQ = q => { const w = (a, b) => prog(q, a - .12, a + .12) * (1 - prog(q, b - .12, b + .12));
+  return {a: Math.max(w(Q0 - 2.5, Q0 - .5), w(Q0 + .5, Q0 + 2.5)), y: q < Q0 ? -.25 : .04}; };
+
+let mapaPagina = null;
+function quadroQ(q) {
+  const [x, y, rl, yw, pt] = pose(q);
+  const e = ESC;
+  phone.position.set((x - 540), (960 - y), 0); phone.rotation.set(pt * RAD, yw * RAD, rl * RAD); phone.scale.setScalar(e);
+  sombra.position.set((x - 540) + 17 * e, (960 - y) - 26 * e, -ESP * e); sombra.rotation.z = rl * RAD * .9; sombra.scale.setScalar(e);
+  sombra.material.opacity = .5 * (q < -.5 ? 0 : 1);
+  // a página rola (a fração da altura): os UV da textura andam
+  const rep = PGH_VIS / PAGE_H, off = 1 - rep - scrollQ(q) / PAGE_H;
+  mapaPagina.repeat.set(1, rep); mapaPagina.offset.set(0, off);
+  const d = dedoQ(q); mDisco.opacity = .62 * d.a; mAnel.opacity = .98 * d.a; disco.position.set(0, d.y * SH, ZF + .8); disco.scale.setScalar(1 + .1 * (1 - d.a));
+  desenhaBrilho((q - 7.3) / 3.4);
+  phone.visible = FIM > 0 || q < dur * 30;
+  renderer.render(scene, camera);
+}
+function quadro(t) {
+  const q = t * 30 + 1e-6, borrado = (q < 3.6) || (q > Q0 - .5 && q < Q0 + 6.4) || (q > 7 && q < 11);
+  actx.globalCompositeOperation = 'source-over'; actx.globalAlpha = 1; actx.clearRect(0, 0, W, H);
+  if (!borrado || KSUB < 2) { quadroQ(q); actx.drawImage(glc, 0, 0); return; }
+  const obt = q < 3.6 ? .75 : .8;                              // o obturador, em quadros (360° na entrada)
+  actx.globalCompositeOperation = 'lighter'; actx.globalAlpha = 1 / KSUB;
+  for (let k = 0; k < KSUB; k++) { quadroQ(q + (k / (KSUB - 1) - .5) * obt); actx.drawImage(glc, 0, 0); }
+  actx.globalAlpha = 1; actx.globalCompositeOperation = 'source-over';
+}
+
+Promise.all([carregaImg(TELA), carregaImg(FOTO), document.fonts.load('400 80px Anton'), document.fonts.load(`600 26px ${FD}`), document.fonts.load('600 20px "IBM Plex Mono"')]).then(([tela, foto]) => {
+  const pg = tex(desenhaPagina(foto, tela)); pg.wrapS = pg.wrapT = T.ClampToEdgeWrapping; mapaPagina = pg; telaMat.map = pg; telaMat.needsUpdate = true;
+  mBarra.map = tex(desenhaBarra()); barraMesh.visible = !tela; mBarra.needsUpdate = true;
+  D.monta(tl => {
+    tl.to({}, {duration: dur}, 0);
+    D.aoQuadro(() => quadro(tl.time()));
+    renderer.compile(scene, camera); quadro(0);
+    D.cue(0, 'whoosh'); D.cue(Math.max(0, TS - .05), 'swish');
+    return dur;
+  });
+});
+</script>
+</body>
+</html>

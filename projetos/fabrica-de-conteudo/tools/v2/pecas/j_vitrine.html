@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<!-- JABÁ — a vitrine da Fábrica: a sequência de imagens REAIS que cobre a fala do jabá (tela cheia, opaca, 1920x1080).
+     Cada cena dura 1–3 s e troca na palavra que a pede; tudo é arquivo de verdade (print, quadro de bruto, gravação do
+     terminal, vídeo), nada desenhado. Movimento em todas: empurrão de câmera, queda, barra que enche, cartão que pousa.
+     O que fica fora do quadro de player (y > 896) é só fundo. `cenas` é uma lista JSON; t = quando entra (s), d = quanto dura.
+       foto    {img, rot, z: 1.0→1.1, de: "cx,cy"}  a imagem cobrindo o quadro dentro de uma moldura, com empurrão
+       video   {img: mp4, off, rot}                 o mesmo, com vídeo (o quadro segue a timeline)
+       queda   {fundo, itens:[{img,nome,tam}], rot, soma} os brutos caem na pasta (a janela real do Finder à esquerda)
+       cortes  {linhas:[{nome,dur,keep:[[a,b]]}], de, para, rot} uma barra por bruto: o que ficou enche, o que saiu fica vazio
+       cartoes {itens:[{img,x,y,w,rot,rt}], rot, fundo}  o que a Fábrica monta, pousando em cascata
+       lado    {a:{img,rt}, b:{img,rt}, rot}        duas imagens lado a lado (antes × depois), a da direita entra por último
+       ?cenas=[{"t":0.3,"d":2,"tipo":"foto","img":"../midia/rosto-capa.png","rot":"exemplo"}]&dur=4 -->
+<html lang="pt-BR" class="h">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/direcao-h.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+.cena{position:absolute;inset:0;opacity:0;overflow:hidden}
+.fnd{position:absolute;inset:-60px;background-size:cover;background-position:center;filter:blur(38px) brightness(.45) saturate(1.2)}
+.mol{position:absolute;overflow:hidden;opacity:0}
+.mol img,.mol video{display:block;width:100%;height:100%;object-fit:cover;transform-origin:var(--o,50% 50%)}
+.rot{position:absolute;left:70px;bottom:230px;padding:10px 26px 14px;font:800 52px/1.1 var(--fd);letter-spacing:var(--ls);color:var(--ink);opacity:0;white-space:nowrap;z-index:9}
+.mini{position:absolute;opacity:0;overflow:hidden;line-height:0}
+.mini img{width:100%;display:block}
+.mini i{position:absolute;left:0;right:0;bottom:0;padding:5px 8px;background:var(--ink);color:#fff;font:700 18px/1 var(--fm);font-style:normal;line-height:1}
+.soma{position:absolute;right:90px;top:70px;padding:12px 30px 16px;font:900 84px/1 var(--fd);color:var(--ink);opacity:0;z-index:9;white-space:nowrap}
+.soma small{display:block;font:700 26px/1.2 var(--fm);letter-spacing:.06em;text-transform:uppercase}
+.lin{position:absolute;left:120px;right:120px;height:58px;opacity:0}
+.lin b{position:absolute;left:0;top:0;width:300px;font:700 28px/58px var(--fm);color:#fff;white-space:nowrap}
+.lin .tr{position:absolute;left:320px;right:0;top:6px;height:46px;border:4px solid var(--ink);background:rgba(255,255,255,.14);border-radius:8px}
+.lin .kp{position:absolute;top:0;bottom:0;background:var(--mk);transform-origin:0 50%}
+.cart{position:absolute;opacity:0;filter:drop-shadow(10px 10px 0 var(--ink))}
+.cart img{display:block;width:100%;border:4px solid var(--ink);border-radius:10px;background:#000}
+.cart i{position:absolute;left:12px;bottom:-22px;padding:6px 18px 8px;font:800 30px/1.1 var(--fd);font-style:normal;color:var(--ink);white-space:nowrap}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+const dur = D.n('dur', '10'), $ = id => document.getElementById(id), W = 1920, H = 1080;
+const cenas = JSON.parse(D.q('cenas', '[]'));
+const el = (cls, html = '', st = '') => { const e = document.createElement('div'); e.className = cls; e.innerHTML = html; if (st) e.style.cssText = st; return e; };
+const fundo = (g, img) => g.appendChild(el('fnd', '', `background-image:url('${img}')`));
+const moldura = (g, x, y, w, h, o) => { const m = el('mol nb'); m.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px`;
+  o.video = o.video || /\.(mp4|mov|webm)$/i.test(o.img);
+  const vid = 'v' + (++nvid);
+  if (o.video) m.innerHTML = `<div id="${vid}" style="width:100%;height:100%"></div>`; else m.innerHTML = `<img src="${o.img}" alt="">`;
+  g.appendChild(m); if (o.video) D.midia('#' + vid, o.img, 'video', 'cover').dataset.off = String(o.off || 0); return m; };
+let nvid = 0;
+const rotulo = (g, txt) => { if (!txt) return null; const r = el('rot nb cor-mk', txt); g.appendChild(r); return r; };
+const cs = cenas.map((c, i) => { const g = el('cena'); g.id = 'c' + i; $('stage').appendChild(g); return {c, g, i}; });
+
+cs.forEach(({c, g}) => {
+  c.m = [];
+  if (c.tipo === 'foto' || c.tipo === 'video') {
+    fundo(g, c.fundo || (c.tipo === 'foto' ? c.img : '../midia/fundo-avatar6.png'));
+    const w = c.w || 1580, h = c.h || Math.round(w * 9 / 16);
+    const x = (W - w) / 2, y = Math.max(40, Math.min(150 - (h - 890) / 2, (880 - h) / 2));
+    c.m.push(moldura(g, x, y, w, h, {img: c.img, video: c.tipo === 'video', off: (c.off || 0) - c.t}));
+    c.r = rotulo(g, c.rot);
+  } else if (c.tipo === 'queda') {
+    fundo(g, c.fundo);
+    const jan = moldura(g, 60, 110, 1100, 500, {img: c.fundo}); const fi = jan.firstChild;
+    fi.style.cssText = 'width:1500px;height:auto;max-width:none;object-fit:fill;transform-origin:0 0'; jan.style.background = '#1b1b1f';
+    c.m.push(jan);
+    const cols = 3, tw = 165, gx = 1230, gy = 110;
+    c.itens.forEach((it, k) => {
+      const w = it.pe ? 100 : tw, m = el('mini nb'); m.innerHTML = `<img src="${it.img}" alt=""><i>${it.nome}</i>`;
+      m.style.cssText = `left:${gx + (k % cols) * (tw + 25) + (tw - w) / 2}px;top:${gy + Math.floor(k / cols) * 175}px;width:${w}px`;
+      g.appendChild(m); c.m.push(m);
+    });
+    c.s = el('soma nb cor-mk', `<span id="sm${c.t}">0</span><small>${c.soma || 'vídeos brutos'}</small>`); c.s.style.cssText = 'left:60px;top:650px;right:auto'; g.appendChild(c.s);
+    c.r = rotulo(g, c.rot);
+  } else if (c.tipo === 'cortes') {
+    g.appendChild(el('fnd', '', 'background:#150f24;filter:none'));
+    const L = c.linhas, top = 150, pas = 66, max = Math.max(...L.map(l => l.dur));
+    c.rows = L.map((l, k) => {
+      const r = el('lin'); r.style.top = (top + k * pas) + 'px';
+      const wtot = W - 120 * 2 - 320;
+      r.innerHTML = `<b>${l.nome}</b><div class="tr" style="right:${wtot * (1 - l.dur / max)}px">` + l.keep.map(([a, b]) =>
+        `<div class="kp nb" style="left:${a / l.dur * 100}%;width:${(b - a) / l.dur * 100}%;border-width:0 3px;border-radius:0"></div>`).join('') + '</div>';
+      g.appendChild(r); return r;
+    });
+    c.s = el('soma nb cor-mk', `<span>${c.de}</span><small>${c.rot}</small>`); c.s.style.cssText = 'right:90px;top:40px'; g.appendChild(c.s);
+  } else if (c.tipo === 'cartoes') {
+    fundo(g, c.fundo || c.itens[0].img);
+    c.itens.forEach(it => { const e = el('cart', `<img src="${it.img}" alt="">${it.rt ? `<i class="nb cor-mk">${it.rt}</i>` : ''}`);
+      e.style.cssText = `left:${W / 2 + it.x - it.w / 2}px;top:${H / 2 + it.y}px;width:${it.w}px`; e.dataset.rot = it.rot || 0; g.appendChild(e); c.m.push(e); });
+    c.r = rotulo(g, c.rot);
+  } else if (c.tipo === 'lado') {
+    fundo(g, c.fundo || c.a.img);
+    const w = 900, h = 506, y = 230;
+    c.m.push(moldura(g, 60, y, w, h, {...c.a, off: (c.a.off || 0) - c.t}), moldura(g, 960, y, w, h, {...c.b, off: (c.b.off || 0) - c.t}));
+    [c.a, c.b].forEach((o, k) => { const r = el('rot nb cor-mk', o.rt); r.style.cssText = `left:${60 + k * 900 + (k ? 60 : 0)}px;bottom:auto;top:${y - 90}px;font-size:44px`; g.appendChild(r); c.m.push(r); });
+    c.r = rotulo(g, c.rot);
+  }
+});
+
+D.monta(tl => {
+  cs.forEach(({c, g}, i) => {
+    const t = c.t, fim = t + c.d, prox = cs[i + 1] ? cs[i + 1].c.t : null;
+    // a cena fica por baixo da seguinte até ela pousar; some um instante depois
+    tl.set(g, {opacity: 1}, D.at(t) - .001);
+    tl.set(g, {opacity: 0}, (prox !== null ? D.at(prox) + .45 : D.at(fim)));
+    g.style.zIndex = i + 1;
+    if (c.tipo === 'foto' || c.tipo === 'video') {
+      const m = c.m[0], lado = i % 2 ? 1 : -1;
+      D.pousa(m, t, {dx: lado * 220, dy: -80});
+      const o0 = (c.de || '50,50').split(','), o1 = (c.de1 || c.de || '50,50').split(','), z = c.z || 1.12;
+      tl.fromTo(m.querySelector('img,video'), {scale: c.z0 || z / 1.15, transformOrigin: `${o0[0]}% ${o0[1]}%`},
+        {scale: z, transformOrigin: `${o1[0]}% ${o1[1]}%`, duration: c.d, ease: 'none'}, D.at(t));
+      if (c.r) D.pousa(c.r, t + .25, {dy: 40, dx: -80, som: 'pop'});
+    } else if (c.tipo === 'queda') {
+      D.pousa(c.m[0], t, {dx: -200, dy: -60});
+      const n = c.m.length - 1, pas = Math.min(.34, (c.d - 1.2) / n);
+      c.m.slice(1).forEach((m, k) => {
+        D.pousa(m, t + .5 + k * pas, {dy: -520, dx: 0, rot: (k % 2 ? 1 : -1) * 4});
+        D.cue(t + .5 + k * pas + .25, 'pop');
+      });
+      D.pousa(c.s, t + .4, {dy: -40});
+      const o = {v: 0}, sp = document.getElementById('sm' + c.t), alvo = c.itens.length;
+      tl.to(o, {v: alvo, duration: n * pas, ease: 'none', onUpdate: () => { sp.textContent = Math.round(o.v); }}, D.at(t + .5));
+      if (c.r) D.pousa(c.r, t + .3, {dy: 40, dx: -80});
+    } else if (c.tipo === 'cortes') {
+      c.rows.forEach((r, k) => {
+        D.pousa(r, t + .15 + k * .12, {dy: -40, dx: -60});
+        r.querySelectorAll('.kp').forEach((kp, j) => tl.fromTo(kp, {scaleX: 0}, {scaleX: 1, duration: .9, ease: 'power2.out'}, D.at(t + .6 + k * .12 + j * .08)));
+      });
+      D.pousa(c.s, t + 1.0, {dy: 30});
+      const sp = c.s.firstChild, o = {p: 0};
+      tl.to(o, {p: 1, duration: .8, ease: 'power2.out', onUpdate: () => { sp.textContent = o.p < .5 ? c.de : c.para; }}, D.at(t + 1.4));
+      D.cue(t + 1.4, 'ding');
+    } else if (c.tipo === 'cartoes') {
+      c.m.forEach((e, k) => {
+        const te = t + .12 + k * .38;
+        D.pousa(e, te, {dy: -420, dx: (k % 2 ? 1 : -1) * 160, rot: +e.dataset.rot, som: 'pop'});
+        tl.to(e, {scale: 1.08, duration: Math.max(.5, c.d - (te - t) - .6), ease: 'none'}, D.at(te) + .6);   // nunca parado: o freezedetect pega 1,5 s sem mudar
+      });
+      if (c.r) D.pousa(c.r, t + .2, {dy: 40, dx: -80});
+    } else if (c.tipo === 'lado') {
+      D.pousa(c.m[0], t, {dx: -240, dy: -40}); D.pousa(c.m[2], t + .08, {dy: 40, dx: -60});
+      D.pousa(c.m[1], t + .55, {dx: 280, dy: -40, som: 'whoosh'}); D.pousa(c.m[3], t + .63, {dy: 40, dx: 60});
+      tl.fromTo(c.m[0].querySelector('img,video'), {scale: 1}, {scale: 1.06, duration: c.d, ease: 'none'}, D.at(t));
+      tl.fromTo(c.m[1].querySelector('img,video'), {scale: 1}, {scale: 1.06, duration: c.d, ease: 'none'}, D.at(t + .55));
+      if (c.r) D.pousa(c.r, t + .3, {dy: 40, dx: -80});
+    }
+  });
+  return dur;
+});
+</script>
+</body>
+</html>

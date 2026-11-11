@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<!-- TIPOGRAFIA — queda livre em serifa (clone do "Gravity drop"): uma palavra pequena em itálico aparece de golpe no lugar, e a
+     palavra grande, em serifa alta e fina, CAIXA ALTA, cai do alto do quadro LETRA A LETRA, na ordem da leitura, quase
+     juntas (~30 ms entre uma e outra), com gravidade, um quique curto e um amasso ao pousar. Parada, some no corte (sem
+     animação de saída). Letra solta, sem borda nem sombra. O texto mora ATRÁS da pessoa (data-c="tras"): o plano liga
+     `desenho.atras` e põe `atras: true` no item. 1080x1920, --alpha. A serifa é a Instrument Serif normal (vem do Google
+     Fonts; o núcleo só traz o itálico) esticada na altura, como a Didone condensada do original.
+       l1  a palavra pequena, itálica, em papel (queda) · l2  a grande (LIVRE)
+       x · larg   o canto esquerdo e a largura da grande, em px (65 · 590: termina em x 655, longe do painel em 708) · y  o topo da tinta da grande (450) · h  a altura da maiúscula (255)
+       y1  o topo da tinta da pequena (370) · x1  o canto esquerdo da pequena (238) · h1  o corpo dela (100)
+       t0 · sai  quando some (-1: dur - 0,1) · dur
+       ?l1=queda&l2=LIVRE&x=65&larg=605&y=450&h=255&t0=0&dur=1.1 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/editorial.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px;background:transparent}
+#stage{padding:0;display:block;background:none}
+#blk{position:absolute;left:0;top:0;width:1080px;height:1920px}
+.p{position:absolute;white-space:nowrap;line-height:1;font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;
+  color:var(--ed-pp);opacity:.85}
+.b{position:absolute;white-space:nowrap;line-height:1;font-family:'Instrument Serif',serif;font-style:normal;font-weight:400;
+  color:var(--ed-pp)}
+.b i{display:inline-block;font-style:normal;transform-origin:50% 100%}
+.b i b{display:inline-block;font-weight:400;transform-origin:0 0}
+</style>
+</head>
+<body>
+<div id="stage"><div id="blk" data-c="tras"><div class="p" id="p"></div><div class="b" id="b"></div></div></div>
+<script>
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const $ = id => document.getElementById(id);
+const dur = D.n('dur', '1.1'), t0 = D.n('t0', '0'), sai0 = D.n('sai', '-1'), sai = sai0 < 0 ? dur - .1 : sai0;
+const l1 = D.q('l1', 'queda'), l2 = D.q('l2', 'LIVRE');
+const X = D.n('x', '65'), larg = D.n('larg', '590'), Y = D.n('y', '450'), H = D.n('h', '255');
+$('p').textContent = l1;
+$('b').innerHTML = [...l2].map(c => `<i><b>${c === ' ' ? '&nbsp;' : esc(c)}</b></i>`).join('');
+
+Promise.all([document.fonts.load('400 100px "Instrument Serif"'), document.fonts.load('italic 400 100px "Instrument Serif"')])
+  .catch(() => null).then(() => D.monta(tl => {
+  const cx = document.createElement('canvas').getContext('2d');
+  // a pequena: no lugar, de golpe
+  const p = $('p'), h1 = D.n('h1', '100');
+  p.style.fontSize = h1 + 'px';
+  cx.font = `italic 400 ${h1}px "Instrument Serif"`;
+  const mp = cx.measureText(l1);
+  p.style.left = D.n('x1', '238') + 'px';
+  p.style.top = (D.n('y1', '370') - (h1 / 2 + (mp.fontBoundingBoxAscent - mp.fontBoundingBoxDescent) / 2 - mp.actualBoundingBoxAscent)) + 'px';
+  // a grande: a largura enche `larg`, a altura da maiúscula vai a `h` (esticada em y)
+  const b = $('b'); b.style.fontSize = '100px';
+  const w100 = b.getBoundingClientRect().width;
+  const fs = 100 * larg / w100;
+  b.style.fontSize = fs + 'px';
+  cx.font = `400 ${fs}px "Instrument Serif"`;
+  const m = cx.measureText(l2.toUpperCase());
+  const cap = m.actualBoundingBoxAscent, sy = Math.min(1.9, H / cap);
+  const topo = fs / 2 + (m.fontBoundingBoxAscent - m.fontBoundingBoxDescent) / 2 - cap;
+  [...b.querySelectorAll('b')].forEach(g => g.style.transform = `scaleY(${sy})`);
+  b.style.left = X + 'px'; b.style.top = (Y - topo * sy) + 'px';
+  const T = D.at(t0), ls = [...b.children];
+  tl.fromTo(p, {opacity: 0, scale: .92}, {opacity: 1, scale: 1, duration: .05, ease: 'none'}, T);
+  const G = 2 * 1000 / (.24 * .24);                       // 1000 px em 0,24 s
+  const m6 = D.mola(.6, 4);
+  const d = Y + cap * sy + 50;
+  ls.forEach((el, i) => {
+    const t = T + .03 + i * .03 + (i === ls.length - 1 ? .02 : 0), tq = Math.sqrt(2 * d / G);
+    const ba = 16 + (i % 2) * 6, tb = Math.sqrt(2 * ba / G) * 1.3, rot = (i % 2 ? 1 : -1) * 3;
+    tl.fromTo(el, {y: -d, rotation: rot, opacity: 1}, {y: 0, rotation: 0, duration: tq, ease: 'power2.in'}, t);
+    tl.to(el, {scaleX: 1.06, scaleY: .93, duration: .05, ease: 'power2.out'}, t + tq);
+    tl.to(el, {scaleX: 1, scaleY: 1, duration: m6.dur * .5, ease: m6.ease}, t + tq + .05);
+    tl.to(el, {y: -ba, duration: tb, ease: 'power2.out'}, t + tq);
+    tl.to(el, {y: 0, duration: tb, ease: 'power2.in'}, t + tq + tb);
+    if (i === ls.length - 1) D.cue(t + tq, 'thud');
+  });
+  ls.forEach(el => gsap.set(el, {opacity: 0}));
+  tl.set(blk, {opacity: 0}, sai);
+  return dur;
+}));
+const blk = $('blk');
+</script>
+</body>
+</html>

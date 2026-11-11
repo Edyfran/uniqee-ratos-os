@@ -1,0 +1,33 @@
+{
+ "_leia": "Molde do reel do webm pronto: o usuário já gerou o avatar na HeyGen (o webm com fundo removível) e quer o reel. Copie para videos/<slug>/reel.json, ao lado do material, e troque o que é do vídeo dele: os tempos saem da transcrição da voz (transcripts/<voz>.json, que a fábrica faz), os fundos saem do banco de cenas e os textos saem da fala. Confira com: uv run python tools/video-use/helpers/fabrica.py videos/<slug>/reel.json --seco. O formato inteiro está no topo de tools/video-use/helpers/reel_editorial.py.",
+ "estilo": "reel-editorial",
+ "slug": "<slug>",
+ "fonte": "voz.wav",
+ "_fonte": "a voz que foi pra HeyGen. Sem ela à parte, o próprio webm (avatar/rosto.webm): o áudio dele é a voz. Com pausa longa, a voz aparada (apara_pausas.py)",
+ "palavra": "<PALAVRA>",
+ "trabalho": "_trabalho",
+ "dur": 30.0,
+ "imagem": {"fundo": "exemplos/reel-editorial/fundo.png"},
+ "_imagem": "a placa do look dele na HeyGen; sem placa, a do exemplo, que só aparece em trecho de rosto sem `fundo`",
+ "avatar": {"arquivo": "avatar/rosto.webm", "alinha": true, "cheio": {"s": 1.0, "x": 0, "y": 0}},
+ "_avatar": "alinha: a fábrica acha cada pedaço da voz no áudio do webm e o rosto acompanha a voz. Onde a voz fala e o webm não tem rosto, ela recusa a base e diz onde ele tem",
+ "base": [
+  {"de": 0.0, "ate": 4.7, "avatar": 0, "quadro": "cheio", "fundo": "@../banco-de-cenas/<cena atrás do rosto>.mp4"},
+  {"de": 4.7, "ate": 27.0, "avatar": 0, "quadro": "cheio", "fundo": "@../banco-de-cenas/<a cena do lugar que a voz nomeia>.mp4"},
+  {"de": 27.0, "ate": 30.0, "cena": "../banco-de-cenas/<cena sem rosto, pra chamada>.mp4"}
+ ],
+ "_base": "trecho a trecho, de 0 a dur. O fundo troca na palavra que nomeia o lugar; no resto, a cena do banco marcada 'cenário atrás do rosto'. Onde o webm não tem rosto, `cena` do banco ou `painel`",
+ "r": {"dur": 30.0, "cenas": [[0, 30.0, "rosto"]]},
+ "pecas": [
+  {"nome": "gancho", "peca": "g_gancho", "em": 0, "ate": 3.0, "segura": true,
+   "caixa": [60, 140, 1020, 520], "q": {"l": "<o gancho>|*<a parte grifada>"}},
+  {"nome": "comenta", "peca": "g_comenta", "em": 27.0, "ate": 30.0, "segura": true,
+   "caixa": [40, 500, 1040, 1100], "q": {"rot": "Comenta a palavra", "palavra": "<PALAVRA>", "promessa": "<o que ele manda>", "pos": "meio"}}
+ ],
+ "sons": [{"tipo": "whoosh", "t": 4.7}],
+ "trilha": {"faixa": "exemplos/trilhas/groove-leve.m4a"},
+ "_trilha": "a dele; sem a dele, uma das três de exemplos/trilhas/ (CC0). \"nenhuma\" quando ele põe a música pelo app do Instagram",
+ "capa": {"foto": ["avatar/rosto.webm", 5.0], "titulo": "<linha 1>|<linha 2>", "destaque": "<linha 2>",
+          "topo": "<o nome da ferramenta>", "lados": "robo,claquete"},
+ "_capa": "foto: [vídeo, segundo] tira um quadro do webm, já sem fundo"
+}

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<!-- FORMATO 4 — produto e bônus, v2. 1440x1028.
+     Os quatro nomeados caem em linha; o "39" é bloco azul que CONTA de 0 a 39;
+     o guia é bloco preto com barras que encolhem (é sobre gastar menos). -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1440px;height:1028px}
+#stage{padding:44px var(--marg)}
+.hd{margin-bottom:30px;font-size:80px}
+.corpo{display:flex;gap:30px;align-items:stretch}
+.lista{flex:1;display:flex;flex-direction:column;gap:18px;min-width:0}
+.item{padding:22px 28px}
+.item .ic{width:68px;height:68px;font-size:28px}
+.item .nm{font-size:56px}
+.item .de{font-size:32px}
+.lado{width:352px;display:flex;flex-direction:column;gap:22px}
+.mais{flex:1;opacity:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.mais b{display:block;font:900 156px/.86 var(--fd);color:#fff;letter-spacing:-.05em}
+.mais span{font:700 32px/1.25 var(--fd);color:var(--act);text-align:center;margin-top:10px}
+.guia{padding:22px 24px 24px;opacity:0}
+.guia .tag{font:700 24px/1 var(--fm);color:var(--mk);letter-spacing:.12em;text-transform:uppercase}
+.guia h5{font:900 42px/1.06 var(--fd);color:#fff;letter-spacing:var(--ls);margin:12px 0 18px}
+.barra{height:16px;border-radius:4px;background:var(--ink8);margin-bottom:10px;overflow:hidden}
+.barra i{display:block;height:100%;background:var(--mk);width:0}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="kick" id="k">o que entra junto</div>
+  <div class="hd" id="h">Quatro trabalham pra mim.<br>E <b>mais 39</b> pra você.</div>
+  <div class="corpo">
+    <div class="lista">
+      <div class="nb item" id="c1"><span class="ic">01</span><span class="nm">Anúncios</span><span class="de">analisa, propõe, sobe</span></div>
+      <div class="nb item" id="c2"><span class="ic">02</span><span class="nm">Carrosséis</span><span class="de">prepara e entrega</span></div>
+      <div class="nb item" id="c3"><span class="ic">03</span><span class="nm">Membros</span><span class="de">atende na área</span></div>
+      <div class="nb item" id="c4"><span class="ic">04</span><span class="nm">Suporte</span><span class="de">responde o e-mail</span></div>
+    </div>
+    <div class="lado">
+      <div class="mais nb cor-ac" id="c5"><b id="n39">39</b><span>pra adaptar<br>ao seu negócio</span></div>
+      <div class="guia nb cor-ink" id="g">
+        <div class="tag">e o guia de custo</div>
+        <h5>Quanto a IA<br>vai te custar</h5>
+        <div class="barra"><i id="b1"></i></div>
+        <div class="barra"><i id="b2"></i></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+D.monta(tl => {
+  D.cabe('.hd', 46);
+  D.cabe('.item .nm', 34, ['.item', .5]);
+  D.cabe('.item .de', 22, ['.item', .36]);
+  D.cabe('.guia h5', 26, '.guia');
+  D.cabe('.guia .tag', 16, '.guia');
+  D.cabe('.mais span', 20, '.mais');
+  D.camera(5.1, 1.0, 1.03);
+  D.carimbo('#k', .10);
+  D.titulo('#h', .25);
+  D.lista(['#c1', '#c2', '#c3', '#c4'], .80, .26, {dx: -30, dr: 0, rot: 0});
+  D.pousa('#c5', 1.90, {s: 1.12, ease: D.P.HEROI, rot: D.P.ROT});
+  D.conta('#n39', 0, 39, 1.95, .8, n => String(Math.round(n)));
+  D.pousa('#g', 2.45, {rot: -D.P.ROT});
+  tl.fromTo('#b1', {width: '82%'}, {width: '36%', duration: .8, ease: 'expo.inOut'}, 2.85);
+  tl.fromTo('#b2', {width: '66%'}, {width: '27%', duration: .8, ease: 'expo.inOut'}, 3.00);
+  D.sai(['#k', '#h', '.item', '#c5', '#g'], 5.1 - .45);
+  return 5.1;
+});
+</script>
+</body>
+</html>

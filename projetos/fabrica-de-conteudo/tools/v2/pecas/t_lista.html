@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<!-- TIPO — painel de lista, v2. 1440x1028.
+     Os itens caem um a um no instante em que são ditos, e um FOCO amarelo —
+     a sombra do item falado — desliza até cada um. Quem assiste sabe sempre
+     qual item é o de agora, sem precisar apagar os outros.
+       ?hd=Um ano e meio.&it=Infoprodutos|cursos@0.4;Serviços|projetos@1.2&dur=5 -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1440px;height:1028px}
+#stage{padding:44px var(--marg);justify-content:center}
+.hd{font-size:80px;margin-bottom:34px}
+.itens{position:relative;display:flex;flex-direction:column;gap:22px}
+.item{position:relative;z-index:1;padding:24px 30px}
+.item .ic{width:72px;height:72px;font-size:30px}
+.item .nm{font-size:58px}
+.item .de{font-size:var(--piso)}
+.foco{position:absolute;z-index:0;left:0;top:0;opacity:0;background:var(--mk);
+  border:var(--bw) solid var(--ink);border-radius:var(--raio)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="kick" id="k"></div>
+  <div class="hd" id="h"></div>
+  <div class="itens" id="li"><div class="foco" id="fo"></div></div>
+</div>
+<script>
+const dur = D.n('dur', '5');
+document.getElementById('k').textContent = D.q('kick', '');
+document.getElementById('h').innerHTML = D.q('hd', '');
+const its = D.itens('it', 'Um|dois@0.4', ['nome', 'det']);
+const li = document.getElementById('li');
+its.forEach((x, i) => {
+  const d = document.createElement('div');
+  d.className = 'nb item'; d.id = 'it' + i;
+  d.innerHTML = `<span class="ic">0${i + 1}</span>
+    <span class="nm">${x.nome}</span>${x.det ? `<span class="de">${x.det}</span>` : ''}`;
+  li.appendChild(d);
+});
+
+D.monta(tl => {
+  D.cabe('.hd', 46);
+  D.cabe('.item .nm', 34, ['.item', .51]);
+  D.cabe('.item .de', 26, ['.item', .36]);
+  D.camera(dur, 1.0, 1.025);
+  D.carimbo('#k', .10);
+  D.titulo('#h', .22);
+  its.forEach((x, i) => D.pousa('#it' + i, x.t, {dx: -36, dr: 0}));
+  D.desliza('#fo', its.map((_, i) => '#it' + i), its.map(x => x.t));
+  D.sai(['#k', '#h', '.item', '#fo'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<!-- INTERFACE — o agente trabalhando no chat. 1080x1920 ou 1920x1080 (?ar=), --alpha.
+     A pergunta chega, o agente pensa (três pontos que viram a ferramenta: gira → ✓)
+     e responde palavra por palavra com o cursor; o trecho em <b> vira marcador
+     amarelo. Tudo é timeline: o cursor pisca e os pontos pulam por tween.
+       ?pergunta=Quantas vendas vieram do anúncio novo?&acao=lendo a planilha de vendas&feito=43 linhas lidas&resposta=Foram <b>27 vendas</b> desde segunda, 62% do total.&nome=agente de vendas&t0=0.2&dur=7.5 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+html.h,html.h body,html.h #stage{width:1920px;height:1080px}
+html,body{background:transparent}
+#stage{position:relative;overflow:hidden;background:none;padding:0;display:block}
+.jn{position:absolute;left:70px;top:320px;width:940px;padding:0;overflow:hidden;opacity:0}
+html.h .jn{left:390px;top:100px;width:1140px}
+.bar{display:flex;align-items:center;gap:14px;height:80px;padding:0 28px;background:var(--ink);color:#fff;font:700 26px/1 var(--fm);letter-spacing:.06em}
+.bar i{width:20px;height:20px;border-radius:50%;background:var(--ok);border:3px solid #fff;box-sizing:border-box}
+.bar em{margin-left:auto;font-style:normal;color:var(--mk)}
+.cx{display:flex;flex-direction:column;gap:26px;padding:36px 30px 40px;background:var(--pp2)}
+.bo{max-width:80%;padding:22px 28px;font:500 38px/1.32 var(--fd);letter-spacing:-.01em;border-radius:var(--raio);opacity:0}
+html.h .bo{font-size:34px}
+.eu{align-self:flex-end;background:var(--ac);color:#fff}
+.ia{align-self:flex-start;background:#fff;color:var(--ink)}
+.fe{position:relative;align-self:flex-start;display:flex;align-items:center;height:78px;padding:0 24px;overflow:hidden;opacity:0;box-sizing:border-box}
+.pe{position:absolute;left:24px;top:50%;display:flex;gap:12px;margin-top:-9px}
+.pe i{width:18px;height:18px;border-radius:50%;background:var(--ink)}
+.ch{display:flex;align-items:center;gap:16px;white-space:nowrap;font:600 28px/1 var(--fm);color:var(--ink);opacity:0}
+.gi{position:relative;width:36px;height:36px;flex:none}
+.gi b{position:absolute;inset:0;border-radius:50%;border:5px solid var(--ink2);border-top-color:var(--ac);box-sizing:border-box}
+.gi s{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--ok);color:#fff;font:700 22px/1 var(--fd);text-decoration:none;opacity:0}
+.tt{display:grid}
+.tt span{grid-area:1/1}
+.w{display:none}
+.w .b{background:var(--mk);font-weight:700;padding:0 .1em;border-radius:.1em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.cur{display:inline-block;width:.46em;height:1em;margin-left:.06em;vertical-align:-.14em;background:var(--ac)}
+/* ?k= amplia o chat horizontal (k=1.5 enche a tela); sem ?k nada muda */
+html.h{--kk:var(--k,1)}
+html.h .jn{left:calc((1920px - 1140px*var(--kk))/2);width:calc(1140px*var(--kk))}
+html.h .bar{height:calc(80px*var(--kk));padding:0 calc(28px*var(--kk));gap:calc(14px*var(--kk));font-size:calc(26px*var(--kk))}
+html.h .bar i{width:calc(20px*var(--kk));height:calc(20px*var(--kk))}
+html.h .cx{gap:calc(26px*var(--kk));padding:calc(36px*var(--kk)) calc(30px*var(--kk)) calc(40px*var(--kk))}
+html.h .bo{font-size:calc(34px*var(--kk));padding:calc(22px*var(--kk)) calc(28px*var(--kk))}
+html.h .fe{height:calc(78px*var(--kk));padding:0 calc(24px*var(--kk))}
+html.h .pe{left:calc(24px*var(--kk));gap:calc(12px*var(--kk));margin-top:calc(-9px*var(--kk))}
+html.h .pe i{width:calc(18px*var(--kk));height:calc(18px*var(--kk))}
+html.h .ch{gap:calc(16px*var(--kk));font-size:calc(28px*var(--kk))}
+html.h .gi{width:calc(36px*var(--kk));height:calc(36px*var(--kk))}
+html.h .gi s{font-size:calc(22px*var(--kk))}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="jn nb" id="jn">
+    <div class="bar"><i></i><span id="nm"></span><em>● ao vivo</em></div>
+    <div class="cx">
+      <div class="bo eu nb" id="eu"></div>
+      <div class="fe nb" id="fe">
+        <div class="pe" id="pe"><i></i><i></i><i></i></div>
+        <div class="ch" id="ch"><span class="gi"><b id="gb"></b><s id="gs">✓</s></span><span class="tt"><span id="a1"></span><span id="a2"></span></span></div>
+      </div>
+      <div class="bo ia nb" id="ia"><span id="rs"></span><span class="cur" id="cu"></span></div>
+    </div>
+  </div>
+</div>
+<script>
+const R = document.documentElement, HZ = D.q('ar', '1080x1920').startsWith('1920');
+if (HZ) R.classList.add('h');
+const t0 = D.n('t0', '0.2'), PASSO = .07, $ = id => document.getElementById(id);
+$('nm').textContent = D.q('nome', 'agente de vendas');
+$('eu').textContent = D.q('pergunta', 'Quantas vendas vieram do anúncio novo?');
+$('a1').textContent = '▸ ' + D.q('acao', 'lendo a planilha de vendas') + '…';
+$('a2').textContent = D.q('feito', '43 linhas lidas');
+// resposta: palavra por palavra, preservando o <b> como marcador
+const toks = [];
+D.q('resposta', 'Foram <b>27 vendas</b> desde segunda, 62% do total.').replace(/<b>(.*?)<\/b>|([^<]+)/g, (m, b, t) => { (b || t || '').split(/\s+/).filter(Boolean).forEach(w => toks.push({w, b: !!b})); return m; });
+// cada palavra num invólucro (o que aparece e some); o espaço fica fora do marcador
+const ws = toks.map((o, i) => { const s = document.createElement('span'), w = document.createElement('span'); s.className = 'w'; w.textContent = o.w; if (o.b) w.className = 'b'; s.appendChild(w); if (i < toks.length - 1) s.appendChild(document.createTextNode(' ')); $('rs').appendChild(s); return s; });
+const tq = t0 + .35, tp = tq + .6, tf = tp + .9, tk = tf + .95, ta = tk + .35, tfim = ta + ws.length * PASSO;
+const dur = Math.max(tfim + 1.3, D.n('dur', '7.5'));
+D.monta(tl => {
+  const fe = $('fe'), K = parseFloat(D.css('--k')) || 1, wPe = (24 * 2 + 18 * 3 + 12 * 2) * (HZ ? K : 1), wCh = $('ch').scrollWidth + 48 * (HZ ? K : 1);
+  $('a1').style.display = 'none'; const wFeito = $('ch').scrollWidth + 48 * (HZ ? K : 1); $('a1').style.display = '';
+  // centraliza pela altura FINAL (com a resposta inteira escrita)
+  const jn = $('jn'), H = HZ ? 1080 : 1920;
+  ws.forEach(w => { w.style.display = 'inline'; }); gsap.set('#ia', {opacity: 1});
+  jn.style.top = Math.max(60, Math.round((H - jn.offsetHeight) / 2 - (HZ ? 0 : 60))) + 'px';
+  ws.forEach(w => { w.style.display = ''; }); gsap.set('#ia', {opacity: 0});
+  D.pousa('#jn', t0, {rot: 0, dr: 0, dy: -50, som: 'pop'});
+  D.pousa('#eu', tq, {dx: 50, dy: 0, rot: 0, dr: 0, som: 'pop'});
+  // pensa: a caixa nasce com os três pontos
+  tl.fromTo(fe, {opacity: 0, scale: .6, width: wPe}, {opacity: 1, scale: 1, width: wPe, duration: .3, ease: D.P.MOLA}, D.at(tp));
+  document.querySelectorAll('.pe i').forEach((d, k) => {
+    const reps = Math.max(1, Math.floor((tf - tp - .2 - k * .12) / .36)) * 2 - 1;
+    tl.to(d, {y: -12 * (HZ ? K : 1), duration: .18, ease: 'sine.inOut', yoyo: true, repeat: reps}, tp + .1 + k * .12);
+  });
+  // os pontos viram a ferramenta: a caixa estica, o anel gira
+  tl.to('#pe', {opacity: 0, duration: .15}, tf);
+  tl.to(fe, {width: wCh, duration: .4, ease: 'power3.inOut'}, tf);
+  tl.fromTo('#ch', {opacity: 0, x: -14}, {opacity: 1, x: 0, duration: .25, ease: D.P.EASE}, tf + .15);
+  tl.fromTo('#gb', {rotation: 0}, {rotation: 900, duration: tk - tf, ease: 'none'}, tf);
+  D.cue(tf, 'click');
+  tl.to('#gb', {opacity: 0, duration: .1}, tk);
+  tl.fromTo('#gs', {opacity: 0, scale: 0}, {opacity: 1, scale: 1, duration: .35, ease: 'back.out(3)'}, tk);
+  tl.fromTo('#a1', {opacity: 1}, {opacity: 0, y: -10, duration: .2}, tk);
+  tl.fromTo('#a2', {opacity: 0, y: 10}, {opacity: 1, y: 0, duration: .25, ease: D.P.EASE}, tk + .05);
+  tl.to(fe, {width: wFeito, duration: .3, ease: 'power3.inOut'}, tk + .05);
+  D.cue(tk, 'certo');
+  // responde: palavra por palavra, o cursor fixo enquanto escreve e piscando depois
+  tl.fromTo('#ia', {opacity: 0, y: 20}, {opacity: 1, y: 0, duration: .25, ease: D.P.EASE}, ta - .15);
+  ws.forEach((w, i) => tl.set(w, {display: 'inline'}, ta + i * PASSO));
+  D.cue(ta, 'type', {dur: +(ws.length * PASSO).toFixed(3)});
+  for (let t = tfim + .3; t < dur - .6; t += .9) { tl.set('#cu', {opacity: 0}, t); tl.set('#cu', {opacity: 1}, t + .45); }
+  D.sai('#jn', dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<!-- GANCHO — grade rodando: grade 2x4 de cartões verticais inclinados (±6°) na coluna esquerda (x 30–690, y 281–866),
+     sem tocar o painel da direita. Os cartões chegam um a um do alto-esquerda, pousam inclinados, cada um "toca" (a imagem
+     anda devagar) e o texto de alguns cartões troca em sequência; no fim a grade some num corte seco. Clone do
+     "Playing grid" de referência.
+       img   as imagens dos cartões (separadas por ;, repetem; .mp4/.mov/.webm tocam) · tx  as trocas de texto do primeiro cartão (separadas por |)
+       tb    o texto do cartão de baixo (MAIOR) · x  y  o canto da grade (38, 283) · t0 quando entra (0.05) · dur (1.4)
+       ?img=../../../videos/fabrica/reel-igual-kinetic/ref/lado/quadros/q1.jpg;../../../videos/fabrica/reel-igual-kinetic/ref/lado/quadros/q2.jpg&tx=UM ÚNICO|SEGUNDO|DESSE SEGUNDO&tb=MAIOR&dur=1.4 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;900&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px;background:transparent}
+#stage{padding:0;display:block;overflow:hidden;background:none}
+#g{position:absolute;transform-origin:0 0}
+.cd{position:absolute;width:150px;height:270px;background:var(--ink);border:4px solid #fff;border-radius:12px;
+  box-shadow:6px 6px 0 var(--ink);overflow:hidden;opacity:0;outline:4px solid var(--ink);outline-offset:0}
+.cd img,.cd video{position:absolute;left:-12%;top:-6%;width:124%;height:112%;object-fit:cover}
+.cd .tx{position:absolute;left:0;right:0;padding:14px 10px;font:900 27px/.98 var(--fd);letter-spacing:-.03em;
+  color:#fff;text-transform:uppercase;text-align:left}
+.cd.az{background:var(--ac)}
+.cd.mk{background:var(--mk)}.cd.mk .tx{color:var(--ink)}
+.cd .barra{position:absolute;left:10px;right:10px;height:8px;border-radius:4px;background:#fff;opacity:.85}
+.cd .tira{position:absolute;left:8px;right:8px;display:flex;gap:6px}
+.cd .tira i{flex:1;height:96px;border-radius:6px;background:var(--ink6);overflow:hidden;position:relative;border:2px solid #fff}
+.cd .tira i img,.cd .tira i video{left:0;top:0;width:100%;height:100%}
+.cd .sombra{position:absolute;left:0;right:0;bottom:0;height:46%;background:linear-gradient(transparent,rgba(11,13,18,.82))}
+.cd .tx.dn{bottom:0}
+.cd .tx b{background:var(--mk);color:var(--ink);padding:0 .12em}
+.cd .tx.up{top:0}
+.cd .tx span{position:absolute;left:10px;top:14px;right:10px;display:none}
+.cd .tx{position:absolute;height:120px}
+</style>
+</head>
+<body>
+<div id="stage"><div id="g"></div></div>
+<script>
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const dur = D.n('dur', '1.4'), t0 = D.n('t0', '0.05'), X0 = D.n('x', '30'), Y0 = D.n('y', '240');
+const imgs = D.q('img', '../../../videos/fabrica/reel-igual-kinetic/ref/lado/quadros/q1.jpg;../../../videos/reels/fabrica-chega-de-editar-capa.jpg;../../../videos/fabrica/reel-igual-kinetic/ref/lado/quadros/q3.jpg;../../../videos/reels/fabrica-mesmo-video-capa.jpg;../../../videos/fabrica/reel-igual-kinetic/ref/lado/quadros/q2.jpg;../../../videos/reels/fabrica-um-pedido-virou-video-capa.jpg;../../../videos/fabrica/reel-igual-kinetic/fotos/e-sobretudo-longe.png;../../../videos/reels/fabrica-voce-grava-pede-pronto-capa.jpg;../../../videos/fabrica/reel-igual-kinetic/ref/lado/quadros/q4.jpg;../../../videos/reels/fabrica-video-cru-tem-jeito-capa.jpg').split(';').filter(Boolean);
+const im = i => esc(imgs[i % imgs.length]);
+const md = i => /\.(mp4|mov|webm)$/i.test(imgs[i % imgs.length])
+  ? `<video src="${im(i)}" muted playsinline preload="auto" data-off="${(i % 4) * .12}"></video>` : `<img src="${im(i)}">`;
+const tx = D.q('tx', 'UM ÚNICO|SEGUNDO|DESSE SEGUNDO').split('|');
+const tb = D.q('tb', 'MAIOR');
+// 8 cartões: c0 texto que troca · c1 foto · c2 três telas · c3 foto · c4 MAIOR · c5 foto + tarja · c6 telas · c7 foto
+const C = [
+  `<div class="az cd0"></div>` ,
+  `${md(0)}<div class="sombra"></div>`,
+  `<div class="tira"><i>${md(0)}</i><i>${md(1)}</i><i>${md(2)}</i></div>`,
+  `${md(3)}<div class="sombra"></div><div class="barra" style="bottom:18px"></div>`,
+  `${md(4)}<div class="sombra"></div><div class="tx up"><b>${esc(tb)}</b></div>`,
+  `${md(5)}<div class="barra" style="top:16px"></div><div class="barra" style="top:32px;right:50px"></div>`,
+  `${md(6)}<div class="sombra"></div><div class="barra" style="bottom:34px;right:30px"></div><div class="barra" style="bottom:18px"></div>`,
+  `${md(7)}<div class="sombra"></div><div class="barra" style="bottom:18px;right:44px"></div>`
+];
+const cls = ['az', '', 'ink', '', '', '', 'az', 'mk'];
+const R = [-6, 4, -3, 6, -5, 3, -4, 5];
+const g = document.getElementById('g'); g.style.left = X0 + 'px'; g.style.top = Y0 + 'px';
+C.forEach((h, i) => {
+  const d = document.createElement('div'); d.className = 'cd ' + cls[i]; d.id = 'k' + i;
+  d.style.left = ((i % 4) * 165) + 'px'; d.style.top = (i < 4 ? 0 : 300) + 'px'; d.style.transform = `rotate(${R[i]}deg)`;
+  d.innerHTML = h; g.appendChild(d);
+});
+const t0el = document.querySelector('#k0');
+document.querySelectorAll('#g video').forEach(v => D._videos.push(v));
+t0el.innerHTML = tx.map((s, j) => `<div class="tx up t${j}" style="display:${j ? 'none' : 'block'}">${esc(s).replace(' ', '<br>')}</div>`).join('');
+D.monta(tl => {
+  const e = Math.max(0, dur - 1.3);
+  // a ordem de chegada: o primeiro, o do alto à direita, e o resto de pouco em pouco
+  const ordem = [0, 3, 1, 2, 4, 7, 5, 6];
+  ordem.forEach((i, k) => {
+    const t = t0 + k * .055, c = document.getElementById('k' + i);
+    tl.fromTo(c, {opacity: 0}, {opacity: 1, duration: .05, ease: 'none'}, t);
+    tl.fromTo(c, {x: -150 - (i % 4) * 20, y: -300, rotation: R[i] - 14, scale: .9},
+      {x: 0, y: 0, rotation: R[i], scale: 1, duration: .32, ease: 'power3.out'}, t);
+    // toca: a imagem anda devagar dentro do cartão
+    tl.fromTo(c.querySelectorAll('img,video'), {scale: 1.0, x: i % 2 ? 6 : -6}, {scale: 1.12, x: i % 2 ? -6 : 6, duration: dur - t, ease: 'none'}, t);
+  });
+  D.cue(t0, 'swish');
+  // o texto do primeiro cartão troca por corte: mais da 2ª pra 3ª no fim
+  const t2 = t0 + .6 + e * .3, t3 = t0 + .85 + e * .6;
+  tl.set('.t0', {display: 'none'}, t2); tl.set('.t1', {display: 'block'}, t2);
+  tl.set('.t1', {display: 'none'}, t3); tl.set('.t2', {display: 'block'}, t3);
+  D.cue(t2, 'click'); D.cue(t3, 'click');
+  // saída: corte seco
+  const ts = t0 + 1.0 + e;
+  tl.set('#g', {opacity: 0}, ts);       // corte seco
+  return Math.max(dur, ts + .1);
+});
+</script>
+</body>
+</html>

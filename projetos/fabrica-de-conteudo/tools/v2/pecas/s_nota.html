@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<!-- SOCIAL — a nota com estrelas e os comentários que chegam. 1080x1920 ou 1920x1080 (?ar=), --alpha.
+     As estrelas batem em sequência (a última preenche só a fração da nota), a nota
+     e o número de avaliações contam, e os comentários pousam empilhados e tortos,
+     cada um com a sua nota, e ficam flutuando.
+       ?nota=4,9&n=2314&rot=avaliações dos alunos&c=Ana S.|Em duas semanas o suporte parou de ser meu;Bruno M.|Montei o primeiro agente no mesmo dia;Carla R.|Vale cada centavo&t0=0.2&dur=6 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+html.h,html.h body,html.h #stage{width:1920px;height:1080px}
+html,body{background:transparent}
+#stage{position:relative;overflow:hidden;background:none;padding:0;display:block}
+.tp{position:absolute;left:70px;top:300px;width:940px;display:flex;align-items:center;gap:34px;padding:34px 40px;box-sizing:border-box;opacity:0}
+html.h .tp{left:130px;top:250px;width:800px;flex-direction:column;align-items:flex-start;gap:18px}
+.nt{font:700 190px/.8 var(--fd);letter-spacing:-.06em;color:var(--ink);font-variant-numeric:tabular-nums}
+.di{display:flex;flex-direction:column;gap:16px;min-width:0}
+.es{display:flex;gap:10px}
+.es svg{width:78px;height:78px;overflow:visible;opacity:0}
+.nn{font:700 42px/1 var(--fd);letter-spacing:-.02em;color:var(--ink);white-space:nowrap}
+.rt{font:600 24px/1.2 var(--fm);letter-spacing:.08em;text-transform:uppercase;color:var(--ink6)}
+.cs{position:absolute;left:70px;top:720px;width:940px;display:flex;flex-direction:column;gap:30px}
+html.h .cs{left:1000px;top:150px;width:800px}
+.cm{display:flex;flex-direction:column;gap:14px;padding:26px 30px 28px;opacity:0}
+.cm .qm{display:flex;align-items:center;gap:16px}
+.cm .av{flex:none;width:62px;height:62px;border-radius:50%;background:var(--ac);color:#fff;border:var(--bw) solid var(--ink);display:flex;align-items:center;justify-content:center;font:700 30px/1 var(--fd);box-sizing:border-box}
+.cm b{font:700 32px/1 var(--fd);letter-spacing:-.02em;color:var(--ink)}
+.cm .mi{margin-left:auto;display:flex;gap:4px}
+.cm .mi svg{width:30px;height:30px;overflow:visible}
+.cm p{margin:0;font:500 36px/1.3 var(--fd);letter-spacing:-.01em;color:var(--ink);text-wrap:pretty}
+html.h .cm p{font-size:32px}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="tp nb" id="tp"><span class="nt" id="nt"></span><div class="di"><div class="es" id="es"></div><span class="nn" id="nn"></span><span class="rt" id="rt"></span></div></div>
+  <div class="cs" id="cs"></div>
+</div>
+<script>
+const R = document.documentElement, HZ = D.q('ar', '1080x1920').startsWith('1920');
+if (HZ) R.classList.add('h');
+const t0 = D.n('t0', '0.2'), $ = id => document.getElementById(id);
+const nota = Math.max(0, Math.min(5, parseFloat(D.q('nota', '4,9').replace(',', '.')) || 0)), N = Math.round(D.n('n', '2314'));
+const cs = D.q('c', 'Ana S.|Em duas semanas o suporte parou de ser meu;Bruno M.|Montei o primeiro agente no mesmo dia;Carla R.|Vale cada centavo').split(';').map(s => s.split('|')).filter(c => c[1]).slice(0, HZ ? 3 : 4);
+const tc = t0 + 1.25, dur = Math.max(tc + cs.length * .45 + 1.6, D.n('dur', '6'));
+$('rt').textContent = D.q('rot', 'avaliações dos alunos');
+const STAR = '50,4 62,37 97,37 69,58 80,93 50,72 20,93 31,58 3,37 38,37';
+let uid = 0;
+const estrela = f => { const id = 'k' + (uid++); return `<svg viewBox="0 0 100 100"><defs><clipPath id="${id}"><rect x="0" y="0" width="${(f * 100).toFixed(1)}" height="100"></rect></clipPath></defs>`
+  + `<polygon points="${STAR}" transform="translate(7 7)" style="fill:var(--ink)"></polygon><polygon points="${STAR}" style="fill:#fff"></polygon>`
+  + `<polygon points="${STAR}" clip-path="url(#${id})" style="fill:var(--mk)"></polygon><polygon points="${STAR}" style="fill:none;stroke:var(--ink);stroke-width:7;stroke-linejoin:round"></polygon></svg>`; };
+$('es').innerHTML = [0, 1, 2, 3, 4].map(i => estrela(Math.max(0, Math.min(1, nota - i)))).join('');
+cs.forEach(([nome, tx], i) => {
+  const d = document.createElement('div'); d.className = 'cm nb'; d.id = 'c' + i;
+  d.innerHTML = `<div class="qm"><span class="av"></span><b></b><span class="mi">${[0, 1, 2, 3, 4].map(() => estrela(1)).join('')}</span></div><p></p>`;
+  d.querySelector('.av').textContent = nome.trim()[0] || '•'; d.querySelector('b').textContent = nome.trim(); d.querySelector('p').textContent = tx.trim();
+  $('cs').appendChild(d);
+});
+D.monta(tl => {
+  if (HZ) ['tp', 'cs'].forEach(id => { $(id).style.top = Math.max(60, Math.round((1080 - $(id).offsetHeight) / 2)) + 'px'; });
+  D.pousa('#tp', t0, {rot: -1, dy: -50, som: 'pop'});
+  D.conta('#nt', 0, nota, t0 + .3, .9, v => v.toFixed(1).replace('.', ','));
+  const o = {v: 0}, nn = $('nn'), escreve = () => { nn.textContent = Math.round(o.v).toLocaleString('pt-BR') + ' avaliações'; };
+  escreve();
+  tl.to(o, {v: N, duration: 1.1, ease: 'expo.out', onUpdate: escreve}, D.at(t0) + .4);
+  tl.fromTo('#nn', {opacity: 0, y: 12}, {opacity: 1, y: 0, duration: .3, ease: D.P.EASE}, D.at(t0) + .35);
+  tl.fromTo('#rt', {opacity: 0}, {opacity: 1, duration: .3}, D.at(t0) + .5);
+  document.querySelectorAll('#es svg').forEach((s, i) => tl.fromTo(s, {opacity: 0, scale: 0, rotation: -35}, {opacity: 1, scale: 1, rotation: 0, duration: .34, ease: 'back.out(2.6)', transformOrigin: '50% 50%'}, D.at(t0) + .38 + i * .09));
+  D.cue(t0 + .38, 'pop'); D.cue(t0 + .38 + 4 * .09 + .1, 'ding');
+  cs.forEach((c, i) => D.pousa('#c' + i, tc + i * .45, {rot: [-1.6, 1.3, -.9, 1.1][i % 4], dx: i % 2 ? 60 : -60, dy: -30, som: 'pop'}));
+  D.flutua('.cm', tc + cs.length * .45 + .3, dur - .5, 1.1);
+  D.sai(['#tp', '.cm'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

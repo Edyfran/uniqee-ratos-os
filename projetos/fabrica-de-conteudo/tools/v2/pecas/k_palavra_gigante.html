@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<!-- TIPOGRAFIA — a palavra que bate e vai: branca, Black, enorme na faixa de cima, entra borrada num quadro, firma e fica parada; na saída sai seca, sem blur nem fade. Dura uma batida (~0,35 s). 1080x1920, --alpha.
+     Clone do efeito 10 do Deps_-cz-Fg.
+       l     a palavra (uma linha) · cor  br (branco) | mk (amarelo)
+       y     o topo da tinta (319) · h  a altura da tinta de uma letra alta (161) · larg  largura máxima (810, 75%)
+       t0 (0.1: a entrada borrada cabe na timeline) · sai  quando sai (-1: fica até o fim) · dur
+       ?l=Claude Code&y=319&h=161&t0=0.1&sai=.48&dur=.5 -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/editorial.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px;background:transparent}
+#stage{padding:0;display:block;background:none}
+#w{position:absolute;left:0;top:0;white-space:nowrap;font:900 100px/1 var(--ed-sans);letter-spacing:-.04em;color:#fff;
+  -webkit-text-stroke:8px var(--ink);paint-order:stroke fill;filter:drop-shadow(8px 8px 0 var(--ink));opacity:0}
+#w.mk{color:var(--mk)}
+</style>
+</head>
+<body>
+<div id="stage"><div id="w"></div></div>
+<script>
+const dur = D.n('dur', '.45'), t0 = D.n('t0', '0.1'), sai = D.n('sai', '-1');
+const w = document.getElementById('w'); w.textContent = D.q('l', 'Claude Code'); w.classList.add(D.q('cor', 'br'));
+D.monta(tl => {
+  const cx = document.createElement('canvas').getContext('2d');
+  cx.font = '900 100px ' + D.css('--ed-sans').split(',')[0];
+  const m = cx.measureText(w.textContent);
+  const alt = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent;
+  let k = D.n('h', '161') / alt;
+  const larg = D.n('larg', '810'), tw = m.width * k;
+  if (tw > larg) k *= larg / tw;
+  w.style.fontSize = (100 * k) + 'px';
+  const wr = w.getBoundingClientRect();
+  const topoTinta = (wr.height / 2 + (m.fontBoundingBoxAscent - m.fontBoundingBoxDescent) * k / 2) - m.actualBoundingBoxAscent * k;
+  w.style.left = (540 - wr.width / 2) + 'px'; w.style.top = (D.n('y', '319') - topoTinta) + 'px';
+  tl.set(w, {opacity: 1}, t0);
+  tl.fromTo(w, {filter: 'blur(10px) drop-shadow(8px 8px 0 #0B0D12)'},
+    {filter: 'blur(0px) drop-shadow(8px 8px 0 #0B0D12)', duration: .08, ease: 'power2.in', immediateRender: false}, t0);
+  if (sai >= 0) tl.set(w, {opacity: 0}, sai);   // saída seca: o corte da câmera leva a palavra
+  return dur;
+});
+</script>
+</body>
+</html>

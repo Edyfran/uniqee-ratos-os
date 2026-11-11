@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<!-- PROVA — três cartões de Reel tocando vídeo, lado a lado sobre o rosto, clone da ficha 01 do De2SEI7JP8r (medido a 30 qps). Três cartões verticais de 290x528 com 15 px
+     de vão (x 89, 394 e 699; y 499) entram um a um (o 1º em f4, o 2º em f18, o 3º em f39): 1 quadro translúcido, depois dois quadros opacos a 19 px e escala 0,965 e a 7 px e 0,9875 (casados com a ref, quadro a quadro,
+     igual nos três) e o assentado; somem juntos num fade de 4 quadros (f145 a f148). O cartão TOCA: o que roda dentro
+     dele é uma sequência de quadros (um JPG por quadro do vídeo, `pasta/<d>/f_0001.jpg`), porque buscar `<video>` quadro a quadro atrasa um quadro de vez em quando; cada
+     quadro é posto no seu instante, não animado. No fiel a sequência é o recorte da própria ref; na adaptação, o clipe do dono com a tela do Instagram por cima.
+     `fiel=1`: a peça roda por cima do vídeo da própria ref, que já traz o quadro translúcido e o fade de saída dos cartões: sem o translúcido e sem o fade (some de uma vez em `sai`).
+     Por cima da pessoa, 1080x1920, --alpha.
+       pasta  a pasta das sequências (a pasta com as sequências de quadros; sem ela os cartões ficam vazios) · c  os cartões, JSON [{"d": subpasta, "x": canto esquerdo, "t": quadro do translúcido, "ini": 1º quadro da sequência (o 1º opaco), "e": [[subida, escala], …] de cada quadro opaco da entrada}]
+       y  w  h  r  o canto de cima, o tamanho e o raio (499, 290, 528, 16) · dy0  a subida do quadro translúcido (31) · esc0  a escala dele (0.9425) · n  os quadros da sequência (148) · sai  o quadro em que o fade começa (145) · v  a versão das sequências (muda o cache)
+       dur  a janela em s
+     etiqueta: leque-de-reels, tela-de-app
+       ?c=%5B%7B%22d%22%3A%22c1%22%2C%22x%22%3A89%2C%22t%22%3A4%2C%22ini%22%3A8%2C%22f%22%3A%5B0.75%2C0.5%2C0.25%2C0%5D%7D%5D&dur=4.933 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px;background:transparent}
+#stage{padding:0;display:block;overflow:hidden;background:none;position:relative}
+.rc{position:absolute;opacity:0;overflow:hidden;background:#111;transform-origin:50% 50%}
+.rc img{position:absolute;left:0;top:0;width:100%;height:100%;opacity:0;display:block}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+const fiel = D.n('fiel', '0') === 1, dur = D.n('dur', '4.933');
+const Y = D.n('y', '499'), W = D.n('w', '290'), H = D.n('h', '528'), R = D.n('r', '16'), N = D.n('n', '148');
+const dy0 = D.n('dy0', '31'), esc0 = D.n('esc0', '0.9425'), sai = D.n('sai', '145'), pasta = D.q('pasta', '');
+let cartoes = []; try { cartoes = JSON.parse(D.q('c', '[]')); } catch (e) {}
+const cx = cartoes.map(c => {
+  const rc = document.createElement('div'); rc.className = 'rc';
+  Object.assign(rc.style, {left: c.x + 'px', top: Y + 'px', width: W + 'px', height: H + 'px', borderRadius: R + 'px'});
+  const imgs = [];
+  for (let i = c.ini; i < N; i++) {
+    const im = document.createElement('img');
+    im.src = `${pasta}/${c.d}/f_${String(i + 1).padStart(4, "0")}.png`;
+    rc.appendChild(im); imgs.push(im);
+  }
+  imgs[0].style.opacity = 1;
+  document.getElementById('stage').appendChild(rc);
+  return {c, rc, imgs};
+});
+D.monta(tl => {
+  cx.forEach(({c, rc, imgs}) => {
+    const q = k => (c.t + k) / 30, fr = k => ({opacity: 1, scale: c.e[k - 1][1], y: c.e[k - 1][0]});
+    tl.set(rc, {opacity: 0, scale: esc0, y: dy0}, 0);
+    tl.set(rc, {opacity: fiel ? 0 : .5}, q(0));
+    c.e.forEach((_, i) => tl.set(rc, fr(i + 1), q(i + 1)));
+    for (let i = 1; i < imgs.length; i++) {
+      tl.set(imgs[i - 1], {opacity: 0}, (c.ini + i) / 30);
+      tl.set(imgs[i], {opacity: 1}, (c.ini + i) / 30);
+    }
+    if (fiel) tl.set(rc, {opacity: 0}, sai / 30);
+    else [.75, .5, .25, 0].forEach((a, i) => tl.set(rc, {opacity: a}, (sai + i) / 30));
+  });
+  return dur;
+});
+</script>
+</body>
+</html>

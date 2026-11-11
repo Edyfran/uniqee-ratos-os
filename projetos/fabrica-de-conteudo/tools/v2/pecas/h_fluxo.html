@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<!-- AULA — diagrama de fluxo que se monta. 1920x1080, papel (ou ?alfa=1).
+     Cada nó cai no tempo em que é dito; a ligação até ele se desenha logo antes
+     e a ponta da seta bate. No fim, um ponto amarelo percorre o fluxo inteiro
+     ("executando") e acende cada nó por onde passa. Até 5 nós.
+       ?nos=Webhook|gatilho|recebe o formulário@0.4;Agente|Claude|lê e classifica@1.1;...
+        &kick=o fluxo&hd=Do formulário <b>ao e-mail</b>&t0=0.2&dur=5.5
+     hd=- tira o título. -->
+<html lang="pt-BR" class="h">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/direcao-h.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+.tp{position:absolute;left:140px;top:120px;right:140px}
+.tp .hd{font-size:84px;margin:0}
+svg.lig{position:absolute;left:0;top:0;width:1920px;height:1080px;overflow:visible}
+.lig path{fill:none;stroke:var(--ink);stroke-width:6;stroke-linecap:round}
+.lig polygon{fill:var(--ink)}
+.no{position:absolute;top:470px;opacity:0;overflow:hidden}
+.no .ti{padding:12px 16px 10px;border-bottom:var(--bw) solid var(--ink);font:700 18px/1 var(--fm);letter-spacing:.1em;text-transform:uppercase;background:var(--ac);color:#fff}
+.no .nm{padding:20px 18px 8px;font:700 40px/1.05 var(--fd);letter-spacing:-.02em;color:var(--ink)}
+.no .de{padding:0 18px 20px;font:500 22px/1.25 var(--fm);color:var(--ink6)}
+.no .de:empty{display:none}
+.pt{position:absolute;left:0;top:0;width:32px;height:32px;margin:-16px 0 0 -16px;border-radius:50%;background:var(--mk);border:4px solid var(--ink);opacity:0}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="tp" id="tp"><div class="kick" id="k"></div><div class="hd" id="hd"></div></div>
+  <svg class="lig" id="lig"></svg>
+  <div class="pt" id="pt"></div>
+</div>
+<script>
+const dur = D.n('dur', '5.5'), t0 = D.n('t0', '0.2'), $ = id => document.getElementById(id);
+const hd = D.q('hd', 'Do formulário <b>ao e-mail</b>');
+if (hd === '-') $('tp').remove(); else { $('k').textContent = D.q('kick', 'o fluxo'); $('hd').innerHTML = hd; }
+const nos = D.itens('nos', 'Webhook|gatilho|recebe o formulário@0.4;Agente|Claude|lê e classifica@1.1;Planilha|Sheets|salva a linha@1.8;E-mail|Gmail|avisa você@2.5', ['nm', 'ti', 'de']).slice(0, 5);
+const n = nos.length, AV = 1640, w = Math.min(320, (AV - (n - 1) * 90) / n), gap = n > 1 ? (AV - n * w) / (n - 1) : 0;
+nos.forEach((o, i) => $('stage').insertAdjacentHTML('beforeend', `<div class="no nb" style="left:${140 + i * (w + gap)}px;width:${w}px"><div class="ti">${o.ti || ''}</div><div class="nm">${o.nm}</div><div class="de">${o.de || ''}</div></div>`));
+if (hd === '-') document.querySelectorAll('.no').forEach(el => el.style.top = '400px');
+
+D.monta(tl => {
+  const els = [...document.querySelectorAll('.no')], NS = 'http://www.w3.org/2000/svg', svg = $('lig');
+  const tn = nos.map((o, i) => isNaN(o.t) ? t0 + .3 + i * .7 : o.t);
+  if ($('tp')) { D.carimbo('#k', t0, 0); D.titulo('#hd', t0 + .1, .06); }
+  D.cue(tn[0], 'pop');
+  els.forEach((el, i) => D.pousa(el, tn[i], {dy: -50}));
+  const cy = el => el.offsetTop + 78;
+  const segs = [];
+  for (let i = 0; i < n - 1; i++) {
+    const a = els[i], b = els[i + 1], x0 = a.offsetLeft + a.offsetWidth + 14, x1 = b.offsetLeft - 20, y = cy(a);
+    const p = document.createElementNS(NS, 'path'); p.setAttribute('d', `M ${x0} ${y} H ${x1 - 12}`); svg.appendChild(p);
+    const hd2 = document.createElementNS(NS, 'polygon'); hd2.setAttribute('points', `${x1 - 16},${y - 14} ${x1 + 4},${y} ${x1 - 16},${y + 14}`); svg.appendChild(hd2);
+    const L = p.getTotalLength(), ta = D.at(tn[i + 1]) - .3;
+    gsap.set(p, {strokeDasharray: L, strokeDashoffset: L});
+    tl.to(p, {strokeDashoffset: 0, duration: .3, ease: 'power2.inOut'}, ta);
+    tl.fromTo(hd2, {opacity: 0, scale: .2, transformOrigin: '50% 50%'}, {opacity: 1, scale: 1, duration: .25, ease: D.P.MOLA}, ta + .26);
+    D.cue(tn[i + 1] - .3, 'swish');
+    segs.push({x0, x1, y});
+  }
+  // o ponto de execução percorre o fluxo e acende cada nó
+  if (n > 1) {
+    const pt = $('pt'); let t = D.at(tn[n - 1]) + .7;
+    const acende = (el, tt) => { const ti = el.querySelector('.ti'); tl.to(ti, {backgroundColor: D.css('--mk'), color: D.css('--ink'), duration: .1}, tt); if (el !== els[n - 1]) tl.to(ti, {backgroundColor: D.css('--ac'), color: '#fff', duration: .4}, tt + .35); };
+    gsap.set(pt, {x: segs[0].x0, y: segs[0].y});
+    tl.fromTo(pt, {opacity: 0, scale: .3}, {opacity: 1, scale: 1, duration: .2, ease: D.P.MOLA}, t);
+    acende(els[0], t);
+    D.cue(t, 'ding');
+    segs.forEach((s, i) => {
+      tl.set(pt, {x: s.x0, y: s.y}, t + .1);
+      tl.to(pt, {x: s.x1, duration: .34, ease: 'power1.inOut'}, t + .1);
+      t += .44; acende(els[i + 1], t);
+    });
+    tl.to(pt, {opacity: 0, scale: .3, duration: .2}, t + .05);
+  }
+  D.sai(['#k', '#hd', '.no', '#lig'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

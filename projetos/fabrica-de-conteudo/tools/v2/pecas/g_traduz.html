@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<!-- TINTEIRO — o efeito da carta, traduzido na própria carta. 1920x1080, --alpha (1080x1920 pelo ?ar=).
+     A carta citada sobe no terço do quadro (o mesmo lugar e tamanho da carta citada do Treinando:
+     400 px, centro a 600 px do meio) e cresce até o maior tamanho que cabe inteira no lado dela.
+     O inglês da caixa se desfaz em tinta (escorre, embaça e some, com um brilho dourado passando)
+     e o português se escreve no lugar, dentro da caixa original, na letra da carta (Barlow, a gratuita
+     mais perto da Brandon das cartas). O resto do quadro fica livre: ele continua falando ao lado.
+       img     a imagem da carta (Lorcast ou arquivo) · ou carta=Nome - Versão (o índice vivo/cartas.js)
+       pt      o texto em português, fiel ao oficial, frase a frase: [NOME] vira a etiqueta da habilidade,
+               *Rush* fica em negrito (a palavra-chave do jogo fica em inglês), (lembrete) sai em itálico,
+               e a quebra de linha separa as habilidades, como na carta
+       caixa   personagem (padrão: a caixa ao lado dos diamantes de lore) · cheia (ação, item, canção)
+               · ou x,y,w,h em fração da carta (0–1), pra layout fora do padrão
+       lugar   terco-dir · terco-esq · centro (o lugar do núcleo, D.desloc) — ou o antigo:
+       lado    dir (padrão) · esq · x  a distância do centro da carta ao meio do quadro, ao entrar (600)
+       larg    a largura da carta ao entrar (400) · margem  a folga da carta crescida até a borda (40);
+               no 16:9 o pé conta da faixa do player (D.PE), não do quadro
+       papel   a cor do papel da caixa, que cobre o inglês (o pergaminho medido nas cartas)
+       intensidade contida · media (padrão) · ousada: o quanto a câmera, a tinta e o brilho aparecem
+       t0 · dur (sem dur: o tempo de ler o texto)
+     ?carta=Chernabog - Unnatural Force&pt=[DARK DANCE] Quando você jogar este personagem, você pode embaralhar um personagem adversário escolhido no deck do jogador dele. Se fizer isso, esse jogador pode jogar um personagem do descarte dele de graça.&lado=dir&intensidade=media&t0=0.2 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/direcao-h.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<script src="../nucleo/ao-vivo.js"></script>
+<script src="../vivo/cartas.js"></script>
+<style>
+#stage{width:100vw;height:100vh;padding:0;display:block}
+#carta{position:absolute;left:0;top:0;transform-origin:0 0;opacity:0}
+#carta .arte{position:absolute;inset:0;border-radius:4.2%/3%;overflow:hidden;box-shadow:var(--sh) var(--sh) 0 var(--mk)}
+#carta .arte .mid{position:absolute;inset:0;width:100%;height:100%;object-fit:fill}
+/* o papel que cobre o inglês: cor chapada da caixa, borda desfocada pra fundir no pergaminho */
+#papel{position:absolute;background:var(--carta-papel);filter:blur(2px)}
+/* o inglês: a própria imagem da carta recortada na caixa; `darken` sobre o papel deixa só a tinta */
+#ingles{position:absolute;background-repeat:no-repeat;mix-blend-mode:darken;
+  -webkit-mask-image:linear-gradient(90deg,transparent calc(var(--a) - 18%),#000 var(--a));--a:0%}
+#gotas{position:absolute;overflow:hidden}
+#gotas b{position:absolute;display:block;border-radius:50%;background:var(--carta-tinta)}
+#brilho{position:absolute;border-radius:50%;background:var(--mk);opacity:0}
+#pt{position:absolute;color:var(--carta-tinta);font:500 10px/1.16 var(--fc);overflow:hidden}
+#pt b{font-weight:700}
+#pt i{font-style:italic}
+#pt .tag{display:inline-block;font:600 1.02em/1 var(--fc-tag);text-transform:uppercase;letter-spacing:.01em;
+  color:var(--carta-papel);background:var(--carta-tinta);padding:.1em .3em .08em;margin-right:.18em;border-radius:.12em}
+#pt .pl{white-space:nowrap}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><filter id="tinta" x="-10%" y="-20%" width="120%" height="160%">
+  <feTurbulence type="fractalNoise" baseFrequency=".035 .09" numOctaves="2" seed="7"/>
+  <feDisplacementMap id="desloca" in="SourceGraphic" scale="0" xChannelSelector="R" yChannelSelector="G"/>
+</filter></svg>
+<div id="stage">
+  <div id="saida">
+    <div id="carta">
+      <div class="arte" id="arte"></div>
+      <div id="papel"></div>
+      <div id="ingles"></div>
+      <div id="gotas"><div id="brilho"></div></div>
+      <div id="pt"></div>
+    </div>
+  </div>
+</div>
+<script>
+const $ = id => document.getElementById(id), R = document.documentElement;
+if (!D.q('ar', '1920x1080').startsWith('1080')) R.classList.add('h');
+const t0 = D.n('t0', '0.2');
+const INT = {contida: 0, media: 1, ousada: 2}[D.q('intensidade', 'media')] ?? 1;
+if (D.q('papel')) R.style.setProperty('--carta-papel', D.q('papel'));
+// a letra da carta mora no núcleo; o D.monta espera estas faces antes de medir
+const fc = D.css('--fc').split(',')[0], ft = D.css('--fc-tag').split(',')[0], f0 = window.__folha;
+window.__folha = Promise.resolve(f0).then(() => Promise.all(['500', 'italic 500', '700'].map(w => document.fonts.load(`${w} 20px ${fc}`))
+  .concat(document.fonts.load(`600 20px ${ft}`))).catch(() => null));
+
+const img = D.q('img', '') || (AoVivo.carta(D.q('carta', 'Chernabog - Unnatural Force')) || {}).img || '';
+D.midia('#arte', img, 'carta', 'fill');
+
+// a caixa do texto, em fração da carta. Medida no layout padrão (Chernabog, Mother Knows Best):
+// o pergaminho começa logo abaixo da faixa de classificação e vai até a linha do artista
+const CAIXAS = {personagem: [.036, .668, .842, .258], cheia: [.036, .668, .928, .258]};
+const cx = D.q('caixa', 'personagem');
+const [fx, fy, fw, fh] = CAIXAS[cx] || cx.split(',').map(Number);
+
+// o texto: [NOME] vira etiqueta, *x* negrito, (lembrete) itálico
+const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+$('pt').innerHTML = esc(D.q('pt', '[DARK DANCE] Quando você jogar este personagem, você pode embaralhar um personagem adversário escolhido no deck do jogador dele. Se fizer isso, esse jogador pode jogar um personagem do descarte dele de graça.'))
+  .replace(/\[([^\]]+)\]/g, '<span class="tag">$1</span>').replace(/\(([^)]*)\)/g, '<i>($1)</i>')
+  .replace(/\n/g, '<br>').replace(/\*([^*]+)\*/g, '<b>$1</b>');
+
+/* Divide em letras sem quebrar palavra: cada palavra é um span nowrap com as letras dentro.
+   Anda pelos nós de texto, então <b>, <i> e a etiqueta continuam onde estavam. */
+function letras(el) {
+  const ls = [], ps = [];
+  const walk = node => [...node.childNodes].forEach(n => {
+    if (n.nodeType === 1) return walk(n);
+    const fr = document.createDocumentFragment();
+    n.textContent.split(/(\s+)/).forEach(s => {
+      if (!s) return;
+      if (/^\s+$/.test(s)) return fr.appendChild(document.createTextNode(s));
+      const p = document.createElement('span'); p.className = 'pl';
+      [...s].forEach(ch => { const l = document.createElement('span'); l.textContent = ch; l.style.display = 'inline-block'; p.appendChild(l); ls.push(l); });
+      fr.appendChild(p); ps.push(p);
+    });
+    n.replaceWith(fr);
+  });
+  walk(el);
+  return {ls, ps};
+}
+
+D.monta(tl => {
+  const W = innerWidth, H = innerHeight, vert = H > W, m = D.n('margem', '40');
+  const esq = D.q('lugar', '') ? D.desloc() < 0 : D.q('lado', 'dir') === 'esq';
+  // a carta, na largura em que entra (a da carta citada do Treinando), centrada no terço
+  const cw = vert ? W * .62 : D.n('larg', D.CARTA.larg), ch = cw / D.CARTA.prop;
+  const bx = fx * cw, by = fy * ch, bw = fw * cw, bh = fh * ch;
+  const car = $('carta');
+  Object.assign(car.style, {width: cw + 'px', height: ch + 'px'});
+  const ret = (el, x, y, w, h) => Object.assign(el.style, {left: x + 'px', top: y + 'px', width: w + 'px', height: h + 'px'});
+  ret($('papel'), bx + 2, by + 2, bw - 4, bh - 4); ret($('ingles'), bx, by, bw, bh); ret($('gotas'), bx, by, bw, bh);
+  Object.assign($('ingles').style, {backgroundImage: img ? `url("${img}")` : 'none', backgroundSize: `${cw}px ${ch}px`, backgroundPosition: `${-bx}px ${-by}px`});
+  const x0 = vert ? (W - cw) / 2 : W / 2 + D.desloc(600) - cw / 2, y0 = (H - ch) / 2;
+
+  // o zoom: a carta inteira, no maior tamanho que cabe com a margem — encostada na borda do lado dela
+  // e acima da faixa do player do YouTube (D.PE, 0 fora do 16:9)
+  const HU = H - D.PE;
+  const sZ = vert ? (W - 2 * m) / cw : Math.min((HU - 2 * m) / ch, (W / 2 - m) / cw);
+  const xZ = vert ? m : esq ? m : W - m - cw * sZ, yZ = (HU - ch * sZ) / 2;
+
+  // o português dentro da caixa original: a maior letra que cabe (medida na escala da carta)
+  const pt = $('pt'), pad = bh * .055;
+  ret(pt, bx, by, bw, bh);
+  pt.style.padding = `${pad}px ${pad * 1.15}px`;
+  let px = bh * .2;
+  const cabe = () => { pt.style.fontSize = px + 'px'; return pt.scrollHeight <= pt.clientHeight + .5 && pt.scrollWidth <= pt.clientWidth + .5; };
+  while (px > 3 && !cabe()) px -= bh * .002;
+  pt.style.paddingTop = pad + Math.max(0, pt.clientHeight - pt.scrollHeight) / 2 + 'px';
+  window.__letra = +(px * sZ).toFixed(1);   // a letra na tela, pra quem confere
+
+  // 1. a carta inteira sobe no terço
+  gsap.set(car, {x: x0, y: y0, scale: 1});
+  tl.fromTo(car, {opacity: 0, y: y0 + [20, 40, 90][INT], rotation: [0, -2, -6][INT], scale: [.98, .94, .8][INT]},
+    {opacity: 1, y: y0, rotation: 0, scale: 1, duration: D.P.ENT * 1.3, ease: INT === 2 ? D.P.HEROI : D.P.POUSA}, D.at(t0));
+  D.cue(t0, 'whoosh');
+
+  // 2. a carta cresce até o maior tamanho que cabe inteira
+  const tZ = t0 + [1.2, 1.1, .95][INT], dZ = [1.0, .85, .7][INT];
+  tl.to(car, {x: xZ, y: yZ, scale: sZ, duration: dZ, ease: ['power2.inOut', 'power3.inOut', 'expo.inOut'][INT]}, tZ);
+  D.cue(tZ, 'zoom-in');
+
+  // 3. o inglês se desfaz em tinta: a frente varre da esquerda pra direita, a tinta ondula (turbulência),
+  //    embaça e escorre; gotas descem e somem, e um brilho dourado passa junto da frente
+  const tV = tZ + dZ + [1.0, .9, .8][INT], dV = [.6, .75, .9][INT];
+  const ondula = bh * [.05, .09, .14][INT];
+  $('ingles').style.filter = 'url(#tinta)';
+  tl.fromTo('#ingles', {'--a': '0%'}, {'--a': '118%', duration: dV, ease: 'sine.inOut'}, tV);
+  tl.fromTo('#desloca', {attr: {scale: 0}}, {attr: {scale: ondula}, duration: dV * .8, ease: 'power2.in'}, tV);
+  tl.to('#ingles', {y: bh * .06, duration: dV, ease: 'power1.in'}, tV);
+  tl.to('#ingles', {opacity: 0, duration: dV * .5, ease: 'power1.in'}, tV + dV * .5);
+  const gotas = [];
+  for (let k = 0; k < [8, 16, 28][INT]; k++) {
+    const b = document.createElement('b'), s = bh * (.025 + Math.random() * .035), x = Math.random() * bw;
+    Object.assign(b.style, {left: x + 'px', top: bh * (.12 + Math.random() * .7) + 'px', width: s + 'px', height: s + 'px', opacity: 0, filter: `blur(${s * .25}px)`});
+    $('gotas').appendChild(b);
+    const t = tV + (x / bw) * dV * .85;
+    tl.fromTo(b, {opacity: 0, y: 0, scaleY: 1}, {opacity: [.35, .5, .6][INT], duration: .12, ease: 'power1.out'}, t);
+    tl.to(b, {y: bh * (.15 + Math.random() * .3), scaleY: 2.4, opacity: 0, duration: .55, ease: 'power2.in'}, t + .1);
+  }
+  const g = $('brilho'), gw = bh * .5;
+  ret(g, -gw / 2, -bh * .15, gw * .5, bh * 1.3);
+  g.style.filter = `blur(${gw * .35}px)`;
+  tl.fromTo(g, {x: 0, opacity: 0}, {x: bw, duration: dV, ease: 'sine.inOut'}, tV);
+  tl.to(g, {opacity: [.25, .4, .6][INT], duration: dV * .3, yoyo: true, repeat: 1, repeatDelay: dV * .4}, tV);
+  D.cue(tV, 'shimmer');
+
+  // 4. o português se escreve por cima, letra a letra, só aparecendo (sem pulo), atrás da frente da tinta
+  const tE = tV + dV * .45, passo = [.012, .016, .018][INT];
+  const {ls, ps} = letras(pt);
+  tl.fromTo(pt.querySelectorAll('.tag'), {opacity: 0}, {opacity: 1, duration: .12, ease: 'power1.out'}, tE);
+  ls.forEach((l, k) => tl.fromTo(l, {opacity: 0, filter: 'blur(2px)'},
+    {opacity: 1, filter: 'blur(0px)', duration: .22, ease: 'power1.out'}, tE + k * passo));
+  const fimE = tE + ls.length * passo + .22;
+  // sem cue de digitação: a escrita é tinta, e o teclado passava por cima da voz dele (07/10)
+
+  // fica o tempo de ler (~ 4 palavras por segundo, contado de quando a escrita começa) e sai
+  const dur = D.n('dur', String(+(Math.max(fimE + 1.5, tE + ps.length / 4) + .6).toFixed(2)));
+  D.sai('#saida', dur - .5);
+  return dur;
+});
+</script>
+</body>
+</html>

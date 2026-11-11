@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<!-- TIPOGRAFIA — queda livre: as letras (serifa, itálico) caem do alto, bem fora do quadro, com gravidade (o espaço vai
+     com o quadrado do tempo), batem no chão invisível, amassam, quicam UMA vez e assentam. Uma linha pequena cai primeiro
+     e a grande logo depois, letra a letra; ~1,1 s de ação e o resto é parado. 1080x1920, --alpha. Letra branca (a pequena
+     em amarelo), borda de tinta e sombra dura, como a frase gigante: sobre qualquer cena, escuro ou claro.
+       l1    a linha pequena (queda) · l2  a grande (LIVRE) · h  o corpo da grande (330) · h1  o da pequena (118)
+       y     o topo da linha pequena, em px (300: a zona do Reels começa em 270) · larg  a largura máxima da grande (940)
+       al    c centraliza (padrão) | e alinha à esquerda, em x=`x` (70)
+       t0 · sai  quando sai (-1: fica até o fim) · dur
+       ?l1=queda&l2=LIVRE&h=330&y=300&t0=0.1&sai=1.9&dur=2.3 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/editorial.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px;background:transparent}
+#stage{padding:0;display:block;background:none}
+.qd{position:absolute;left:0;width:1080px;filter:drop-shadow(9px 9px 0 var(--ink))}
+.ln{white-space:nowrap;line-height:1;font-family:var(--ed-serif);font-style:italic;font-weight:400}
+.ln i{display:inline-block;font-style:italic;transform-origin:50% 100%;color:#fff;
+  -webkit-text-stroke:9px var(--ink);paint-order:stroke fill}
+.ln.a i{color:var(--mk);-webkit-text-stroke:7px var(--ink)}
+.ln.b{margin-top:-.04em;letter-spacing:.03em}
+</style>
+</head>
+<body>
+<div id="stage"><div class="qd" id="qd"><div class="ln a" id="a"></div><div class="ln b" id="b"></div></div></div>
+<script>
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const $ = id => document.getElementById(id);
+const dur = D.n('dur', '2.3'), t0 = D.n('t0', '0.1'), sai = D.n('sai', '1.9');
+const l1 = D.q('l1', 'queda'), l2 = D.q('l2', 'LIVRE'), esq = D.q('al', 'c') === 'e';
+const letras = s => [...s].map(l => l === ' ' ? '<i>&nbsp;</i>' : `<i>${esc(l)}</i>`).join('');
+$('a').innerHTML = letras(l1); $('b').innerHTML = letras(l2);
+$('a').style.fontSize = D.n('h1', '118') + 'px';
+$('qd').style.top = D.n('y', '300') + 'px';
+$('qd').style.textAlign = esq ? 'left' : 'center';
+if (esq) $('qd').style.paddingLeft = D.n('x', '70') + 'px';
+
+document.fonts.load('italic 400 100px "Instrument Serif"').catch(() => null).then(() => D.monta(tl => {
+  // a grande encolhe até caber na largura
+  const b = $('b'); b.style.fontSize = D.n('h', '330') + 'px';
+  const w = (() => { b.style.display = 'inline-block'; const r = b.getBoundingClientRect().width; b.style.display = ''; return r; })();
+  const larg = D.n('larg', '940');
+  if (w > larg) b.style.fontSize = (D.n('h', '330') * larg / w) + 'px';
+  if (!esq) { $('a').style.textAlign = 'center'; b.style.textAlign = 'center'; }
+
+  const G = 2 * 1000 / (.42 * .42);                      // a gravidade: 1000 px em 0,42 s
+  const m = D.mola(.6, 4);
+  const cai = (el, t, peq, i) => {
+    const r = el.getBoundingClientRect(), d = r.top + r.height + 60;   // sai do alto, fora do quadro
+    const tq = Math.sqrt(2 * d / G), ba = peq ? 38 : 78, tb = Math.sqrt(2 * ba / G) * .95;
+    const rot = (i % 2 ? 1 : -1) * (4 + (i % 3) * 2);
+    tl.fromTo(el, {y: -d, rotation: rot}, {y: 0, rotation: 0, duration: tq, ease: 'power2.in'}, t);
+    tl.to(el, {scaleX: 1.1, scaleY: .86, duration: .066, ease: 'power2.out'}, t + tq);
+    tl.to(el, {scaleX: 1, scaleY: 1, duration: m.dur * .6, ease: m.ease}, t + tq + .066);
+    tl.to(el, {y: -ba, duration: tb, ease: 'power2.out'}, t + tq);        // o único quique
+    tl.to(el, {y: 0, duration: tb, ease: 'power2.in'}, t + tq + tb);
+    tl.to(el, {scaleX: 1.04, scaleY: .96, duration: .05, ease: 'power2.out'}, t + tq + 2 * tb);
+    tl.to(el, {scaleX: 1, scaleY: 1, duration: .16, ease: 'power3.out'}, t + tq + 2 * tb + .05);
+    return t + tq;
+  };
+  const A = [...$('a').children], B = [...$('b').children];
+  A.forEach((el, i) => cai(el, D.at(t0) + i * .05, true, i));
+  const tB = D.at(t0) + .12;
+  B.forEach((el, i) => {
+    const tc = cai(el, tB + i * .075, false, i + 1);
+    if (i === B.length - 1 || i % 2 === 0) D.cue(tc, 'thud');
+  });
+  if (sai >= 0) {
+    D.sai('.ln i', sai);
+  }
+  return dur;
+}));
+</script>
+</body>
+</html>

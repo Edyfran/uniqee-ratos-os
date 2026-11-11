@@ -1,0 +1,19 @@
+{
+ "_leia": "Os estilos da marca, um por formato que o cliente marcou no questionário (apague os outros). Cada um herda do estilo do kit mais perto e muda só o que é da marca. Troque TROQUE-SLUG pelo slug do cliente (minúsculo, sem espaço) e TROQUE.ttf pelo arquivo da letra em marca/fontes/. Os caminhos partem da raiz da fábrica. O estilo.py lista estes junto com os do kit: uv run python tools/video-use/helpers/estilo.py",
+ "TROQUE-SLUG-reel": {
+  "_o_que": "o reel editorial: a voz clonada dele, o avatar no cartão, painel e peças com a cor e a letra dele",
+  "herda": "reel-editorial",
+  "desenho": {"tema": "marca"},
+  "imagem": {"fundo": "marca/placa.png"}
+ },
+ "TROQUE-SLUG-celular": {
+  "_o_que": "o reel do que ele grava no celular: corte do silêncio, legenda na letra dele, b-roll",
+  "herda": "reel-camera",
+  "desenho": {"tema": "marca", "fonte": "marca/fontes/TROQUE.ttf"}
+ },
+ "TROQUE-SLUG-anuncio": {
+  "_o_que": "o criativo de anúncio: voz em off sobre as cenas do banco dele, legenda na letra dele",
+  "herda": "criativo",
+  "desenho": {"tema": "marca", "fonte": "marca/fontes/TROQUE.ttf"}
+ }
+}

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<!-- CAPA NICK — a capa do Reel no molde do Nick Saraev, sem tradução pra outra voz.
+     1080x1920, opaca, parada: sai como JPEG. Sangrada: a parede de ladrilhos tech e o brilho cobrem o quadro todo, e o
+     tronco dele desce até a borda de baixo. A marca da ferramenta no topo, o rosto grande no meio (foto de estúdio
+     recortada, nada na frente), dois ícones de app inclinados encostando nas orelhas, e o título em caixa alta pesada
+     com o destaque numa faixa vermelha.
+     Zona segura (README): marca, rosto e título ficam em y 290–1610, dentro do corte 4:5 (285–1635), que cabe no 3:4 da
+     grade do perfil (240–1680). Fora dela só vai o que pode sumir: o fundo, o brilho e o tronco.
+       titulo    3–5 palavras; "|" força a quebra
+       destaque  o trecho do título que vai na faixa vermelha (a linha do objeto)
+       topo      o nome da ferramenta, em texto. Sozinho sai em caixa alta pesada; com `logo`, sai ao lado dele na letra de display
+       logo      a marca oficial da ferramenta (decisão do dono, 30/09), SVG branco em midia/: logo-elevenlabs.svg (o wordmark
+                 inteiro, sem `topo`) ou logo-higgsfield.svg (o ícone, com topo=Higgsfield). logo=ninja é a do dono: o ninja
+                 em pixel, que mora em nucleo/marca-ninja.js e não vai pro aluno; sem o arquivo, ninja sai robô
+       lados     os dois ícones: mic | onda | claquete | filme | robo | ninja | rec | cel, ou texto curto ("1"), ou o endereço de
+                 uma imagem quadrada (um quadro da cena), que vira ícone de app.
+                 ":n" põe um selo amarelo com n no canto ("onda:1,onda:2") · iy  o alto dos ícones, em px (640)
+       rosto     PNG com alfa, topo da cabeça no topo da imagem e tronco comprido (padrão: a foto de estúdio, midia/rosto-estudio.png;
+                 o gera_capas.py recorta e estica o tronco)
+       cx        o meio do rosto no PNG, em fração da largura (.51) · larg  largura do PNG na capa, em px (860)
+       ry        onde começa o cabelo, em px (440)
+       tb, tm    o fim do título, a partir de baixo (310), e a folga dos lados (36). A capa que aparece dentro do vídeo e a
+                 miniatura do anúncio ficam na zona do Reels (y 270–1250, x 65–1015): tb=680, tm=70, e a foto menor
+       h, ty, sub, sb   a altura do quadro (1920) e onde fica a marca (ty, 365); a etiqueta amarela embaixo (sub) e o fim dela (sb, 60)
+       monta     1: a capa se monta em vez de sair parada (o Demo overdrive, 12/10): o fundo acende, o rosto sobe da base,
+                 os ícones entram girando de fora, o assunto cai, o título bate e a faixa varre. Sai como vídeo
+                 (o r_capa o põe no cartão). t0 · dur (2,2). Sem monta, a capa de sempre: um quadro só.
+     ?titulo=70 cenas|nenhuma filmada&destaque=nenhuma filmada&topo=FEITO COM IA&lados=robo,claquete
+     monta: ?titulo=70 cenas|nenhuma filmada&destaque=nenhuma filmada&topo=FEITO COM IA&lados=robo,claquete&monta=1&dur=2.2 -->
+<html lang="pt-BR" data-qa="entra-seco fica">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/editorial.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<!-- h: a altura do quadro (1920; 1350 pro cartão 4:5 do carrossel). Só o que depende da altura se move: o chão e a marca (ty) -->
+<script>const H = D.n('h', '1920'); if (H !== 1920) document.head.insertAdjacentHTML('beforeend', `<style>html,body,#stage{height:${H}px!important}.chao{top:${H - 860}px!important}.topo{top:${D.n('ty', '365')}px!important}.parede{top:${H - 2560}px!important}</style>`);</script>
+<!-- o ninja é a marca do dono: o desenho só carrega quando logo ou lados pedem, e o arquivo não vai pro aluno -->
+<script>if ([D.q('logo', ''), ...D.q('lados', '').split(',')].some(u => u.split(':')[0].trim() === 'ninja')) document.write('<script src="../nucleo/marca-ninja.js"><\/script>');</script>
+<style>
+html,body{width:1080px;height:1920px;background:var(--ink)}
+#stage{width:1080px;height:1920px;background:var(--ink);padding:0;display:block;position:relative;overflow:hidden}
+/* o fundo, de ponta a ponta: a parede de ladrilhos em perspectiva em cima, o chão com as linhas acesas embaixo */
+.parede{position:absolute;left:-270px;top:-640px;width:1620px;height:2140px;display:grid;
+  grid-template-columns:repeat(12,1fr);gap:16px;transform:perspective(1100px) rotateX(12deg);transform-origin:50% 100%;
+  filter:blur(2.2px)}
+.parede i{border-radius:22px;border:3px solid color-mix(in srgb,var(--ac) 50%,transparent);
+  background:color-mix(in srgb,var(--ac) 12%,transparent)}
+.parede i.acesa{background:color-mix(in srgb,var(--ac) 40%,transparent);box-shadow:0 0 34px color-mix(in srgb,var(--ac) 70%,transparent)}
+.parede i.quente{border-color:color-mix(in srgb,var(--mk) 60%,transparent);background:color-mix(in srgb,var(--mk) 16%,transparent)}
+.parede i.furo{background:radial-gradient(circle,color-mix(in srgb,var(--ac2) 50%,transparent) 0 18%,transparent 20%),color-mix(in srgb,var(--ac) 18%,transparent)}
+.chao{position:absolute;left:-700px;right:-700px;top:1060px;height:1160px;transform:perspective(800px) rotateX(55deg);transform-origin:50% 100%;
+  background:repeating-linear-gradient(90deg,color-mix(in srgb,var(--mk) 60%,transparent) 0 5px,transparent 5px 130px),
+             repeating-linear-gradient(0deg,color-mix(in srgb,var(--ac) 90%,transparent) 0 5px,transparent 5px 130px),
+             linear-gradient(0deg,color-mix(in srgb,var(--ac) 40%,transparent),transparent 70%);filter:blur(1.4px)}
+/* o escuro não come mais o pé: só baixa a parede atrás do título e deixa o brilho da cabeça e o do chão */
+.escuro{position:absolute;inset:0;background:
+  radial-gradient(60% 16% at 50% 0,color-mix(in srgb,var(--ac) 40%,transparent),transparent 75%),
+  radial-gradient(55% 26% at 50% 40%,color-mix(in srgb,var(--ac) 34%,transparent),transparent 70%),
+  radial-gradient(80% 20% at 50% 100%,color-mix(in srgb,var(--ac) 50%,transparent),transparent 75%),
+  linear-gradient(180deg,color-mix(in srgb,var(--ink) 10%,transparent) 0,color-mix(in srgb,var(--ink) 20%,transparent) 30%,
+    color-mix(in srgb,var(--ink) 45%,transparent) 62%,color-mix(in srgb,var(--ink) 45%,transparent) 84%,color-mix(in srgb,var(--ink) 10%,transparent) 100%)}
+.topo{position:absolute;top:365px;left:60px;right:60px;transform:translateY(-50%);display:flex;align-items:center;justify-content:center;gap:34px;
+  white-space:nowrap;color:var(--pp);filter:drop-shadow(0 8px 20px rgba(0,0,0,.6))}
+.topo b{font:900 170px/1 var(--ed-sans);letter-spacing:-.03em}
+.topo img{display:block;height:150px}
+.topo img.marca{height:auto;width:860px;max-height:150px}
+.topo svg{display:block;width:150px;height:150px;flex:none}
+.topo.com-logo b{font:700 150px/1 var(--fd);letter-spacing:-.02em}
+/* o rosto: tronco até a borda de baixo, some só pros lados (o ombro cortado não vira uma reta) e ganha a borda azul do fundo */
+.rosto{position:absolute;width:var(--rl);
+  filter:brightness(1.06) contrast(1.05) drop-shadow(0 0 3px color-mix(in srgb,var(--ac2) 55%,transparent)) drop-shadow(0 0 36px color-mix(in srgb,var(--ac) 75%,transparent));
+  --m:linear-gradient(90deg,transparent 0,#000 13%,#000 87%,transparent 100%);-webkit-mask-image:var(--m);mask-image:var(--m)}
+/* a luz de baixo, por cima do tronco: acende a malha preta e o chão, pro pé da capa não virar faixa vazia */
+.luz{position:absolute;left:0;right:0;bottom:0;height:560px;mix-blend-mode:screen;
+  background:radial-gradient(80% 95% at 50% 108%,color-mix(in srgb,var(--ac) 80%,transparent),transparent 72%),
+             linear-gradient(0deg,color-mix(in srgb,var(--ac2) 18%,transparent),transparent 40%)}
+/* o ícone de app: canto redondo, brilho de cima, sombra macia, inclinado */
+.ic{position:absolute;width:260px;height:260px;border-radius:60px;display:grid;place-items:center;
+  box-shadow:0 30px 60px -16px rgba(0,0,0,.7),0 6px 16px rgba(0,0,0,.35);
+  background-image:linear-gradient(160deg,rgba(255,255,255,.26),transparent 46%)}
+.ic.a{left:56px;transform:rotate(-8deg)} .ic.b{right:56px;transform:rotate(8deg)}
+.ic svg{width:170px;height:170px;overflow:visible}
+.ic.branco{background-color:var(--pp);color:var(--ac)}
+.ic.azul{background-color:var(--ac);color:var(--pp)}
+.ic.tinta{background-color:var(--ink8);color:var(--pp)}
+.ic.amarelo{background-color:var(--mk);color:var(--ink)}
+.ic.cena{background:var(--ink);overflow:hidden;border:6px solid var(--pp)}
+.ic.cena img{width:100%;height:100%;object-fit:cover;display:block}
+.ic.txt b{font:900 190px/1 var(--ed-sans);letter-spacing:-.04em}
+.ic .selo{position:absolute;right:-22px;top:-22px;width:96px;height:96px;border-radius:50%;display:grid;place-items:center;
+  background:var(--mk);color:var(--ink);font:900 62px/1 var(--ed-sans);box-shadow:0 8px 18px rgba(0,0,0,.45)}
+.sub{position:absolute;left:0;right:0;display:flex;justify-content:center}
+.sub b{background:var(--mk);color:var(--ink);border-radius:16px;padding:.2em .6em;font:700 40px/1 var(--fd);letter-spacing:.02em;text-transform:uppercase;box-shadow:0 12px 28px -8px rgba(0,0,0,.7)}
+/* o título acaba em 1610: dentro do 4:5 e do 3:4 */
+.tit{position:absolute;left:36px;right:36px;bottom:310px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.tit .s,.tit .d{font:900 150px/1 var(--ed-sans);letter-spacing:-.025em;text-transform:uppercase;white-space:nowrap;color:var(--pp)}
+.tit .s{text-shadow:0 8px 26px rgba(0,0,0,.8),0 0 60px rgba(0,0,0,.6)}
+.tit .d{background:var(--no);border-radius:20px;padding:.1em .12em .06em;font-size:150px;margin-top:8px;letter-spacing:-.035em;
+  box-shadow:0 18px 40px -10px rgba(0,0,0,.7)}
+.tit .d + .s{margin-top:10px}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const st = document.getElementById('stage');
+const add = (tag, cls, html = '') => { const e = document.createElement(tag); e.className = cls; e.innerHTML = html; st.appendChild(e); return e; };
+
+// a parede: sorteio fixo (mesma capa sempre), poucos ladrilhos acesos
+let semente = 7;
+const sorte = () => (semente = (semente * 16807) % 2147483647) / 2147483647;
+const parede = add('div', 'parede');
+for (let k = 0; k < 12 * 13; k++) {
+  const r = sorte(), i = document.createElement('i');
+  i.className = r < .1 ? 'acesa' : r < .16 ? 'quente' : r < .34 ? 'furo' : '';
+  parede.appendChild(i);
+}
+add('div', 'chao');
+add('div', 'escuro');
+
+// os ícones: desenhados aqui
+const ROBO = ['.....YY.....', '.....BB.....', '...BBBBBB...', '...BWWWWB...', '...BKWWKB...', '...BWWWWB...',
+              '...BBBBBB...', '....BBBB....', '.BBBBBBBBBB.', 'B.BBYYYYBB.B', 'B.BBBBBBBB.B', '..BBB..BBB..'];
+const pixel = g => '<svg viewBox="-1 -1 14 14" shape-rendering="crispEdges">' +
+  g.map((row, y) => [...row].map((c, x) => c === '.' ? '' : `<rect class="px-${c}" x="${x}" y="${y}" width="1.03" height="1.03"/>`).join('')).join('') + '</svg>';
+const ONDA = [16, 30, 52, 72, 44, 64, 28, 48, 20];
+const GLIFOS = {
+  mic: ['branco', '<svg viewBox="0 0 100 100"><rect x="35" y="8" width="30" height="52" rx="15" fill="currentColor"/><path d="M24 46a26 26 0 0 0 52 0M50 72v14M34 90h32" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round"/></svg>'],
+  onda: ['azul', '<svg viewBox="0 0 100 100">' + ONDA.map((h, k) => `<line x1="${14 + k * 9}" x2="${14 + k * 9}" y1="${50 - h / 2}" y2="${50 + h / 2}" stroke="currentColor" stroke-width="6.5" stroke-linecap="round"/>`).join('') + '</svg>'],
+  claquete: ['amarelo', '<svg viewBox="0 0 100 100"><rect x="10" y="42" width="80" height="48" rx="7" fill="currentColor"/>' +
+    '<g transform="rotate(-14 10 36)"><rect x="10" y="22" width="80" height="16" rx="4" fill="currentColor"/>' +
+    [0, 1, 2, 3].map(k => `<path d="M${18 + k * 19} 22h9l-8 16h-9z" style="fill:var(--pp)"/>`).join('') + '</g>' +
+    '<path d="M22 58h56M22 72h36" style="stroke:var(--mk)" stroke-width="6" stroke-linecap="round"/></svg>'],
+  filme: ['amarelo', '<svg viewBox="0 0 100 100"><rect x="20" y="6" width="60" height="88" rx="7" fill="currentColor"/>' +
+    [0, 1, 2, 3, 4].map(k => `<rect x="25" y="${12 + k * 16}" width="8" height="9" rx="2" style="fill:var(--mk)"/><rect x="67" y="${12 + k * 16}" width="8" height="9" rx="2" style="fill:var(--mk)"/>`).join('') +
+    '<rect x="38" y="14" width="24" height="32" rx="3" style="fill:var(--mk)"/><rect x="38" y="54" width="24" height="32" rx="3" style="fill:var(--mk)"/></svg>'],
+  robo: ['branco', pixel(ROBO)],
+  rec: ['tinta', '<svg viewBox="0 0 100 100"><rect x="6" y="26" width="62" height="48" rx="9" fill="currentColor"/><path d="M68 44l26-14v40L68 56z" fill="currentColor"/>' +
+    '<circle cx="24" cy="42" r="8" style="fill:var(--no)"/></svg>'],
+  cel: ['azul', '<svg viewBox="0 0 100 100"><rect x="24" y="4" width="52" height="92" rx="10" fill="none" stroke="currentColor" stroke-width="7"/>' +
+    '<path d="M36 52l10 10 19-22" fill="none" style="stroke:var(--mk)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>'],
+};
+// o ninja vem do núcleo (nucleo/marca-ninja.js); sem o arquivo (o kit do aluno), o ninja pedido sai robô
+GLIFOS.ninja = window.MARCA_NINJA ? ['branco', pixel(window.MARCA_NINJA.ok)] : GLIFOS.robo;
+
+// a marca: o logo oficial (com o nome ao lado, se vier `topo`) ou só o nome escrito; logo=ninja é o do dono, o ninja em pixel
+const logo = D.q('logo', ''), nome = D.q('topo', '');
+if (logo || nome) {
+  const t = add('div', 'topo' + (logo ? ' com-logo' : ''));
+  if (logo === 'ninja') t.insertAdjacentHTML('beforeend', GLIFOS.ninja[1]);
+  else if (logo) t.insertAdjacentHTML('beforeend', `<img class="${nome ? '' : 'marca'}" src="${esc(logo)}" alt="">`);
+  if (nome) t.insertAdjacentHTML('beforeend', `<b>${esc(nome)}</b>`);
+}
+
+D.q('lados', 'robo,claquete').split(',').filter(Boolean).slice(0, 2).forEach((u, i) => {
+  // com "/" é uma imagem (um quadro da cena, recortado quadrado): vira ícone de app
+  const [nome, selo] = u.includes('/') ? [u] : u.split(':');
+  const g = GLIFOS[nome.trim()];
+  const e = add('div', 'ic ' + 'ab'[i] + ' ' + (nome.includes('/') ? 'cena' : g ? g[0] : 'txt ' + ['azul', 'branco'][i]),
+                nome.includes('/') ? `<img src="${esc(nome)}" alt="">` : g ? g[1] : `<b>${esc(nome)}</b>`);
+  e.style.top = D.n('iy', '640') + 'px';
+  if (selo) e.insertAdjacentHTML('beforeend', `<span class="selo">${esc(selo)}</span>`);
+});
+
+// o rosto por cima dos ícones: o meio dele (`cx`) no meio da tela
+const RL = D.n('larg', '860');
+document.documentElement.style.setProperty('--rl', RL + 'px');
+const ro = add('img', 'rosto');
+ro.src = D.q('rosto', '../midia/rosto-estudio.png');
+ro.style.left = (540 - D.n('cx', '.51') * RL) + 'px';
+ro.style.top = D.n('ry', '440') + 'px';
+add('div', 'luz');
+
+// o título se parte em volta do destaque: antes · faixa · depois
+const titulo = D.q('titulo', '70 cenas|nenhuma filmada'), dq = D.q('destaque', 'nenhuma filmada');
+const j = dq ? titulo.indexOf(dq) : -1;
+const partes = j < 0 ? [['s', titulo]] : [['s', titulo.slice(0, j)], ['d', dq], ['s', titulo.slice(j + dq.length)]];
+const tit = add('div', 'tit');
+tit.style.bottom = D.n('tb', '310') + 'px';
+tit.style.left = tit.style.right = D.n('tm', '36') + 'px';
+partes.filter(([, t]) => t.replace(/[|,\s]/g, '')).forEach(([k, t]) => {
+  const e = document.createElement('div');
+  e.className = k;
+  e.innerHTML = t.split('|').map(x => esc(x.trim())).filter(Boolean).join('<br>');
+  tit.appendChild(e);
+});
+
+// sub: uma etiqueta amarela embaixo do título (só o carrossel usa); sb, o fim dela a partir de baixo
+if (D.q('sub', '')) { const e = add('div', 'sub', '<b></b>'); e.firstChild.textContent = D.q('sub', ''); e.style.bottom = D.n('sb', '60') + 'px'; }
+
+window.__folha = document.fonts.load('900 100px ' + D.css('--ed-sans').split(',')[0]).catch(() => null);
+
+D.monta(tl => {
+  D.cabe('.topo b', 60, document.querySelector('.topo img') ? .74 : .88);   // com o ícone ao lado, o nome divide a linha
+  D.cabe('.tit .s', 70, '.tit');
+  D.cabe('.tit .d', 70, ['.tit', .95]);   // a faixa tem folga dos lados
+  // as duas linhas quase no mesmo corpo, como no Nick: a de cima passa da faixa no máximo 1,2×, senão a faixa perde o grito
+  const fd = parseFloat(getComputedStyle(document.querySelector('.tit .d') || document.body).fontSize);
+  if (document.querySelector('.tit .d')) document.querySelectorAll('.tit .s').forEach(e => {
+    if (parseFloat(getComputedStyle(e).fontSize) > fd * 1.2) e.style.fontSize = fd * 1.2 + 'px'; });
+  tl.set('.tit', {opacity: 1}, 0);   // parada: a capa é um quadro só
+  if (D.q('monta', '0') !== '1') return D.n('dur', '1');
+  // monta: cada parte entra no seu tempo, e o quadro final é a capa de sempre. O fundo só acende (a parede e o chão
+  // têm a perspectiva no transform do CSS, que o GSAP reescreveria)
+  const t0 = D.n('t0', '0.1'), ics = document.querySelectorAll('.ic');
+  tl.fromTo(['.parede', '.chao', '.luz'], {opacity: 0}, {opacity: 1, duration: .45, ease: 'power2.out', stagger: .06}, t0);
+  tl.fromTo('.rosto', {y: 300, opacity: 0}, {y: 0, opacity: 1, duration: .55, ease: D.P.POUSA}, D.at(t0 + .3));
+  D.cue(t0 + .3, 'whoosh');
+  ics.forEach((e, i) => {
+    const lado = i ? 1 : -1, t = t0 + .55 + i * .16;
+    tl.fromTo(e, {x: 460 * lado, y: -120, rotation: 40 * lado, scale: .5, opacity: 0},
+      {x: 0, y: 0, rotation: 8 * lado, scale: 1, opacity: 1, duration: .5, ease: D.P.POUSA}, D.at(t));
+    D.cue(t, 'pop');
+  });
+  if (document.querySelector('.topo')) {
+    tl.fromTo('.topo', {yPercent: -50, y: -90, opacity: 0}, {y: 0, opacity: 1, duration: .4, ease: D.P.POUSA}, D.at(t0 + .9));
+    D.cue(t0 + .9, 'swish');
+  }
+  document.querySelectorAll('.tit > div').forEach((e, i) => {
+    const t = t0 + 1.15 + i * .2;
+    if (e.classList.contains('d')) {
+      tl.fromTo(e, {clipPath: 'inset(0 100% 0 0 round 20px)'}, {clipPath: 'inset(0 0% 0 0 round 20px)', duration: .35,
+        ease: 'power3.inOut'}, D.at(t));
+      D.cue(t, 'swish');
+    } else {
+      tl.fromTo(e, {scale: 1.5, opacity: 0}, {scale: 1, opacity: 1, duration: .3, ease: D.P.POUSA}, D.at(t));
+      D.cue(t, 'impact');
+    }
+  });
+  return D.n('dur', '2.2');
+});
+</script>
+</body>
+</html>

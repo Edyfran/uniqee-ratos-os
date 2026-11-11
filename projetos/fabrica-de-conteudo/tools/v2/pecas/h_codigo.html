@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<!-- AULA — código/comando com destaque de linha. 1920x1080, --alpha. Terço esquerdo.
+     A janela cai, as linhas se revelam da esquerda uma a uma, e o destaque
+     amarelo anda de linha em linha no tempo da fala; as outras linhas apagam.
+     Com |nota, a etiqueta aparece do lado da janela, na altura da linha.
+       ?arquivo=agente.js&code=linha 1%0Alinha 2...&linhas=3@1.4;5|nunca cole a chave aqui@2.4&t0=0.2&dur=4.5
+     Quebra de linha: %0A (ou \n). Cores: palavra-chave, texto entre aspas, número, comentário. -->
+<html lang="pt-BR" class="h alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/direcao-h.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+.jn{position:absolute;left:120px;top:120px;width:1180px;background:var(--cod);border:var(--bw) solid var(--ink);border-radius:var(--raio);box-shadow:var(--shx,var(--sh)) var(--shx,var(--sh)) 0 var(--ink);overflow:hidden;opacity:0}
+.bar{display:flex;align-items:center;gap:10px;height:56px;padding:0 20px;background:var(--ink);border-bottom:3px solid #000}
+.bar i{width:16px;height:16px;border-radius:4px;background:#3B3F4A}
+.bar i:first-child{background:var(--mk)}
+.bar span{margin-left:14px;font:600 20px/1 var(--fm);color:var(--cod-cm)}
+.cod{position:relative;padding:22px 0 26px}
+.hl{position:absolute;left:0;right:0;top:0;height:50px;background:rgba(242,199,68,.16);border-left:8px solid var(--mk);opacity:0}
+.ln{position:relative;display:flex;height:50px;align-items:center;font:500 28px/1 var(--fm);white-space:pre;color:var(--cod-tx)}
+.ln .nr{flex:none;width:76px;padding-right:22px;text-align:right;color:var(--cod-ln)}
+.k{color:var(--cod-kw)}.s{color:var(--mk)}.c{color:#7C808B}.nm{color:var(--cod-nm)}
+.nota{position:absolute;left:1336px;padding:12px 18px 10px;font:700 24px/1 var(--fm);letter-spacing:.04em;border-radius:var(--raio-s);white-space:nowrap;opacity:0}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="jn" id="jn"><div class="bar"><i></i><i></i><i></i><span id="fn"></span></div><div class="cod" id="cod"><div class="hl" id="hl"></div></div></div>
+</div>
+<script>
+const dur = D.n('dur', '4.5'), t0 = D.n('t0', '0.2'), $ = id => document.getElementById(id);
+const PADRAO = ['const agente = new Agent({', '  modelo: "claude-sonnet",', '  ferramentas: [planilha, email],', '  // a chave fica no .env', '  chave: process.env.ANTHROPIC_KEY,', '});', 'await agente.run("resume as vendas de hoje");'].join('\n');
+const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const pinta = l => {
+  const m = l.match(/^(\s*)(\/\/.*|#.*)$/);
+  if (m) return m[1] + `<span class="c">${esc(m[2])}</span>`;
+  return l.split(/("[^"]*"|'[^']*'|`[^`]*`)/).map((p, i) => i % 2 ? `<span class="s">${esc(p)}</span>`
+    : esc(p).replace(/\b(\d+)\b/g, '<span class="nm">$1</span>').replace(/\b(const|let|var|await|async|new|return|function|if|else|import|from|export|true|false|null|def|for|in)\b/g, '<span class="k">$1</span>')).join('');
+};
+$('fn').textContent = D.q('arquivo', 'agente.js');
+const linhas = D.q('code', PADRAO).replace(/\\n/g, '\n').split('\n');
+linhas.forEach((l, i) => $('cod').insertAdjacentHTML('beforeend', `<div class="ln"><span class="nr">${i + 1}</span><span class="tx">${pinta(l) || ' '}</span></div>`));
+const hs = D.itens('linhas', '3@1.4;5|nunca cole a chave aqui@2.4', ['n', 'nota']).map(h => ({...h, n: parseInt(h.n, 10)})).filter(h => h.n >= 1 && h.n <= linhas.length);
+
+D.monta(tl => {
+  const lns = [...document.querySelectorAll('.ln')], jr = $('jn').getBoundingClientRect();
+  D.pousa('#jn', t0, {dy: -40, som: 'pop'});
+  lns.forEach((l, i) => tl.fromTo(l.querySelector('.tx'), {clipPath: 'inset(0 100% 0 0)'}, {clipPath: 'inset(0 0% 0 0)', duration: .32, ease: 'power2.out'}, D.at(t0) + .22 + i * .07));
+  D.cue(t0 + .22, 'type', {dur: +(lns.length * .07).toFixed(3)});
+  const hl = $('hl');
+  hs.forEach((h, j) => {
+    const ln = lns[h.n - 1], top = ln.offsetTop, t = D.at(h.t);
+    if (j === 0) { gsap.set(hl, {top}); tl.fromTo(hl, {opacity: 0, scaleX: .2, transformOrigin: 'left center'}, {opacity: 1, scaleX: 1, duration: .4, ease: D.P.EASE}, t); }
+    else { tl.to(hl, {top, duration: .45, ease: D.P.MOLA}, t); D.cue(h.t, 'swish'); }
+    tl.to(lns.filter(x => x !== ln), {opacity: .38, duration: .3}, t);
+    tl.to(ln, {opacity: 1, duration: .3}, t);
+    if (h.nota) {
+      const n = document.createElement('div'); n.className = 'nota nb cor-mk'; n.textContent = h.nota; $('stage').appendChild(n);
+      n.style.top = (jr.top + 56 + 4 + ln.offsetTop + 25 - n.offsetHeight / 2) + 'px';
+      tl.fromTo(n, {opacity: 0, x: -30}, {opacity: 1, x: 0, duration: .4, ease: D.P.MOLA}, t + .12);
+      const prox = hs[j + 1];
+      if (prox) tl.to(n, {opacity: 0, x: -20, duration: .2, ease: 'power2.in'}, D.at(prox.t));
+    }
+  });
+  D.sai(['#jn', '.nota'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<!-- TRANSIÇÃO — o botão: o clique abre um círculo, e a próxima cena nasce de dentro dele. 1080x1920 ou
+     1920x1080 (?ar=), --alpha.
+     O botão pousa por cima do vídeo, a seta vai até ele e clica. Do botão sai o disco, que cresce até
+     cobrir o quadro: no `meio` o quadro está todo coberto, e ali cai o corte do vídeo por baixo
+     (window.__corte). Do mesmo ponto abre o buraco, com a borda tinta, e o vídeo seguinte aparece de
+     dentro dele até o disco sair pela borda. O pedido vira a cena, sem corte seco. Da referência
+     (Skillry #225, #410, no drop o círculo que abre do botão para a cena) saiu só o movimento.
+       rot  o texto do botão · x, y  o centro do botão, em fração do quadro (0.5, 0.72)
+       cor  ac|mk|ink, o disco (ac) · t_clique (0.7) · meio (1.0) · dur
+       ?rot=edita pra mim&x=0.5&y=0.72&cor=ac&t_clique=0.7&meio=1.0&dur=1.7 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<script src="../nucleo/cursor.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+html.h,html.h body,html.h #stage{width:1920px;height:1080px}
+html,body{background:transparent}
+#stage{position:relative;overflow:hidden;background:none;padding:0;display:block}
+#bt{position:absolute;padding:30px 54px 32px;white-space:nowrap;opacity:0}
+#disco{position:absolute;z-index:60;border-radius:50%;border:8px solid var(--ink);box-sizing:border-box;transform:scale(0)}
+#disco.ac{background:var(--ac)}#disco.mk{background:var(--mk)}#disco.ink{background:var(--ink)}
+#anel{position:absolute;z-index:60;border-radius:50%;border:8px solid var(--ink);box-sizing:border-box;opacity:0}
+</style>
+</head>
+<body>
+<div id="stage"><div class="btn" id="bt"></div><div id="disco"></div><div id="anel"></div></div>
+<script>
+const $ = id => document.getElementById(id), R = document.documentElement, HZ = D.q('ar', '1080x1920').startsWith('1920');
+if (HZ) R.classList.add('h');
+const W = HZ ? 1920 : 1080, H = HZ ? 1080 : 1920;
+const X = D.n('x', '0.5') * W, Y = D.n('y', '0.72') * H;
+const tClique = D.n('t_clique', '0.7'), meio = Math.max(tClique + .2, D.n('meio', '1.0')), ABRE = .5;
+const dur = Math.max(meio + ABRE + .05, D.n('dur', '1.7'));
+window.__corte = meio;
+$('bt').textContent = D.q('rot', 'edita pra mim');
+$('disco').classList.add(['ac', 'mk', 'ink'].includes(D.q('cor')) ? D.q('cor') : 'ac');
+// o disco cobre o quadro quando o raio passa do canto mais longe do botão
+const RC = Math.hypot(Math.max(X, W - X), Math.max(Y, H - Y)) + 40;
+Object.assign($('disco').style, {left: X - RC + 'px', top: Y - RC + 'px', width: 2 * RC + 'px', height: 2 * RC + 'px'});
+
+D.monta(tl => {
+  const bt = $('bt'), disco = $('disco'), anel = $('anel');
+  Object.assign(bt.style, {left: X - bt.offsetWidth / 2 + 'px', top: Y - bt.offsetHeight / 2 + 'px'});
+  D.pousa(bt, .15, {s: 1.06, som: 'pop'});
+  D.cursor('#stage', [{x: X + 190, y: Y + 260, t: tClique - .45}, {x: X + 30, y: Y + 10, t: tClique, clica: true}]);
+  tl.to(bt, {scale: .9, duration: .07, yoyo: true, repeat: 1, ease: 'power2.out'}, tClique);
+  // o disco sai do botão e cobre o quadro no meio
+  tl.fromTo(disco, {scale: 0}, {scale: 1, duration: meio - tClique - .04, ease: 'power3.in'}, tClique + .04);
+  D.cue(tClique + .04, 'whoosh');
+  // o buraco abre do mesmo ponto: o disco perde o miolo, e o anel tinta segue a borda dele
+  const B = {r: 0};
+  D.aoQuadro(() => {
+    const r = B.r;
+    disco.style.webkitMaskImage = disco.style.maskImage = r > 0 ? `radial-gradient(circle at 50% 50%, transparent ${r}px, #000 ${r + .5}px)` : 'none';
+    Object.assign(anel.style, {left: X - r - 4 + 'px', top: Y - r - 4 + 'px', width: 2 * r + 8 + 'px', height: 2 * r + 8 + 'px', opacity: r > 0 ? 1 : 0});
+  });
+  tl.fromTo(B, {r: 0}, {r: RC, duration: ABRE, ease: 'power3.out', immediateRender: false}, meio);
+  tl.set(['#stage .cur', '#stage .cur-anel', bt], {opacity: 0}, meio);   // a cena nova não leva o botão
+  D.cue(meio, 'whoosh-out');
+  return dur;
+});
+</script>
+</body>
+</html>

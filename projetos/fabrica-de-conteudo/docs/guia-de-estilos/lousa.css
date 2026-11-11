@@ -1,0 +1,48 @@
+/* Lousa: quadro-negro de sala de aula. Verde-escuro com pó de giz, letra escrita à mão, o
+   objeto é só o contorno em giz, torto como quem desenhou na hora, e nenhuma sombra. O
+   destaque é giz amarelo por cima da palavra.
+   Copie para marca/tema.css e troque as quatro cores (docs/guia-de-estilos.md).
+   As letras moram em tools/video-use/assets/fontes/: copie cada arquivo do url() pra
+   marca/fontes/, com o <Família>-OFL.txt do lado. */
+
+@font-face{font-family:'Marca';font-weight:400;src:url(fontes/Excalifont-Regular.ttf) format('truetype')}
+@font-face{font-family:'MarcaApoio';font-weight:400;src:url(fontes/Excalifont-Regular.ttf) format('truetype')}
+
+html.marca{
+  /* as quatro cores: lousa (escuro), giz (claro), bloco, marcador (giz amarelo) */
+  --pp:#1E3A2F; --ink:#F2EFE6; --ac:#3C6DB4; --mk:#F2D26B;
+  --sur:color-mix(in srgb,var(--pp) 72%,transparent); --ink9:var(--pp);
+  --ink6:color-mix(in srgb,var(--ink) 75%,var(--pp)); --ink4:color-mix(in srgb,var(--ink) 52%,var(--pp));
+  --ink2:color-mix(in srgb,var(--ink) 20%,var(--pp));
+  --ac2:color-mix(in srgb,var(--ac) 30%,var(--pp)); --act:color-mix(in srgb,var(--ac) 40%,var(--pp));
+  --no2:color-mix(in srgb,var(--no) 25%,var(--pp));
+  --fd:'Marca',system-ui,sans-serif; --fm:'MarcaApoio',system-ui,sans-serif; --ls:0em;
+
+  /* a forma: contorno de giz torto, sem sombra, o pó de giz no quadro */
+  --bw:3px; --sh:0px; --sombra:transparent; --raio:18px 28px 14px 24px / 26px 14px 28px 16px;
+  --raio-s:12px 18px 10px 16px / 16px 10px 18px 12px; --lado:var(--ink2);
+  --tex:radial-gradient(60% 40% at 25% 20%,color-mix(in srgb,var(--ink) 9%,transparent),transparent 70%),
+        radial-gradient(50% 35% at 80% 75%,color-mix(in srgb,var(--ink) 7%,transparent),transparent 70%),
+        repeating-linear-gradient(115deg,color-mix(in srgb,var(--ink) 2.5%,transparent) 0 3px,transparent 3px 11px);
+  font-synthesis:none;
+
+  /* o reel editorial e a capa: o painel também escurece */
+  --ed-sans:'Marca',system-ui,sans-serif;
+  --ed-pp:var(--pp); --ed-pp-luz:color-mix(in srgb,var(--pp) 88%,white); --ed-folha:transparent;
+  --ed-tx:var(--ink);
+  --ed-dg-apaga-tx:linear-gradient(180deg,#FFFFFF 0%,rgba(255,255,255,.82) 42%,rgba(255,255,255,.2) 95%);
+  --ed-dg-azul:linear-gradient(180deg,var(--ac) 0%,var(--ac) 100%);
+  --ed-dg-ouro:linear-gradient(180deg,var(--mk) 0%,var(--mk) 100%);
+  --ed-dg-some-azul:linear-gradient(180deg,var(--ac) 0%,color-mix(in srgb,var(--ac) 55%,transparent) 55%,color-mix(in srgb,var(--ac) 6%,transparent) 100%);
+  --ed-dg-some-ouro:linear-gradient(180deg,var(--mk) 0%,color-mix(in srgb,var(--mk) 55%,transparent) 55%,color-mix(in srgb,var(--mk) 6%,transparent) 100%);
+}
+html.marca body{color:var(--ink)}
+html.marca .nb{border-color:color-mix(in srgb,var(--ink) 85%,transparent);box-shadow:none}
+html.marca .nb.cor-ac{color:#fff}
+html.marca .nb.cor-mk{color:var(--ink9)}
+html.marca .nb.cor-ink{background:var(--ink9);color:var(--ink)}
+/* o giz amarelo por cima da palavra: transparente, a letra de giz continua aparecendo */
+html.marca .hd b,html.marca .mkr{background-image:linear-gradient(color-mix(in srgb,var(--mk) 42%,transparent),color-mix(in srgb,var(--mk) 42%,transparent));color:var(--ink)}
+html.marca .kick{background:none;color:var(--mk);border-color:var(--mk);box-shadow:none}
+html.marca .ic{background:none;color:var(--mk);border-color:var(--mk)}
+html.marca .btn{box-shadow:none}

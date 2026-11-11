@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<!-- TIPOGRAFIA — legenda gigante em lâmina (clone do "Giant captions"): a palavra em sans Black, CAIXA ALTA, sobre uma lâmina
+     azul que é a caixa da legenda, nasce pequena no meio do quadro (na altura do rosto) e SALTA de uma vez, sem deslizar, pro alto
+     e no tamanho cheio; depois a segunda palavra, em serifa itálica amarela sobre a lâmina de baixo, entra gigante (2,6x, maior
+     que a tela) e faz zoom-out em ~0,12 s até o tamanho dela, parada seca. A saída é uma varredura da direita pra esquerda que
+     revela o vídeo. 1080x1920, --alpha. Lâmina com borda de tinta e sombra dura, como todo cartão da direção. Fica por cima
+     (a posição final é acima da cabeça), então não pede `atras`.
+       l1  a palavra Black (LEGENDA) · l2  a itálica (gigante.)
+       x · y  o canto esquerdo da lâmina e o topo dela, em px (55 · 275) · larg  a largura da lâmina (585)
+       ix · iy   o centro da palavra pequena do começo, em px (432 · 810) · esc  a escala dela (.55)
+       t0 · sai  quando começa a varrer (-1: dur - 0,2) · dur
+       ?l1=LEGENDA&l2=gigante.&x=55&y=275&larg=585&t0=0&dur=1.1 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/editorial.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px;background:transparent}
+#stage{padding:0;display:block;background:none}
+#blk{position:absolute;left:0;top:0;width:1080px;height:1920px}
+.lam{position:absolute;background:var(--ac);border:4px solid var(--ink);box-shadow:8px 8px 0 var(--ink);
+  display:flex;align-items:center;justify-content:center;transform-origin:50% 50%}
+.lam span{display:block;white-space:nowrap;line-height:1}
+#a span{font-family:var(--ed-sans);font-weight:900;text-transform:uppercase;letter-spacing:-.035em;color:var(--ed-pp)}
+#c span{font-family:var(--ed-serif);font-style:italic;font-weight:400;color:var(--mk)}
+#c{opacity:0}
+</style>
+</head>
+<body>
+<div id="stage"><div id="blk"><div class="lam" id="a"><span id="sa"></span></div><div class="lam" id="c"><span id="sc"></span></div></div></div>
+<script>
+const $ = id => document.getElementById(id);
+const dur = D.n('dur', '1.1'), t0 = D.n('t0', '0'), sai0 = D.n('sai', '-1'), sai = sai0 < 0 ? dur - .2 : sai0;
+const X = D.n('x', '55'), Y = D.n('y', '275'), W = D.n('larg', '585');
+const l1 = D.q('l1', 'LEGENDA'), l2 = D.q('l2', 'gigante.');
+$('sa').textContent = l1; $('sc').textContent = l2;
+
+document.fonts.load('900 100px Inter').catch(() => null).then(() => D.monta(tl => {
+  const cx = document.createElement('canvas').getContext('2d');
+  const pad = 22, wt = W - 2 * pad - 8;
+  // linha 1: a sans enche a largura útil da lâmina
+  const sa = $('sa'); sa.style.fontSize = '100px';
+  const fsA = 100 * wt / (sa.getBoundingClientRect().width - 3.5); sa.style.fontSize = fsA + 'px';
+  cx.font = `900 ${fsA}px Inter`; const cap = cx.measureText(l1.toUpperCase()).actualBoundingBoxAscent;
+  const hA = Math.round(cap + 2 * 26 + 8);
+  const A = $('a'); Object.assign(A.style, {left: X + 'px', top: Y + 'px', width: W + 'px', height: hA + 'px'});
+  // linha 2: a serifa itálica, na mesma largura útil (no máximo 150 px de corpo)
+  const sc = $('sc'); sc.style.fontSize = '100px';
+  const fsC = Math.min(160, 100 * wt / sc.getBoundingClientRect().width); sc.style.fontSize = fsC + 'px';
+  const hC = Math.round(fsC * .9 + 28);
+  const C = $('c'); const wC = W;
+  Object.assign(C.style, {left: X + 'px', top: (Y + hA - 4) + 'px', width: wC + 'px', height: hC + 'px'});
+  const T = D.at(t0);
+  // 1. a palavra pequena no rosto, e o salto (corte, sem deslize)
+  const cxA = X + W / 2, cyA = Y + hA / 2, esc = D.n('esc', '.55');
+  const dx = D.n('ix', '432') - cxA, dy = D.n('iy', '810') - cyA;
+  gsap.set(A, {x: dx, y: dy, scale: +esc});
+  tl.set(A, {x: 0, y: 0, scale: 1}, T + .125);
+  D.cue(T + .125, 'impact');
+  // 2. a itálica entra gigante e faz zoom-out
+  tl.fromTo(C, {opacity: 1, scale: 2.6}, {scale: 1, duration: .125, ease: 'power3.out', immediateRender: false}, T + .5);
+  tl.set(C, {opacity: 0}, 0);
+  tl.set(C, {opacity: 1}, T + .5);
+  D.cue(T + .5, 'whoosh');
+  // 3. a varredura da direita pra esquerda
+  tl.to('#blk', {clipPath: 'inset(0px 100% 0px 0px)', duration: .15, ease: 'power2.in'}, sai);
+  return dur;
+}));
+</script>
+</body>
+</html>

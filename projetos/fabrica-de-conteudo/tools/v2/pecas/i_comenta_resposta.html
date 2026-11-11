@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<!-- INTERFACE — o convite do comentário: a barra "Adicione um comentário..." sobe de baixo, ganha o anel amarelo e o cursor (que pisca), digita a palavra,
+     o botão de enviar acende e leva o toque, a palavra se solta da barra numa pílula e vira a bolha "você QUERO" com o coração (que explode em dois);
+     a resposta (avatar do dono, "Te mandei o link") nasce de um balão de três pontos, e o botão-esqueleto vira o botão amarelo "Abrir link", com um
+     brilho que o atravessa. Clone da barra, da bolha e da resposta do efeito 16 comment bubble do De25fKeTRl7 (ficha 17; passada 2: cada estado nos
+     quadros medidos na ref, por cor, por posição e por diferença de quadros). Cara de app: vidro escuro, texto claro, o amarelo do núcleo.
+     1080x1920, --alpha, por cima de tudo. Quadros contados desde o início da janela do convite (f565 da ref): a barra sobe em 74 a 83 (f639 a f648),
+     o cursor pisca em 86 a 95, a digitação vai de 96 a 105, o toque de 103 a 110, a pílula é 111 (f676), a bolha nasce em 112, o coração em 115 (f680),
+     a resposta em 116, o botão chega a amarelo em 127 (f692). Cada estado é um valor posto no quadro (a ref muda por quadro, não por curva).
+     A palavra tem 5 letras (a ref, 6): saem a cada 2 quadros, com um quadro de fantasma (a ref: 1,6 quadro por letra).
+       etiqueta: comentario, barra-de-comentario, resposta
+       palavra  o que se digita (QUERO) · ph  o texto da barra vazia (Adicione um comentário...) · voce  a palavra pequena da bolha (você)
+       resp  a resposta (Te mandei o link) · btn  o botão (Abrir link) · img  a foto do avatar (sem ela, um círculo cinza) · dy  quanto descer a bolha e a resposta (60: o queixo da nossa foto está 100 px abaixo)
+       dur
+       ?palavra=QUERO&resp=Te mandei o link&btn=Abrir link&dur=4.833 -->
+<html lang="pt-BR" class="alfa" data-qa="fica">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block;overflow:hidden}
+.a{position:absolute;opacity:0}
+#barg{position:absolute;inset:0;transform-origin:509.5px 1380px}
+.vidro{background:rgba(7,12,16,.9);box-shadow:0 18px 40px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.07)}
+#barra{left:91px;top:1302px;width:837px;height:157px;border-radius:79px}
+#anel{left:91px;top:1302px;width:837px;height:157px;border-radius:79px;border:3px solid var(--mk);box-sizing:border-box}
+.pessoa{border-radius:50%;background:#C5C7CC;display:flex;align-items:flex-end;justify-content:center;overflow:hidden}
+.pessoa svg{width:70%;height:70%;fill:#8C8F96}
+#ph{left:270px;top:1356px;font:500 40px/1 var(--fd);color:rgba(255,255,255,.5);letter-spacing:-.01em;white-space:nowrap}
+#env{left:800px;top:1333px;width:105px;height:105px;border-radius:50%;background:#2B2E36;display:flex;align-items:center;justify-content:center}
+#env svg{width:46px;height:46px}
+#cur{left:0;top:1348px;width:4px;height:56px;border-radius:2px;background:var(--mk)}
+#dig{left:270px;top:1349px;font:700 52px/1 var(--fd);color:#fff;letter-spacing:.01em;white-space:nowrap}
+#dig span{opacity:0}
+#toque{left:792px;top:1325px;width:121px;height:121px;border-radius:50%;background:transparent;border:9px solid rgba(214,214,206,.55);box-sizing:border-box}
+#pil{border-radius:70px;background:rgba(235,233,222,.62);white-space:nowrap;display:flex;align-items:center;gap:16px;padding:0 40px 0 26px}
+.bolha{background:#FFFCF2;border-radius:75px;box-shadow:0 14px 30px rgba(0,0,0,.35);white-space:nowrap}
+#coracao,#coracao2{width:70px;height:70px;border-radius:50%;background:#fff;box-shadow:0 6px 14px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center}
+#coracao svg{width:38px;height:38px;fill:#E8315A;transform:scale(1.22,.96)}
+#coracao2{background:none;box-shadow:none}
+#coracao2 svg{width:30px;height:30px;fill:#F28BA3}
+.faisca{left:0;top:0;width:9px;height:9px;border-radius:50%;background:#F28BA3}
+#resp{border-radius:40px;background:rgba(12,18,22,.94);box-shadow:0 18px 40px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.07);transform-origin:0 0}
+.pontos{display:flex;gap:9px;align-items:center;justify-content:center}
+.pontos i{width:14px;height:14px;border-radius:50%;background:#9AA0AD}
+#botao{position:absolute;left:37px;top:105px;width:357px;height:106px;border-radius:60px;background:#3A3E47;transform-origin:50% 50%}
+#botao .in{position:absolute;inset:0;border-radius:60px;overflow:hidden}
+#botao b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:14px;font:700 46px/1 var(--fd);color:var(--ink);letter-spacing:-.02em;opacity:0}
+#botao b svg{width:36px;height:36px;stroke:#6B5410;fill:none;stroke-width:2.4}
+#brilho{position:absolute;top:-20px;bottom:-20px;width:90px;left:-140px;transform:skewX(-20deg);background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.9) 50%,rgba(255,255,255,0))}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+const FR = 1 / 30, T = f => f * FR;
+const PAL = D.q('palavra', 'QUERO').toUpperCase(), dur = D.n('dur', '4.833'), dy = D.n('dy', '60');
+const IMG = D.q('img', '');
+const PESSOA = '<svg viewBox="0 0 24 24"><circle cx="12" cy="8.500" r="4.200"/><path d="M3.500 24c0-6 3.800-9.500 8.500-9.500s8.500 3.500 8.500 9.500z"/></svg>';
+const HEART = '<svg viewBox="0 0 24 24"><path d="M12 21.500S3 15.800 3 9.200C3 6 5.300 4 8 4c1.700 0 3.200.9 4 2.300C12.800 4.900 14.300 4 16 4c2.700 0 5 2 5 5.200 0 6.600-9 12.300-9 12.300z"/></svg>';
+const LINK = '<svg viewBox="0 0 24 24" stroke-linecap="round"><path d="M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1"/><path d="M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1"/></svg>';
+const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+const mix = (a, b, t) => `rgb(${hex(a).map((v, i) => Math.round(v + (hex(b)[i] - v) * t)).join(',')})`;
+
+D.monta(tl => {
+  const st = document.getElementById('stage');
+  st.innerHTML = `
+    <div id="barg">
+      <div class="a vidro" id="barra"></div>
+      <div class="a pessoa" id="bav" style="left:121px;top:1336px;width:98px;height:98px">${PESSOA}</div>
+      <div class="a" id="ph">${D.q('ph', 'Adicione um comentário...')}</div>
+      <div class="a" id="env"><svg viewBox="0 0 24 24" fill="none" stroke="#7B7F89" stroke-width="2.800" stroke-linecap="round" stroke-linejoin="round" id="envs"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div>
+      <div class="a" id="anel"></div><div class="a" id="cur"></div>
+      <div class="a" id="dig">${[...PAL].map((c, i) => `<span id="l${i}">${c}</span>`).join('')}</div>
+      <div class="a" id="toque"></div>
+    </div>
+    <div class="a" id="pil" style="left:262px;top:1215px;height:129px"><div class="pessoa" style="width:44px;height:44px;flex:none;background:#8a8f99 url('${IMG}') -27px -46px/100px auto no-repeat;box-shadow:0 0 0 2px var(--mk)"></div><span style="font:700 70px/1 var(--fd);color:#6A6C73;letter-spacing:-.02em">${PAL}</span></div>
+    <div class="a pessoa" id="cav" style="left:126px;top:${1130 + dy}px;width:110px;height:110px">${PESSOA}</div>
+    <div class="a bolha" id="bolha" style="left:259px;top:${1050 + dy}px;height:150px;padding:0 60px 0 44px;display:flex;align-items:center;gap:24px">
+      <span id="voce" style="font:500 38px/1 var(--fd);color:#8A8D95">${D.q('voce', 'você')}</span><span id="bp" style="font:700 78px/1 var(--fd);color:#0B0D12;letter-spacing:-.02em;-webkit-text-stroke:1.5px #0B0D12">${PAL}</span></div>
+    <div class="a" id="coracao">${HEART}</div>
+    <div class="a" id="coracao2">${HEART}</div>
+    ${[0, 1, 2, 3, 4, 5].map(i => `<div class="a faisca" id="fa${i}"></div>`).join('')}
+    <svg class="a" id="fio" style="left:177px;top:${1180 + dy}px" width="70" height="110" viewBox="0 0 70 110"><path id="fiop" d="M2 0V76Q2 103 29 103H64" fill="none" stroke="#D6D8DD" stroke-width="4" stroke-linecap="round" stroke-dasharray="1 1"/></svg>
+    <div class="a" id="pen" style="left:251px;top:${1241 + dy}px;width:98px;height:98px;border-radius:50%;box-shadow:0 0 0 2.500px var(--mk);background:#8a8f99 url('${IMG}') -92px -148px/292px auto no-repeat"></div>
+    <div class="a pontos" id="pt" style="left:372px;top:${1262 + dy}px;width:86px;height:56px;border-radius:30px;background:rgba(12,18,22,.94)"><i></i><i></i><i id="p3"></i></div>
+    <div class="a" id="resp" style="left:374px;top:${1217 + dy}px;width:524px;height:233px">
+      <div id="rt" style="position:absolute;left:57px;top:32px;font:500 48px/1 var(--fd);color:#D9DBE0;white-space:nowrap;opacity:0">${D.q('resp', 'Te mandei o link')}</div>
+      <div id="botao"><div class="in"><div id="brilho"></div></div><b id="bt">${LINK}${D.q('btn', 'Abrir link')}</b></div>
+    </div>`;
+  const $ = s => document.querySelector(s);
+  const set = (sel, f, props) => tl.set(sel, props, T(f));
+  const seq = (sel, f0, arr, k = 'opacity') => arr.forEach((v, i) => set(sel, f0 + i, {[k]: v}));
+  const AM = '#F2C744', CZ = '#2B2E36', SETA0 = '#7B7F89', SETA1 = '#0B0D12';
+
+  // ── a barra: sobe de 77 px, freando por 0,72 por quadro (a ref: 1379, 1359, 1340, 1329, 1321, 1316, 1313, 1310 em f639 a f646), cresce de 795 a 837 px;
+  //    a cápsula passa de translúcida a cheia em 3 quadros; o conteúdo entra em 3 quadros (avatar f642, texto f643, botão f644)
+  for (let n = 0; n < 10; n++) { const o = 77 * Math.pow(.72, n); set('#barg', 74 + n, {y: +o.toFixed(2), scaleX: +(.95 + .05 * (1 - o / 77)).toFixed(4)}); }
+  set('#barg', 84, {y: 0, scaleX: 1});
+  seq('#barra', 74, [.22, .5, .85, 1]);
+  seq('#bav', 77, [.33, .68, .93, 1]); seq('#ph', 78, [.1, .46, .75, 1]); seq('#env', 79, [.27, .61, .92, 1]);   // curvas medidas na ref (luminância normalizada por quadro)
+  // ── o foco: o anel amarelo de f651 a f654; o cursor (à esquerda do texto) liga em f651 a f654, apaga em f655 a f657 e liga de f658 em diante
+  seq('#anel', 86, [.25, .6, .85, 1]);
+  set('#cur', 86, {opacity: 1, x: 252}); set('#cur', 90, {opacity: 0}); set('#cur', 93, {opacity: 1}); set('#cur', 107, {opacity: 0});
+  // ── a digitação: cada letra entra num quadro de fantasma e fica cheia no seguinte; o texto e o cursor andam junto (a ref: f661 a f670)
+  const n = [...PAL].length, g = i => 96 + 2 * i;
+  const dg = $('#dig'), fins = [...dg.querySelectorAll('span')].map(s => s.offsetLeft + s.offsetWidth);
+  set('#dig', 96, {opacity: 1}); set('#ph', 96, {opacity: 0});
+  for (let i = 0; i < n; i++) {
+    set('#l' + i, g(i), {opacity: .35}); set('#l' + i, g(i) + 1, {opacity: 1});
+    set('#cur', g(i), {x: 270 + fins[i] + 6});
+  }
+  // ── o botão de enviar: acende em rampa de f661 a f664 (a ref: 0,18, 0,53, 0,85, 1,0); o toque de f668 a f675 deixa o botão pálido, com um disco em volta
+  [.18, .53, .85, 1].forEach((a, i) => { set('#env', 96 + i, {backgroundColor: mix(CZ, AM, a)}); set('#envs', 96 + i, {stroke: mix(SETA0, SETA1, a)}); });
+  set('#toque', 103, {opacity: 1, scale: 1.12}); set('#toque', 108, {scale: 1.05}); set('#toque', 111, {opacity: 0});
+  set('#env', 103, {backgroundColor: mix(AM, '#F8D06F', .45)});            // f668: o botão começa a empalidecer com o anel (a ref mede 1,08 contra 1,18 do pálido)
+  set('#env', 104, {backgroundColor: '#F8D06F'}); set('#envs', 104, {stroke: '#6B6E75'});
+  set('#env', 109, {backgroundColor: mix(AM, '#F8D06F', .45)});            // f674 e f675: volta ao amarelo (1,08 e 0,93)
+  set('#env', 110, {backgroundColor: mix(AM, '#B89A3E', .35)}); set('#envs', 109, {stroke: SETA1});
+  set('#env', 111, {backgroundColor: AM}); set('#envs', 111, {stroke: SETA1});
+  // ── f676: a palavra se solta da barra numa pílula translúcida com o mini-avatar; a barra esvazia; em f677 a barra some e a bolha toma o lugar
+  set('#barra', 111, {opacity: .5}); ['#bav', '#dig', '#cur', '#ph', '#toque'].forEach(s => set(s, 111, {opacity: 0})); set('#env', 111, {opacity: .55});
+  ['#barra', '#env', '#anel'].forEach(s => set(s, 112, {opacity: 0}));
+  set('#pil', 111, {opacity: .5}); set('#pil', 112, {opacity: 0});
+  // ── f677: a bolha sobe de 118 px (a ref: top em 1168, 1125, 1092, 1073, 1056, 1050) com o avatar de quem comenta; o avatar do dono e o balão de pontos nascem juntos
+  [[112, 118, .7], [113, 75, .95], [114, 42, 1], [115, 23, 1], [116, 6, 1], [117, 0, 1]].forEach(([f, o, a]) => {
+    ['#bolha', '#cav'].forEach(s => set(s, f, {y: o, opacity: a}));
+  });
+  seq('#voce', 112, [.6, 1]);
+  seq('#pen', 112, [.7, 1]); seq('#pt', 112, [.7, 1]);
+  set('#p3', 115, {scale: 1.5}); set('#p3', 116, {scale: 1});
+  // ── o coração: f680 a f688 (a ref mede o coração em 22x15, 37x29, 45x35, 45x34, 43x32, 41x31, 37x27, 35x27, 33x24 px): escala e deslocamento por quadro
+  const lb = $('#bolha').getBoundingClientRect().width || 500;
+  const cx0 = 259 + lb - 8, cy0 = 1061 + dy;                      // o centro do selo de coração, em px do quadro
+  const lc = $('#coracao');
+  [lc, $('#coracao2')].forEach(e => { e.style.left = (cx0 - 35) + 'px'; e.style.top = (cy0 - 35) + 'px'; });
+  const HS = [.67, 1.12, 1.36, 1.36, 1.3, 1.24, 1.12, 1.06, 1], HD = [[-7, 14], [0, -1], [6, -10], [8, -15], [9, -16], [8, -14], [6, -10], [3, -6], [2, -2]];
+  HS.forEach((s, i) => set('#coracao', 115 + i, {opacity: 1, scale: s, x: HD[i][0], y: HD[i][1]}));
+  set('#coracao', 124, {scale: 1, x: 0, y: 0});
+  // a explosão em dois: um 2º coração rosa atrás, só em f682, e faíscas que abrem de f682 a f684
+  set('#coracao2', 117, {opacity: .85, scale: 1.1, x: -9, y: 6}); set('#coracao2', 118, {opacity: 0});
+  for (let i = 0; i < 6; i++) {
+    const a = i * Math.PI / 3 + .4;
+    [[117, 40, .9], [118, 50, .8], [119, 58, .5], [120, 64, .2]].forEach(([f, r, op]) => set('#fa' + i, f, {opacity: op, x: cx0 - 4 + Math.cos(a) * r, y: cy0 - 4 + Math.sin(a) * r}));
+    set('#fa' + i, 121, {opacity: 0});
+  }
+  // ── a resposta: em f681 o balão de pontos vira o retângulo (63% do tamanho) com o botão-esqueleto dentro; cresce até o cheio em f685; o fio em L nasce
+  set('#pt', 116, {opacity: 0});
+  [[.63, .64], [.79, .82], [.92, .93], [.98, .99], [1, 1]].forEach(([sx, sy], i) => set('#resp', 116 + i, {opacity: 1, scaleX: sx, scaleY: sy}));
+  seq('#rt', 117, [.35, .7, 1]);
+  const fl = $('#fiop').getTotalLength();
+  $('#fiop').setAttribute('stroke-dasharray', `${fl} ${fl}`);
+  [.12, .42, .8, 1].forEach((p, i) => { set('#fio', 116 + i, {opacity: 1}); set('#fiop', 116 + i, {attr: {'stroke-dashoffset': +(fl * (1 - p)).toFixed(2)}}); });
+  set('#fiop', 115, {attr: {'stroke-dashoffset': fl}});
+  // ── o botão: esqueleto cinza até f689; em f690 escurece com o rótulo apagado; f691 encolhe a 0,78 e fica meio amarelo; f692 amarelo com aro; f693 0,96; f694 cheio
+  set('#botao', 116, {backgroundColor: '#3A3E47'});
+  set('#botao', 125, {backgroundColor: mix(CZ, AM, .14)}); set('#bt', 125, {opacity: .4});
+  // a largura do botão na ref (f691 a f697): 269, 305, 330, 349, 357, 361, 357 px; e a luz sobe a 1,17 em f692 e f693 e assenta em f695
+  [[126, .75, mix(CZ, AM, .78), .8, 1], [127, .855, AM, 1, 1.11], [128, .925, AM, 1, 1.1], [129, .977, AM, 1, 1.05], [130, 1, AM, 1, 1], [131, 1.01, AM, 1, 1], [132, 1, AM, 1, 1]].forEach(([f, sc, bg, lb, br]) => {
+    set('#botao', f, {scale: sc, backgroundColor: bg, filter: `brightness(${br})`}); set('#bt', f, {opacity: lb});
+  });
+  set('#botao', 127, {boxShadow: '0 0 0 10px rgba(255,255,255,.22)'}); set('#botao', 128, {boxShadow: '0 0 0 0px rgba(255,255,255,0)'});
+  // o brilho que atravessa o botão de f699 a f701 (quadros 134 a 136)
+  tl.fromTo('#brilho', {x: 0}, {x: 520, duration: 3 * FR, ease: 'none', immediateRender: false}, T(134));
+  return dur;
+});
+</script>
+</body>
+</html>

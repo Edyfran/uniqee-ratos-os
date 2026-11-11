@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<!-- PROVA — cartela de título que vira celular. 1080x1920, --alpha, tela cheia (o painel passa por cima).
+     Fundo azul em bloco com um timecode que corre; TÍTULO aparece, depois CARTELA entra embaixo e o título sobe, com um
+     fio amarelo. Corte seco pro vídeo em tela cheia, que ENCOLHE com um repique pra dentro de um celular de borda papel
+     (`0:15 / 0:21` e barra de progresso), cresce um tico, espera, passa do quadro por baixo do painel e enche a tela.
+     A tela do celular é o quadro `img` inteiro, sem faixa.
+       l1  l2  as duas linhas da cartela (TÍTULO, CARTELA) · tc  o timecode inicial (00:00:14:11)
+       img  o quadro que vai na tela do celular (o avatar) · rel  o relógio do player (0:15 / 0:21)
+       t0  quando entra (0) · dur  (1.2): a espera do celular estica, o movimento não
+       ?l1=TÍTULO&l2=CARTELA&tc=00:00:14:11&img=../midia/rosto-estudio.png&dur=1.2 -->
+<html lang="pt-BR" class="alfa" data-qa="fundo">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;padding:0;display:block;overflow:hidden;background:none}
+#bg{position:absolute;inset:0;background:var(--ac)}
+#tc{position:absolute;left:0;width:712px;top:440px;text-align:center;font:600 22px/1 var(--fm);letter-spacing:.25em;color:var(--mk)}
+.tt{position:absolute;left:0;width:712px;text-align:center;font:400 270px/1 'Instrument Serif',serif;
+  text-transform:uppercase;color:var(--pp);white-space:nowrap;letter-spacing:-.01em}
+#fio{position:absolute;left:281px;top:1005px;width:150px;height:5px;background:var(--mk);transform-origin:0 50%}
+#ph{position:absolute;left:0;top:0;width:1080px;height:1920px;box-sizing:border-box;border:0 solid var(--pp);border-radius:0;background:var(--ink)}
+#sc{position:absolute;inset:0;overflow:hidden;border-radius:inherit}
+#sc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.bt{position:absolute;left:-14px;width:8px;border-radius:4px 0 0 4px;background:var(--pp);opacity:0}
+#rel{position:absolute;left:34px;bottom:112px;font:600 24px/1 var(--fm);color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.5);opacity:0}
+#br{position:absolute;left:34px;right:34px;bottom:76px;height:4px;background:rgba(255,255,255,.35);border-radius:2px;opacity:0}
+#br i{position:absolute;left:0;top:0;bottom:0;width:72%;background:#fff;border-radius:2px}
+#br b{position:absolute;left:72%;top:-6px;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:#fff}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="bg"></div>
+  <div id="tc"></div>
+  <div class="tt" id="t1"></div><div class="tt" id="t2"></div><div id="fio"></div>
+  <div id="ph"><div class="bt" style="top:140px;height:50px"></div><div class="bt" style="top:230px;height:80px"></div><div class="bt" style="top:330px;height:80px"></div>
+    <div id="sc"></div><div id="rel"></div><div id="br"><i></i><b></b></div></div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const dur = D.n('dur', '1.2'), t0 = D.n('t0', '0');
+$('t1').textContent = D.q('l1', 'TÍTULO'); $('t2').textContent = D.q('l2', 'CARTELA');
+$('rel').textContent = D.q('rel', '0:15 / 0:21');
+const [h, m, s, f0] = D.q('tc', '00:00:14:11').split(':').map(Number);
+const tcs = [0, 2, 6, 10, 14].map(d => [h, m, s, f0 + d].map(n => String(n).padStart(2, '0')).join(':'));
+const img = D.midia('#sc', D.q('img', '../midia/rosto-estudio.png'), 'avatar', 'cover');
+document.fonts.load('400 100px "Instrument Serif"').catch(() => null).then(() => D.monta(tl => {
+  // as duas linhas cabem na coluna esquerda (x 0–700)
+  const w = Math.max($('t1').scrollWidth, $('t2').scrollWidth);
+  if (w > 640) $('t1').style.fontSize = $('t2').style.fontSize = (270 * 640 / w) + 'px';
+  const fs = parseFloat(getComputedStyle($('t1')).fontSize);
+  const top = c => (c - fs / 2) + 'px';
+  $('t1').style.top = top(658); $('t2').style.top = top(860);
+  const L = 0, e = Math.max(0, dur - 1.2);      // o que sobra de dur vira espera do celular
+  const A = t0 + L;
+  $('tc').textContent = tcs[0];
+  tl.set('#t1,#t2,#fio', {opacity: 0}, 0);
+  tl.set('#ph', {opacity: 0}, 0);
+  tl.set('#t1', {opacity: 1}, A);
+  // o relógio é função do tempo (nada de call: o seek não dispara)
+  D.aoQuadro(() => { const t = D.tl.time() - A; $('tc').textContent = tcs[t < 0 ? 0 : Math.min(4, 1 + Math.floor(t / .125))]; });
+  tl.fromTo('#t1', {y: 0}, {y: -45, duration: .1, ease: 'power3.out', immediateRender: false}, A + .375);
+  tl.set('#t2', {opacity: 1}, A + .375);
+  tl.fromTo('#t2', {y: 14}, {y: 0, duration: .1, ease: 'power3.out', immediateRender: false}, A + .375);
+  tl.set('#fio', {opacity: 1}, A + .375);
+  tl.fromTo('#fio', {scaleX: 0}, {scaleX: 1, duration: .18, ease: 'power3.out', immediateRender: false}, A + .375);
+  // corte seco: o vídeo toma a tela, esconde a cartela só por baixo dele
+  const C = A + .5;
+  tl.set('#ph', {opacity: 1}, C);
+  tl.set('#tc,#t1,#t2,#fio', {opacity: 0}, C + .12);
+  const R = (l, t, w, h) => ({left: l, top: t, width: w, height: h});
+  const tela = {borderWidth: 8, borderRadius: 55};
+  tl.to('#ph', {...R(52, 246, 631, 1072), ...tela, duration: .12, ease: 'back.out(1.6)'}, C + .125);   // o vídeo cheio fica 1 quadro antes de encolher
+  tl.to('.bt', {opacity: 1, duration: .05}, C + .2);
+  tl.to('#rel,#br', {opacity: 1, duration: .08}, C + .22);
+  tl.to('#ph', {...R(60, 240, 640, 1086), duration: .09, ease: 'power2.out'}, C + .25);
+  const G = C + .34 + e;                                  // depois da espera, a aceleração final não estica
+  tl.to('#ph', {...R(13, 168, 777, 1305), duration: .12, ease: 'power2.in'}, G);
+  tl.to('#ph', {...R(0, 0, 1080, 1920), borderWidth: 0, borderRadius: 0, duration: .08, ease: 'power2.in'}, G + .12);
+  tl.to('.bt,#rel,#br', {opacity: 0, duration: .06}, G);
+  D.cue(A, 'type'); D.cue(A + .375, 'stamp'); D.cue(C, 'swish'); D.cue(G + .12, 'whoosh');
+  return dur;
+}));
+</script>
+</body>
+</html>

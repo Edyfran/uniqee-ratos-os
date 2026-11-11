@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<!-- GANCHO — texto adesivo: a linha do selo vira uma etiqueta amarela de vidro que se solta da lista (pálida, borrada e com o canto descolado em f420),
+     voa pra baixo NÍTIDA, com giro (+15,6 graus em f422) e ecos pálidos e borrados atrás dela, e pousa grudada na tela, parada (não acompanha a pessoa nem
+     o laptop), com um reflexo que cruza a etiqueta de f427 a f430. Clone do efeito 12 sticky text do De25fKeTRl7 (ficha 13; passada 2: cada quadro é uma pose
+     medida na ref): o voo é de 5 quadros e a etiqueta cresce de 0,41 a 1 (200 px da linha da lista a 491 px).
+     A linha de onde ela sai fica vazia no selo (`vazia` do e_selo_lista_De25fKeTRl7) até o quadro 33, em que a etiqueta some de uma vez e a linha volta.
+     1080x1920, --alpha. Este item entra DEPOIS do selo na lista do plano: a etiqueta passa por cima da lista.
+       etiqueta: etiqueta-adesiva, voo-com-borrao, reflexo
+       tx  o texto (texto adesivo) · n  o número da linha do selo (12) · de  o centro da linha na lista, x,y (840,535) · para  o centro do pouso, x,y (690,1245)
+       rot  o giro do pouso, graus (-6) · dur  a duração (1.1)
+       ?tx=texto adesivo&n=12&de=840,535&para=690,1245&dur=1.1 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block;overflow:hidden}
+.et{position:absolute;left:0;top:0;width:491px;height:96px;opacity:0;will-change:transform}
+.pl{position:relative;width:491px;height:96px;border-radius:22px;overflow:hidden;display:flex;align-items:center;padding-left:34px;
+  background:linear-gradient(180deg,#F9E08A 0%,var(--mk) 52%,#E5B22A 100%);
+  box-shadow:inset 0 3px 0 rgba(255,255,255,.6),inset 0 -6px 0 rgba(140,95,0,.26),0 14px 22px rgba(0,0,0,.45)}
+.pl .n{font:700 34px/1 var(--fd);color:#6A5314;margin-right:24px}
+.pl .t{font:700 64px/1 var(--fd);letter-spacing:-.045em;color:var(--ink);white-space:nowrap;-webkit-text-stroke:.9px var(--ink)}
+.pl .br{position:absolute;top:-20px;bottom:-20px;width:190px;left:-160px;transform:skewX(-20deg);opacity:0;
+  background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.72) 50%,rgba(255,255,255,0))}
+.pl .cr{position:absolute;left:0;top:0;width:62px;height:62px;opacity:0;background:linear-gradient(135deg,rgba(255,255,255,.97) 0 44%,rgba(150,105,0,.5) 49%,rgba(0,0,0,0) 56%)}
+.pl .pa{position:absolute;inset:0;opacity:0;background:rgba(255,255,255,.62)}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs id="defs"></defs></svg>
+<div id="stage"></div>
+<script>
+const FR = 1 / 30;
+const dur = D.n('dur', '1.1'), rot = D.n('rot', '-6');
+const [x0, y0] = D.q('de', '840,535').split(',').map(Number), [x1, y1] = D.q('para', '690,1245').split(',').map(Number);
+const T = f => f * FR;
+
+D.monta(tl => {
+  const stage = document.getElementById('stage'), defs = document.getElementById('defs');
+  const mk = id => {
+    const e = document.createElement('div');
+    e.className = 'et'; e.id = id;
+    e.innerHTML = `<div class="pl"><span class="n">${D.q('n', '12')}</span><span class="t">${D.q('tx', 'texto adesivo')}</span><i class="pa"></i><i class="br"></i><i class="cr"></i></div>`;
+    stage.appendChild(e);
+    defs.insertAdjacentHTML('beforeend', `<filter id="f_${id}" x="-80%" y="-120%" width="260%" height="340%"><feGaussianBlur id="s_${id}" stdDeviation="0 0"/></filter>`);
+    e.style.filter = `url(#f_${id})`;
+    return e;
+  };
+  const et = mk('et'), eco = [mk('e1'), mk('e2'), mk('e3')];
+  // Cada quadro é uma pose (a ref tem 1 pose por quadro, f420 = quadro 3 da janela). Posição como fração do caminho entre a linha da lista (de) e o pouso (para):
+  // f421 (850,556), f422 (865,748), f423 (766,1057) e o pouso (700,1146) na ref. escala, giro (graus), borrão (x y) e opacidade medidos nos quadros.
+  const U = (ux, uy) => ({x: x0 + (x1 - x0) * ux, y: y0 + (y1 - y0) * uy});
+  // [quadro, ux, uy, escala, giro, borrão x, borrão y, opacidade, véu pálido]
+  const K = [
+    [3, -.12, .014, .41, -8, 3.6, 3.6, .66, 1],            // f420: etiqueta pálida, translúcida e borrada, com o canto descolado (a ref: 203x47 px, -8 graus)
+    [4, -.067, .03, .46, -10.6, 0, 0, 1, 0],                // f421: nítida e pequena (a ref: centro (850,556), 225 px, -10,6 graus)
+    [5, -.147, .345, .72, 15.6, 2, 3, 1, 0],                // f422: nítida, +15,6 graus, ecos pálidos atrás (caixa 693 a 1042 por 678 a 816, centro (865,748))
+    [6, .55, .855, 1.035, 1.8, 0, 0, 1, 0],                // f423: nítida, +1,8 graus, 509 px, centro (766,1057)
+    [7, 1.06, 1.015, 1.0, -5.8, 0, 0, 1, 0],              // f424: nítida, -5,8 graus, passa um pouco do lugar
+    [8, 1.01, 1.0, 1.0, rot, 0, 0, 1, 0],                 // f425: assenta
+    [9, .92, 1.0, 1.0, rot, 0, 0, 1, 0],
+    [10, 1, 1, 1.0, rot, 0, 0, 1, 0]];
+  K.forEach(([q, ux, uy, sc, g, bx, by, o, pa]) => {
+    const p = U(ux, uy);
+    const pose = {xPercent: -50, yPercent: -50, x: p.x, y: p.y, scale: sc, rotation: g, opacity: o};
+    tl.set(et, pose, T(q));
+    tl.set('#s_et', {attr: {stdDeviation: `${bx} ${by}`}}, T(q));
+    tl.set(et.querySelector('.pa'), {opacity: pa}, T(q));
+  });
+  // os ecos: cópias pálidas e borradas ATRÁS da pílula, ao longo do caminho de onde ela veio (a ref: f422 um véu de 3 a 4 cópias subindo até a lista, f423 uma cópia
+  // acima, f424 um fantasma); [quadro, [dx, dy, escala, giro, opacidade, borrão x, borrão y] por eco], posições contra o centro da pílula do mesmo quadro
+  const ECO = [
+    [5, [[-10, -100, .72, 6, .38, 7, 14], [-14, -200, .72, -2, .28, 8, 16], [-18, -300, .72, -9, .18, 9, 18]]],
+    [6, [[34, -110, 1.03, 6, .34, 8, 14], [58, -215, 1.0, 10, .2, 9, 16]]],
+    [7, [[-34, -60, 1.0, -4, .3, 6, 8]]]];
+  eco.forEach((e, j) => {
+    tl.set(e, {xPercent: -50, yPercent: -50, opacity: 0}, 0);
+    ECO.forEach(([q, es]) => {
+      const m = K.find(k => k[0] === q), pm = U(m[1], m[2]), d = es[j];
+      if (!d) return tl.set(e, {opacity: 0}, T(q));
+      tl.set(e, {x: pm.x + d[0], y: pm.y + d[1], scale: d[2], rotation: m[4] + d[3], opacity: d[4]}, T(q));
+      tl.set('#s_e' + (j + 1), {attr: {stdDeviation: `${d[5]} ${d[6]}`}}, T(q));
+    });
+    tl.set(e, {opacity: 0}, T(8));
+  });
+  // o reflexo: uma faixa branca larga, inclinada, cruza a etiqueta da esquerda pra direita de f426 a f430 (a ref: a esquerda pálida em f426 e f427,
+  // o meio em f428, 60% em f429, a ponta da direita em f430, limpa em f431); x = centro da faixa contra a esquerda da etiqueta, +95
+  const br = et.querySelector('.br');
+  [[9, 20], [10, 170], [11, 315], [12, 400], [13, 535]].forEach(([q, x]) => tl.set(br, {x, opacity: q === 9 ? .45 : 1}, T(q)));
+  tl.set(br, {opacity: 0}, T(14));
+  // o canto descolado: aparece em f420 e ainda cobre o "12" em f421
+  tl.set(et.querySelector('.cr'), {opacity: 1}, T(3)); tl.set(et.querySelector('.cr'), {opacity: 0}, T(5));
+  // fica parada até o quadro 33 e some de uma vez
+  tl.set(et, {opacity: 0}, dur);
+  return dur;
+});
+</script>
+</body>
+</html>

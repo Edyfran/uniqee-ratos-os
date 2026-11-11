@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<!-- OFERTA — o pacote: "olha o que você leva". 1080x1920, tela cheia.
+     Cada item cai no instante em que é recapitulado e recebe o ✓ verde (o que
+     a pessoa RECEBE). Aceita miniatura real por item; sem ela, o selo numerado.
+     Sem preço individual: esses valores não existem na oferta.
+       ?hd=Olha o que <b>você leva</b>.&it=Treinamento completo||img.png@0.4;Bônus 1|43 perfis@1.3
+        &fecho=Incluído na inscrição&t_fecho=5&dur=7 -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+#stage{padding:0 70px;justify-content:center}
+.hd{font-size:92px;margin-bottom:48px}
+.pilha{display:flex;flex-direction:column;gap:24px}
+.pc{display:flex;align-items:center;gap:26px;padding:20px 26px 20px 20px;opacity:0}
+.pc .th{flex:none;width:118px;height:118px;border:var(--bw) solid var(--ink);border-radius:var(--raio-s);
+  background:var(--mk);color:var(--ink9);display:flex;align-items:center;justify-content:center;font:700 38px/1 var(--fm);overflow:hidden}
+.pc .th img{width:100%;height:100%;object-fit:cover;display:block}
+.pc .tx{flex:1;min-width:0}
+.pc b{display:block;font:700 58px/1.04 var(--fd);letter-spacing:var(--ls);color:var(--ink)}
+.pc em{display:block;font:600 40px/1.15 var(--fd);color:var(--ink6);font-style:normal;margin-top:4px}
+.pc .ok{flex:none;width:66px;height:66px;border-radius:50%;background:var(--ok);border:var(--bw) solid var(--ink);
+  color:#fff;display:flex;align-items:center;justify-content:center;font:700 32px/1 var(--fd);opacity:0}
+.fecho{align-self:center;margin-top:56px;padding:26px 42px;font:700 50px/1 var(--fd);letter-spacing:var(--ls);opacity:0}
+.fecho:empty{display:none}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="kick" id="k"></div>
+  <div class="hd" id="h"></div>
+  <div class="pilha" id="pl"></div>
+  <div class="fecho nb cor-ac" id="fe"></div>
+</div>
+<script>
+const dur = D.n('dur', '7');
+document.getElementById('k').textContent = D.q('kick', '');
+document.getElementById('h').innerHTML = D.q('hd', 'Olha o que <b>você leva</b>.');
+document.getElementById('fe').textContent = D.q('fecho', 'Incluído na inscrição');
+const its = D.itens('it', 'Treinamento completo@0.6;Suporte@1.4;Acesso vitalício|com atualizações@2.2;Bônus 1|43 perfis de agentes@3.0;Bônus 2|guia de custos@3.8', ['nome', 'det', 'img']);
+const pl = document.getElementById('pl');
+its.forEach((x, i) => {
+  const d = document.createElement('div');
+  d.className = 'pc nb'; d.id = 'pc' + i;
+  const th = x.img ? `<img src="${x.img}" alt="">` : String(i + 1).padStart(2, '0');
+  d.innerHTML = `<span class="th">${th}</span><span class="tx"><b>${x.nome}</b>${x.det ? `<em>${x.det}</em>` : ''}</span><span class="ok">✓</span>`;
+  pl.appendChild(d);
+});
+
+D.monta(tl => {
+  D.cabe('.hd', 52);
+  D.cabe('.pc b', 36, '.tx');
+  D.cabe('.pc em', 28, '.tx');
+  D.camera(dur, 1.0, 1.03);
+  if (D.q('kick')) D.carimbo('#k', .1);
+  D.titulo('#h', .15);
+  its.forEach((x, i) => {
+    D.pousa('#pc' + i, x.t, {dx: -40, rot: D.inclina(i) * .5, som: 'pop'});
+    tl.fromTo('#pc' + i + ' .ok', {opacity: 0, scale: .2, rotation: -40},
+      {opacity: 1, scale: 1, rotation: 0, duration: .4, ease: 'back.out(3)'}, x.t + .22);
+    D.cue(x.t + .3, 'click');
+  });
+  if (D.q('fecho', 'Incluído na inscrição')) {
+    const tf = D.n('t_fecho', its[its.length - 1].t + 1.1 + '');
+    D.pousa('#fe', tf, {rot: D.P.ROT, s: 1.12, ease: D.P.HEROI});
+    D.cue(tf, 'impact');
+  }
+  D.sai(['#k', '#h', '.pc', '#fe'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

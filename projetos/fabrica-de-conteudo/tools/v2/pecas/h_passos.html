@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<!-- AULA — passo a passo numerado, na lateral. 1920x1080, --alpha. Coluna esquerda.
+     Os passos pousam em fila; os que já foram têm ✓, o atual ganha a sombra
+     amarela, os próximos ficam apagados. Em `vai`, o atual é carimbado ✓ e a
+     sombra amarela desliza até o próximo.
+       ?it=Criar o webhook;Ligar o agente;Salvar na planilha;Publicar&atual=2&vai=2.4&kick=passo a passo&t0=0.2&dur=4
+     vai=- não avança.
+     ts=0.3,2.1,4.0 (um tempo por item, desde o início da peça): cada item entra quando a fala chega nele, o anterior
+     ganha ✓ e a sombra desliza; antes do 1º tempo nada aparece (sem barra vazia). -->
+<html lang="pt-BR" class="h alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<link rel="stylesheet" href="../nucleo/direcao-h.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+.ps{position:absolute;left:60px;top:140px;width:560px}
+.ps .kick{font-size:20px;margin-bottom:22px}
+.lista{position:relative;display:flex;flex-direction:column;gap:18px}
+.fx{position:absolute;left:0;top:0;background:var(--mk);border:var(--bw) solid var(--ink);border-radius:var(--raio);opacity:0}
+.pa{position:relative;display:flex;align-items:center;gap:18px;padding:16px 20px;opacity:0}
+.pa .ic{position:relative;width:56px;height:56px;font-size:24px}
+.pa .ic span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.pa .ic .b{opacity:0;font-size:30px}
+.pa .nm{font:700 30px/1.15 var(--fd);letter-spacing:-.02em;color:var(--ink)}
+.pa.feito .ic{background:var(--ink);color:var(--mk)}
+.pa.feito .ic .a{opacity:0}
+.pa.feito .ic .b{opacity:1}
+.pa.feito .nm{color:var(--ink4)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="ps"><div class="kick" id="k"></div><div class="lista" id="ls"><div class="fx" id="fx"></div></div></div>
+</div>
+<script>
+const dur = D.n('dur', '4'), t0 = D.n('t0', '0.2'), $ = id => document.getElementById(id);
+const its = D.q('it', 'Criar o webhook;Ligar o agente;Salvar na planilha;Publicar').split(';').filter(Boolean);
+const at = Math.max(1, Math.min(its.length, Math.round(D.n('atual', '2'))));
+const vai = D.q('vai', '2.4') === '-' || at >= its.length ? null : D.n('vai', '2.4');
+$('k').textContent = D.q('kick', 'passo a passo');
+its.forEach((s, i) => $('ls').insertAdjacentHTML('beforeend', `<div class="pa nb${i < at - 1 ? ' feito' : ''}"><div class="ic"><span class="a">${String(i + 1).padStart(2, '0')}</span><span class="b">✓</span></div><div class="nm">${s}</div></div>`));
+
+const ts = D.q('ts', '').split(',').filter(Boolean).map(Number);
+D.monta(tl => {
+  if (ts.length === its.length) {
+    const ps = [...document.querySelectorAll('.pa')];
+    D.carimbo('#k', t0, 0);
+    ps.forEach((p, i) => {
+      D.pousa(p, ts[i], {dx: -40, dy: 0, dr: 0});
+      if (i === 0) return;
+      const ic = ps[i - 1].querySelector('.ic'), t = D.at(ts[i]);
+      tl.to(ic.querySelector('.a'), {opacity: 0, scale: .4, duration: .12}, t);
+      tl.fromTo(ic.querySelector('.b'), {opacity: 0, scale: 1.8}, {opacity: 1, scale: 1, duration: .32, ease: 'back.out(2.2)'}, t + .04);
+      tl.to(ic, {backgroundColor: D.css('--ink'), color: D.css('--mk'), duration: .12}, t + .04);
+      tl.to(ps[i - 1].querySelector('.nm'), {color: D.css('--ink4'), duration: .3}, t + .1);
+    });
+    D.desliza('#fx', ps, ts, {off: 12});
+    D.sai(['#k', '.pa', '#fx'], dur - .45);
+    return dur;
+  }
+  const ps = [...document.querySelectorAll('.pa')], cur = ps[at - 1];
+  D.carimbo('#k', t0, 0);
+  ps.forEach((p, i) => {
+    const t = t0 + .1 + i * .09;
+    D.pousa(p, t, {dx: -40, dy: 0, dr: 0});
+    if (i > at - 1) tl.to(p, {opacity: .55, duration: .3}, D.at(t) + .35);
+  });
+  const tFx = t0 + .2 + ps.length * .09;
+  if (vai == null) D.desliza('#fx', [cur], [tFx], {off: 12});
+  else {
+    const nx = ps[at], ic = cur.querySelector('.ic'), t = D.at(vai);
+    D.desliza('#fx', [cur, nx], [tFx, vai + .12], {off: 12});
+    tl.to(ic.querySelector('.a'), {opacity: 0, scale: .4, duration: .12}, t);
+    tl.fromTo(ic.querySelector('.b'), {opacity: 0, scale: 1.8}, {opacity: 1, scale: 1, duration: .32, ease: 'back.out(2.2)'}, t + .04);
+    tl.to(ic, {backgroundColor: D.css('--ink'), color: D.css('--mk'), duration: .12}, t + .04);
+    tl.to(cur.querySelector('.nm'), {color: D.css('--ink4'), duration: .3}, t + .1);
+    tl.to(nx, {opacity: 1, duration: .25}, t + .12);
+    D.cue(vai, 'certo');
+  }
+  D.sai(['#k', '.pa', '#fx'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

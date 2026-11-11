@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<!-- PROVA — a lupa: o editado aparece dentro do bruto. 1080x1920.
+     O bruto ocupa o quadro e a etiqueta do estado (BRUTO) está no canto. A lupa pousa e, dentro
+     dela, o mesmo instante já editado; ela anda pelos pontos que provam (a legenda, o cenário, a
+     figurinha) e, em `t_enche`, cresce até o editado tomar o quadro e a etiqueta virar EDITADO.
+     Imagem ou vídeo (.mp4/.mov/.webm) nos dois: o vídeo segue a timeline, então os dois andam juntos.
+     Com a= vazio e fundo transparente no render, o bruto é o vídeo de baixo, na composição. Da referência (Skillry #398,
+     a máscara que segue o cursor e mostra o que tem dentro) saiu só o movimento.
+       a       o antes (bruto) · b  o depois (editado), no mesmo instante e enquadramento
+       r       o raio da lupa (230) · cam  "x,y@t;…" o centro dela em px, no instante em que ESTÁ lá
+       t_enche quando ela cresce e o editado toma o quadro (-1: não cresce, ela sai)
+       rot     a etiqueta da lupa (EDITADO) · tag  a do canto (BRUTO) · tag2  a do fim (EDITADO)
+       topo    o y da etiqueta do canto (200; no anúncio, 270: a zona segura) · dur
+       ?a=../midia/lupa-antes.jpg&b=../midia/lupa-depois.jpg&r=230&cam=560,760@0.3;830,520@1.3;470,1200@2.3&t_enche=3.2&dur=4.2 -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+#stage{padding:0;display:block;overflow:hidden}
+.cam{position:absolute;inset:0;overflow:hidden}
+#lente{position:absolute;left:0;top:0;border-radius:50%;opacity:0;
+  border:calc(var(--bw)*3) solid var(--ink);box-shadow:inset 0 0 0 7px var(--mk),var(--shx,var(--sh)) var(--shx,var(--sh)) 0 var(--sombra,var(--ink))}
+#cabo{position:absolute;left:50%;top:50%;width:54px;height:210px;margin-left:-27px;border-radius:14px;
+  background:var(--ink);border:var(--bw) solid var(--ink);transform-origin:50% 0;transform:rotate(-45deg) translateY(var(--rc))}
+#cabo i{position:absolute;left:0;right:0;top:34px;height:26px;background:var(--mk)}
+#rl{position:absolute;left:50%;bottom:100%;transform:translate(-50%,-18px) rotate(-3deg);white-space:nowrap;
+  font:700 44px/1 var(--fm);letter-spacing:.1em;padding:14px 18px 12px;opacity:0}
+.tag{position:absolute;left:60px;display:flex;align-items:center;gap:14px;padding:16px 22px 14px;opacity:0;
+  font:700 48px/1 var(--fm);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.tag i{width:26px;height:26px;border-radius:50%;background:var(--no);border:3px solid var(--ink);font-style:normal}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="cam" id="antes"></div>
+  <div class="cam" id="depois"></div>
+  <div id="lente"><div id="cabo"><i></i></div><span class="nb cor-mk" id="rl"></span></div>
+  <div class="tag nb" id="tag"><i></i><span id="tagt"></span></div>
+  <div class="tag nb cor-mk" id="tag2"><span id="tag2t"></span></div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const dur = D.n('dur', '4.2'), R0 = D.n('r', '230'), tEnche = D.n('t_enche', '3.2'), topo = D.n('topo', '200');
+const cam = D.q('cam', '560,760@0.3;830,520@1.3;470,1200@2.3').split(';').filter(Boolean).map(s => {
+  const [xy, t] = s.split('@'), [x, y] = xy.split(',').map(Number); return {x, y, t: parseFloat(t)};
+});
+const a = D.q('a', '../midia/lupa-antes.jpg'), b = D.q('b', '../midia/lupa-depois.jpg');
+// a= vazio: sem a camada do bruto (o vídeo de baixo é o bruto); a lupa e o depois por cima
+if (a) D.midia('#antes', a, 'antes'); else $('antes').remove();
+D.midia('#depois', b, 'depois');
+$('rl').textContent = D.q('rot', 'EDITADO');
+$('tagt').textContent = D.q('tag', 'BRUTO');
+$('tag2t').textContent = '✓ ' + D.q('tag2', 'EDITADO');
+['tag', 'tag2'].forEach(id => $(id).style.top = topo + 'px');
+
+D.monta(tl => {
+  const bw = parseFloat(getComputedStyle($('lente')).borderLeftWidth);
+  // L é a lupa inteira: o centro e o raio. A cada quadro buscado, o anel e o recorte do depois
+  // saem dela, então os dois nunca se descolam
+  const L = {x: cam[0].x, y: cam[0].y, r: 0};
+  const lente = $('lente'), dep = $('depois');
+  const desenha = () => {
+    const r = Math.max(0, L.r);
+    Object.assign(lente.style, {width: 2 * r + 'px', height: 2 * r + 'px', left: L.x - r + 'px', top: L.y - r + 'px'});
+    lente.style.setProperty('--rc', r - bw + 'px');
+    dep.style.clipPath = `circle(${Math.max(0, r - bw)}px at ${L.x}px ${L.y}px)`;
+  };
+  D.aoQuadro(desenha);
+
+  const t0 = cam[0].t;
+  D.pousa('#tag', Math.max(.05, t0 - .1), {som: 'pop'});
+  tl.fromTo(L, {r: R0 * .45}, {r: R0, duration: D.P.ENT, ease: D.P.POUSA}, D.at(t0));
+  tl.fromTo(lente, {opacity: 0, '--shx': '0px'}, {opacity: 1, '--shx': D.SH + 'px', duration: D.P.ENT, ease: D.P.POUSA}, D.at(t0));
+  D.carimbo('#rl', t0 + .25, -3);
+  cam.forEach((p, i) => {
+    if (!i) return;
+    const d = Math.max(.3, Math.min(.75, p.t - cam[i - 1].t - .1));
+    tl.to(L, {x: p.x, y: p.y, duration: d, ease: 'power3.inOut'}, p.t - d);
+    D.cue(p.t - d + .05, 'swish');
+  });
+  if (tEnche >= 0) {
+    // cresce até cobrir o canto mais longe: o editado toma o quadro, e o anel sai pela borda
+    const fim = cam[cam.length - 1], cobre = Math.hypot(Math.max(fim.x, 1080 - fim.x), Math.max(fim.y, 1920 - fim.y)) + bw + 40;
+    tl.to(L, {r: cobre, duration: .55, ease: 'power3.in'}, D.at(tEnche) - .3);
+    tl.to('#rl', {opacity: 0, duration: .15}, D.at(tEnche) - .3);
+    D.cue(D.at(tEnche) - .3, 'zoom-in');
+    tl.to('#tag', {opacity: 0, scale: .9, duration: .15}, D.at(tEnche));
+    D.carimbo('#tag2', tEnche + .1, -2);
+    D.sai(['#tag2'], dur - .4);
+  } else {
+    D.sai(['#lente', '#tag'], dur - .4);
+  }
+  return dur;
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<!-- PROVA — parede de capas atrás da pessoa: 7 colunas de capas, a 42% da luz, que rolam em sentidos alternados a 1,6 px por quadro
+     (constante: a ref mede 45 px/s). Cada coluna é uma pilha de capas com fundo escuro, e a pilha é finita: entra do fora do quadro (as que sobem, por
+     baixo; as que descem, por cima), freando pela razão de 0,67 por quadro (a ref mede 0,65 a 0,67, de 336 px por quadro a 1,6) e, no fim, sai acelerando (a velocidade dobra a cada quadro no começo) até a pilha acabar. Quase sem borrão de movimento (só a saída leva um vertical mínimo, de 0,5 a 0,9 px de desvio, a partir de 70 px por quadro): a ref borra pouco a
+     parede (a razão do gradiente vertical contra o horizontal cai a 0,84 a 118 px por quadro; um desvio de 1 px já dá isso, e um de obturador daria 0,3). As colunas entram e saem em tempos próprios (medidos na ref) e não da esquerda pra direita.
+     Clone da parede do efeito 16 comment bubble do De25fKeTRl7 (ficha 17; passada 2: entrada e saída medidas por coluna, por correlação de fase e por
+     cobertura contra o quadro limpo). 1080x1920, --alpha. Vai ATRÁS da pessoa: entra no plano com "atras": true. Termina em `fundo` (a linha dos ombros)
+     e nunca cobre o laptop. Quadros contados desde o início da janela do convite (f565 da ref).
+       etiqueta: parede-de-capas, atras-da-pessoa, colunas-alternadas
+       img  os caminhos das capas, separados por ; (relativos a esta peça; o padrão são as amostras do guia de estilos)
+       ent  o quadro em que a 1ª coluna (a da esquerda) começa a entrar (21) · sai  o quadro em que ela começa a sair (55; a última sai ~4 quadros depois)
+       dur  quando acaba (a última coluna sai no 70: 71 quadros) · fundo  o pé da parede, px (1100) · bri  a luz das capas, 0 a 1 (0.42) · vel  px por quadro (1.6)
+       ?ent=21&sai=55&dur=2.367 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block;overflow:hidden}
+.col{position:absolute;top:0;overflow:hidden;opacity:0}
+.pilha{position:absolute;left:0;top:0;width:100%;background:rgba(4,6,10,.97);padding:0 var(--rec);box-sizing:border-box;overflow:hidden}
+.t{position:relative;overflow:hidden;border-radius:12px;background:#0A0D16}
+.t img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs id="defs"></defs></svg>
+<div id="stage"></div>
+<script>
+const FR = 1 / 30;
+const IMGS = D.q('img', ['colagem', 'cyberpunk', 'editorial', 'lousa', 'luxo', 'neobrutalista', 'pixel', 'pop', 'quadrinhos', 'retro', 'tech', 'vaporwave'].map(n => '../../../docs/guia-de-estilos/' + n + '.jpg').join(';'))
+  .split(';').filter(Boolean);
+const ENT = D.n('ent', '21'), SAI = D.n('sai', '55'), fundo = D.n('fundo', '1100'), bri = D.n('bri', '0.42'), vel = D.n('vel', '1.6');
+const dur = D.n('dur', String(71 * FR));
+// as 7 colunas da ref: x 5, passo 154,2, largura 145 (a primeira e a última sangram um pouco pelas bordas)
+const NC = 7, X0 = 5, PASSO = 154.2, LARG = 145, GAP = 9;
+const rnd = s => { const x = Math.sin(s * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+// ENTRADA: o deslocamento da pilha em relação ao repouso decai quadro a quadro pela razão medida na ref (0,66 nos primeiros quadros e 0,44 no fim: a coluna
+// da direita anda 334, 224, 152, 101, 66, 42, 26, 16, 8,6, 4,6 px por quadro): o = O * S(t), com S cumulativa. `t` conta desde o quadro em que o deslocamento vale O.
+// t0 de cada coluna, em quadros desde `ent` (c0 = a da esquerda): a 2ª (junto do quadro de arte) entra primeiro, depois a 4ª, a 1ª, a 6ª, a 3ª, a 5ª e a 7ª
+const RAZAO = [.659, .652, .638, .624, .605, .582, .554, .52, .494, .452, .42, .44];
+const S_ENT = RAZAO.reduce((a, r) => (a.push(a[a.length - 1] * r), a), [1]);
+const sEnt = n => {      // n pode ser negativo (antes do 1º quadro: a mesma razão do começo) e fracionário (geométrica entre os quadros)
+  if (n <= 0) return Math.pow(1 / RAZAO[0], -n);
+  if (n >= S_ENT.length - 1) return S_ENT[S_ENT.length - 1] * Math.pow(.45, n - (S_ENT.length - 1));
+  const i = Math.floor(n), f = n - i;
+  return Math.exp(Math.log(S_ENT[i]) * (1 - f) + Math.log(S_ENT[i + 1]) * f);
+};
+const T0 = [0, 1.66, 1.8, 3.34, 3.43, 5.0, 5.0];      // quadros desde `ent`: c0, c1, c2, c3, c4, c5, c6 (f586; f587,7; f587,8; f589,3; f589,4; f591; f591)
+const O_SOBE = 978, O_DESCE = 670;          // o deslocamento em t = 0 (as que sobem: a ponta da pilha em 855 px; as que descem entram mais fundo, de cima)
+// SAÍDA: o deslocamento EXTRA (além da deriva) em px, por quadro desde o início da saída da coluna; começa na da esquerda e as outras entram 0,67 quadro depois uma da outra
+const S_SAI = [0, 1.5, 7.7, 25.3, 63.5, 133.9, 250.5, 431, 701, 1101, 1681, 2511, 3691, 5400, 7900, 11500];   // medido até o 7 (ref f627) e depois ×1,5 por quadro
+const sSai = tau => {
+  if (tau <= 0) return 0;
+  const i = Math.min(Math.floor(tau), S_SAI.length - 2), f = Math.min(1, tau - i);
+  return Math.exp(Math.log(S_SAI[i] + 1) * (1 - f) + Math.log(S_SAI[i + 1] + 1) * f) - 1;     // geométrica entre os quadros: exata nos inteiros
+};
+// as pilhas são finitas: o fim delas manda no quadro em que a coluna some (as que sobem somem ~10,5 quadros depois de começar a sair; as que descem, ~6,8)
+const TOPO_SOBE = -123.5, TOPO_DESCE = -114, ALT_SOBE = 2279, ALT_DESCE = 2104;
+const stage = document.getElementById('stage');
+stage.style.setProperty('--vao', GAP + 'px'); stage.style.setProperty('--rec', ((PASSO - LARG) / 2) + 'px');
+const FOCOS = ['50% 18%', '50% 82%', '30% 45%', '70% 45%', '50% 55%', '50% 30%'];
+const cols = [];
+for (let k = 0; k < NC; k++) {
+  const sobe = k % 2 === 0, alt = sobe ? ALT_SOBE : ALT_DESCE;
+  let h = 0, tiles = '', i = 0;
+  while (h < alt - 150) {
+    const th = Math.round(170 + rnd(k * 17 + i * 3.1) * 120), img = IMGS[Math.floor(rnd(k * 31 + i * 7.7) * IMGS.length)];
+    const foco = FOCOS[Math.floor(rnd(k * 5 + i * 11.3) * FOCOS.length)], esc = (1 + rnd(k + i * 2.3) * .5).toFixed(2), hue = Math.round((rnd(k * 3 + i * 13.1) - .5) * 40);
+    tiles += `<div class="t" style="height:${th}px;margin:${i ? GAP : 4}px 0 0"><img src="${img}" alt="" style="object-position:${foco};transform:scale(${esc});filter:hue-rotate(${hue}deg) saturate(.95)"></div>`;
+    h += th + GAP; i++;
+  }
+  const c = document.createElement('div');
+  c.className = 'col';
+  c.style.cssText = `left:${X0 - (PASSO - LARG) / 2 + k * PASSO}px;width:${PASSO}px;height:${fundo}px;filter:brightness(${bri})`;
+  c.innerHTML = `<div class="pilha" id="p${k}" style="height:${alt}px">${tiles}</div>`;
+  document.getElementById('defs').insertAdjacentHTML('beforeend', `<filter id="vb${k}" x="-10%" y="-30%" width="120%" height="160%"><feGaussianBlur id="gb${k}" stdDeviation="0 0"/></filter>`);
+  stage.appendChild(c);
+  cols.push(c);
+}
+
+D.monta(tl => {
+  const total = Math.round(dur / FR);
+  cols.forEach((c, k) => {
+    const sobe = k % 2 === 0, d = sobe ? -1 : 1, topo = sobe ? TOPO_SOBE : TOPO_DESCE, o0 = sobe ? O_SOBE : O_DESCE;
+    const t0 = ENT + T0[k], fs = SAI + k * 0.67, p = c.querySelector('.pilha');
+    // posição da pilha num quadro: repouso + entrada (freia por R) + deriva (vel px por quadro) + saída (acelera)
+    const pos = f => topo + (sobe ? 1 : -1) * o0 * sEnt(f - t0) + d * vel * (f - t0) + d * sSai(f - fs);
+    const alt = sobe ? ALT_SOBE : ALT_DESCE;
+    let visivel = false;
+    // a coluna existe desde o 1º quadro em que a ponta da pilha (o topo, se sobe; o pé, se desce) entra no quadro
+    for (let f = Math.floor(t0) - 4; f <= total; f++) {
+      const y = pos(f), ponta = sobe ? y : y + alt;
+      if (!visivel && (sobe ? ponta < fundo : ponta > 0) && f >= Math.floor(t0) - 2) { visivel = true; tl.set(c, {opacity: 1}, Math.max(0, f) * FR); }
+      if (!visivel || f < 0) continue;
+      tl.set(p, {y: +y.toFixed(2)}, f * FR);
+      // a saída leva um borrão vertical mínimo a partir de 70 px por quadro: desvio de 0,5 a 0,9 px, que dá a razão do gradiente da ref (0,95, 0,84, 0,93 em f625 a f627)
+      if (f >= Math.floor(fs)) {
+        const v = Math.abs(y - pos(f - 1)), sg = v >= 70 ? Math.min(.9, .0065 * v) : 0;
+        if (f === Math.floor(fs)) tl.set(c, {filter: `brightness(${bri}) url(#vb${k})`}, f * FR);
+        tl.set(document.getElementById('gb' + k), {attr: {stdDeviation: `0 ${sg.toFixed(2)}`}}, f * FR);
+      }
+      if (f >= fs + 14) { tl.set(c, {opacity: 0}, f * FR); break; }   // a pilha já saiu
+    }
+  });
+  return dur;
+});
+</script>
+</body>
+</html>

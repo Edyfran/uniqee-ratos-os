@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<!-- TIPO — a conta que soma, v2. 1080x1920.
+     Extrato de ponta a ponta, e o valor de cada linha VOA até o total — a soma
+     é vista acontecendo, não só o número mudando. O total sobe com expo.out e
+     leva um soco de escala quando chega.
+       ?it=🎧|Suporte|1500@0.3;💬|Vendas|2000@1.2;💻|Programador|3000@2.1
+        &de=4500&rot=POR MÊS&dur=5 -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+#stage{padding:0 56px;justify-content:center}
+.kick{margin-bottom:34px}
+.extrato{overflow:hidden;opacity:0}
+.ln{display:flex;align-items:center;gap:26px;padding:34px 36px;opacity:0;border-top:calc(var(--bw)*.75) solid var(--ink)}
+.ln:first-child{border-top:0}
+.ln .em{font-size:60px;line-height:1;flex:none;width:72px;text-align:center;
+  font-family:'Apple Color Emoji','Noto Color Emoji','Segoe UI Emoji',sans-serif}
+.ln .nm{flex:1;min-width:0;font:800 62px/1.05 var(--fd);color:var(--ink);letter-spacing:var(--ls);white-space:nowrap}
+.ln .vl{font:600 48px/1 var(--fm);color:var(--ink6);flex:none;white-space:nowrap}
+.tt{display:flex;align-items:center;gap:24px;margin-top:44px;padding:34px 36px;opacity:0}
+.tt .rt{font:700 34px/1 var(--fm);letter-spacing:.12em;text-transform:uppercase;flex:none;
+  background:var(--mk);color:var(--ink);border:var(--bw) solid var(--ink);border-radius:var(--raio-s);padding:.4em .6em .34em}
+.tt .vl{flex:1;text-align:right;font:900 112px/1 var(--fd);color:#fff;letter-spacing:-.045em;white-space:nowrap;transform-origin:right center}
+.voa{position:absolute;left:0;top:0;padding:12px 18px;font:700 40px/1 var(--fm);white-space:nowrap;opacity:0;border-radius:var(--raio-s);z-index:5}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="kick" id="k"></div>
+  <div class="extrato nb" id="ls"></div>
+  <div class="tt nb cor-ac" id="t"><span class="rt" id="rt"></span><span class="vl" id="tv"></span></div>
+</div>
+<script>
+const dur = D.n('dur', '5');
+document.getElementById('k').textContent = D.q('kick', '');
+document.getElementById('rt').textContent = D.q('rot', 'POR MÊS');
+const its = D.itens('it', '🎧|Suporte|1500@0.3;💬|Vendas|2000@1.2;💻|Programador|3000@2.1', ['em', 'nome', 'valor']);
+its.forEach(x => x.valor = parseFloat(x.valor));
+const de = D.n('de', '0');
+const ls = document.getElementById('ls');
+its.forEach((x, i) => {
+  const d = document.createElement('div');
+  d.className = 'ln'; d.id = 'ln' + i;
+  d.innerHTML = `<span class="em">${x.em}</span><span class="nm">${x.nome}</span><span class="vl">${D.brl(x.valor)}/mês</span>`;
+  ls.appendChild(d);
+});
+document.getElementById('tv').textContent = D.brl(its.reduce((a, x) => a + x.valor, de));
+
+D.monta(tl => {
+  D.cabe('.ln .nm', 38);
+  D.cabe('.tt .vl', 64, '.tt');
+  // mede ANTES de qualquer tween: a câmera e a entrada mexem no retângulo
+  const stage = document.getElementById('stage');
+  const S = stage.getBoundingClientRect();
+  const rel = el => { const r = el.getBoundingClientRect(); return {x: r.left - S.left, y: r.top - S.top, w: r.width, h: r.height}; };
+  const alvo = rel(document.getElementById('tv'));
+  const voos = its.map((x, i) => {
+    const v = rel(document.querySelector('#ln' + i + ' .vl'));
+    const c = document.createElement('div');
+    c.className = 'voa nb cor-mk'; c.id = 'vo' + i; c.textContent = '+' + D.brl(x.valor).replace('R$ ', '');
+    stage.appendChild(c);
+    const cw = c.offsetWidth, ch = c.offsetHeight;
+    const x0 = v.x + v.w - cw, y0 = v.y - ch - 6;
+    c.style.left = x0 + 'px'; c.style.top = y0 + 'px';
+    return {dx: (alvo.x + alvo.w - cw) - x0, dy: (alvo.y + alvo.h / 2 - ch / 2) - y0};
+  });
+
+  D.camera(dur, 1.0, 1.03);
+  if (D.q('kick')) D.carimbo('#k', .1);
+  D.pousa('#ls', Math.max(.2, its[0].t - .1), {rot: D.inclina(0) * .3});
+  D.pousa('#t', its[0].t + .1, {rot: D.inclina(1) * .3});
+  let acc = de;
+  its.forEach((x, i) => {
+    tl.fromTo('#ln' + i, {opacity: 0, x: -40}, {opacity: 1, x: 0, duration: D.P.ENT, ease: D.P.EASE}, D.at(x.t));
+    const v = voos[i];
+    tl.fromTo('#vo' + i, {opacity: 0, scale: .5, x: 0, y: 14}, {opacity: 1, scale: 1, y: 0, duration: .24, ease: 'back.out(2.4)'}, x.t + .12);
+    tl.to('#vo' + i, {x: v.dx, y: v.dy, rotation: D.inclina(i) * 3 || -4, duration: .46, ease: 'power3.in'}, x.t + .36);
+    tl.to('#vo' + i, {opacity: 0, scale: .55, duration: .1, ease: 'power2.in'}, x.t + .76);
+    D.conta('#tv', acc, acc + x.valor, x.t + .8 + D.ANTECIPA);
+    acc += x.valor;
+  });
+  D.sai(['#k', '#ls', '#t'], dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>
