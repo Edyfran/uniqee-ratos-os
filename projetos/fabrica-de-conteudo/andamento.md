@@ -5,7 +5,7 @@ Instalada e conferida. Próximo passo: `/onboarding` (estilo, cores, letras, log
 da Uniqee) e o primeiro Reels.
 
 ## Pendências
-- [ ] Baixar o modelo de transcrição (~3 GB), ou deixar baixar no primeiro vídeo
+- [x] Modelo de transcrição baixado (2026-11-11, ~2,9 GB em `~/.cache/huggingface`)
 - [ ] Rodar o `/onboarding` com a marca da Uniqee
 - [ ] Primeiro Reels
 
