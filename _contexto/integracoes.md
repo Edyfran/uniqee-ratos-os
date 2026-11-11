@@ -26,6 +26,7 @@
 | Kittl | ampliar imagem pequena antes de imprimir (upscale; pode custar crédito). Não tem mockup de azulejo | MCP (conector do claude.ai) | ligada | 2026-11-09 |
 | Gemini (Veo e imagem) | vídeos e mockups de divulgação | só você, na mão | não ligada | 2026-11-09 |
 | Python + Pillow | script da /ajustar-arte | CLI (`python`) | ligada | 2026-11-08 |
+| Fábrica de Conteúdo com IA | editar os Reels (corte, legenda, peças, trilha, capa), de graça | CLI (`uv run` dentro de `projetos/fabrica-de-conteudo/`) | ligada, transcrição local (sem chave da ElevenLabs) | 2026-11-11 |
 
 ## Os sete assuntos que todo negócio tem
 

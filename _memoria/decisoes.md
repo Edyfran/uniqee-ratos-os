@@ -21,3 +21,4 @@ regra de trabalho. O que não entra: tarefa feita (isso é o diário).
 - **2026-11-08** (Edyfran) [PreçoArte]: divulgação com 3 posts por semana no perfil da Uniqee, por uma skill própria (/divulgar-precoarte). Por quê: o foco é vender o PreçoArte, e o público (sublimador) é outro, diferente do de quem compra presente.
 - **2026-11-08** (Edyfran): melhorar a skill marketing-digital-uniqee em vez de criar uma /divulgar-uniqee nova. Por quê: ela já existia e vale em qualquer lugar da conta, inclusive no celular.
 - **2026-11-09** (Edyfran): vídeos de divulgação podem ser feitos por IA, com pessoas fictícias, rótulo de IA no Instagram e "Vídeo ilustrativo" na legenda. Por quê: dispensa autorização de cliente e mantém o rosto dele fora da marca.
+- **2026-11-11** (Edyfran) [Fábrica de Conteúdo]: a Fábrica fica em `projetos/fabrica-de-conteudo/`, com AGENTS.md próprio, e não na raiz. Por quê: o pacote traz AGENTS.md, CLAUDE.md e .claude/ que sobrescreveriam os do RatosOS.
