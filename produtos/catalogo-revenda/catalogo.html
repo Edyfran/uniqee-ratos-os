@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Catálogo de Revenda Uniqee</title>
+<link href="https://fonts.googleapis.com/css2?family=Radio+Canada+Big:wght@400;500;600;700&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cinza: #aeb7be;
+    --creme: #f3ede3;
+    --texto: #0f172a;
+    --petroleo: #447a81;
+    --vermelho: #ef5a4c;
+    --amarelo: #f6bd2a;
+    --verdeagua: #5aa595;
+    --verde: #8cc152;
+  }
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 210mm; height: 297mm; }
+  body {
+    font-family: "Radio Canada Big", sans-serif;
+    color: var(--texto);
+    background: var(--creme);
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .pagina { width: 210mm; height: 297mm; display: flex; flex-direction: column; overflow: hidden; }
+
+  header {
+    background: var(--cinza);
+    padding: 8mm 14mm 7mm;
+    display: flex; align-items: center; justify-content: space-between;
+    position: relative;
+  }
+  .logo { width: 62mm; height: 34mm; overflow: hidden; position: relative; }
+  .logo img { position: absolute; width: 96mm; left: -17.3mm; top: -30.9mm; }
+  .titulo { text-align: right; }
+  .titulo .detalhe { font-family: "Caveat", cursive; font-size: 19pt; color: var(--petroleo); line-height: 1; }
+  .titulo h1 { font-size: 27pt; font-weight: 700; line-height: 1.05; letter-spacing: -0.3pt; }
+  .titulo p { font-size: 10pt; margin-top: 2mm; }
+  .faixa { display: flex; height: 2.2mm; }
+  .faixa span { flex: 1; }
+
+  main {
+    flex: 1;
+    padding: 7mm 14mm 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: repeat(3, 1fr);
+    gap: 5mm;
+  }
+  .card {
+    background: #fff;
+    border-radius: 5mm;
+    display: flex; overflow: hidden;
+    box-shadow: 0 0.6mm 2mm rgba(15, 23, 42, 0.08);
+  }
+  .foto { width: 50%; display: flex; align-items: center; justify-content: center; padding: 1mm; background: #fff; }
+  .foto img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  .info { flex: 1; padding: 5mm 5mm 5mm 3mm; display: flex; flex-direction: column; justify-content: center; }
+  .info h2 { font-size: 13pt; font-weight: 700; line-height: 1.15; }
+  .info .desc { font-size: 8.5pt; color: #475569; margin-top: 1mm; line-height: 1.3; }
+  .preco { margin-top: 3mm; }
+  .preco + .preco { margin-top: 2.5mm; padding-top: 2.5mm; border-top: 0.3mm dashed #cbd5e1; }
+  .preco .variacao { font-size: 8.5pt; font-weight: 600; color: var(--petroleo); text-transform: uppercase; letter-spacing: 0.4pt; }
+  .preco .valor { font-size: 21pt; font-weight: 700; color: var(--texto); line-height: 1.05; }
+  .preco .valor small { font-size: 11pt; font-weight: 600; margin-right: 0.6mm; }
+  .preco .revenda { white-space: nowrap; font-size: 8pt; color: #64748b; }
+  .preco.compacto .valor { font-size: 17pt; }
+  .consulta { font-size: 15pt; font-weight: 700; color: var(--petroleo); margin-top: 3mm; }
+
+  .condicoes {
+    background: var(--petroleo); color: #fff;
+    border-radius: 5mm; padding: 6mm;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .condicoes h3 { font-family: "Caveat", cursive; font-size: 21pt; font-weight: 600; line-height: 1; margin-bottom: 3mm; }
+  .condicoes ul { list-style: none; font-size: 9.5pt; line-height: 1.4; }
+  .condicoes li { padding-left: 4.5mm; position: relative; margin-bottom: 1.6mm; }
+  .condicoes li::before { content: ""; position: absolute; left: 0; top: 1.6mm; width: 2mm; height: 2mm; border-radius: 50%; background: var(--amarelo); }
+
+  footer {
+    padding: 6mm 14mm 7mm;
+    display: flex; justify-content: space-between; align-items: flex-end;
+    font-size: 9pt;
+  }
+  footer .frase { font-family: "Caveat", cursive; font-size: 16pt; color: var(--petroleo); }
+  footer .contato { text-align: right; line-height: 1.4; }
+  footer .contato b { font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="pagina">
+  <header>
+    <div class="logo"><img src="imagens/logo.png" alt="Uniqee Personalizados"></div>
+    <div class="titulo">
+      <div class="detalhe">feito com carinho, pra revender</div>
+      <h1>Catálogo de Revenda</h1>
+      <p>Valores exclusivos para parceiros · novembro de 2026</p>
+    </div>
+  </header>
+  <div class="faixa">
+    <span style="background:var(--vermelho)"></span><span style="background:var(--amarelo)"></span><span style="background:var(--verdeagua)"></span><span style="background:var(--verde)"></span><span style="background:var(--petroleo)"></span>
+  </div>
+
+  <main>
+    <div class="card">
+      <div class="foto"><img src="imagens/caneca.webp" alt="Caneca branca personalizada"></div>
+      <div class="info">
+        <h2>Caneca branca personalizada</h2>
+        <div class="desc">Em cerâmica, com foto e mensagem.</div>
+        <div class="preco">
+          <div class="valor"><small>R$</small>14,00</div>
+          <div class="revenda">Revenda sugerida: R$ 20,00</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="foto"><img src="imagens/camisa.png" alt="Camisa personalizada"></div>
+      <div class="info">
+        <h2>Camisa personalizada</h2>
+        <div class="preco compacto">
+          <div class="variacao">100% poliéster</div>
+          <div class="valor"><small>R$</small>22,00</div>
+          <div class="revenda">Revenda sugerida: R$ 30,00</div>
+        </div>
+        <div class="preco compacto">
+          <div class="variacao">100% algodão</div>
+          <div class="valor"><small>R$</small>30,00</div>
+          <div class="revenda">Revenda sugerida: R$ 40,00</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="foto"><img src="imagens/azulejo.webp" alt="Azulejo personalizado"></div>
+      <div class="info">
+        <h2>Azulejo personalizado 15x15</h2>
+        <div class="preco compacto">
+          <div class="variacao">Só o azulejo</div>
+          <div class="valor"><small>R$</small>18,00</div>
+          <div class="revenda">Revenda sugerida: R$ 25,00</div>
+        </div>
+        <div class="preco compacto">
+          <div class="variacao">Com suporte</div>
+          <div class="valor"><small>R$</small>25,00</div>
+          <div class="revenda">Revenda sugerida: R$ 34,00</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="foto"><img src="imagens/almochaveiro.png" alt="Almochaveiro"></div>
+      <div class="info">
+        <h2>Almochaveiro 7x7</h2>
+        <div class="desc">Mini almofada com argola de chaveiro. Ótima lembrancinha.</div>
+        <div class="preco">
+          <div class="valor"><small>R$</small>5,50</div>
+          <div class="revenda">Revenda sugerida: R$ 8,00</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="foto"><img src="imagens/almofada.webp" alt="Almofada personalizada"></div>
+      <div class="info">
+        <h2>Almofada personalizada</h2>
+        <div class="desc">Com foto e mensagem, frente personalizada.</div>
+        <div class="consulta">Sob consulta</div>
+      </div>
+    </div>
+
+    <div class="condicoes">
+      <h3>Como funciona</h3>
+      <ul>
+        <li>Você envia a foto e o texto; a gente cria a arte e manda pra aprovação.</li>
+        <li>Pagamento: 50% de entrada via Pix e o restante na entrega.</li>
+        <li>Prazo de produção de até 5 dias úteis.</li>
+        <li>Entrega ou retirada, a combinar.</li>
+      </ul>
+    </div>
+  </main>
+
+  <footer>
+    <div class="frase">Presentes com significado, pra quem é especial.</div>
+    <div class="contato">
+      <b>@uniqeepersonalizados</b><br>
+      uniqeepersonalizados.shop
+    </div>
+  </footer>
+</div>
+</body>
+</html>
