@@ -157,5 +157,6 @@ Este sistema está no GitHub: depois do `/atualizar`, oferecer o `/syncar` na me
 - `pedidos/` · pedidos que não entram no Brinderoz
 - `atendimento/` · modelos de resposta pro WhatsApp e orçamentos
 - `projetos/` · projetos internos, um por pasta (o PreçoArte entra aqui)
+  - `projetos/fabrica-de-conteudo/` · Fábrica de Conteúdo com IA: edita os Reels (corte, legenda, peças, trilha, capa). Tem AGENTS.md próprio do pacote
 - `estudos/` · pesquisas de tendência, concorrência e referências
 - `publicacoes/` · o que já foi postado, pra consultar
