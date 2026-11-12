@@ -1,0 +1,14 @@
+{
+ "_padrao": "uniqee-celular",
+ "_leia": "Os estilos da Uniqee, um por formato. Cada um herda do estilo do kit mais perto e muda só o que é da marca. Os caminhos partem da raiz da fábrica. O estilo.py lista estes junto com os do kit: uv run python tools/video-use/helpers/estilo.py",
+ "uniqee-celular": {
+  "_o_que": "o reel do que ele grava no celular: corte do silêncio, legenda manuscrita, b-roll",
+  "herda": "reel-camera",
+  "desenho": {"tema": "marca", "legenda": "manuscrita"}
+ },
+ "uniqee-anuncio": {
+  "_o_que": "o criativo de anúncio: voz em off sobre as cenas do banco dele, legenda manuscrita",
+  "herda": "criativo",
+  "desenho": {"tema": "marca", "legenda": "manuscrita"}
+ }
+}

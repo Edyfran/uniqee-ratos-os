@@ -1,0 +1,43 @@
+{
+ "duracao": 4,
+ "cues": [
+  {
+   "t": 0.3,
+   "tipo": "pop"
+  },
+  {
+   "t": 0.6,
+   "tipo": "click"
+  },
+  {
+   "t": 0.6,
+   "tipo": "pop"
+  },
+  {
+   "t": 0.9,
+   "tipo": "click"
+  },
+  {
+   "t": 0.9,
+   "tipo": "pop"
+  },
+  {
+   "t": 1.2,
+   "tipo": "click"
+  },
+  {
+   "t": 1.2,
+   "tipo": "impact"
+  },
+  {
+   "t": 3.55,
+   "tipo": "whoosh-out"
+  }
+ ],
+ "pessoa": null,
+ "video": [],
+ "peca": "o_pacote",
+ "query": "hd=O+seu+presente%2C+%3Cb%3Ecom+significado%3C%2Fb%3E.&it=Caneca%7Ccom+a+foto+de+voc%C3%AAs%400.3%3BAzulejo%7Cpra+guardar+o+momento%400.6%3BAlmofada%7Cpra+abra%C3%A7ar+a+saudade%400.9&fecho=Uniqee+Personalizados&t_fecho=1.2&dur=4&ar=1080x1920&tema=marca",
+ "fps": 30,
+ "formato": "1080x1920"
+}
