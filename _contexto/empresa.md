@@ -32,3 +32,4 @@ atendimento e orçamentos no WhatsApp · desenvolvimento do PreçoArte
 - Condições de venda: 50% de entrada via Pix, prazo de até 5 dias úteis, entrega sem taxa ou
   retirada, a combinar. As artes nascem no ChatGPT e são impressas pelo Corel, que espelha na impressão.
 - **Revenda pra parceiros:** valores de atacado no catálogo `produtos/catalogo-revenda/`; orçamentos à parte em `atendimento/orcamentos/`.
+- **Preço ao cliente final (2026-11-12):** azulejo 15 x 15 cm R$ 35,00 · 20 x 20 cm R$ 45,00.
