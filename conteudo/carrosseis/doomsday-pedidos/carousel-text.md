@@ -1,6 +1,6 @@
 # Carrossel · Abertura dos pedidos · Camisas Doomsday
 
-Estilo: elaborado · 7 slides · 1080 x 1350
+Estilo: elaborado · 7 slides · 1080 x 1350 · postagem: 16/11/2026
 Estreia no Brasil: 17/12/2026 ("Vingadores: Doutor Destino")
 Imagens: `imagens/doutor-destino.jpg`, `imagens/duas-armaduras.jpg`, `imagens/o-elmo.jpg`, `imagens/logo-doomsday.jpg`
 
@@ -9,7 +9,7 @@ Imagens: `imagens/doutor-destino.jpg`, `imagens/duas-armaduras.jpg`, `imagens/o-
 ## Slide 1 · Capa
 - Selo: PEDIDOS ABERTOS
 - Título: A camisa da estreia de Doomsday
-- Contagem: Faltam 35 dias
+- Contagem: Faltam 31 dias
 - Linha de apoio: Estreia nos cinemas em 17 de dezembro.
 
 ## Slide 2 · Doutor Destino (imagem: doutor-destino.jpg)
@@ -38,7 +38,6 @@ Imagens: `imagens/doutor-destino.jpg`, `imagens/duas-armaduras.jpg`, `imagens/o-
 - 2. Pague 50% de entrada no Pix. O restante, na entrega.
 - 3. A produção leva até 5 dias úteis.
 - Destaque: Pra estar com ela no dia da estreia, faça o pedido até 09 de dezembro.
-- Preço: [a confirmar]
 
 ## Slide 7 · CTA
 - Título: Já escolheu a sua?
@@ -49,7 +48,7 @@ Imagens: `imagens/doutor-destino.jpg`, `imagens/duas-armaduras.jpg`, `imagens/o-
 
 ## Legenda
 
-Faltam 35 dias pra estreia, e as camisas de Doomsday já estão com pedidos abertos. São quatro estampas. Qual é a sua?
+Faltam 31 dias pra estreia, e as camisas de Doomsday já estão com pedidos abertos. São quatro estampas. Qual é a sua?
 
 Doutor Destino, Duas Armaduras, O Elmo e Logo Doomsday. Cada uma foi pensada pra quem vai estar na sala de cinema no dia 17 de dezembro, ou pra presentear quem não perde um filme da Marvel.
 
