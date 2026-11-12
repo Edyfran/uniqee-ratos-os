@@ -1,0 +1,12 @@
+:root { --bg:#06090a; --verde:#8be04e; --texto:#f3ede3; --cinza:#aeb7be; --creme:#f3ede3; --tinta:#0f172a; --verde-esc:#1f6b35; }
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { width:1080px; height:1350px; }
+body { position:relative; overflow:hidden; background:var(--bg); font-family:'Radio Canada Big', sans-serif; color:var(--texto); }
+body::after { content:""; position:absolute; inset:0; filter:url(#noise); opacity:.06; pointer-events:none; z-index:50; }
+.barra { position:absolute; left:0; top:0; bottom:0; width:10px; background:var(--verde); z-index:5; }
+.progresso { position:absolute; left:0; bottom:0; height:4px; background:var(--verde); z-index:5; }
+.marca { position:absolute; top:62px; right:56px; font-size:22px; letter-spacing:4px; text-transform:uppercase; color:var(--cinza); z-index:5; }
+.tag { display:inline-block; font-size:24px; letter-spacing:6px; text-transform:uppercase; color:var(--verde); font-weight:500; }
+.nome { font-weight:700; text-transform:uppercase; letter-spacing:-2px; line-height:.95; }
+.texto { font-size:34px; line-height:1.38; font-weight:400; }
+.fantasma { position:absolute; font-weight:700; line-height:.8; color:transparent; -webkit-text-stroke:2px rgba(139,224,78,.14); letter-spacing:-20px; z-index:1; }
