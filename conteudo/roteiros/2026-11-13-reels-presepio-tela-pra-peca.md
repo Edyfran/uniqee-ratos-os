@@ -3,6 +3,8 @@
 Refação do Reels do presépio dourado (postado em 12/11, 1 curtida), só com os dois vídeos que já existem.
 Ideia: a arte na tela vira a peça real. Um produto só (Maria e o Menino), uns 11 segundos, sem mockup.
 
+**Vídeo montado:** `conteudo/artes/2026-11-13-presepio-tela-pra-peca/reels-presepio-tela-pra-peca.mp4` (sem música) · capa: `capa.jpg` na mesma pasta.
+
 **Vídeos de origem** (WhatsApp, 12/11/2026, 13h57):
 - **Vídeo A · tela** (9 s): a arte aberta no computador.
 - **Vídeo B · azulejo** (24 s): a câmera chegando perto do azulejo na bancada.
