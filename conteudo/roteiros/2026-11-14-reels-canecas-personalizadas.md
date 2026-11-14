@@ -3,7 +3,7 @@
 Linha tradicional · Instagram · Reels vertical de uns 35 segundos, com locução.
 Serviço: caneca personalizada com a arte que o cliente quiser (frase, data, nome, lembrança).
 
-**Objetivo:** apresentar o serviço e puxar pedido pelo WhatsApp (link da bio).
+**Objetivo:** apresentar o serviço e puxar conversa pelo direct do Instagram.
 **Ideia:** mostrar o caminho completo da caneca, da peça branca até a arte aparecendo quando o papel
 sai. O momento do papel sendo puxado é o coração do vídeo: é ali que a pessoa vê a "surpresa".
 
@@ -38,7 +38,7 @@ Três opções. Recomendo a primeira, porque abre com o momento mais bonito do v
 | 14–16s | IMG_5803, do segundo 9 ao 12: caneca saindo da prensa | — | "E fica nela de verdade." |
 | 16–24s | IMG_5804, do segundo 0 ao 8 e do 24 ao 30 (dois cortes): papel saindo, close na frase | "Cada detalhe, do jeito que você pediu" | "Na hora de tirar o papel, aparece cada detalhe, do jeito que você pediu." |
 | 24–30s | IMG_5805, do segundo 0 ao 6: passeio pelas canecas prontas | "Uma ou um lote inteiro" | "Pode ser uma caneca só, pra presentear alguém especial, ou um lote inteiro, pra sua turma ou o seu evento." |
-| 30–35s | IMG_5805, final (caneca de dentro vermelho em destaque) + logo da Uniqee | "Peça a sua · link da bio" | "Conte a sua ideia pra gente no WhatsApp, pelo link da bio. A gente transforma em caneca." |
+| 30–35s | IMG_5805, final (caneca de dentro vermelho em destaque) + logo da Uniqee | "Peça a sua · chame no direct" | "Mande a sua ideia pra gente no direct. A gente transforma em caneca." |
 
 Trilha: instrumental leve, com uma subida no 0–3s e outra no 16s (papel saindo).
 O som ambiente do papel sendo puxado pode ficar baixinho por baixo da locução: ele dá gosto de ver.
@@ -47,7 +47,7 @@ O som ambiente do papel sendo puxado pode ficar baixinho por baixo da locução:
 
 ## Locução completa (pra gravar)
 
-Umas 90 palavras, em torno de 33 segundos num ritmo calmo. Vai em blocos: se errar, regrave só o bloco.
+Umas 85 palavras, em torno de 32 segundos num ritmo calmo. Vai em blocos: se errar, regrave só o bloco.
 
 ```
 Olha o que aparece quando o papel sai.
@@ -60,7 +60,7 @@ Na hora de tirar o papel, aparece cada detalhe, do jeito que você pediu.
 
 Pode ser uma caneca só, pra presentear alguém especial, ou um lote inteiro, pra sua turma ou o seu evento.
 
-Conte a sua ideia pra gente no WhatsApp, pelo link da bio. A gente transforma em caneca.
+Mande a sua ideia pra gente no direct. A gente transforma em caneca.
 ```
 
 Se não quiser gravar com a própria voz (a voz também identifica), dá pra gerar a locução por IA
@@ -76,7 +76,7 @@ Uma caneca branca, uma ideia sua e pronto: vira presente com significado. ☕
 A gente personaliza do seu jeito: frase, data, nome, foto ou aquela lembrança que só vocês entendem.
 Uma unidade pra presentear ou um lote pra sua turma, empresa ou evento.
 
-Chame no WhatsApp pelo link da bio e conte a sua ideia.
+Mande a sua ideia no nosso direct que a gente responde por lá.
 
 #canecapersonalizada #presentepersonalizado #uniqeepersonalizados #sublimacao #presentecomsignificado
 ```
