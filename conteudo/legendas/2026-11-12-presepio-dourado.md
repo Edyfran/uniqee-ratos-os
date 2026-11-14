@@ -47,18 +47,39 @@ Azulejo Presépio Dourado ✨
 Maria e o Menino, pronto pra enfeitar a sua sala neste Natal. Encomende pelo direct ou responda aqui 🎄
 ```
 
-## Resposta do direct (preço)
+## Resposta do direct (em etapas, pra conversar antes de vender)
+
+Versão anterior (14/11/2026 trocada por ser direta demais no primeiro contato): mandava preço, entrada
+de 50%, prazo e entrega de uma vez.
+
+### 1. Primeiro contato (automação)
 
 ```
-Olá! Que bom que você gostou do presépio dourado ✨
+Olá, tudo bem? Que alegria receber a sua mensagem 😊
 
-O azulejo personalizado sai por:
-• 15 x 15 cm: R$ 35,00
-• 20 x 20 cm: R$ 45,00
+Fico feliz que o presépio dourado tocou você ✨ Qual das artes chamou mais a sua atenção?
 
-Qual opção você escolheu e em qual tamanho?
+E me conte: é pra deixar na sua casa ou pra presentear alguém especial?
+```
 
-Pra fazer o pedido, a gente pede 50% de entrada via Pix, e o prazo é de até 5 dias úteis. A entrega é sem taxa, ou você pode retirar, como preferir. Peça com antecedência pra garantir o seu antes do Natal 🎄
+### 1b. Se a pessoa já perguntou o preço
+
+```
+Olá, tudo bem? Que alegria receber a sua mensagem 😊
+
+O azulejo do presépio dourado sai a partir de R$ 35,00 (15 x 15 cm), e também temos no tamanho 20 x 20 cm, por R$ 45,00.
+
+Qual das artes chamou mais a sua atenção? Se quiser, mostro como ela fica em cada tamanho ✨
+```
+
+### 2. Quando ela escolher a arte e o tamanho
+
+```
+Escolha linda! Esse vai ficar muito bonito 🎄
+
+Pra garantir o seu, a gente pede 50% de entrada via Pix, e o azulejo fica pronto em até 5 dias úteis. A entrega é sem taxa, ou você pode retirar, como preferir.
+
+Como o Natal está chegando, quanto antes a gente fechar, mais tranquilo fica pra você.
 ```
 
 Se o preço incluir o suporte, pôr "com suporte" depois dos tamanhos.
