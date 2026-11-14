@@ -52,24 +52,25 @@ Maria e o Menino, pronto pra enfeitar a sua sala neste Natal. Encomende pelo dir
 Versão anterior (14/11/2026 trocada por ser direta demais no primeiro contato): mandava preço, entrada
 de 50%, prazo e entrega de uma vez.
 
-### 1. Primeiro contato (automação)
+### 1. Primeiro contato (automação, depois que a pessoa comenta o número)
 
 ```
-Olá, tudo bem? Que alegria receber a sua mensagem 😊
+Olá, tudo bem? Vi que você escolheu a sua favorita entre os presépios dourados, que alegria! ✨
 
-Fico feliz que o presépio dourado tocou você ✨ Qual das artes chamou mais a sua atenção?
+Ótima escolha. Cada arte mostra um momento do nascimento de Jesus, e a que você escolheu fica linda em lugar de destaque.
 
-E me conte: é pra deixar na sua casa ou pra presentear alguém especial?
+Me conte: é pra deixar na sua casa ou pra presentear alguém especial neste Natal? 🎄
 ```
 
-### 1b. Se a pessoa já perguntou o preço
+Se a automação conseguir pôr o número que a pessoa comentou na mensagem, trocar a primeira linha por:
+"Vi que você escolheu o presépio número X, que alegria! ✨"
+
+### 1b. Quando ela responder (ou perguntar o preço)
 
 ```
-Olá, tudo bem? Que alegria receber a sua mensagem 😊
+Que bom! Tenho certeza de que vai ficar lindo 😊
 
-O azulejo do presépio dourado sai a partir de R$ 35,00 (15 x 15 cm), e também temos no tamanho 20 x 20 cm, por R$ 45,00.
-
-Qual das artes chamou mais a sua atenção? Se quiser, mostro como ela fica em cada tamanho ✨
+O azulejo sai por R$ 35,00 no tamanho 15 x 15 cm, ou R$ 45,00 no 20 x 20 cm. Se quiser, mostro como a sua arte fica em cada tamanho ✨
 ```
 
 ### 2. Quando ela escolher a arte e o tamanho
