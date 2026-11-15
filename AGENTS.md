@@ -158,5 +158,6 @@ Este sistema está no GitHub: depois do `/atualizar`, oferecer o `/syncar` na me
 - `atendimento/` · modelos de resposta pro WhatsApp e orçamentos
 - `projetos/` · projetos internos, um por pasta (o PreçoArte entra aqui)
   - `projetos/fabrica-de-conteudo/` · Fábrica de Conteúdo com IA: edita os Reels (corte, legenda, peças, trilha, capa). Tem AGENTS.md próprio do pacote
+  - `projetos/loja-uniqee/` · Loja virtual própria da Uniqee (vitrine, provador com mockup, venda e gestão), pra substituir o Brinderoz
 - `estudos/` · pesquisas de tendência, concorrência e referências
 - `publicacoes/` · o que já foi postado, pra consultar
