@@ -97,7 +97,7 @@
     toast.classList.add('on');
     clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove('on'), 5000);
   }
-  function abrirGaveta() { document.body.classList.add('gaveta-aberta'); desenharGaveta(); $('#gaveta').setAttribute('aria-hidden', 'false'); }
+  function abrirGaveta() { toast.classList.remove('on'); document.body.classList.add('gaveta-aberta'); desenharGaveta(); $('#gaveta').setAttribute('aria-hidden', 'false'); }
   function fecharGaveta() { document.body.classList.remove('gaveta-aberta'); $('#gaveta').setAttribute('aria-hidden', 'true'); }
   $('#abrirCarrinho').onclick = abrirGaveta;
   $('#fecharCarrinho').onclick = fecharGaveta;

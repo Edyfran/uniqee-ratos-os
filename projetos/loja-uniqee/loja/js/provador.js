@@ -4,20 +4,26 @@
 window.Provador = (function () {
   const TIPOS = {
     caneca: {
-      area: { w: 21, h: 9.8 }, tituloCor: 'Fundo da caneca', dica: 'Arraste pra girar a caneca', corPadrao: '#ffffff', fundo: true,
+      area: { w: 21, h: 9.8 }, tituloCor: 'Fundo da caneca', rotuloCor: 'Fundo', dica: 'Arraste pra girar a caneca', corPadrao: '#ffffff', fundo: true,
       cores: [['Branco', '#ffffff'], ['Creme', '#f3ebe2'], ['Rosa clarinho', '#fdf0e9'], ['Rosé', '#c57e84'], ['Azul', '#cfe2ea'], ['Petróleo', '#457981'], ['Preto', '#1c1c1e']],
-      texto: { y: .3, tam: 1.8 }, alturaEditor: 260,
+      texto: { y: .3, tam: 1.8 }, alturaEditor: 260, lados: ['frente'],
     },
     camiseta: {
-      area: { w: 28, h: 35 }, tituloCor: 'Cor da camiseta', dica: 'Estampa de 28 x 35 cm na frente', corPadrao: '#f7f7f4', fundo: false,
-      cores: [['Branca', '#f7f7f4'], ['Off-white', '#eee6d6'], ['Cinza mescla', '#b8bbbe'], ['Verde-militar', '#4b5130'], ['Azul-marinho', '#1f2a44'], ['Preta', '#1c1c1e']],
-      texto: { y: .36, tam: 3.4 }, alturaEditor: 380,
+      area: { w: 28, h: 35 }, tituloCor: 'Cor da camiseta', rotuloCor: 'Cor', dica: '', corPadrao: '#f4f4f2', fundo: false,
+      cores: [['Branca', '#f4f4f2'], ['Preta', '#111113'], ['Cinza mescla', '#b3b5b8'], ['Azul-marinho', '#1d2740'], ['Verde-militar', '#4a5032'], ['Off-white', '#ece4d4']],
+      texto: { y: .36, tam: 3.4 }, alturaEditor: 380, lados: ['frente', 'costas'],
     },
     azulejo: {
-      area: { w: 15.7, h: 15.7 }, tituloCor: 'Fundo do azulejo', dica: 'Azulejo 15x15 no suporte', corPadrao: '#ffffff', fundo: true,
+      area: { w: 15.7, h: 15.7 }, tituloCor: 'Fundo do azulejo', rotuloCor: 'Fundo', dica: 'Azulejo 15x15 no suporte', corPadrao: '#ffffff', fundo: true,
       cores: [['Branco', '#ffffff'], ['Creme', '#f3ebe2'], ['Rosa clarinho', '#fdf0e9'], ['Rosé', '#c57e84'], ['Azul', '#cfe2ea'], ['Preto', '#1c1c1e']],
-      texto: { y: .36, tam: 1.6 }, alturaEditor: 320,
+      texto: { y: .36, tam: 1.6 }, alturaEditor: 320, lados: ['frente'],
     },
+  };
+  // Onde fica a área de impressão nas fotos da camiseta (js/camiseta-fotos.js), medido numa escala de 1000 px:
+  // cx é o centro, topo é o começo da estampa e k é quantos pixels valem 1 cm.
+  const FOTOS_CAMISA = {
+    frente: { cx: 495, topo: 200, k: 8.6 },
+    costas: { cx: 493, topo: 165, k: 8.6 },
   };
   const FONTES = [
     { id: 'Caveat', nome: 'Manuscrita', css: '700 {px} "Caveat"' },
@@ -28,25 +34,67 @@ window.Provador = (function () {
     ['Azul-noite', '#0b1220'], ['Marrom café', '#5e5045'], ['Rosé', '#c57e84'],
     ['Branco', '#ffffff'], ['Petróleo', '#457981'], ['Dourado', '#b8892b'],
   ];
+  const NOME_LADO = { frente: 'Frente', costas: 'Costas' };
   const ICONE_ENVIAR = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>';
+
+  // ---------- camiseta: fotos, mapas de sombra e de brilho (carregados uma vez) ----------
+  let camisaPronta = null;
+  function carregarCamisa() {
+    if (camisaPronta) return camisaPronta;
+    camisaPronta = Promise.all(Object.entries(FOTOS_CAMISA).map(async ([lado, f]) => {
+      const img = new Image(); img.src = window.UNIQEE_CAMISA[lado]; await img.decode();
+      const N = img.naturalWidth;
+      const base = document.createElement('canvas'); base.width = base.height = N;
+      const bg = base.getContext('2d'); bg.drawImage(img, 0, 0);
+      const px = bg.getImageData(0, 0, N, N).data;
+      // sombra: o branco da foto vira 1 e as dobras escurecem um pouco mais que no original
+      const sombra = document.createElement('canvas'); sombra.width = sombra.height = N;
+      const brilho = document.createElement('canvas'); brilho.width = brilho.height = N;
+      const sd = sombra.getContext('2d').createImageData(N, N), hd = brilho.getContext('2d').createImageData(N, N);
+      for (let i = 0; i < px.length; i += 4) {
+        const l = (.299 * px[i] + .587 * px[i + 1] + .114 * px[i + 2]) / 255;
+        const s = Math.max(0, Math.min(1, 1 - (0.97 - l) * 1.35)) * 255;
+        sd.data[i] = sd.data[i + 1] = sd.data[i + 2] = s; sd.data[i + 3] = px[i + 3];
+        hd.data[i] = hd.data[i + 1] = hd.data[i + 2] = 255;
+        hd.data[i + 3] = px[i + 3] * Math.max(0, Math.min(1, (l - .80) * 4.5));
+      }
+      sombra.getContext('2d').putImageData(sd, 0, 0);
+      brilho.getContext('2d').putImageData(hd, 0, 0);
+      return [lado, { ...f, N, base, sombra, brilho }];
+    })).then(Object.fromEntries);
+    return camisaPronta;
+  }
+  const luminancia = (hex) => { const n = parseInt(hex.slice(1), 16); return ((n >> 16) * .299 + ((n >> 8) & 255) * .587 + (n & 255) * .114) / 255; };
 
   function montar(raiz, { tipo, produto, aoAdicionar }) {
     const T = TIPOS[tipo];
     const A = T.area;
     const brl = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     const opcoesProduto = produto.opcoes || [];
+    const ehCamisa = tipo === 'camiseta';
 
     raiz.innerHTML = `
       <div class="prov-grade">
-        <div class="prov-palco" role="img" aria-label="Como vai ficar">
-          <div class="prov-vista prov-3d" data-v="3d" hidden><div class="carregando">Preparando a caneca…</div></div>
-          <canvas class="prov-vista" data-v="camisa" hidden></canvas>
-          <div class="prov-vista prov-azulejo" data-v="azulejo" hidden><div class="placa"><canvas></canvas><div class="suporte"><i></i><i></i></div></div></div>
-          <p class="dica">${T.dica}</p>
+        <div>
+          <div class="prov-palco${ehCamisa ? ' escuro' : ''}" role="img" aria-label="Como vai ficar">
+            <div class="prov-vista prov-3d" data-v="3d" hidden><div class="carregando">Preparando a caneca…</div></div>
+            <canvas class="prov-vista" data-v="camisa" hidden></canvas>
+            <div class="prov-vista prov-azulejo" data-v="azulejo" hidden><div class="placa"><canvas></canvas><div class="suporte"><i></i><i></i></div></div></div>
+            ${T.lados.length > 1 ? `<div class="lados" role="tablist">${T.lados.map(l => `<button role="tab" data-lado="${l}" aria-selected="${l === 'frente'}">${NOME_LADO[l]}</button>`).join('')}</div>` : ''}
+            ${T.dica ? `<p class="dica">${T.dica}</p>` : ''}
+          </div>
+          ${ehCamisa ? '<div class="miniaturas" data-c="miniaturas"></div>' : ''}
         </div>
         <div class="prov-painel">
+          ${ehCamisa ? `<div class="prov-passo prov-cabeca">
+            <h1>${produto.nome}</h1>
+            <div class="preco"><b>${brl(produto.preco)}</b><small>no Pix</small></div>
+            <div class="rotulo-peq">COR <span data-c="nomeCor"></span></div>
+            <div class="cores-chip" data-c="coresPeca"></div>
+            ${opcoesProduto.map((o, i) => `<div class="rotulo-peq">${o.nome.toUpperCase()}</div><div class="opcoes-lista" data-opcao="${i}">${o.valores.map(v => `<button class="opcao" data-v="${v}" aria-pressed="false">${v}</button>`).join('')}</div>`).join('')}
+          </div>` : ''}
           <div class="prov-passo">
-            <h2><span>1</span> Sua foto</h2>
+            <h2><span>1</span> Sua foto${ehCamisa ? ` <em class="lado-atual" data-c="ladoAtual">na frente</em>` : ''}</h2>
             <div class="linha">
               <label class="botao rose enviar"><input type="file" data-c="arquivo" accept="image/*">${ICONE_ENVIAR} Enviar foto</label>
               <button class="botao leve" data-c="exemplo">Usar foto de exemplo</button>
@@ -73,13 +121,13 @@ window.Provador = (function () {
             <div class="linha" data-c="coresTexto"></div>
             <div class="ajustes"><label class="ajuste">Tamanho <input type="range" data-c="tamTexto" min="0.8" max="6" step="0.05"></label></div>
           </div>
-          <div class="prov-passo">
+          ${ehCamisa ? '' : `<div class="prov-passo">
             <h2><span>3</span> ${T.tituloCor}${opcoesProduto.length ? ' e tamanho' : ''}</h2>
-            <div class="linha" data-c="coresPeca"></div>
+            <div class="cores-chip" data-c="coresPeca"></div>
             ${opcoesProduto.map((o, i) => `<div class="rotulo-peq">${o.nome}</div><div class="opcoes-lista" data-opcao="${i}">${o.valores.map(v => `<button class="opcao" data-v="${v}" aria-pressed="false">${v}</button>`).join('')}</div>`).join('')}
-          </div>
+          </div>`}
           <div class="prov-passo prov-final">
-            <div class="preco-prov"><span>${produto.nome}</span><b>${brl(produto.preco)}</b></div>
+            ${ehCamisa ? '' : `<div class="preco-prov"><span>${produto.nome}</span><b>${brl(produto.preco)}</b></div>`}
             <div class="linha" style="justify-content:space-between">
               <span class="rot" style="margin:0">Quantidade</span>
               <div class="qtd"><button data-c="menos" aria-label="Menos">−</button><input data-c="qtd" type="number" min="1" max="99" value="1" aria-label="Quantidade"><button data-c="mais" aria-label="Mais">+</button></div>
@@ -98,47 +146,47 @@ window.Provador = (function () {
     const azCanvas = vAz.querySelector('canvas');
     ({ caneca: vista3d, camiseta: vc, azulejo: vAz })[tipo].hidden = false;
 
-    const st = {
-      cor: T.corPadrao, foto: null,
-      fx: 0, fy: 0, fs: 1, fr: 0,
-      texto: '', fonte: 'Caveat', corTexto: '#5e5045', tam: T.texto.tam, tx: 0, ty: A.h * T.texto.y,
-      opcoes: {},
-    };
-    q('tamTexto').value = st.tam;
+    // cada lado da peça tem a sua arte; cor, tamanho e quantidade são da peça
+    const novaArte = () => ({ foto: null, fx: 0, fy: 0, fs: 1, fr: 0, texto: '', fonte: 'Caveat', corTexto: '#5e5045', tam: T.texto.tam, tx: 0, ty: A.h * T.texto.y });
+    const artes = Object.fromEntries(T.lados.map(l => [l, novaArte()]));
+    let lado = 'frente', st = artes.frente;
+    const peca = { cor: T.corPadrao, opcoes: {} };
+    const temArte = (a) => !!(a.foto || a.texto.trim());
 
     // ---------- desenho da estampa ----------
-    const fonteCss = (px) => FONTES.find(f => f.id === st.fonte).css.replace('{px}', px.toFixed(2) + 'px');
+    const fonteCss = (a, px) => FONTES.find(f => f.id === a.fonte).css.replace('{px}', px.toFixed(2) + 'px');
     const larg = (img) => img.naturalWidth || img.width;
     const alt = (img) => img.naturalHeight || img.height;
-    function medidaFoto() {
-      const f = st.foto, cover = Math.max(A.w / f.nw, A.h / f.nh);
-      return { w: f.nw * cover * st.fs, h: f.nh * cover * st.fs, cmPorPx: cover * st.fs };
+    function medidaFoto(a = st) {
+      const f = a.foto, cover = Math.max(A.w / f.nw, A.h / f.nh);
+      return { w: f.nw * cover * a.fs, h: f.nh * cover * a.fs, cmPorPx: cover * a.fs };
     }
-    function desenharEstampa(ctx, ox, oy, k, { fundo = true, full = false } = {}) {
+    function desenharEstampa(ctx, ox, oy, k, { fundo = true, full = false, arte = st } = {}) {
+      const a = arte;
       ctx.save();
       ctx.beginPath(); ctx.rect(ox, oy, A.w * k, A.h * k); ctx.clip();
-      if (fundo && T.fundo) { ctx.fillStyle = st.cor; ctx.fillRect(ox, oy, A.w * k, A.h * k); }
-      if (st.foto) {
-        const m = medidaFoto();
+      if (fundo && T.fundo) { ctx.fillStyle = peca.cor; ctx.fillRect(ox, oy, A.w * k, A.h * k); }
+      if (a.foto) {
+        const m = medidaFoto(a);
         ctx.save();
-        ctx.translate(ox + (A.w / 2 + st.fx) * k, oy + (A.h / 2 + st.fy) * k);
-        ctx.rotate(st.fr * Math.PI / 180);
+        ctx.translate(ox + (A.w / 2 + a.fx) * k, oy + (A.h / 2 + a.fy) * k);
+        ctx.rotate(a.fr * Math.PI / 180);
         ctx.imageSmoothingQuality = 'high';
-        ctx.drawImage(full ? st.foto.full : st.foto.prev, -m.w * k / 2, -m.h * k / 2, m.w * k, m.h * k);
+        ctx.drawImage(full ? a.foto.full : a.foto.prev, -m.w * k / 2, -m.h * k / 2, m.w * k, m.h * k);
         ctx.restore();
       }
-      if (st.texto.trim()) {
-        ctx.font = fonteCss(st.tam * k);
+      if (a.texto.trim()) {
+        ctx.font = fonteCss(a, a.tam * k);
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillStyle = st.corTexto;
-        ctx.fillText(st.texto, ox + (A.w / 2 + st.tx) * k, oy + (A.h / 2 + st.ty) * k);
+        ctx.fillStyle = a.corTexto;
+        ctx.fillText(a.texto, ox + (A.w / 2 + a.tx) * k, oy + (A.h / 2 + a.ty) * k);
       }
       ctx.restore();
     }
     function caixaTexto() {
       if (!st.texto.trim()) return null;
       const c = document.createElement('canvas').getContext('2d');
-      c.font = fonteCss(100);
+      c.font = fonteCss(st, 100);
       const w = c.measureText(st.texto).width / 100 * st.tam, h = st.tam * 0.9;
       return { x: st.tx - w / 2, y: st.ty - h / 2, w, h };
     }
@@ -159,12 +207,13 @@ window.Provador = (function () {
     function desenharEditor() {
       const W = A.w * ek, H = A.h * ek;
       edc.clearRect(0, 0, W, H);
-      edc.fillStyle = st.cor; edc.fillRect(0, 0, W, H);
+      edc.fillStyle = peca.cor; edc.fillRect(0, 0, W, H);
       desenharEstampa(edc, 0, 0, ek);
-      if (!st.foto && !st.texto.trim()) {
-        edc.fillStyle = 'rgba(15,23,42,.45)'; edc.font = '500 15px "Radio Canada Big"';
+      if (!temArte(st)) {
+        edc.fillStyle = luminancia(peca.cor) < .45 ? 'rgba(255,255,255,.6)' : 'rgba(15,23,42,.45)';
+        edc.font = '500 15px "Radio Canada Big"';
         edc.textAlign = 'center'; edc.textBaseline = 'middle';
-        edc.fillText('Toque aqui pra enviar sua foto', W / 2, H / 2);
+        edc.fillText(ehCamisa && lado === 'costas' ? 'Toque aqui pra estampar as costas' : 'Toque aqui pra enviar sua foto', W / 2, H / 2);
       }
       if (alvo === 'texto') {
         const b = caixaTexto();
@@ -301,53 +350,60 @@ window.Provador = (function () {
       tres.medir(); tres.atualizar();
     }
 
-    // ---------- camiseta (desenhada, enquanto não há foto real da peça) ----------
-    const vcc = vc.getContext('2d');
-    const CAMISA = new Path2D('M27 3 C30 9.5 46 9.5 49 3 L63 6 L77 19 L70.5 29.5 L64.5 25.5 L65 74 Q38 76.5 11 74 L11.5 25.5 L5.5 29.5 L-1 19 L13 6 Z');
-    const GOLA = new Path2D('M27 3 C30 9.5 46 9.5 49 3');
-    const corEscura = (hex) => { const n = parseInt(hex.slice(1), 16); return ((n >> 16) * .299 + ((n >> 8) & 255) * .587 + (n & 255) * .114) < 110; };
-    function desenharCamisa() {
-      const dpr = window.devicePixelRatio || 1, W = vc.clientWidth, Hh = vc.clientHeight;
-      if (!W) return;
-      vc.width = W * dpr; vc.height = Hh * dpr;
-      const g = vcc;
-      g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, Hh);
-      const k = Math.min(W, Hh) / 86, ox = (W - 76 * k) / 2, oy = (Hh - 77 * k) / 2 + k;
-      g.save(); g.translate(ox, oy); g.scale(k, k);
-      g.shadowColor = 'rgba(40,30,20,.18)'; g.shadowBlur = 24; g.shadowOffsetY = .8;
-      g.fillStyle = st.cor; g.fill(CAMISA);
-      g.shadowColor = 'transparent';
-      g.save(); g.clip(CAMISA);
-      // estampa desenhada à parte em boa resolução, pra letra pequena não deformar
-      const ke = k * dpr, est = document.createElement('canvas');
-      est.width = Math.ceil(A.w * ke); est.height = Math.ceil(A.h * ke);
-      desenharEstampa(est.getContext('2d'), 0, 0, ke, { fundo: false });
-      g.drawImage(est, 24, 11, A.w, A.h);
-      const escura = corEscura(st.cor);
-      g.globalCompositeOperation = 'multiply';
-      const lados = g.createLinearGradient(11, 0, 65, 0);
-      lados.addColorStop(0, 'rgba(0,0,0,.16)'); lados.addColorStop(.18, 'rgba(0,0,0,0)'); lados.addColorStop(.82, 'rgba(0,0,0,0)'); lados.addColorStop(1, 'rgba(0,0,0,.16)');
-      g.fillStyle = lados; g.fillRect(-2, 0, 80, 80);
-      for (const [x, y, rx, ry, rot, a] of [[20, 52, 3, 18, -.18, .10], [55, 50, 3, 20, .15, .09], [38, 66, 14, 4, 0, .08], [16, 14, 7, 3, .5, .10], [60, 14, 7, 3, -.5, .10], [70, 22, 5, 2, .8, .08], [6, 22, 5, 2, -.8, .08]]) {
-        g.save(); g.translate(x, y); g.rotate(rot); g.scale(rx, ry);
-        const r = g.createRadialGradient(0, 0, 0, 0, 0, 1);
-        r.addColorStop(0, `rgba(0,0,0,${a})`); r.addColorStop(1, 'rgba(0,0,0,0)');
-        g.fillStyle = r; g.beginPath(); g.arc(0, 0, 1, 0, Math.PI * 2); g.fill(); g.restore();
-      }
-      g.globalCompositeOperation = 'screen';
-      const lp = g.createRadialGradient(34, 26, 1, 34, 26, 26);
-      lp.addColorStop(0, `rgba(255,255,255,${escura ? .10 : .06})`); lp.addColorStop(1, 'rgba(255,255,255,0)');
-      g.fillStyle = lp; g.fillRect(0, 0, 80, 80);
+    // ---------- camiseta: foto lisa tingida na cor escolhida, com a estampa por baixo das dobras ----------
+    let fotos = null;
+    function pintarCamisa(destino, ladoCamisa, cor, tamanho) {
+      const F = fotos[ladoCamisa], N = tamanho, s = N / 1000;
+      destino.width = destino.height = N;
+      const g = destino.getContext('2d');
+      g.clearRect(0, 0, N, N);
+      // 1. a silhueta na cor da camisa
       g.globalCompositeOperation = 'source-over';
-      g.restore();
-      g.lineCap = 'round';
-      g.strokeStyle = escura ? 'rgba(255,255,255,.10)' : 'rgba(0,0,0,.10)'; g.lineWidth = 1.6; g.stroke(GOLA);
-      g.strokeStyle = escura ? 'rgba(0,0,0,.35)' : 'rgba(0,0,0,.12)'; g.lineWidth = .18;
-      g.beginPath(); g.moveTo(27.6, 4.6); g.bezierCurveTo(30.6, 11.2, 45.4, 11.2, 48.4, 4.6); g.stroke();
-      g.beginPath(); g.moveTo(11.1, 72.4); g.quadraticCurveTo(38, 74.9, 64.9, 72.4); g.stroke();
-      g.strokeStyle = 'rgba(0,0,0,.14)'; g.lineWidth = .15; g.stroke(CAMISA);
-      g.restore();
+      g.fillStyle = cor; g.fillRect(0, 0, N, N);
+      g.globalCompositeOperation = 'destination-in';
+      g.drawImage(F.base, 0, 0, N, N);
+      // 2. a estampa, presa dentro da camisa
+      const arte = artes[ladoCamisa];
+      if (temArte(arte)) {
+        g.globalCompositeOperation = 'source-atop';
+        const k = F.k * s;
+        desenharEstampa(g, F.cx * s - A.w * k / 2, F.topo * s, k, { fundo: false, arte });
+      }
+      // 3. as dobras escurecem tudo (tecido e estampa) e 4. o brilho volta nas partes altas
+      g.globalCompositeOperation = 'multiply';
+      g.drawImage(F.sombra, 0, 0, N, N);
+      g.globalCompositeOperation = 'screen';
+      g.globalAlpha = luminancia(cor) < .35 ? .2 : .12;
+      g.drawImage(F.brilho, 0, 0, N, N);
+      g.globalAlpha = 1;
+      g.globalCompositeOperation = 'destination-in';
+      g.drawImage(F.base, 0, 0, N, N);
+      g.globalCompositeOperation = 'source-over';
+      return destino;
     }
+    function desenharCamisa() {
+      if (!fotos) return;
+      const dpr = window.devicePixelRatio || 1, W = vc.clientWidth;
+      if (!W) return;
+      const N = Math.min(1000, Math.round(W * dpr));
+      pintarCamisa(vc, lado, peca.cor, N);
+    }
+    let timerMinis = null;
+    function desenharMiniaturas() {
+      clearTimeout(timerMinis);
+      timerMinis = setTimeout(() => {
+        const box = q('miniaturas'); if (!box || !fotos) return;
+        if (!box.children.length) {
+          box.innerHTML = T.cores.map(([nome, hex]) => `<button class="mini" data-cor="${hex}" title="${nome}" aria-label="${nome}"><canvas></canvas><span>${nome}</span></button>`).join('');
+          box.querySelectorAll('.mini').forEach(b => b.onclick = () => { peca.cor = b.dataset.cor; montarCores(); atualizar(); });
+        }
+        box.querySelectorAll('.mini').forEach(b => {
+          b.setAttribute('aria-pressed', b.dataset.cor === peca.cor);
+          pintarCamisa(b.querySelector('canvas'), lado, b.dataset.cor, 180);
+        });
+      }, 250);
+    }
+    if (ehCamisa) carregarCamisa().then(f => { fotos = f; atualizar(); });
 
     // ---------- azulejo (placa com leve perspectiva) ----------
     function desenharAzulejo() {
@@ -381,7 +437,7 @@ window.Provador = (function () {
         if (desmontado) return;
         desenharEditor();
         if (tipo === 'caneca') tres && tres.atualizar();
-        else if (tipo === 'camiseta') desenharCamisa();
+        else if (ehCamisa) { desenharCamisa(); desenharMiniaturas(); }
         else desenharAzulejo();
         atualizarQualidade();
       });
@@ -392,13 +448,12 @@ window.Provador = (function () {
       const box = q('coresPeca'); box.innerHTML = '';
       for (const [nome, hex] of T.cores) {
         const b = document.createElement('button');
-        b.className = 'cor'; b.style.background = hex; b.title = nome; b.setAttribute('aria-label', nome);
-        b.setAttribute('aria-pressed', st.cor === hex);
-        b.onclick = () => { st.cor = hex; montarCores(); atualizar(); };
+        b.className = 'cor-chip'; b.innerHTML = `<i style="background:${hex}"></i>${nome}`;
+        b.setAttribute('aria-pressed', peca.cor === hex);
+        b.onclick = () => { peca.cor = hex; montarCores(); atualizar(); };
         box.appendChild(b);
       }
-      const s = document.createElement('span'); s.className = 'cor-nome';
-      s.textContent = T.cores.find(c => c[1] === st.cor)?.[0] || ''; box.appendChild(s);
+      const nc = q('nomeCor'); if (nc) nc.textContent = '· ' + (T.cores.find(c => c[1] === peca.cor)?.[0] || '');
     }
     function montarTexto() {
       const fb = q('fontes'); fb.innerHTML = '';
@@ -418,10 +473,24 @@ window.Provador = (function () {
         cb.appendChild(b);
       }
     }
+    // os controles mostram sempre a arte do lado que está aberto
+    function sincronizarControles() {
+      q('texto').value = st.texto;
+      q('tamTexto').value = st.tam;
+      q('zoom').value = st.fs; q('giro').value = st.fr;
+      q('ajustes').hidden = !st.foto;
+      const la = q('ladoAtual'); if (la) la.textContent = lado === 'frente' ? 'na frente' : 'nas costas';
+      raiz.querySelectorAll('[data-lado]').forEach(b => b.setAttribute('aria-selected', b.dataset.lado === lado));
+      montarTexto();
+    }
+    raiz.querySelectorAll('[data-lado]').forEach(b => b.onclick = () => {
+      lado = b.dataset.lado; st = artes[lado]; alvo = null;
+      sincronizarControles(); atualizar();
+    });
     raiz.querySelectorAll('[data-opcao]').forEach(box => {
       const o = opcoesProduto[+box.dataset.opcao];
       box.querySelectorAll('.opcao').forEach(b => b.onclick = () => {
-        st.opcoes[o.nome] = b.dataset.v;
+        peca.opcoes[o.nome] = b.dataset.v;
         box.querySelectorAll('.opcao').forEach(x => x.setAttribute('aria-pressed', x === b));
       });
     });
@@ -491,9 +560,9 @@ window.Provador = (function () {
     }
 
     // ---------- adicionar ao carrinho ----------
-    function miniatura(origem, lado = 360) {
+    function miniatura(origem, lado = 360, fundo = '#f6efe8') {
       const c = document.createElement('canvas'); c.width = c.height = lado;
-      const g = c.getContext('2d'); g.fillStyle = '#f6efe8'; g.fillRect(0, 0, lado, lado);
+      const g = c.getContext('2d'); g.fillStyle = fundo; g.fillRect(0, 0, lado, lado);
       const w = origem.width, h = origem.height, s = Math.min(lado / w, lado / h);
       g.drawImage(origem, (lado - w * s) / 2, (lado - h * s) / 2, w * s, h * s);
       return c.toDataURL('image/jpeg', .82);
@@ -507,31 +576,46 @@ window.Provador = (function () {
       g.fillStyle = '#1d1d1f'; g.fillRect(170, 470, 50, 26); g.fillRect(380, 470, 50, 26);
       return c;
     }
+    function mockupCamisa() {
+      // frente e, se tiver arte, as costas lado a lado
+      const comCostas = artes.costas && temArte(artes.costas);
+      const c = document.createElement('canvas'); c.width = comCostas ? 1200 : 600; c.height = 600;
+      const g = c.getContext('2d'); g.fillStyle = '#0d0d0f'; g.fillRect(0, 0, c.width, c.height);
+      g.drawImage(pintarCamisa(document.createElement('canvas'), 'frente', peca.cor, 600), 0, 0);
+      if (comCostas) g.drawImage(pintarCamisa(document.createElement('canvas'), 'costas', peca.cor, 600), 600, 0);
+      return c;
+    }
+    function descreverArte(a) {
+      const d = [];
+      if (a.texto.trim()) d.push(`texto "${a.texto.trim()}" (${FONTES.find(f => f.id === a.fonte).nome.toLowerCase()})`);
+      if (a.foto) d.push(`foto ${a.foto.nome}, ${Math.round(2.54 / medidaFoto(a).cmPorPx)} dpi`);
+      return d.join(', ');
+    }
     q('adicionar').onclick = () => {
       const falta = [];
-      if (!st.foto && !st.texto.trim()) falta.push('envie uma foto ou escreva um texto');
-      for (const o of opcoesProduto) if (!st.opcoes[o.nome]) falta.push(`escolha o ${o.nome.toLowerCase()}`);
-      if (st.foto && !q('termo').checked) falta.push('confirme que pode usar a imagem');
+      if (!T.lados.some(l => temArte(artes[l]))) falta.push('envie uma foto ou escreva um texto');
+      for (const o of opcoesProduto) if (!peca.opcoes[o.nome]) falta.push(`escolha o ${o.nome.toLowerCase()}`);
+      if (T.lados.some(l => artes[l].foto) && !q('termo').checked) falta.push('confirme que pode usar a imagem');
+      if (ehCamisa && !fotos) falta.push('espere a camiseta carregar');
       const fm = q('falta');
       if (falta.length) { fm.hidden = false; fm.textContent = 'Falta pouco: ' + falta.join(', ') + '.'; return; }
       fm.hidden = true;
-      const origem = tipo === 'caneca' ? tres.foto() : tipo === 'camiseta' ? vc : mockupAzulejo();
-      const corNome = T.cores.find(c => c[1] === st.cor)?.[0];
-      const detalhes = [`${T.tituloCor.split(' ')[0]}: ${corNome}`];
-      for (const o of opcoesProduto) detalhes.push(`${o.nome}: ${st.opcoes[o.nome]}`);
-      if (st.texto.trim()) detalhes.push(`Texto: "${st.texto.trim()}" (${FONTES.find(f => f.id === st.fonte).nome.toLowerCase()})`);
-      if (st.foto) detalhes.push(`Foto: ${st.foto.nome}, ${Math.round(2.54 / medidaFoto().cmPorPx)} dpi no tamanho escolhido`);
+      const origem = tipo === 'caneca' ? tres.foto() : ehCamisa ? mockupCamisa() : mockupAzulejo();
+      const corNome = T.cores.find(c => c[1] === peca.cor)?.[0];
+      const detalhes = [`${T.rotuloCor}: ${corNome}`];
+      for (const o of opcoesProduto) detalhes.push(`${o.nome}: ${peca.opcoes[o.nome]}`);
+      for (const l of T.lados) if (temArte(artes[l])) detalhes.push((T.lados.length > 1 ? NOME_LADO[l] + ': ' : 'Arte: ') + descreverArte(artes[l]));
       aoAdicionar({
         qtd: Math.max(1, Math.min(99, +qtd.value || 1)),
-        opcoes: { ...st.opcoes, [T.tituloCor.split(' ')[0]]: corNome },
-        detalhes, mockup: miniatura(origem),
-        // Na versão final, a foto original e o arquivo de impressão sobem pro servidor junto com o pedido.
-        arquivoImpressao: () => {
+        opcoes: { ...peca.opcoes, [T.rotuloCor]: corNome },
+        detalhes, mockup: miniatura(origem, 360, ehCamisa ? '#0d0d0f' : '#f6efe8'),
+        // Na versão final, a foto original e o arquivo de impressão de cada lado sobem pro servidor com o pedido.
+        arquivosImpressao: () => Object.fromEntries(T.lados.filter(l => temArte(artes[l])).map(l => {
           const kp = 300 / 2.54, c = document.createElement('canvas');
           c.width = Math.round(A.w * kp); c.height = Math.round(A.h * kp);
-          desenharEstampa(c.getContext('2d'), 0, 0, kp, { full: true });
-          return c;
-        },
+          desenharEstampa(c.getContext('2d'), 0, 0, kp, { full: true, arte: artes[l] });
+          return [l, c];
+        })),
       });
     };
 
@@ -539,7 +623,7 @@ window.Provador = (function () {
     let desmontado = false;
     function medirTudo() { medirEditor(); if (tres) tres.medir(); atualizar(); }
     window.addEventListener('resize', medirTudo);
-    montarCores(); montarTexto(); medirEditor();
+    montarCores(); sincronizarControles(); medirEditor();
     if (tipo === 'caneca') iniciarCaneca().catch(() => { vista3d.innerHTML = '<div class="carregando">Não consegui carregar a caneca em 3D. Verifique a internet e recarregue a página.</div>'; });
     atualizar();
     document.fonts.ready.then(() => Promise.all(FONTES.map(f => document.fonts.load(f.css.replace('{px}', '20px'))))).then(atualizar).catch(() => {});
@@ -547,6 +631,7 @@ window.Provador = (function () {
     return {
       desmontar() {
         desmontado = true;
+        clearTimeout(timerMinis);
         window.removeEventListener('resize', medirTudo);
         if (tres) tres.fim();
       },
