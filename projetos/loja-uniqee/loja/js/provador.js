@@ -10,7 +10,8 @@ window.Provador = (function () {
     },
     camiseta: {
       area: { w: 28, h: 35 }, tituloCor: 'Cor da camiseta', rotuloCor: 'Cor', dica: '', corPadrao: '#f4f4f2', fundo: false,
-      cores: [['Branca', '#f4f4f2'], ['Preta', '#111113'], ['Cinza mescla', '#b3b5b8'], ['Azul-marinho', '#1d2740'], ['Verde-militar', '#4a5032'], ['Off-white', '#ece4d4']],
+      // o terceiro valor é o fundo da vista: camisa clara no escuro, camisa escura no claro, pra ela não sumir
+      cores: [['Branca', '#f4f4f2', '#111214'], ['Preta', '#111113', '#e9e6e1'], ['Cinza mescla', '#b3b5b8', '#1c1e22'], ['Azul-marinho', '#1d2740', '#e4e8ee'], ['Verde-militar', '#4a5032', '#e8e9df'], ['Off-white', '#ece4d4', '#26221e']],
       texto: { y: .36, tam: 3.4 }, alturaEditor: 380, lados: ['frente', 'costas'],
     },
     azulejo: {
@@ -394,7 +395,12 @@ window.Provador = (function () {
       if (!W) return;
       const N = Math.min(1000, Math.round(W * dpr));
       pintarCamisa(vc, lado, peca.cor, N);
+      const fundo = fundoDaCor(peca.cor), palco = vc.parentElement;
+      const claro = luminancia(fundo) > .5;
+      palco.style.background = fundo; palco.style.borderColor = claro ? '#d9cfc1' : fundo;
+      palco.classList.toggle('claro', claro);
     }
+    const fundoDaCor = (hex) => (T.cores.find(c => c[1] === hex) || [])[2] || '#111214';
     let timerMinis = null;
     function desenharMiniaturas() {
       clearTimeout(timerMinis);
@@ -406,6 +412,8 @@ window.Provador = (function () {
         }
         box.querySelectorAll('.mini').forEach(b => {
           b.setAttribute('aria-pressed', b.dataset.cor === peca.cor);
+          b.style.background = fundoDaCor(b.dataset.cor);
+          b.classList.toggle('claro', luminancia(fundoDaCor(b.dataset.cor)) > .5);
           pintarCamisa(b.querySelector('canvas'), lado, b.dataset.cor, 180);
         });
       }, 250);
@@ -611,7 +619,7 @@ window.Provador = (function () {
       // frente e, se tiver arte, as costas lado a lado
       const comCostas = artes.costas && temArte(artes.costas);
       const c = document.createElement('canvas'); c.width = comCostas ? 1200 : 600; c.height = 600;
-      const g = c.getContext('2d'); g.fillStyle = '#0d0d0f'; g.fillRect(0, 0, c.width, c.height);
+      const g = c.getContext('2d'); g.fillStyle = fundoDaCor(peca.cor); g.fillRect(0, 0, c.width, c.height);
       g.drawImage(pintarCamisa(document.createElement('canvas'), 'frente', peca.cor, 600), 0, 0);
       if (comCostas) g.drawImage(pintarCamisa(document.createElement('canvas'), 'costas', peca.cor, 600), 600, 0);
       return c;
@@ -643,7 +651,7 @@ window.Provador = (function () {
         preco: precoUnitario(),
         qtd: Math.max(1, Math.min(99, +qtd.value || 1)),
         opcoes: { ...peca.opcoes, [T.rotuloCor]: corNome },
-        detalhes, mockup: miniatura(origem, 360, ehCamisa ? '#0d0d0f' : '#f6efe8'),
+        detalhes, mockup: miniatura(origem, 360, ehCamisa ? fundoDaCor(peca.cor) : '#f6efe8'),
         // Na versão final, a foto original e o arquivo de impressão de cada lado sobem pro servidor com o pedido.
         arquivosImpressao: () => Object.fromEntries(lados.filter(l => temArte(artes[l])).map(l => {
           const kp = 300 / 2.54, c = document.createElement('canvas');
