@@ -1,20 +1,18 @@
 <!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><link href="https://fonts.googleapis.com/css2?family=Radio+Canada+Big:wght@400;500;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="base.css"><style>
-body{background:linear-gradient(135deg,#0b1210 0%,#06090a 70%)}
-.riscos{position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(139,224,78,.04) 0 2px,transparent 2px 38px)}
-.c{position:absolute;left:66px;right:56px;top:120px}
-.nome{font-size:100px;margin:16px 0 56px}
-.passo{display:flex;align-items:baseline;gap:32px;padding:26px 0;border-top:2px solid rgba(243,237,227,.14)}
-.passo b{font-size:64px;color:var(--verde);font-weight:700;width:70px}
-.passo p{font-size:38px;line-height:1.3}
-.prazo{position:absolute;left:0;right:0;bottom:0;height:330px;background:var(--verde);color:#07130a;display:flex;align-items:center;gap:40px;padding:0 56px 0 66px}
-.data{font-size:150px;font-weight:700;letter-spacing:-6px;line-height:.8}
-.prazo p{font-size:34px;line-height:1.3;font-weight:500}
-.progresso{background:#07130a;z-index:6}
+.glow{position:absolute;left:-250px;bottom:-300px;width:900px;height:900px;border-radius:50%;background:radial-gradient(circle,rgba(139,224,78,.14),transparent 65%)}
+.foto{position:absolute;left:56px;right:56px;top:56px;height:790px;border-radius:24px;overflow:hidden;z-index:2}
+.foto img{position:absolute;width:968px;height:968px;left:0;top:-70px}
+.chip{position:absolute;left:84px;top:84px;z-index:3;background:rgba(6,9,10,.82);color:var(--texto);font-size:22px;letter-spacing:4px;text-transform:uppercase;padding:12px 20px;border-radius:999px}
+.chip i{display:inline-block;width:16px;height:16px;border-radius:50%;margin-right:12px;vertical-align:-1px;border:2px solid rgba(243,237,227,.5)}
+.c{position:absolute;left:66px;right:56px;bottom:96px;z-index:3}
+.nome{font-size:84px;margin:16px 0 26px}
+.nome span{color:var(--verde)}
+.texto{max-width:930px;font-size:32px}
+.novo{color:#07130a;background:var(--verde);padding:4px 12px;margin-left:14px;font-weight:700;letter-spacing:4px}
 </style></head><body><svg style="position:absolute;width:0;height:0"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" stitchTiles="stitch"/></filter></svg>
-<div class="riscos"></div><div class="barra"></div><span class="marca">Uniqee</span>
-<div class="c"><span class="tag">Pedidos abertos</span><h2 class="nome">Como pedir<br>a sua</h2>
-<div class="passo"><b>1</b><p>Escolha a estampa e o tamanho.</p></div>
-<div class="passo"><b>2</b><p>Pague 50% de entrada no Pix.<br>O restante, na entrega.</p></div>
-<div class="passo"><b>3</b><p>A produção leva até 5 dias úteis.</p></div></div>
-<div class="prazo"><div class="data">09/12</div><p>Pra estar com ela no dia da estreia, faça o pedido até 09 de dezembro.</p></div>
-<div class="progresso" style="width:calc(1080px*6/7)"></div></body></html>
+<div class="glow"></div><div class="barra"></div>
+<div class="foto"><img src="../imagens/latveria-turismo-mockup.png" alt=""></div>
+<span class="chip"><i style="background:#3b4a26"></i>Camisa verde musgo</span>
+<div class="c"><span class="tag">05 / 07 · Estampa<span class="novo">Nova</span></span><h2 class="nome">Visite a <span>Latvéria</span></h2>
+<p class="texto">O cartão-postal do reino do Destino, com castelo, lua e brasão dourado. Só quem conhece o vilão entende a piada.</p></div>
+<div class="progresso" style="width:calc(1080px*6/10)"></div></body></html>
