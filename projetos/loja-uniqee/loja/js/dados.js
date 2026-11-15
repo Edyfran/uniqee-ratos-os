@@ -90,7 +90,7 @@ window.UNIQEE = (function () {
       opcoes: [{ nome: 'Tamanho', valores: ['P', 'M', 'G', 'GG'] }],
       desc: 'Camiseta preta com a arte da Dança dos Dragões, pra fã de House of the Dragon.' },
     { id: 'camiseta-luan-santana', nome: 'Camiseta Luan Santana, Coleção Sousa 2026', img: 'camiseta-luan-santana.webp', preco: 59.90, cat: 'camisetas',
-      momentos: ['aniversario'], etiqueta: 'Sousa 2026', peso: 0.3,
+      momentos: ['aniversario'], colecao: 'sousa', etiqueta: 'Sousa 2026', peso: 0.3,
       opcoes: [{ nome: 'Tamanho', valores: ['P', 'M', 'G', 'GG'] }],
       desc: 'Camiseta da coleção exclusiva Sousa 2026, pra quem vai ao show do Luan Santana.' },
   ];
@@ -108,9 +108,12 @@ window.UNIQEE = (function () {
 
   const CATEGORIAS = [['todos', 'Todos'], ['canecas', 'Canecas'], ['azulejos', 'Azulejos'], ['kits', 'Kits'], ['camisetas', 'Camisetas'], ['squeezes', 'Squeezes']];
 
+  // cada card de coleção abre a página dela, com os modelos (#/presentes?colecao=id)
   const COLECOES = {
-    fe: 'Fé e devoção',
-    geek: 'Geek: animes, filmes e séries',
+    sousa: { nome: 'Sousa, Cidade dos Dinossauros', desc: 'A pegada mais famosa do sertão, pra vestir com orgulho.', img: 'colecao-sousa.png', alt: 'Camisa verde com o brasão da pegada de dinossauro' },
+    fe: { nome: 'Fé e devoção', desc: 'Presentes que acompanham a oração de cada dia.', img: 'kit-tradicao.webp', alt: 'Kit de azulejos religiosos à luz de velas' },
+    geek: { nome: 'Geek', desc: 'Animes, filmes e séries, pra vestir o que você ama.', img: 'camiseta-armaduras-cosmos.webp', alt: 'Camiseta com arte de anime' },
+    gospel: { nome: '> gospel_streetwear', desc: 'Fé em linha de código. Oversized, preta, urbana.', img: 'colecao-gospel.png', alt: 'Camiseta preta com a estampa Jesus Reina', classe: 'gospel' },
   };
 
   return { CONFIG, PRODUTOS, MOMENTOS, CATEGORIAS, COLECOES };

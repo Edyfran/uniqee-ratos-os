@@ -178,7 +178,7 @@
         <p>A gente transforma o momento de vocês num presente pra guardar. Com foto, com nome, com aquela frase que só vocês entendem.</p>
         <div class="acoes">
           <a class="botao rose" href="#/presentes">Escolher um presente</a>
-          <a class="botao contorno" href="#/personalizar/caneca-personalizada">Personalizar agora</a>
+          <a class="botao contorno" href="#/personalizar">Quero personalizar o meu</a>
         </div>
         <div class="selos">
           <div>${ICON.coracao}Feito com carinho em Sousa-PB</div>
@@ -248,12 +248,7 @@
     <section><div class="miolo">
       <h2 class="titulo">Coleções</h2>
       <p class="sub">Pra cada jeito de ser, uma coleção.</p>
-      <div class="colecoes">
-        <a class="colecao" href="${zapUrl('Olá! Quero saber da coleção Sousa, Cidade dos Dinossauros.')}" target="_blank" rel="noopener"><img src="img/colecao-sousa.png" alt="Camisa verde com o brasão da pegada de dinossauro"><div><b>Sousa, Cidade dos Dinossauros</b><span>A pegada mais famosa do sertão, pra vestir com orgulho.</span></div></a>
-        <a class="colecao" href="#/presentes?colecao=fe"><img src="img/kit-tradicao.webp" alt="Kit de azulejos religiosos à luz de velas"><div><b>Fé e devoção</b><span>Presentes que acompanham a oração de cada dia.</span></div></a>
-        <a class="colecao" href="#/presentes?colecao=geek"><img src="img/camiseta-armaduras-cosmos.webp" alt="Camiseta com arte de anime"><div><b>Geek</b><span>Animes, filmes e séries, pra vestir o que você ama.</span></div></a>
-        <a class="colecao gospel" href="${zapUrl('Olá! Quero saber da linha gospel streetwear.')}" target="_blank" rel="noopener"><img src="img/colecao-gospel.png" alt="Camiseta preta com a estampa Jesus Reina"><div><b>&gt; gospel_streetwear</b><span>Fé em linha de código. Oversized, preta, urbana.</span></div></a>
-      </div>
+      <div class="colecoes">${Object.entries(COLECOES).map(([id, c]) => `<a class="colecao${c.classe ? ' ' + c.classe : ''}" href="#/presentes?colecao=${id}"><img src="img/${c.img}" alt="${esc(c.alt)}"><div><b>${esc(c.nome)}</b><span>${esc(c.desc)}</span></div></a>`).join('')}</div>
     </div></section>
 
     <section><div class="miolo">
@@ -323,16 +318,20 @@
       const s = Object.entries(n).filter(([k, v]) => v && !(k === 'cat' && v === 'todos')).map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('&');
       return '#/presentes' + (s ? '?' + s : '');
     };
-    const titulo = momento ? `Presentes de ${momento.nome}` : q.colecao ? COLECOES[q.colecao] : termo ? `Resultados pra “${esc(termo)}”` : 'Nossos presentes';
+    const colecao = COLECOES[q.colecao];
+    const titulo = momento ? `Presentes de ${momento.nome}` : colecao ? esc(colecao.nome) : termo ? `Resultados pra “${esc(termo)}”` : 'Nossos presentes';
+    const vazio = colecao
+      ? `Os modelos desta coleção estão chegando.<br>Enquanto isso, <a href="${zapUrl(`Olá! Quero ver os modelos da coleção ${colecao.nome}.`)}" target="_blank" rel="noopener">peça pelo WhatsApp</a> ou <a href="#/personalizar">personalize o seu</a>.`
+      : `Ainda não temos peça pronta pra essa busca.<br>Mas a gente cria: <a href="#/orcamento">monte um orçamento</a> ou <a href="${zapUrl('Olá! Procurei no site e não achei o que queria. Estou pensando em...')}" target="_blank" rel="noopener">fale no WhatsApp</a>.`;
     app.innerHTML = `<div class="pagina"><div class="miolo">
       ${migalha('Presentes')}
       <h1 class="titulo">${titulo}</h1>
-      <p class="sub">Toque num presente pra ver os detalhes e personalizar.</p>
+      <p class="sub">${colecao ? esc(colecao.desc) + ' Toque num modelo pra ver os detalhes.' : 'Toque num presente pra ver os detalhes e personalizar.'}</p>
       <form class="busca-grande" id="formBusca"><input class="campo" name="q" placeholder="Procurar: caneca, azulejo, avós…" value="${esc(termo)}"><button class="botao noite">Procurar</button></form>
       <div class="filtros">${CATEGORIAS.map(([id, nome]) => `<a class="filtro" href="${link({ cat: id })}" aria-pressed="${cat === id}">${nome}</a>`).join('')}</div>
       <div class="filtros">${MOMENTOS.map(m => `<a class="filtro mom" href="${link({ momento: q.momento === m.id ? '' : m.id })}" aria-pressed="${q.momento === m.id}">${m.nome}</a>`).join('')}
         ${(momento || q.colecao || termo) ? `<a class="filtro-ativo" href="#/presentes" style="color:var(--rose-2);font-weight:600">limpar filtros</a>` : ''}</div>
-      <div class="produtos">${lista.length ? lista.map(cardProduto).join('') : `<div class="vazio">Ainda não temos peça pronta pra essa busca.<br>Mas a gente cria: <a href="#/orcamento">monte um orçamento</a> ou <a href="${zapUrl('Olá! Procurei no site e não achei o que queria. Estou pensando em...')}" target="_blank" rel="noopener">fale no WhatsApp</a>.</div>`}</div>
+      <div class="produtos">${lista.length ? lista.map(cardProduto).join('') : `<div class="vazio">${vazio}</div>`}</div>
     </div></div>`;
     $('#formBusca').onsubmit = (e) => { e.preventDefault(); location.hash = link({ q: e.target.q.value.trim() }); };
   };
@@ -361,7 +360,8 @@
             <div class="linha-compra">
               <button class="botao rose" id="pAdd">Adicionar ao carrinho</button>
               <button class="botao noite" id="pComprar">Comprar agora</button>
-            </div>`}
+            </div>
+            ${p.pede ? '' : `<p style="font-size:14px;color:var(--tinta-2);margin:10px 0 0">Quer uma peça com a sua foto ou a sua arte? <a class="botao leve" href="#/personalizar" style="padding:0">Quero personalizar o meu</a></p>`}`}
           <div class="bloco caixa" style="padding:16px">
             <span class="rot">Calcular frete e prazo</span>
             <form class="frete-calc" id="fFrete"><input class="campo" name="cep" placeholder="Seu CEP" inputmode="numeric" maxlength="9"><button class="botao contorno">Calcular</button></form>
@@ -432,11 +432,33 @@
 
   // provador dentro da loja
   let provadorAtivo = null;
+  // sem peça escolhida: o cliente escolhe o que quer personalizar
+  paginas.escolherPeca = () => {
+    const pecas = PRODUTOS.filter(p => p.provador);
+    const NOME = { caneca: 'Caneca', azulejo: 'Azulejo', camiseta: 'Camisa' };
+    const DICA = { caneca: 'Gire a caneca e veja sua foto nela', azulejo: 'Veja seu azulejo pronto no suporte', camiseta: 'Estampe a frente e as costas' };
+    app.innerHTML = `<div class="pagina"><div class="miolo">
+      ${migalha('Quero personalizar o meu')}
+      <h1 class="titulo">O que você quer <span class="mao">personalizar?</span></h1>
+      <p class="sub">Escolha a peça, envie a sua foto ou a sua arte e veja como fica antes de pedir.</p>
+      <div class="produtos escolher-peca">${pecas.map(p => `<a class="card" href="#/personalizar/${p.id}">
+        <div class="foto"><img src="img/${p.img}" alt="${esc(p.nome)}" loading="lazy"></div>
+        <div class="info">
+          <span class="nome"><b>${NOME[p.provador]}</b></span>
+          <span class="dica">${DICA[p.provador]}</span>
+          <span class="preco"><em style="margin:0 4px 0 0">a partir de</em><b>${brl(p.preco)}</b></span>
+          <span class="acao">Personalizar ${ICON.seta}</span>
+        </div></a>`).join('')}</div>
+      <p class="sub" style="margin-top:22px">Quer outra peça, como almofada, squeeze ou um kit? <a href="#/orcamento" style="color:var(--rose-2);font-weight:600">Monte um orçamento</a>.</p>
+    </div></div>`;
+  };
+
   paginas.personalizar = (q, id) => {
+    if (!id) return paginas.escolherPeca();
     const p = produto(id);
     if (!p || !p.provador) return paginas.naoEncontrada();
     app.innerHTML = `<div class="pagina"><div class="miolo">
-      ${migalha(`<a href="#/produto/${p.id}">${esc(p.nome)}</a>`, 'Personalizar')}
+      ${migalha('<a href="#/personalizar">Quero personalizar o meu</a>', esc(p.nome))}
       <h1 class="titulo">Veja como fica <span class="mao">antes</span> de pedir</h1>
       <p class="sub">Envie uma foto, escreva um nome ou uma frase e veja o presente pronto, do jeito que vai chegar.</p>
       <div class="filtros">${PRODUTOS.filter(x => x.provador).map(x => `<a class="filtro" href="#/personalizar/${x.id}" aria-pressed="${x.id === p.id}">${{ caneca: 'Caneca', azulejo: 'Azulejo', camiseta: 'Camiseta' }[x.provador]}</a>`).join('')}</div>
