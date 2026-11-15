@@ -134,6 +134,27 @@
   footer img{width:120px;border-radius:12px;background:var(--cinza)}
   footer p{max-width:620px}
 
+
+  /* zoom da estampa */
+  .card .foto{cursor:zoom-in}
+  .lupa{position:absolute;right:12px;bottom:12px;background:rgba(6,9,10,.82);color:var(--texto);font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:7px 11px;border-radius:999px;display:flex;align-items:center;gap:6px;pointer-events:none}
+  .lupa svg{width:14px;height:14px}
+  .zoom{position:fixed;inset:0;z-index:50;background:rgba(3,5,5,.94);display:none;flex-direction:column;align-items:center;justify-content:center;padding:16px}
+  .zoom.on{display:flex}
+  .zoom .topo-z{width:100%;max-width:980px;display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+  .zoom h3{font-size:clamp(20px,3vw,28px)}
+  .fechar{font:inherit;background:transparent;border:1px solid var(--linha);color:var(--texto);width:44px;height:44px;border-radius:50%;font-size:24px;cursor:pointer;flex:none}
+  .vistas{display:flex;gap:8px}
+  .vistas button{font:inherit;font-size:14px;background:transparent;color:var(--cinza);border:1px solid var(--linha);border-radius:999px;padding:7px 14px;cursor:pointer}
+  .vistas button.on{background:var(--texto);color:var(--bg)}
+  .palco{position:relative;width:min(980px,100%);height:min(72vh,980px);overflow:hidden;border-radius:18px;background:#1a2320;cursor:zoom-in;touch-action:none}
+  .palco.estampa{background:radial-gradient(60% 60% at 50% 50%,#1c2a24,#070b0a)}
+  .palco img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;transform-origin:50% 50%;transition:transform .25s ease;user-select:none;-webkit-user-drag:none}
+  .palco.ampliado{cursor:zoom-out}
+  .palco.ampliado img{transition:none}
+  .dica{color:var(--cinza);font-size:14px;margin:10px 0 12px;text-align:center}
+  .zoom .btn{padding:14px 26px;font-size:16px}
+
   /* barra fixa no celular */
   .barra-fixa{display:none}
 
@@ -160,6 +181,10 @@
     .relogio div{min-width:64px}
     .relogio b{font-size:28px}
     .bloco .img{height:280px}
+    .zoom .topo-z{flex-wrap:wrap}
+    .zoom h3{flex:1 1 calc(100% - 60px)}
+    .vistas{order:3;width:100%}
+    .vistas button{flex:1}
     .barra-fixa{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(6,9,10,.94);border-top:1px solid var(--linha);padding:12px 16px;gap:12px;align-items:center;backdrop-filter:blur(8px)}
     .barra-fixa div{flex:1;line-height:1.2}
     .barra-fixa small{display:block;color:var(--cinza);font-size:12px}
@@ -379,6 +404,18 @@
   </div>
 </footer>
 
+
+<div class="zoom" id="zoom" role="dialog" aria-modal="true" aria-label="Ver a estampa de perto">
+  <div class="topo-z">
+    <h3 id="z-nome"></h3>
+    <div class="vistas" id="z-vistas"><button data-v="camisa" class="on">Na camisa</button><button data-v="estampa">Só a estampa</button></div>
+    <button class="fechar" id="z-fechar" aria-label="Fechar">×</button>
+  </div>
+  <div class="palco" id="palco"><img id="z-img" alt=""></div>
+  <p class="dica" id="z-dica">Toque na imagem pra aproximar. Arraste pra percorrer a estampa.</p>
+  <a class="btn" id="z-btn" href="#">Escolher esta · R$ 69,90</a>
+</div>
+
 <div class="barra-fixa">
   <div><small>Camiseta Doomsday</small><b>R$ 69,90</b></div>
   <a class="btn js-comprar" href="#">Quero a minha</a>
@@ -409,6 +446,70 @@
       c.hidden = b.dataset.f !== "todas" && !c.dataset.g.split(" ").includes(b.dataset.f);
     });
   }));
+
+
+  // zoom da estampa: clique no card abre a foto grande; clique na foto aproxima
+  const ESTAMPA_SOLO = { "latveria":1, "rivais":1, "ingresso":1, "trex-sousa":1 };
+  const lupa = '<span class="lupa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>Ver de perto</span>';
+  const zoom = document.getElementById("zoom"), palco = document.getElementById("palco"), zImg = document.getElementById("z-img");
+  const zVistas = document.getElementById("z-vistas"), zBtn = document.getElementById("z-btn");
+  let atual = null, escala = 1, px = 0, py = 0, arrastou = false, ini = null;
+
+  function aplicar() { zImg.style.transform = `translate(${px}px,${py}px) scale(${escala})`; palco.classList.toggle("ampliado", escala > 1); }
+  function limitar() {
+    const w = palco.clientWidth, h = palco.clientHeight;
+    const mx = (w * escala - w) / 2, my = (h * escala - h) / 2;
+    px = Math.max(-mx, Math.min(mx, px)); py = Math.max(-my, Math.min(my, py));
+  }
+  function resetar() { escala = 1; px = py = 0; aplicar(); }
+  function vista(v) {
+    zVistas.querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.v === v));
+    palco.classList.toggle("estampa", v === "estampa");
+    zImg.src = v === "estampa" ? `img/zoom/${atual.id}-estampa.webp` : `img/zoom/${atual.id}.jpg`;
+    resetar();
+  }
+  document.querySelectorAll(".card").forEach(card => {
+    const foto = card.querySelector(".foto"), img = foto.querySelector("img");
+    foto.insertAdjacentHTML("beforeend", lupa);
+    foto.addEventListener("click", () => {
+      atual = { id: img.getAttribute("src").replace("img/", "").replace(".jpg", ""), nome: card.querySelector("h3").textContent, link: card.querySelector(".js-comprar") };
+      document.getElementById("z-nome").textContent = atual.nome;
+      zImg.alt = "Estampa " + atual.nome + " ampliada";
+      zVistas.style.display = ESTAMPA_SOLO[atual.id] ? "flex" : "none";
+      zBtn.href = atual.link.href; zBtn.target = atual.link.target || ""; zBtn.rel = atual.link.rel || "";
+      vista("camisa");
+      zoom.classList.add("on"); document.body.style.overflow = "hidden";
+    });
+  });
+  zVistas.querySelectorAll("button").forEach(b => b.addEventListener("click", () => vista(b.dataset.v)));
+  function fechar() { zoom.classList.remove("on"); document.body.style.overflow = ""; }
+  document.getElementById("z-fechar").addEventListener("click", fechar);
+  zBtn.addEventListener("click", fechar);
+  zoom.addEventListener("click", e => { if (e.target === zoom) fechar(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") fechar(); });
+
+  palco.addEventListener("pointerdown", e => { ini = { x: e.clientX, y: e.clientY, px, py }; arrastou = false; palco.setPointerCapture(e.pointerId); });
+  palco.addEventListener("pointermove", e => {
+    if (!ini || escala === 1) return;
+    const dx = e.clientX - ini.x, dy = e.clientY - ini.y;
+    if (Math.abs(dx) + Math.abs(dy) > 4) arrastou = true;
+    px = ini.px + dx; py = ini.py + dy; limitar(); aplicar();
+  });
+  palco.addEventListener("pointerup", e => {
+    if (!ini) return;
+    if (!arrastou) {
+      if (escala > 1) resetar();
+      else {
+        const r = palco.getBoundingClientRect();
+        escala = 2.6;
+        px = (r.width / 2 - (e.clientX - r.left)) * (escala - 1);
+        py = (r.height / 2 - (e.clientY - r.top)) * (escala - 1);
+        limitar(); zImg.style.transition = "transform .25s ease"; aplicar();
+        setTimeout(() => zImg.style.transition = "", 260);
+      }
+    }
+    ini = null;
+  });
 
   // contagem até o fim dos pedidos (09/12/2026, 23:59, horário de Brasília)
   const fim = new Date("2026-12-09T23:59:00-03:00").getTime();
