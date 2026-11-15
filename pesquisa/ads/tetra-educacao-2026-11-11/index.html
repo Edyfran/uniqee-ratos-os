@@ -1,0 +1,395 @@
+<!doctype html><html lang="pt-br"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Radar de Anúncios · Tetra Educação</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{--am:#F2E30C;--ink:#111;--mut:#6b7280;--line:#e5e7eb;--bg:#faf9f5}
+*{box-sizing:border-box}body{margin:0;font-family:'Bricolage Grotesque',system-ui,sans-serif;color:var(--ink);background:var(--bg);line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+header{padding:56px 0 28px;border-bottom:2px solid var(--ink)}
+.kick{font-family:'Instrument Serif',serif;font-style:italic;font-size:22px;color:var(--mut)}
+h1{font-size:clamp(34px,5vw,58px);font-weight:800;letter-spacing:-.02em;margin:.1em 0 .2em}
+h1 mark{background:var(--am);padding:0 .1em}
+.sub{color:var(--mut);font-size:15px}
+h3{font-size:16px;margin:0 0 8px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:32px 0}
+.kpi{border:1.5px dashed #cfcabc;border-radius:14px;padding:18px}
+.kpi b{display:block;font-size:34px;font-weight:800;letter-spacing:-.02em}
+.kpi span{color:var(--mut);font-size:13px}
+section{padding:38px 0;border-bottom:1px solid var(--line)}
+h2{font-size:27px;font-weight:800;letter-spacing:-.01em;margin:0 0 6px}
+h2 em{font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;color:var(--mut);font-size:.8em}
+.lead{color:var(--mut);max-width:74ch;margin:0 0 22px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:34px}
+@media(max-width:720px){.cols{grid-template-columns:1fr}}
+.prom{margin:0;padding-left:18px} .prom li{margin:8px 0;font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:#f3f1ea;border-radius:20px;padding:5px 12px;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}
+.card{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff;display:flex;flex-direction:column}
+.thumb{position:relative;aspect-ratio:1/1;background:#f0eee6;overflow:hidden}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.thumb .noimg{display:flex;align-items:center;justify-content:center;height:100%;color:#aaa;font-size:13px}
+.thumb .play{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.6);color:#fff;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:12px}
+.meta{display:flex;gap:6px;flex-wrap:wrap;padding:12px 14px 0}
+.dias{font-size:12px;font-weight:700;color:#fff;background:var(--c);padding:3px 8px;border-radius:20px}
+.tag{font-size:12px;color:var(--mut);background:#f3f1ea;padding:3px 8px;border-radius:20px}
+.hook{font-weight:700;margin:10px 14px 4px;font-size:15px}
+.copy{color:var(--mut);font-size:13px;margin:0 14px 10px;flex:1}
+.foot{display:flex;justify-content:space-between;align-items:center;padding:0 14px 10px;gap:8px}
+.cta{font-size:12px;font-weight:700;border:1.5px solid var(--ink);border-radius:20px;padding:3px 10px}
+.dom{font-size:11px;color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:130px}
+.link{display:block;padding:10px 14px;border-top:1px solid var(--line);font-size:12px;font-weight:700;color:var(--ink);text-decoration:none}
+.link:hover{background:var(--am)}
+.ofs{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.of{border:1.5px dashed #cfcabc;border-radius:14px;padding:18px}
+.ofn{font-size:30px;font-weight:800} .ofd{display:block;font-weight:700;margin:2px 0} .ofp{color:var(--mut);font-size:13px}
+.hooks{list-style:none;padding:0;margin:0}
+.hooks li{padding:9px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.hc{font-weight:800;background:var(--am);padding:1px 6px;border-radius:6px;margin-right:6px;font-size:12px}
+.bar{display:flex;align-items:center;gap:10px;margin:9px 0;font-size:13px}
+.bar span{width:110px;color:var(--mut)} .bar i{height:12px;background:var(--am);border-radius:6px;display:block} .bar b{font-weight:700}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.vcard{border:1px solid var(--line);border-radius:14px;padding:18px;background:#fff}
+.vhead{display:flex;align-items:center;gap:10px;margin-bottom:8px} .vhead b{font-size:15px}
+.vcard p{color:var(--mut);font-size:14px;margin:0}
+.ideias{background:#111;color:#fff;border-radius:20px;padding:34px;border:none;margin-top:20px}
+.ideias h2{color:#fff} .ideias .lead{color:#bbb}
+.ideias-list{margin:0;padding-left:22px} .ideias-list li{margin:10px 0;font-size:15px}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
+.g{aspect-ratio:1/1;background:#f0eee6;border-radius:10px;overflow:hidden;display:grid;place-items:center;color:#bbb}
+.g img{width:100%;height:100%;object-fit:cover}
+footer{padding:40px 0 60px;color:var(--mut);font-size:13px} footer b{color:var(--ink)}
+footer a{color:var(--ink)}
+</style></head><body>
+<div class="wrap">
+<header>
+  <div class="kick">Radar de Anúncios · inteligência de concorrentes</div>
+  <h1><mark>Tetra Educação</mark> no Meta Ads</h1>
+  <p class="sub">Biblioteca de Anúncios da Meta · 2026-11-11 · 63 anúncios ativos · 40 conceitos únicos após dedupe</p>
+</header>
+
+<div class="kpis">
+  <div class="kpi"><b>63</b><span>anúncios ativos</span></div>
+  <div class="kpi"><b>40</b><span>conceitos únicos</span></div>
+  <div class="kpi"><b>79%</b><span>são vídeo</span></div>
+  <div class="kpi"><b>3d</b><span>longevidade mediana</span></div>
+  <div class="kpi"><b>13</b><span>campeões (60d+)</span></div>
+  <div class="kpi"><b>2</b><span>ofertas ativas</span></div>
+</div>
+
+
+        <section>
+          <h2>O que ele está prometendo <em>· a oferta e a copy por trás</em></h2>
+          <p class="lead">Vende uma única oferta, a Pós-Graduação em Gestão, Negócios e IA, reconhecida pelo MEC, 100% online, com 360 horas, 18 meses e professores executivos de mercado. Os 63 anúncios ativos repetem a mesma copy e variam o criativo: há cerca de 40 conceitos, quase todos com 58 a 63 dias no ar, o que indica uma campanha grande lançada de uma vez e testando muitos vídeos. Não é focada em professores; apareceu na busca por citar professores e IA.</p>
+          <div class="cols">
+            <div>
+              <h3>Promessas que ele martela</h3>
+              <ul class="prom"><li>Pós reconhecida pelo MEC</li><li>Aprender com executivos C-Level</li><li>IA aplicada à gestão e à tomada de decisão</li><li>100% online, com aulas ao vivo e gravadas</li></ul>
+            </div>
+            <div>
+              <h3>Ângulos e dores explorados</h3>
+              <div class="chips"><span class="chip">Crescimento na carreira e liderança</span><span class="chip">Credencial formal (MEC, carga horária)</span><span class="chip">Juntar gestão de pessoas, negócios e IA numa formação só</span><span class="chip">Autoridade do corpo docente</span></div>
+              <h3 style="margin-top:20px">Público-alvo aparente</h3><p class="lead">Profissionais de gestão, comercial e liderança que querem um título de pós com o selo de IA para crescer na carreira.</p>
+            </div>
+          </div>
+        </section>
+
+<section>
+  <h2>Ofertas ativas <em>· pra onde ele manda o tráfego</em></h2>
+  <p class="lead">Agrupando pelo domínio da landing dá pra ver o funil e qual oferta ele mais empurra.</p>
+  <div class="ofs"><div class="of"><span class="ofn">37</span><span class="ofd">black.tetraeducacao.com.br</span><span class="ofp">59% do volume</span></div><div class="of"><span class="ofn">26</span><span class="ofd">tetraeducacao.com.br</span><span class="ofp">41% do volume</span></div></div>
+</section>
+
+<section>
+  <h2>Anúncios campeões <em>· os que mais tempo rodam</em></h2>
+  <p class="lead">Anúncio que fica meses no ar é dinheiro validado: se não convertesse, já teria sido pausado. Ordenado por longevidade, deduplicado por conceito.</p>
+  <div class="grid">
+        <article class="card">
+          <div class="thumb"><img src="thumbs/c0.jpg" loading="lazy" alt=""></div>
+          <div class="meta"><span class="dias" style="--c:#16a34a">63d · campeão</span><span class="tag">IMAGE</span>
+            <span class="tag">3 variações</span></div>
+          <p class="hook">Pós-Graduação em Gestão, Negócios e IA</p>
+          <p class="copy">Pós-Graduação em Gestão, Negócios e IA
+
+Uma formação criada para profissionais que querem liderar o mercado com estratégia, inovação e inteligência artificial.
+
+🎓 Reconhecida pelo MEC
+👨‍💼 Aprenda com executivos C-Levels
+🤖 IA aplicada à gest…</p>
+          <div class="foot"><span class="cta">See details</span>
+            <span class="dom">tetraeducacao.com.br</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=2033063083996927" target="_blank">ver na Ad Library ↗</a>
+        </article>
+        <article class="card">
+          <div class="thumb"><img src="thumbs/c1.jpg" loading="lazy" alt=""><span class="play">▶</span></div>
+          <div class="meta"><span class="dias" style="--c:#16a34a">63d · campeão</span><span class="tag">VIDEO</span>
+            <span class="tag">3 variações</span></div>
+          <p class="hook">Pós-Graduação em Gestão, Negócios e IA</p>
+          <p class="copy">Pós-Graduação em Gestão, Negócios e IA
+
+Uma formação criada para profissionais que querem liderar o mercado com estratégia, inovação e inteligência artificial.
+
+🎓 Reconhecida pelo MEC
+👨‍💼 Aprenda com executivos C-Levels
+🤖 IA aplicada à gest…</p>
+          <div class="foot"><span class="cta">Learn more</span>
+            <span class="dom">tetraeducacao.com.br</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=1881809452790355" target="_blank">ver na Ad Library ↗</a>
+        </article>
+        <article class="card">
+          <div class="thumb"><img src="thumbs/c2.jpg" loading="lazy" alt=""><span class="play">▶</span></div>
+          <div class="meta"><span class="dias" style="--c:#16a34a">63d · campeão</span><span class="tag">VIDEO</span>
+            <span class="tag">2 variações</span></div>
+          <p class="hook">Pós-Graduação em Gestão, Negócios e IA</p>
+          <p class="copy">Pós-Graduação em Gestão, Negócios e IA
+
+Uma formação criada para profissionais que querem liderar o mercado com estratégia, inovação e inteligência artificial.
+
+🎓 Reconhecida pelo MEC
+👨‍💼 Aprenda com executivos C-Levels
+🤖 IA aplicada à gest…</p>
+          <div class="foot"><span class="cta">Learn more</span>
+            <span class="dom">tetraeducacao.com.br</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=4078562282277706" target="_blank">ver na Ad Library ↗</a>
+        </article>
+        <article class="card">
+          <div class="thumb"><img src="thumbs/c3.jpg" loading="lazy" alt=""></div>
+          <div class="meta"><span class="dias" style="--c:#16a34a">63d · campeão</span><span class="tag">IMAGE</span>
+            <span class="tag">2 variações</span></div>
+          <p class="hook">Pós-Graduação em Gestão, Negócios e IA</p>
+          <p class="copy">Pós-Graduação em Gestão, Negócios e IA
+
+Uma formação criada para profissionais que querem liderar o mercado com estratégia, inovação e inteligência artificial.
+
+🎓 Reconhecida pelo MEC
+👨‍💼 Aprenda com executivos C-Levels
+🤖 IA aplicada à gest…</p>
+          <div class="foot"><span class="cta">See details</span>
+            <span class="dom">tetraeducacao.com.br</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=1063959886519604" target="_blank">ver na Ad Library ↗</a>
+        </article>
+        <article class="card">
+          <div class="thumb"><img src="thumbs/c4.jpg" loading="lazy" alt=""><span class="play">▶</span></div>
+          <div class="meta"><span class="dias" style="--c:#16a34a">63d · campeão</span><span class="tag">VIDEO</span>
+            <span class="tag">2 variações</span></div>
+          <p class="hook">Pós-Graduação em Gestão, Negócios e IA</p>
+          <p class="copy">Pós-Graduação em Gestão, Negócios e IA
+
+Uma formação criada para profissionais que querem liderar o mercado com estratégia, inovação e inteligência artificial.
+
+🎓 Reconhecida pelo MEC
+👨‍💼 Aprenda com executivos C-Levels
+🤖 IA aplicada à gest…</p>
+          <div class="foot"><span class="cta">Learn more</span>
+            <span class="dom">tetraeducacao.com.br</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=1672500664588134" target="_blank">ver na Ad Library ↗</a>
+        </article>
+        <article class="card">
+          <div class="thumb"><img src="thumbs/c5.jpg" loading="lazy" alt=""><span class="play">▶</span></div>
+          <div class="meta"><span class="dias" style="--c:#16a34a">63d · campeão</span><span class="tag">VIDEO</span>
+            <span class="tag">2 variações</span></div>
+          <p class="hook">Pós-Graduação em Gestão, Negócios e IA</p>
+          <p class="copy">Pós-Graduação em Gestão, Negócios e IA
+
+Uma formação criada para profissionais que querem liderar o mercado com estratégia, inovação e inteligência artificial.
+
+🎓 Reconhecida pelo MEC
+👨‍💼 Aprenda com executivos C-Levels
+🤖 IA aplicada à gest…</p>
+          <div class="foot"><span class="cta">Learn more</span>
+            <span class="dom">tetraeducacao.com.br</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=1790698671965939" target="_blank">ver na Ad Library ↗</a>
+        </article>
+        <article class="card">
+          <div class="thumb"><img src="thumbs/c6.jpg" loading="lazy" alt=""><span class="play">▶</span></div>
+          <div class="meta"><span class="dias" style="--c:#16a34a">62d · campeão</span><span class="tag">VIDEO</span>
+            <span class="tag">1 variações</span></div>
+          <p class="hook">Pós-Graduação em Gestão, Negócios e IA</p>
+          <p class="copy">Pós-Graduação em Gestão, Negócios e IA
+
+Uma formação criada para profissionais que querem liderar o mercado com estratégia, inovação e inteligência artificial.
+
+🎓 Reconhecida pelo MEC
+👨‍💼 Aprenda com executivos C-Levels
+🤖 IA aplicada à gest…</p>
+          <div class="foot"><span class="cta">Learn more</span>
+            <span class="dom">tetraeducacao.com.br</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=3379272282279313" target="_blank">ver na Ad Library ↗</a>
+        </article>
+        <article class="card">
+          <div class="thumb"><img src="thumbs/c7.jpg" loading="lazy" alt=""><span class="play">▶</span></div>
+          <div class="meta"><span class="dias" style="--c:#16a34a">62d · campeão</span><span class="tag">VIDEO</span>
+            <span class="tag">1 variações</span></div>
+          <p class="hook">Pós-Graduação em Gestão, Negócios e IA</p>
+          <p class="copy">Pós-Graduação em Gestão, Negócios e IA
+
+Uma formação criada para profissionais que querem liderar o mercado com estratégia, inovação e inteligência artificial.
+
+🎓 Reconhecida pelo MEC
+👨‍💼 Aprenda com executivos C-Levels
+🤖 IA aplicada à gest…</p>
+          <div class="foot"><span class="cta">Learn more</span>
+            <span class="dom">tetraeducacao.com.br</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=1610375063821322" target="_blank">ver na Ad Library ↗</a>
+        </article>
+        <article class="card">
+          <div class="thumb"><img src="thumbs/c8.jpg" loading="lazy" alt=""><span class="play">▶</span></div>
+          <div class="meta"><span class="dias" style="--c:#16a34a">62d · campeão</span><span class="tag">VIDEO</span>
+            <span class="tag">1 variações</span></div>
+          <p class="hook">Pós-Graduação em Gestão, Negócios e IA</p>
+          <p class="copy">Pós-Graduação em Gestão, Negócios e IA
+
+Uma formação criada para profissionais que querem liderar o mercado com estratégia, inovação e inteligência artificial.
+
+🎓 Reconhecida pelo MEC
+👨‍💼 Aprenda com executivos C-Levels
+🤖 IA aplicada à gest…</p>
+          <div class="foot"><span class="cta">Learn more</span>
+            <span class="dom">tetraeducacao.com.br</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=1336899751648889" target="_blank">ver na Ad Library ↗</a>
+        </article>
+        <article class="card">
+          <div class="thumb"><img src="thumbs/c9.jpg" loading="lazy" alt=""><span class="play">▶</span></div>
+          <div class="meta"><span class="dias" style="--c:#16a34a">62d · campeão</span><span class="tag">VIDEO</span>
+            <span class="tag">1 variações</span></div>
+          <p class="hook">Pós-Graduação em Gestão, Negócios e IA</p>
+          <p class="copy">Pós-Graduação em Gestão, Negócios e IA
+
+Uma formação criada para profissionais que querem liderar o mercado com estratégia, inovação e inteligência artificial.
+
+🎓 Reconhecida pelo MEC
+👨‍💼 Aprenda com executivos C-Levels
+🤖 IA aplicada à gest…</p>
+          <div class="foot"><span class="cta">Learn more</span>
+            <span class="dom">tetraeducacao.com.br</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=1778048193953253" target="_blank">ver na Ad Library ↗</a>
+        </article>
+        <article class="card">
+          <div class="thumb"><img src="thumbs/c10.jpg" loading="lazy" alt=""><span class="play">▶</span></div>
+          <div class="meta"><span class="dias" style="--c:#16a34a">61d · campeão</span><span class="tag">VIDEO</span>
+            <span class="tag">1 variações</span></div>
+          <p class="hook">Pós-Graduação em Gestão, Negócios e IA</p>
+          <p class="copy">Pós-Graduação em Gestão, Negócios e IA
+
+Uma formação criada para profissionais que querem liderar o mercado com estratégia, inovação e inteligência artificial.
+
+🎓 Reconhecida pelo MEC
+👨‍💼 Aprenda com executivos C-Levels
+🤖 IA aplicada à gest…</p>
+          <div class="foot"><span class="cta">Learn more</span>
+            <span class="dom">tetraeducacao.com.br</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=2490439254791844" target="_blank">ver na Ad Library ↗</a>
+        </article>
+        <article class="card">
+          <div class="thumb"><img src="thumbs/c11.jpg" loading="lazy" alt=""><span class="play">▶</span></div>
+          <div class="meta"><span class="dias" style="--c:#16a34a">61d · campeão</span><span class="tag">VIDEO</span>
+            <span class="tag">1 variações</span></div>
+          <p class="hook">Pós-Graduação em Gestão, Negócios e IA</p>
+          <p class="copy">Pós-Graduação em Gestão, Negócios e IA
+
+Uma formação criada para profissionais que querem liderar o mercado com estratégia, inovação e inteligência artificial.
+
+🎓 Reconhecida pelo MEC
+👨‍💼 Aprenda com executivos C-Levels
+🤖 IA aplicada à gest…</p>
+          <div class="foot"><span class="cta">Learn more</span>
+            <span class="dom">tetraeducacao.com.br</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=2123530908245908" target="_blank">ver na Ad Library ↗</a>
+        </article>
+        <article class="card">
+          <div class="thumb"><img src="thumbs/c12.jpg" loading="lazy" alt=""><span class="play">▶</span></div>
+          <div class="meta"><span class="dias" style="--c:#16a34a">61d · campeão</span><span class="tag">VIDEO</span>
+            <span class="tag">1 variações</span></div>
+          <p class="hook">Pós-Graduação em Gestão, Negócios e IA</p>
+          <p class="copy">Pós-Graduação em Gestão, Negócios e IA
+
+Uma formação criada para profissionais que querem liderar o mercado com estratégia, inovação e inteligência artificial.
+
+🎓 Reconhecida pelo MEC
+👨‍💼 Aprenda com executivos C-Levels
+🤖 IA aplicada à gest…</p>
+          <div class="foot"><span class="cta">Learn more</span>
+            <span class="dom">tetraeducacao.com.br</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=1816521206005197" target="_blank">ver na Ad Library ↗</a>
+        </article>
+        <article class="card">
+          <div class="thumb"><img src="thumbs/c13.jpg" loading="lazy" alt=""><span class="play">▶</span></div>
+          <div class="meta"><span class="dias" style="--c:#ca8a04">58d · aquecendo</span><span class="tag">VIDEO</span>
+            <span class="tag">1 variações</span></div>
+          <p class="hook">Pós-Graduação em Gestão, Negócios e IA</p>
+          <p class="copy">Pós-Graduação em Gestão, Negócios e IA
+
+Uma formação criada para profissionais que querem liderar o mercado com estratégia, inovação e inteligência artificial.
+
+🎓 Reconhecida pelo MEC
+👨‍💼 Aprenda com executivos C-Levels
+🤖 IA aplicada à gest…</p>
+          <div class="foot"><span class="cta">Learn more</span>
+            <span class="dom">tetraeducacao.com.br</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=1111087078269356" target="_blank">ver na Ad Library ↗</a>
+        </article>
+        <article class="card">
+          <div class="thumb"><img src="thumbs/c14.jpg" loading="lazy" alt=""><span class="play">▶</span></div>
+          <div class="meta"><span class="dias" style="--c:#ca8a04">58d · aquecendo</span><span class="tag">VIDEO</span>
+            <span class="tag">1 variações</span></div>
+          <p class="hook">Pós-Graduação em Gestão, Negócios e IA</p>
+          <p class="copy">Pós-Graduação em Gestão, Negócios e IA
+
+Uma formação criada para profissionais que querem liderar o mercado com estratégia, inovação e inteligência artificial.
+
+🎓 Reconhecida pelo MEC
+👨‍💼 Aprenda com executivos C-Levels
+🤖 IA aplicada à gest…</p>
+          <div class="foot"><span class="cta">Learn more</span>
+            <span class="dom">tetraeducacao.com.br</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=1764137647993598" target="_blank">ver na Ad Library ↗</a>
+        </article></div>
+</section>
+
+
+        <section>
+          <h2>Anatomia dos vídeos campeões <em>· o que faz o hook segurar</em></h2>
+          <p class="lead">Leitura frame a frame dos 3 vídeos que mais tempo rodam. É onde o dinheiro dele está.</p>
+          <div class="vgrid"><div class="vcard">
+              <div class="vhead"><span class="dias" style="--c:#16a34a">63d · campeão</span><b>Pós-Graduação Gestão, Negócios &amp; IA (apresentadora no sofá)</b></div>
+              <p>Vídeo de 33 segundos com uma apresentadora num ambiente sofisticado. O título PÓS-GRADUAÇÃO GESTÃO NEGÓCIOS &amp; IA aparece em letras grandes nos primeiros 3 segundos, depois o site no celular, o selo do MEC com 360 horas, 18 meses e 10 módulos, cena de aluno no notebook e o fechamento Toque em Saiba Mais. Estrutura de prova formal mais do que de dor.</p></div><div class="vcard">
+              <div class="vhead"><span class="dias" style="--c:#16a34a">63d · campeão</span><b>Pós-Graduação Gestão, Negócios &amp; IA (apresentadora com notebook)</b></div>
+              <p>Vídeo de 35 segundos que abre com a apresentadora segurando o notebook com a página dos professores. Entram animações ilustradas (CRESCER, JÁ ESTÁ) para quebrar o ritmo e telas da plataforma de aulas. Mostrar o rosto dos professores e a plataforma por dentro responde à dúvida de quem compra curso online: o que eu vou receber.</p></div><div class="vcard">
+              <div class="vhead"><span class="dias" style="--c:#16a34a">63d · campeão</span><b>Gestão de pessoas, negócios e inteligência artificial</b></div>
+              <p>Vídeo de 52 segundos com uma apresentadora numa mesa de escritório, legendas em caixa alta palavra por palavra (GESTÃO DE PESSOAS, GESTÃO DE NEGÓCIOS, E INTELIGÊNCIA ARTIFICIAL). O hook é a lista das três frentes e a frase se você quer crescer hoje. Depois troca de cenário com a logo da Tetra e cenas de tablet. Legenda dinâmica segura quem assiste sem som.</p></div></div>
+        </section>
+
+<section>
+  <div class="cols">
+    <div><h2>Hooks que ele repete</h2>
+      <p class="lead">Primeira linha de cada conceito. O que aparece muito é aposta consciente.</p>
+      <ul class="hooks"><li><span class="hc">30×</span> 🚨 Inscrições abertas para o Tetra Infinity!</li><li><span class="hc">26×</span> Pós-Graduação em Gestão, Negócios e IA</li><li><span class="hc">7×</span> 🎉 Você acaba de ganhar um CUPOM DE DESCONTO exclusivo para alunos da Tetra!</li></ul></div>
+    <div><h2>CTA e formato</h2>
+      <p class="lead">Botões mais usados nos anúncios ativos.</p>
+      <div class="bar"><span>Learn more</span><i style="width:100%"></i><b>58</b></div><div class="bar"><span>See details</span><i style="width:9%"></i><b>5</b></div>
+      <div class="bar" style="margin-top:18px"><span>Vídeo</span><i style="width:79%"></i><b>79%</b></div>
+      <div class="bar"><span>Imagem</span><i style="width:21%"></i><b>21%</b></div>
+    </div>
+  </div>
+</section>
+
+
+        <section class="ideias">
+          <h2>Ideias pra você testar</h2>
+          <p class="lead">Não copie. Pegue o que funciona pra ele e adapte pro seu ângulo.</p>
+          <ol class="ideias-list"><li>Se tiver um curso com certificação, mostre carga horária, duração e módulos em números grandes na tela</li><li>Mostre a plataforma e o material por dentro no vídeo, para responder ao que o aluno vai receber</li><li>Grave várias versões do mesmo roteiro em cenários diferentes e deixe o Meta escolher a melhor, como a Tetra fez com cerca de 40 vídeos</li><li>Use legenda em caixa alta, palavra a palavra, para quem assiste sem som</li><li>Há espaço vazio: nenhuma pós grande fala direto com o professor sobre IA na sala de aula</li></ol>
+        </section>
+
+<section>
+  <h2>Galeria de criativos</h2>
+  <p class="lead">Amostra dos conceitos ativos. Clica pra abrir na Ad Library.</p>
+  <div class="gal"><a class="g" href="https://www.facebook.com/ads/library?id=2033063083996927" target="_blank"><img src='thumbs/c0.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1881809452790355" target="_blank"><img src='thumbs/c1.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=4078562282277706" target="_blank"><img src='thumbs/c2.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1063959886519604" target="_blank"><img src='thumbs/c3.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1672500664588134" target="_blank"><img src='thumbs/c4.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1790698671965939" target="_blank"><img src='thumbs/c5.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=3379272282279313" target="_blank"><img src='thumbs/c6.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1610375063821322" target="_blank"><img src='thumbs/c7.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1336899751648889" target="_blank"><img src='thumbs/c8.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1778048193953253" target="_blank"><img src='thumbs/c9.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=2490439254791844" target="_blank"><img src='thumbs/c10.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=2123530908245908" target="_blank"><img src='thumbs/c11.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1816521206005197" target="_blank"><img src='thumbs/c12.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1111087078269356" target="_blank"><img src='thumbs/c13.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1764137647993598" target="_blank"><img src='thumbs/c14.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1083329504415068" target="_blank"><img src='thumbs/c15.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=2446460289515486" target="_blank"><img src='thumbs/c16.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1412971260940972" target="_blank"><img src='thumbs/c17.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=4240753796057880" target="_blank"><img src='thumbs/c18.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=2383396632491737" target="_blank"><img src='thumbs/c19.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=2050217642358693" target="_blank"><img src='thumbs/c20.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=2228955718002165" target="_blank"><img src='thumbs/c21.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1116139961011668" target="_blank"><img src='thumbs/c22.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1167873935886154" target="_blank"><img src='thumbs/c23.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1641391834117624" target="_blank"><img src='thumbs/c24.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1132559829174075" target="_blank"><img src='thumbs/c25.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=29075131282149947" target="_blank"><img src='thumbs/c26.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1830676874745280" target="_blank"><img src='thumbs/c27.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=952319881065443" target="_blank"><img src='thumbs/c28.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1798298301479108" target="_blank"><img src='thumbs/c29.jpg' loading=lazy></a></div>
+</section>
+
+<footer>
+  <b>Radar de Anúncios</b> · skill <b>/espiar-ads-ratos</b> da DobraLabs. Use pra inspiração e leitura de mercado, nunca pra copiar criativo alheio.<br>
+  Feito com Claude Code. Aprenda a construir skills assim nos cursos da <a href="https://ratosdeia.com.br" target="_blank">Ratos de IA</a>.
+</footer>
+</div></body></html>

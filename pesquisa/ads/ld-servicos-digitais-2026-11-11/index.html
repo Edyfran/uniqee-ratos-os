@@ -1,0 +1,357 @@
+<!doctype html><html lang="pt-br"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Radar de Anúncios · LD Serviços Digitais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{--am:#F2E30C;--ink:#111;--mut:#6b7280;--line:#e5e7eb;--bg:#faf9f5}
+*{box-sizing:border-box}body{margin:0;font-family:'Bricolage Grotesque',system-ui,sans-serif;color:var(--ink);background:var(--bg);line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+header{padding:56px 0 28px;border-bottom:2px solid var(--ink)}
+.kick{font-family:'Instrument Serif',serif;font-style:italic;font-size:22px;color:var(--mut)}
+h1{font-size:clamp(34px,5vw,58px);font-weight:800;letter-spacing:-.02em;margin:.1em 0 .2em}
+h1 mark{background:var(--am);padding:0 .1em}
+.sub{color:var(--mut);font-size:15px}
+h3{font-size:16px;margin:0 0 8px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:32px 0}
+.kpi{border:1.5px dashed #cfcabc;border-radius:14px;padding:18px}
+.kpi b{display:block;font-size:34px;font-weight:800;letter-spacing:-.02em}
+.kpi span{color:var(--mut);font-size:13px}
+section{padding:38px 0;border-bottom:1px solid var(--line)}
+h2{font-size:27px;font-weight:800;letter-spacing:-.01em;margin:0 0 6px}
+h2 em{font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;color:var(--mut);font-size:.8em}
+.lead{color:var(--mut);max-width:74ch;margin:0 0 22px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:34px}
+@media(max-width:720px){.cols{grid-template-columns:1fr}}
+.prom{margin:0;padding-left:18px} .prom li{margin:8px 0;font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:#f3f1ea;border-radius:20px;padding:5px 12px;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}
+.card{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff;display:flex;flex-direction:column}
+.thumb{position:relative;aspect-ratio:1/1;background:#f0eee6;overflow:hidden}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.thumb .noimg{display:flex;align-items:center;justify-content:center;height:100%;color:#aaa;font-size:13px}
+.thumb .play{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.6);color:#fff;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:12px}
+.meta{display:flex;gap:6px;flex-wrap:wrap;padding:12px 14px 0}
+.dias{font-size:12px;font-weight:700;color:#fff;background:var(--c);padding:3px 8px;border-radius:20px}
+.tag{font-size:12px;color:var(--mut);background:#f3f1ea;padding:3px 8px;border-radius:20px}
+.hook{font-weight:700;margin:10px 14px 4px;font-size:15px}
+.copy{color:var(--mut);font-size:13px;margin:0 14px 10px;flex:1}
+.foot{display:flex;justify-content:space-between;align-items:center;padding:0 14px 10px;gap:8px}
+.cta{font-size:12px;font-weight:700;border:1.5px solid var(--ink);border-radius:20px;padding:3px 10px}
+.dom{font-size:11px;color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:130px}
+.link{display:block;padding:10px 14px;border-top:1px solid var(--line);font-size:12px;font-weight:700;color:var(--ink);text-decoration:none}
+.link:hover{background:var(--am)}
+.ofs{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.of{border:1.5px dashed #cfcabc;border-radius:14px;padding:18px}
+.ofn{font-size:30px;font-weight:800} .ofd{display:block;font-weight:700;margin:2px 0} .ofp{color:var(--mut);font-size:13px}
+.hooks{list-style:none;padding:0;margin:0}
+.hooks li{padding:9px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.hc{font-weight:800;background:var(--am);padding:1px 6px;border-radius:6px;margin-right:6px;font-size:12px}
+.bar{display:flex;align-items:center;gap:10px;margin:9px 0;font-size:13px}
+.bar span{width:110px;color:var(--mut)} .bar i{height:12px;background:var(--am);border-radius:6px;display:block} .bar b{font-weight:700}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.vcard{border:1px solid var(--line);border-radius:14px;padding:18px;background:#fff}
+.vhead{display:flex;align-items:center;gap:10px;margin-bottom:8px} .vhead b{font-size:15px}
+.vcard p{color:var(--mut);font-size:14px;margin:0}
+.ideias{background:#111;color:#fff;border-radius:20px;padding:34px;border:none;margin-top:20px}
+.ideias h2{color:#fff} .ideias .lead{color:#bbb}
+.ideias-list{margin:0;padding-left:22px} .ideias-list li{margin:10px 0;font-size:15px}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
+.g{aspect-ratio:1/1;background:#f0eee6;border-radius:10px;overflow:hidden;display:grid;place-items:center;color:#bbb}
+.g img{width:100%;height:100%;object-fit:cover}
+footer{padding:40px 0 60px;color:var(--mut);font-size:13px} footer b{color:var(--ink)}
+footer a{color:var(--ink)}
+</style></head><body>
+<div class="wrap">
+<header>
+  <div class="kick">Radar de Anúncios · inteligência de concorrentes</div>
+  <h1><mark>LD Serviços Digitais</mark> no Meta Ads</h1>
+  <p class="sub">Biblioteca de Anúncios da Meta · 2026-11-11 · 54 anúncios ativos · 38 conceitos únicos após dedupe</p>
+</header>
+
+<div class="kpis">
+  <div class="kpi"><b>54</b><span>anúncios ativos</span></div>
+  <div class="kpi"><b>38</b><span>conceitos únicos</span></div>
+  <div class="kpi"><b>0%</b><span>são vídeo</span></div>
+  <div class="kpi"><b>1d</b><span>longevidade mediana</span></div>
+  <div class="kpi"><b>0</b><span>campeões (60d+)</span></div>
+  <div class="kpi"><b>2</b><span>ofertas ativas</span></div>
+</div>
+
+
+        <section>
+          <h2>O que ele está prometendo <em>· a oferta e a copy por trás</em></h2>
+          <p class="lead">Vende guias em PDF de R$ 37, pagamento único, com prompts prontos e um Projeto para configurar o Claude, cada um para uma profissão: professores, advogados, médicos, nutricionistas, contadores, fisioterapeutas, corretores e salões. Os 54 anúncios entraram no ar há 1 ou 2 dias: é um teste em massa de nichos com o mesmo molde de criativo. A marca por trás é o @andredamas.ads, que também anuncia o próprio perfil com conteúdo gratuito.</p>
+          <div class="cols">
+            <div>
+              <h3>Promessas que ele martela</h3>
+              <ul class="prom"><li>Professor: a semana planejada numa conversa, com rubrica, pré-correção e atividade adaptada</li><li>17 prompts prontos, 5 competências e 7 dias de plano</li><li>A IA prepara, a decisão e a assinatura continuam do profissional</li><li>Usar IA dentro das regras de cada conselho (CFM, CRECI, OAB)</li></ul>
+            </div>
+            <div>
+              <h3>Ângulos e dores explorados</h3>
+              <div class="chips"><span class="chip">Um nicho por anúncio, chamando a profissão pelo nome</span><span class="chip">Medo do erro da IA (jurisprudência inventada, multa, paciente exposto)</span><span class="chip">Número concreto de prompts e páginas</span><span class="chip">Preço único e baixo no próprio criativo</span><span class="chip">Responsabilidade do profissional preservada</span></div>
+              <h3 style="margin-top:20px">Público-alvo aparente</h3><p class="lead">Profissionais liberais e professores que já ouviram falar de IA mas têm medo de errar ou não sabem por onde começar, e compram por impulso um material barato e específico da área.</p>
+            </div>
+          </div>
+        </section>
+
+<section>
+  <h2>Ofertas ativas <em>· pra onde ele manda o tráfego</em></h2>
+  <p class="lead">Agrupando pelo domínio da landing dá pra ver o funil e qual oferta ele mais empurra.</p>
+  <div class="ofs"><div class="of"><span class="ofn">49</span><span class="ofd">ldservicosdigitais.com.br</span><span class="ofp">91% do volume</span></div><div class="of"><span class="ofn">5</span><span class="ofd">www.instagram.com</span><span class="ofp">9% do volume</span></div></div>
+</section>
+
+<section>
+  <h2>Anúncios campeões <em>· os que mais tempo rodam</em></h2>
+  <p class="lead">Anúncio que fica meses no ar é dinheiro validado: se não convertesse, já teria sido pausado. Ordenado por longevidade, deduplicado por conceito.</p>
+  <div class="grid">
+        <article class="card">
+          <div class="thumb"><div class="noimg">sem preview</div></div>
+          <div class="meta"><span class="dias" style="--c:#6b7280">2d · novo</span><span class="tag">TEXT</span>
+            <span class="tag">5 variações</span></div>
+          <p class="hook">A IA muda toda semana. Eu mostro o que mudou, o que serve pro seu trabalho e como usar, de graça.</p>
+          <p class="copy">A IA muda toda semana. Eu mostro o que mudou, o que serve pro seu trabalho e como usar, de graça.
+
+Sem curso e sem mensalidade. É só seguir o @andredamas.ads.…</p>
+          <div class="foot"><span class="cta">Visit Instagram profile</span>
+            <span class="dom">www.instagram.com</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=1450062363900504" target="_blank">ver na Ad Library ↗</a>
+        </article>
+        <article class="card">
+          <div class="thumb"><img src="thumbs/c1.jpg" loading="lazy" alt=""></div>
+          <div class="meta"><span class="dias" style="--c:#6b7280">2d · novo</span><span class="tag">IMAGE</span>
+            <span class="tag">3 variações</span></div>
+          <p class="hook">Professor, a semana planejada numa conversa, rubrica, pré-correção e atividade adaptada.</p>
+          <p class="copy">Professor, a semana planejada numa conversa, rubrica, pré-correção e atividade adaptada.
+
+O guia traz 17 prompts do dia a dia e um Projeto por turma. A IA prepara, a nota continua sua.
+
+R$ 37, pagamento único.…</p>
+          <div class="foot"><span class="cta">Learn more</span>
+            <span class="dom">ldservicosdigitais.com.br</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=4405715659645514" target="_blank">ver na Ad Library ↗</a>
+        </article>
+        <article class="card">
+          <div class="thumb"><img src="thumbs/c2.jpg" loading="lazy" alt=""></div>
+          <div class="meta"><span class="dias" style="--c:#6b7280">2d · novo</span><span class="tag">IMAGE</span>
+            <span class="tag">1 variações</span></div>
+          <p class="hook">Nutricionista, de cabeça a IA chuta. Com a TACO anexada, ela cita.</p>
+          <p class="copy">Nutricionista, de cabeça a IA chuta. Com a TACO anexada, ela cita.
+
+O guia traz o Projeto pronto, 16 prompts do dia a dia, cardápio com a soma por refeição e o uso de IA dentro do Código de Ética novo.
+
+R$ 37, pagamento único.…</p>
+          <div class="foot"><span class="cta">Learn more</span>
+            <span class="dom">ldservicosdigitais.com.br</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=1093171583548164" target="_blank">ver na Ad Library ↗</a>
+        </article>
+        <article class="card">
+          <div class="thumb"><img src="thumbs/c3.jpg" loading="lazy" alt=""></div>
+          <div class="meta"><span class="dias" style="--c:#6b7280">1d · novo</span><span class="tag">IMAGE</span>
+            <span class="tag">2 variações</span></div>
+          <p class="hook">Nutricionista, de cabeça a IA chuta. Com a TACO anexada, ela cita.</p>
+          <p class="copy">Nutricionista, de cabeça a IA chuta. Com a TACO anexada, ela cita.
+
+O guia traz o Projeto pronto, 16 prompts do dia a dia, cardápio com a soma por refeição e o uso de IA dentro do Código de Ética novo.
+
+R$ 37, pagamento único.…</p>
+          <div class="foot"><span class="cta">Learn more</span>
+            <span class="dom">ldservicosdigitais.com.br</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=1075374608858174" target="_blank">ver na Ad Library ↗</a>
+        </article>
+        <article class="card">
+          <div class="thumb"><img src="thumbs/c4.jpg" loading="lazy" alt=""></div>
+          <div class="meta"><span class="dias" style="--c:#6b7280">1d · novo</span><span class="tag">IMAGE</span>
+            <span class="tag">2 variações</span></div>
+          <p class="hook">Advogado, dá pra usar o Claude em peça, autos e atendimento sem citar o que não existe.</p>
+          <p class="copy">Advogado, dá pra usar o Claude em peça, autos e atendimento sem citar o que não existe.
+
+O guia traz o Projeto anti-invenção, as leis do Brasil anexadas, 12 tarefas com o prompt pronto e um plano de 7 dias. A IA rascunha, você confere e ass…</p>
+          <div class="foot"><span class="cta">Learn more</span>
+            <span class="dom">ldservicosdigitais.com.br</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=1798164071431530" target="_blank">ver na Ad Library ↗</a>
+        </article>
+        <article class="card">
+          <div class="thumb"><img src="thumbs/c5.jpg" loading="lazy" alt=""></div>
+          <div class="meta"><span class="dias" style="--c:#6b7280">1d · novo</span><span class="tag">IMAGE</span>
+            <span class="tag">2 variações</span></div>
+          <p class="hook">Fisioterapeuta, as evoluções do turno de uma vez, relatório como rascunho e exercício de casa que o paciente entende.</p>
+          <p class="copy">Fisioterapeuta, as evoluções do turno de uma vez, relatório como rascunho e exercício de casa que o paciente entende.
+
+O guia traz 19 prompts do dia a dia. A assinatura continua sua.
+
+R$ 37, pagamento único.…</p>
+          <div class="foot"><span class="cta">Learn more</span>
+            <span class="dom">ldservicosdigitais.com.br</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=2349801125873554" target="_blank">ver na Ad Library ↗</a>
+        </article>
+        <article class="card">
+          <div class="thumb"><img src="thumbs/c6.jpg" loading="lazy" alt=""></div>
+          <div class="meta"><span class="dias" style="--c:#6b7280">1d · novo</span><span class="tag">IMAGE</span>
+            <span class="tag">1 variações</span></div>
+          <p class="hook">Contador, o extrato em PDF vira planilha com prova, a conciliação mostra o que não bateu e o mês fecha com checklist.</p>
+          <p class="copy">Contador, o extrato em PDF vira planilha com prova, a conciliação mostra o que não bateu e o mês fecha com checklist.
+
+O guia traz 20 prompts do dia a dia. A conta sai da fórmula, a assinatura é sua.
+
+R$ 37, pagamento único.…</p>
+          <div class="foot"><span class="cta">Learn more</span>
+            <span class="dom">ldservicosdigitais.com.br</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=1467978992099519" target="_blank">ver na Ad Library ↗</a>
+        </article>
+        <article class="card">
+          <div class="thumb"><img src="thumbs/c7.jpg" loading="lazy" alt=""></div>
+          <div class="meta"><span class="dias" style="--c:#6b7280">1d · novo</span><span class="tag">IMAGE</span>
+            <span class="tag">1 variações</span></div>
+          <p class="hook">Corretor, do anúncio ao fechamento com o Claude: anúncio sem cara de IA, lead respondido e retomado, dentro da regra do CRECI.</p>
+          <p class="copy">Corretor, do anúncio ao fechamento com o Claude: anúncio sem cara de IA, lead respondido e retomado, dentro da regra do CRECI.
+
+O guia traz 19 prompts do dia a dia e o passo a passo pra configurar uma vez só.
+
+R$ 37, pagamento único.…</p>
+          <div class="foot"><span class="cta">Learn more</span>
+            <span class="dom">ldservicosdigitais.com.br</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=1779548746489541" target="_blank">ver na Ad Library ↗</a>
+        </article>
+        <article class="card">
+          <div class="thumb"><img src="thumbs/c8.jpg" loading="lazy" alt=""></div>
+          <div class="meta"><span class="dias" style="--c:#6b7280">1d · novo</span><span class="tag">IMAGE</span>
+            <span class="tag">3 variações</span></div>
+          <p class="hook">Salão e estética: o Claude responde o WhatsApp, organiza a agenda e escreve o post sem prometer resultado.</p>
+          <p class="copy">Salão e estética: o Claude responde o WhatsApp, organiza a agenda e escreve o post sem prometer resultado.
+
+O guia traz o Projeto pronto pra copiar, 16 prompts do dia a dia, a política de falta e os pacotes com a margem à vista.
+
+R$ 37, pag…</p>
+          <div class="foot"><span class="cta">Learn more</span>
+            <span class="dom">ldservicosdigitais.com.br</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=1436303088704510" target="_blank">ver na Ad Library ↗</a>
+        </article>
+        <article class="card">
+          <div class="thumb"><img src="thumbs/c9.jpg" loading="lazy" alt=""></div>
+          <div class="meta"><span class="dias" style="--c:#6b7280">1d · novo</span><span class="tag">IMAGE</span>
+            <span class="tag">1 variações</span></div>
+          <p class="hook">Médico, o Claude pode trabalhar no seu consultório sem expor paciente e sem sair da regra do CFM.</p>
+          <p class="copy">Médico, o Claude pode trabalhar no seu consultório sem expor paciente e sem sair da regra do CFM.
+
+O guia traz o passo a passo da conta segura, o Projeto pronto pra copiar, 18 prompts do dia a dia e o Instagram dentro da Res. 2.336. A IA ra…</p>
+          <div class="foot"><span class="cta">Learn more</span>
+            <span class="dom">ldservicosdigitais.com.br</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=2519100651946043" target="_blank">ver na Ad Library ↗</a>
+        </article>
+        <article class="card">
+          <div class="thumb"><img src="thumbs/c10.jpg" loading="lazy" alt=""></div>
+          <div class="meta"><span class="dias" style="--c:#6b7280">1d · novo</span><span class="tag">IMAGE</span>
+            <span class="tag">1 variações</span></div>
+          <p class="hook">Fisioterapeuta, as evoluções do turno de uma vez, relatório como rascunho e exercício de casa que o paciente entende.</p>
+          <p class="copy">Fisioterapeuta, as evoluções do turno de uma vez, relatório como rascunho e exercício de casa que o paciente entende.
+
+O guia traz 19 prompts do dia a dia. A assinatura continua sua.
+
+R$ 37, pagamento único.…</p>
+          <div class="foot"><span class="cta">Learn more</span>
+            <span class="dom">ldservicosdigitais.com.br</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=3048547705498820" target="_blank">ver na Ad Library ↗</a>
+        </article>
+        <article class="card">
+          <div class="thumb"><img src="thumbs/c11.jpg" loading="lazy" alt=""></div>
+          <div class="meta"><span class="dias" style="--c:#6b7280">1d · novo</span><span class="tag">IMAGE</span>
+            <span class="tag">1 variações</span></div>
+          <p class="hook">Corretor, do anúncio ao fechamento com o Claude: anúncio sem cara de IA, lead respondido e retomado, dentro da regra do CRECI.</p>
+          <p class="copy">Corretor, do anúncio ao fechamento com o Claude: anúncio sem cara de IA, lead respondido e retomado, dentro da regra do CRECI.
+
+O guia traz 19 prompts do dia a dia e o passo a passo pra configurar uma vez só.
+
+R$ 37, pagamento único.…</p>
+          <div class="foot"><span class="cta">Learn more</span>
+            <span class="dom">ldservicosdigitais.com.br</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=1494300189181038" target="_blank">ver na Ad Library ↗</a>
+        </article>
+        <article class="card">
+          <div class="thumb"><img src="thumbs/c12.jpg" loading="lazy" alt=""></div>
+          <div class="meta"><span class="dias" style="--c:#6b7280">1d · novo</span><span class="tag">IMAGE</span>
+            <span class="tag">1 variações</span></div>
+          <p class="hook">Advogado, dá pra usar o Claude em peça, autos e atendimento sem citar o que não existe.</p>
+          <p class="copy">Advogado, dá pra usar o Claude em peça, autos e atendimento sem citar o que não existe.
+
+O guia traz o Projeto anti-invenção, as leis do Brasil anexadas, 12 tarefas com o prompt pronto e um plano de 7 dias. A IA rascunha, você confere e ass…</p>
+          <div class="foot"><span class="cta">Learn more</span>
+            <span class="dom">ldservicosdigitais.com.br</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=1434442115524764" target="_blank">ver na Ad Library ↗</a>
+        </article>
+        <article class="card">
+          <div class="thumb"><img src="thumbs/c13.jpg" loading="lazy" alt=""></div>
+          <div class="meta"><span class="dias" style="--c:#6b7280">1d · novo</span><span class="tag">IMAGE</span>
+            <span class="tag">1 variações</span></div>
+          <p class="hook">Contador, o extrato em PDF vira planilha com prova, a conciliação mostra o que não bateu e o mês fecha com checklist.</p>
+          <p class="copy">Contador, o extrato em PDF vira planilha com prova, a conciliação mostra o que não bateu e o mês fecha com checklist.
+
+O guia traz 20 prompts do dia a dia. A conta sai da fórmula, a assinatura é sua.
+
+R$ 37, pagamento único.…</p>
+          <div class="foot"><span class="cta">Learn more</span>
+            <span class="dom">ldservicosdigitais.com.br</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=1786001529293496" target="_blank">ver na Ad Library ↗</a>
+        </article>
+        <article class="card">
+          <div class="thumb"><img src="thumbs/c14.jpg" loading="lazy" alt=""></div>
+          <div class="meta"><span class="dias" style="--c:#6b7280">1d · novo</span><span class="tag">IMAGE</span>
+            <span class="tag">1 variações</span></div>
+          <p class="hook">Nutricionista, de cabeça a IA chuta. Com a TACO anexada, ela cita.</p>
+          <p class="copy">Nutricionista, de cabeça a IA chuta. Com a TACO anexada, ela cita.
+
+O guia traz o Projeto pronto, 16 prompts do dia a dia, cardápio com a soma por refeição e o uso de IA dentro do Código de Ética novo.
+
+R$ 37, pagamento único.…</p>
+          <div class="foot"><span class="cta">Learn more</span>
+            <span class="dom">ldservicosdigitais.com.br</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=1828244035180576" target="_blank">ver na Ad Library ↗</a>
+        </article></div>
+</section>
+
+
+        <section>
+          <h2>Anatomia dos vídeos campeões <em>· o que faz o hook segurar</em></h2>
+          <p class="lead">Leitura frame a frame dos 3 vídeos que mais tempo rodam. É onde o dinheiro dele está.</p>
+          <div class="vgrid"><div class="vcard">
+              <div class="vhead"><span class="dias" style="--c:#6b7280">2d · novo</span><b>17 PROMPTS PARA PROFESSORES (criativo estático)</b></div>
+              <p>LD não usa vídeo: são imagens no mesmo molde escuro com laranja. Selo GUIA COMPLETO, a profissão em destaque, um título com número (17 PROMPTS PARA PROFESSORES), três chips de prova (prompts, competências, dias de plano), mockups das páginas do PDF e uma faixa laranja com Quero o guia e R$ 37. Tudo o que o comprador precisa decidir está na imagem.</p></div><div class="vcard">
+              <div class="vhead"><span class="dias" style="--c:#6b7280">1d · novo</span><b>JURISPRUDÊNCIA QUE NÃO EXISTE JÁ VIROU MULTA (advogado)</b></div>
+              <p>Variação que troca o número pelo medo: cita uma decisão do TST que condenou advogado por usar jurisprudência inventada, com fonte e data. O produto aparece como a proteção contra esse risco. Mostra que o mesmo molde aceita um gancho de notícia real.</p></div><div class="vcard">
+              <div class="vhead"><span class="dias" style="--c:#6b7280">1d · novo</span><b>18 PROMPTS PARA MÉDICOS</b></div>
+              <p>Mesmo molde do criativo de professores, trocando a profissão e a norma do conselho (Res. 2.336 do CFM). Confirma a estratégia de escala: um template, várias profissões, deixando o Meta mostrar qual nicho converte.</p></div></div>
+        </section>
+
+<section>
+  <div class="cols">
+    <div><h2>Hooks que ele repete</h2>
+      <p class="lead">Primeira linha de cada conceito. O que aparece muito é aposta consciente.</p>
+      <ul class="hooks"><li><span class="hc">7×</span> Contador, o extrato em PDF vira planilha com prova, a conciliação mostra o que não bateu e o mês fecha com checklist.</li><li><span class="hc">7×</span> Corretor, do anúncio ao fechamento com o Claude: anúncio sem cara de IA, lead respondido e retomado, dentro da regra do CRECI.</li><li><span class="hc">6×</span> Professor, a semana planejada numa conversa, rubrica, pré-correção e atividade adaptada.</li><li><span class="hc">6×</span> Nutricionista, de cabeça a IA chuta. Com a TACO anexada, ela cita.</li><li><span class="hc">6×</span> Advogado, dá pra usar o Claude em peça, autos e atendimento sem citar o que não existe.</li><li><span class="hc">6×</span> Fisioterapeuta, as evoluções do turno de uma vez, relatório como rascunho e exercício de casa que o paciente entende.</li><li><span class="hc">5×</span> A IA muda toda semana. Eu mostro o que mudou, o que serve pro seu trabalho e como usar, de graça.</li><li><span class="hc">5×</span> Salão e estética: o Claude responde o WhatsApp, organiza a agenda e escreve o post sem prometer resultado.</li><li><span class="hc">4×</span> Psicólogo, dá pra usar o Claude na agenda, no contrato e no Instagram sem quebrar o sigilo.</li><li><span class="hc">2×</span> Médico, o Claude pode trabalhar no seu consultório sem expor paciente e sem sair da regra do CFM.</li></ul></div>
+    <div><h2>CTA e formato</h2>
+      <p class="lead">Botões mais usados nos anúncios ativos.</p>
+      <div class="bar"><span>Learn more</span><i style="width:100%"></i><b>49</b></div><div class="bar"><span>Visit Instagram profile</span><i style="width:10%"></i><b>5</b></div>
+      <div class="bar" style="margin-top:18px"><span>Vídeo</span><i style="width:0%"></i><b>0%</b></div>
+      <div class="bar"><span>Imagem</span><i style="width:100%"></i><b>100%</b></div>
+    </div>
+  </div>
+</section>
+
+
+        <section class="ideias">
+          <h2>Ideias pra você testar</h2>
+          <p class="lead">Não copie. Pegue o que funciona pra ele e adapte pro seu ângulo.</p>
+          <ol class="ideias-list"><li>Monte um template de criativo único e troque só o público (professor de ensino médio, técnico, universitário, coordenador) para testar qual responde melhor</li><li>Ponha um número concreto no título (quantidade de prompts, de páginas, de dias) e o preço no próprio criativo</li><li>Use uma notícia real de erro com IA na educação (plágio, correção injusta) como gancho de medo, com fonte</li><li>Reforce que a IA prepara e o professor decide: diminui a resistência de quem tem medo de perder autonomia</li><li>Ofereça um Projeto pronto do Claude ou um GPT configurado junto com os prompts: o comprador recebe algo que já funciona</li></ol>
+        </section>
+
+<section>
+  <h2>Galeria de criativos</h2>
+  <p class="lead">Amostra dos conceitos ativos. Clica pra abrir na Ad Library.</p>
+  <div class="gal"><a class="g" href="https://www.facebook.com/ads/library?id=1450062363900504" target="_blank"><span>—</span></a><a class="g" href="https://www.facebook.com/ads/library?id=4405715659645514" target="_blank"><img src='thumbs/c1.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1093171583548164" target="_blank"><img src='thumbs/c2.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1075374608858174" target="_blank"><img src='thumbs/c3.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1798164071431530" target="_blank"><img src='thumbs/c4.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=2349801125873554" target="_blank"><img src='thumbs/c5.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1467978992099519" target="_blank"><img src='thumbs/c6.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1779548746489541" target="_blank"><img src='thumbs/c7.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1436303088704510" target="_blank"><img src='thumbs/c8.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=2519100651946043" target="_blank"><img src='thumbs/c9.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=3048547705498820" target="_blank"><img src='thumbs/c10.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1494300189181038" target="_blank"><img src='thumbs/c11.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1434442115524764" target="_blank"><img src='thumbs/c12.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1786001529293496" target="_blank"><img src='thumbs/c13.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1828244035180576" target="_blank"><img src='thumbs/c14.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1630005962146343" target="_blank"><img src='thumbs/c15.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=2626642327774462" target="_blank"><img src='thumbs/c16.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=3006909419652646" target="_blank"><img src='thumbs/c17.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1316639507214600" target="_blank"><img src='thumbs/c18.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1672823361238541" target="_blank"><img src='thumbs/c19.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=2210948289800995" target="_blank"><img src='thumbs/c20.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1067926562962267" target="_blank"><img src='thumbs/c21.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1155669250737612" target="_blank"><img src='thumbs/c22.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1459851429441849" target="_blank"><img src='thumbs/c23.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1689716272949391" target="_blank"><img src='thumbs/c24.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1706990690944724" target="_blank"><img src='thumbs/c25.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1785185166072704" target="_blank"><img src='thumbs/c26.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1786175699272630" target="_blank"><img src='thumbs/c27.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1862328859228782" target="_blank"><img src='thumbs/c28.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1866643221434208" target="_blank"><img src='thumbs/c29.jpg' loading=lazy></a></div>
+</section>
+
+<footer>
+  <b>Radar de Anúncios</b> · skill <b>/espiar-ads-ratos</b> da DobraLabs. Use pra inspiração e leitura de mercado, nunca pra copiar criativo alheio.<br>
+  Feito com Claude Code. Aprenda a construir skills assim nos cursos da <a href="https://ratosdeia.com.br" target="_blank">Ratos de IA</a>.
+</footer>
+</div></body></html>

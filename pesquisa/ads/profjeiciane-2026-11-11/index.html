@@ -1,0 +1,211 @@
+<!doctype html><html lang="pt-br"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Radar de Anúncios · profjeiciane</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{--am:#F2E30C;--ink:#111;--mut:#6b7280;--line:#e5e7eb;--bg:#faf9f5}
+*{box-sizing:border-box}body{margin:0;font-family:'Bricolage Grotesque',system-ui,sans-serif;color:var(--ink);background:var(--bg);line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+header{padding:56px 0 28px;border-bottom:2px solid var(--ink)}
+.kick{font-family:'Instrument Serif',serif;font-style:italic;font-size:22px;color:var(--mut)}
+h1{font-size:clamp(34px,5vw,58px);font-weight:800;letter-spacing:-.02em;margin:.1em 0 .2em}
+h1 mark{background:var(--am);padding:0 .1em}
+.sub{color:var(--mut);font-size:15px}
+h3{font-size:16px;margin:0 0 8px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:32px 0}
+.kpi{border:1.5px dashed #cfcabc;border-radius:14px;padding:18px}
+.kpi b{display:block;font-size:34px;font-weight:800;letter-spacing:-.02em}
+.kpi span{color:var(--mut);font-size:13px}
+section{padding:38px 0;border-bottom:1px solid var(--line)}
+h2{font-size:27px;font-weight:800;letter-spacing:-.01em;margin:0 0 6px}
+h2 em{font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;color:var(--mut);font-size:.8em}
+.lead{color:var(--mut);max-width:74ch;margin:0 0 22px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:34px}
+@media(max-width:720px){.cols{grid-template-columns:1fr}}
+.prom{margin:0;padding-left:18px} .prom li{margin:8px 0;font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:#f3f1ea;border-radius:20px;padding:5px 12px;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}
+.card{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff;display:flex;flex-direction:column}
+.thumb{position:relative;aspect-ratio:1/1;background:#f0eee6;overflow:hidden}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.thumb .noimg{display:flex;align-items:center;justify-content:center;height:100%;color:#aaa;font-size:13px}
+.thumb .play{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.6);color:#fff;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:12px}
+.meta{display:flex;gap:6px;flex-wrap:wrap;padding:12px 14px 0}
+.dias{font-size:12px;font-weight:700;color:#fff;background:var(--c);padding:3px 8px;border-radius:20px}
+.tag{font-size:12px;color:var(--mut);background:#f3f1ea;padding:3px 8px;border-radius:20px}
+.hook{font-weight:700;margin:10px 14px 4px;font-size:15px}
+.copy{color:var(--mut);font-size:13px;margin:0 14px 10px;flex:1}
+.foot{display:flex;justify-content:space-between;align-items:center;padding:0 14px 10px;gap:8px}
+.cta{font-size:12px;font-weight:700;border:1.5px solid var(--ink);border-radius:20px;padding:3px 10px}
+.dom{font-size:11px;color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:130px}
+.link{display:block;padding:10px 14px;border-top:1px solid var(--line);font-size:12px;font-weight:700;color:var(--ink);text-decoration:none}
+.link:hover{background:var(--am)}
+.ofs{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.of{border:1.5px dashed #cfcabc;border-radius:14px;padding:18px}
+.ofn{font-size:30px;font-weight:800} .ofd{display:block;font-weight:700;margin:2px 0} .ofp{color:var(--mut);font-size:13px}
+.hooks{list-style:none;padding:0;margin:0}
+.hooks li{padding:9px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.hc{font-weight:800;background:var(--am);padding:1px 6px;border-radius:6px;margin-right:6px;font-size:12px}
+.bar{display:flex;align-items:center;gap:10px;margin:9px 0;font-size:13px}
+.bar span{width:110px;color:var(--mut)} .bar i{height:12px;background:var(--am);border-radius:6px;display:block} .bar b{font-weight:700}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.vcard{border:1px solid var(--line);border-radius:14px;padding:18px;background:#fff}
+.vhead{display:flex;align-items:center;gap:10px;margin-bottom:8px} .vhead b{font-size:15px}
+.vcard p{color:var(--mut);font-size:14px;margin:0}
+.ideias{background:#111;color:#fff;border-radius:20px;padding:34px;border:none;margin-top:20px}
+.ideias h2{color:#fff} .ideias .lead{color:#bbb}
+.ideias-list{margin:0;padding-left:22px} .ideias-list li{margin:10px 0;font-size:15px}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
+.g{aspect-ratio:1/1;background:#f0eee6;border-radius:10px;overflow:hidden;display:grid;place-items:center;color:#bbb}
+.g img{width:100%;height:100%;object-fit:cover}
+footer{padding:40px 0 60px;color:var(--mut);font-size:13px} footer b{color:var(--ink)}
+footer a{color:var(--ink)}
+</style></head><body>
+<div class="wrap">
+<header>
+  <div class="kick">Radar de Anúncios · inteligência de concorrentes</div>
+  <h1><mark>profjeiciane</mark> no Meta Ads</h1>
+  <p class="sub">Biblioteca de Anúncios da Meta · 2026-11-11 · 6 anúncios ativos · 4 conceitos únicos após dedupe</p>
+</header>
+
+<div class="kpis">
+  <div class="kpi"><b>6</b><span>anúncios ativos</span></div>
+  <div class="kpi"><b>4</b><span>conceitos únicos</span></div>
+  <div class="kpi"><b>83%</b><span>são vídeo</span></div>
+  <div class="kpi"><b>521d</b><span>longevidade mediana</span></div>
+  <div class="kpi"><b>4</b><span>campeões (60d+)</span></div>
+  <div class="kpi"><b>3</b><span>ofertas ativas</span></div>
+</div>
+
+
+        <section>
+          <h2>O que ele está prometendo <em>· a oferta e a copy por trás</em></h2>
+          <p class="lead">Vende uma formação curta de 4 horas por R$ 29,90, com certificado, sobre usar IA (ChatGPT) para adaptar avaliações e atividades para alunos com deficiência, autismo e TDAH. Também vende a Imersão ChatGPT e Canva na Prática, ao vivo no Google Meet. A conversão acontece pelo WhatsApp e pelo Instagram, e os anúncios campeões rodam há mais de 480 dias.</p>
+          <div class="cols">
+            <div>
+              <h3>Promessas que ele martela</h3>
+              <ul class="prom"><li>Adaptar provas e atividades para alunos com deficiência em pouco tempo</li><li>4 horas de conteúdo prático com certificado por R$ 29,90</li><li>Material para aplicar na sala de aula no dia seguinte</li><li>Dominar ChatGPT e Canva em dois dias ao vivo</li></ul>
+            </div>
+            <div>
+              <h3>Ângulos e dores explorados</h3>
+              <div class="chips"><span class="chip">Educação inclusiva (AEE, autismo, TDAH, deficiência intelectual)</span><span class="chip">Cansaço e falta de tempo do professor</span><span class="chip">Certificado como benefício para a carreira</span><span class="chip">Comentário com palavra-chave (EU QUERO) para puxar conversa</span><span class="chip">Vagas limitadas</span></div>
+              <h3 style="margin-top:20px">Público-alvo aparente</h3><p class="lead">Professoras e professores da educação básica, principalmente quem atende alunos com deficiência ou trabalha no AEE, com orçamento baixo e que valorizam certificado.</p>
+            </div>
+          </div>
+        </section>
+
+<section>
+  <h2>Ofertas ativas <em>· pra onde ele manda o tráfego</em></h2>
+  <p class="lead">Agrupando pelo domínio da landing dá pra ver o funil e qual oferta ele mais empurra.</p>
+  <div class="ofs"><div class="of"><span class="ofn">4</span><span class="ofd">api.whatsapp.com</span><span class="ofp">67% do volume</span></div><div class="of"><span class="ofn">1</span><span class="ofd">instagram.com</span><span class="ofp">17% do volume</span></div><div class="of"><span class="ofn">1</span><span class="ofd">ime.events</span><span class="ofp">17% do volume</span></div></div>
+</section>
+
+<section>
+  <h2>Anúncios campeões <em>· os que mais tempo rodam</em></h2>
+  <p class="lead">Anúncio que fica meses no ar é dinheiro validado: se não convertesse, já teria sido pausado. Ordenado por longevidade, deduplicado por conceito.</p>
+  <div class="grid">
+        <article class="card">
+          <div class="thumb"><img src="thumbs/c0.jpg" loading="lazy" alt=""><span class="play">▶</span></div>
+          <div class="meta"><span class="dias" style="--c:#16a34a">535d · campeão</span><span class="tag">VIDEO</span>
+            <span class="tag">2 variações</span></div>
+          <p class="hook">Olá!</p>
+          <p class="copy">Olá! 
+Com apenas R$ 29,90, você garante:
+✅ 4 horas de conteúdo 100% prático
+✅ Certificado incluso
+✅ Uso de Inteligência Artificial para adaptar com rapidez e qualidade
+✅ Materiais e ferramentas para aplicar na sua sala de aula no dia seguin…</p>
+          <div class="foot"><span class="cta">Learn more</span>
+            <span class="dom">api.whatsapp.com</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=24108634292090120" target="_blank">ver na Ad Library ↗</a>
+        </article>
+        <article class="card">
+          <div class="thumb"><img src="thumbs/c1.jpg" loading="lazy" alt=""></div>
+          <div class="meta"><span class="dias" style="--c:#16a34a">521d · campeão</span><span class="tag">CAROUSEL</span>
+            <span class="tag">1 variações</span></div>
+          <p class="hook">Frases simples que mudam o dia de um aluno com deficiência.</p>
+          <p class="copy">Frases simples que mudam o dia de um aluno com deficiência.
+Na escola, cada palavra pode construir ou derrubar pontes.
+Vamos escolher sempre as que acolhem 💛
+Qual dessas você já disse hoje?
+
+📌 Salve e envie pra quem precisa lembrar disso to…</p>
+          <div class="foot"><span class="cta">Visit Instagram profile</span>
+            <span class="dom">instagram.com</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=2963204540517221" target="_blank">ver na Ad Library ↗</a>
+        </article>
+        <article class="card">
+          <div class="thumb"><img src="thumbs/c2.jpg" loading="lazy" alt=""><span class="play">▶</span></div>
+          <div class="meta"><span class="dias" style="--c:#16a34a">483d · campeão</span><span class="tag">VIDEO</span>
+            <span class="tag">2 variações</span></div>
+          <p class="hook">📣 PROFESSORES, ATENÇÃO!</p>
+          <p class="copy">📣 PROFESSORES, ATENÇÃO!
+
+Você já passou horas tentando adaptar avaliações e atividades para seus alunos com Autismo, TDAH, Deficiência Intelectual e outros perfis de aprendizagem?
+✍️ Entre imprimir provas, simplificar enunciados, criar vers…</p>
+          <div class="foot"><span class="cta">Send WhatsApp message</span>
+            <span class="dom">api.whatsapp.com</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=1330293428454898" target="_blank">ver na Ad Library ↗</a>
+        </article>
+        <article class="card">
+          <div class="thumb"><img src="thumbs/c3.jpg" loading="lazy" alt=""><span class="play">▶</span></div>
+          <div class="meta"><span class="dias" style="--c:#16a34a">478d · campeão</span><span class="tag">VIDEO</span>
+            <span class="tag">1 variações</span></div>
+          <p class="hook">Você quer apresentar seu trabalho, publicar nos anais com ISSN e DOI e ainda conquistar certificados válidos em todo o Brasil?</p>
+          <p class="copy">Você quer apresentar seu trabalho, publicar nos anais com ISSN e DOI e ainda conquistar certificados válidos em todo o Brasil?
+O CINEP – Congresso Interdisciplinar de Ensino e Pesquisa está com inscrições abertas! 🧠✨
+
+🟢 Submeta seu resumo, …</p>
+          <div class="foot"><span class="cta">Learn more</span>
+            <span class="dom">ime.events</span></div>
+          <a class="link" href="https://www.facebook.com/ads/library?id=1423825482259057" target="_blank">ver na Ad Library ↗</a>
+        </article></div>
+</section>
+
+
+        <section>
+          <h2>Anatomia dos vídeos campeões <em>· o que faz o hook segurar</em></h2>
+          <p class="lead">Leitura frame a frame dos 3 vídeos que mais tempo rodam. É onde o dinheiro dele está.</p>
+          <div class="vgrid"><div class="vcard">
+              <div class="vhead"><span class="dias" style="--c:#16a34a">535d · campeão</span><b>Você, professor, que quer adaptar avaliações para alunos com deficiência...</b></div>
+              <p>Vídeo de 15 segundos que na prática é uma arte parada com uma animação sutil (o EU QUERO é sublinhado). O texto grande faz a pergunta, a professora sorrindo aponta para o CTA, e o ícone de acessibilidade e o logo do ChatGPT dizem o assunto num olhar. Roda há quase um ano e meio: é a prova de que nesse nicho a dor bem nomeada vale mais que a produção.</p></div><div class="vcard">
+              <div class="vhead"><span class="dias" style="--c:#16a34a">483d · campeão</span><b>PROFESSORES, ATENÇÃO!</b></div>
+              <p>Vídeo de 43 segundos que abre com uma cena feita com IA: uma professora exausta diante de pilhas de provas, e uma colega chega com a solução no celular. Depois entra uma arte da Imersão ChatGPT e Canva ao vivo, com certificado e materiais. A estrutura é problema encenado, alívio e oferta, e o primeiro quadro já mostra a dor sem precisar de som.</p></div><div class="vcard">
+              <div class="vhead"><span class="dias" style="--c:#16a34a">478d · campeão</span><b>Convite para o congresso CINEP</b></div>
+              <p>Vídeo de 13 segundos com uma apresentadora falando direto para a câmera, sorridente, num cenário com luz rosa. É um anúncio de evento acadêmico (publicar resumo com ISSN e DOI), mostrando que a página também monetiza o desejo do professor por certificado e currículo. A energia da fala segura, mas o tema foge de IA.</p></div></div>
+        </section>
+
+<section>
+  <div class="cols">
+    <div><h2>Hooks que ele repete</h2>
+      <p class="lead">Primeira linha de cada conceito. O que aparece muito é aposta consciente.</p>
+      <ul class="hooks"><li><span class="hc">2×</span> Olá!</li><li><span class="hc">2×</span> 📣 PROFESSORES, ATENÇÃO!</li><li><span class="hc">1×</span> Frases simples que mudam o dia de um aluno com deficiência.</li><li><span class="hc">1×</span> Você quer apresentar seu trabalho, publicar nos anais com ISSN e DOI e ainda conquistar certificados válidos em todo o Brasil?</li></ul></div>
+    <div><h2>CTA e formato</h2>
+      <p class="lead">Botões mais usados nos anúncios ativos.</p>
+      <div class="bar"><span>Learn more</span><i style="width:100%"></i><b>3</b></div><div class="bar"><span>Send WhatsApp message</span><i style="width:67%"></i><b>2</b></div><div class="bar"><span>Visit Instagram profile</span><i style="width:33%"></i><b>1</b></div>
+      <div class="bar" style="margin-top:18px"><span>Vídeo</span><i style="width:83%"></i><b>83%</b></div>
+      <div class="bar"><span>Imagem</span><i style="width:17%"></i><b>17%</b></div>
+    </div>
+  </div>
+</section>
+
+
+        <section class="ideias">
+          <h2>Ideias pra você testar</h2>
+          <p class="lead">Não copie. Pegue o que funciona pra ele e adapte pro seu ângulo.</p>
+          <ol class="ideias-list"><li>Educação inclusiva com IA é um ângulo validado há mais de um ano: vale um conteúdo ou produto teu sobre adaptar atividades com IA para alunos com deficiência</li><li>Teste o CTA de comentário com palavra-chave e a resposta automática no direct, que reduz o atrito para quem não clica em link</li><li>Encene a dor (o professor corrigindo de madrugada) nos primeiros segundos, mesmo com imagem gerada por IA</li><li>Ofereça certificado de horas: para o professor da educação básica isso pesa tanto quanto o conteúdo</li><li>Um formato ao vivo e curto (imersão de 2 dias) funciona como porta de entrada barata</li></ol>
+        </section>
+
+<section>
+  <h2>Galeria de criativos</h2>
+  <p class="lead">Amostra dos conceitos ativos. Clica pra abrir na Ad Library.</p>
+  <div class="gal"><a class="g" href="https://www.facebook.com/ads/library?id=24108634292090120" target="_blank"><img src='thumbs/c0.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=2963204540517221" target="_blank"><img src='thumbs/c1.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1330293428454898" target="_blank"><img src='thumbs/c2.jpg' loading=lazy></a><a class="g" href="https://www.facebook.com/ads/library?id=1423825482259057" target="_blank"><img src='thumbs/c3.jpg' loading=lazy></a></div>
+</section>
+
+<footer>
+  <b>Radar de Anúncios</b> · skill <b>/espiar-ads-ratos</b> da DobraLabs. Use pra inspiração e leitura de mercado, nunca pra copiar criativo alheio.<br>
+  Feito com Claude Code. Aprenda a construir skills assim nos cursos da <a href="https://ratosdeia.com.br" target="_blank">Ratos de IA</a>.
+</footer>
+</div></body></html>

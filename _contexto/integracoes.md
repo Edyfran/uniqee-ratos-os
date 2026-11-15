@@ -12,7 +12,7 @@
 | WhatsApp | atendimento e orçamento com cliente | só você, na mão (dá pra ligar via WhatsApp Cloud API ou Z-API) | não ligada | 2026-11-08 |
 | Canva | artes e posts da Uniqee (tem brand kit da Uniqee) | MCP (conector do claude.ai) | ligada | 2026-11-08 |
 | Metricool | métricas e agendamento de posts | MCP (conector do claude.ai) | ligada, mas sem o Instagram conectado | 2026-11-08 |
-| Instagram | divulgação da Uniqee e do PreçoArte | via Metricool, quando conectar | não ligada | 2026-11-08 |
+| Instagram | divulgação da Uniqee e do PreçoArte | Instagram Graph API (app claudecode-edy, usuário do sistema dm-automacao; chave `INSTAGRAM_TOKEN` nas chaves do app Conteúdo da Ratoeira, que lê os posts e números a cada hora) | ligada (leitura; publicar ainda não) | 2026-11-12 |
 | ManyChat | resposta automática no Instagram ("comente PREÇO") | só você, na mão | não ligada | 2026-11-08 |
 | Kiwify | checkout do PreçoArte | webhook pro serviço de chaves na Cloudflare; o agente não alcança direto | não ligada | 2026-11-08 |
 | Mercado Pago | link de pagamento pra venda manual no WhatsApp | só você, na mão | não ligada | 2026-11-08 |
@@ -21,9 +21,9 @@
 | GitHub | código e versões do PreçoArte | git instalado; `gh` CLI não instalado | não ligada | 2026-11-08 |
 | Gmail | email | MCP (conector do claude.ai) | ligada, uso no negócio não confirmado | 2026-11-08 |
 | Google Calendar | agenda | MCP (conector do claude.ai) | ligada, uso no negócio não confirmado | 2026-11-08 |
-| ChatGPT | gerar a arte das peças | só você, na mão | não ligada | 2026-11-08 |
+| ChatGPT | gerar a arte das peças e foto de peça lisa pra mockup | skill gpt-image2-ratos (login do Codex, plano ChatGPT, sem chave); recusa peça com personagem licenciado | ligada | 2026-11-15 |
 | Corel | imprimir a arte (espelha na impressão) | só você, na mão | não ligada | 2026-11-08 |
-| Kittl | ampliar imagem pequena antes de imprimir (upscale; pode custar crédito). Não tem mockup de azulejo | MCP (conector do claude.ai) | ligada | 2026-11-09 |
+| Kittl | ampliar imagem pequena antes de imprimir (upscale; pode custar crédito). Tem mockup de camiseta; não tem de azulejo | MCP (conector do claude.ai) | ligada | 2026-11-15 |
 | Gemini (Veo e imagem) | vídeos e mockups de divulgação | só você, na mão | não ligada | 2026-11-09 |
 | Python + Pillow | script da /ajustar-arte | CLI (`python`) | ligada | 2026-11-08 |
 | Fábrica de Conteúdo com IA | editar os Reels (corte, legenda, peças, trilha, capa), de graça | CLI (`uv run` dentro de `projetos/fabrica-de-conteudo/`) | ligada, transcrição local (sem chave da ElevenLabs) | 2026-11-11 |

@@ -1,0 +1,26 @@
+{
+  "resumo_oferta": "Vende um e-book, o Manual Prático de IA para Professores Universitários, por R$ 47 em preço de lançamento, com checkout na Hotmart e aulas online de apoio. Se posiciona como colega de profissão: professor da UFPE que mostra como ele mesmo usa ChatGPT e Claude nas aulas de Finanças e Estatística. O anúncio entrou no ar ontem, então é uma oferta em teste.",
+  "promessas": [
+    "Exemplos reais das aulas dele, não teoria",
+    "Preparar apresentações, avaliações e materiais didáticos com IA",
+    "Usar ChatGPT e Claude no dia a dia do professor universitário",
+    "Preço de entrada baixo (R$ 47) com aulas de apoio"
+  ],
+  "angulos": [
+    "Autoridade de par: um professor ensinando professores",
+    "Pergunta direta ao público (você já usa IA na sua disciplina?)",
+    "Recorte de nicho: professor universitário, não professor em geral",
+    "Praticidade: manual curto e aplicado"
+  ],
+  "publico": "Professores do ensino superior, de áreas variadas, que ainda não usam IA de forma organizada nas disciplinas.",
+  "analise_video": [
+    {"titulo": "Professor, você já usa IA na sua disciplina?", "dias": 1, "leitura": "Vídeo de 44 segundos, selfie em plano fechado no escritório, com microfone de lapela e quadro colorido ao fundo. O hook é uma pergunta em legenda queimada logo no primeiro segundo, nomeando o público. Por volta dos 15 segundos entra a credencial (Pierre Lucena, Professor da UFPE) e no fim aparece o nome do produto. Sem cortes nem B-roll: aposta toda na credibilidade do rosto e do cargo. É barato de produzir e transmite confiança, mas fica parado; vale testar com tela mostrando a IA em uso."}
+  ],
+  "ideias_pra_voce": [
+    "Use tua própria credencial de professor (instituição, anos de sala, disciplina) logo nos primeiros segundos: é o ativo que mais gera confiança nesse nicho",
+    "Abra o vídeo com uma pergunta que nomeia o público e a situação, em legenda grande",
+    "Mostre um exemplo real de aula tua com IA na tela (antes e depois de um material), coisa que o Pierre não faz",
+    "Teste um produto de entrada abaixo de R$ 50 para validar o público antes de um curso maior",
+    "Escolha um recorte (técnico, ensino médio, superior, uma disciplina) em vez de falar com todo professor"
+  ]
+}

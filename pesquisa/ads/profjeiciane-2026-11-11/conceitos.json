@@ -1,0 +1,98 @@
+{
+  "meta": {
+    "label": "profjeiciane",
+    "page_id": "414510061739606",
+    "pais": null,
+    "status": "ACTIVE",
+    "data": "2026-11-11",
+    "total_ativos": 6,
+    "conceitos": 4,
+    "paginas_lidas": 1,
+    "creditos_restantes": 86,
+    "top3_video": [
+      {
+        "i": 0,
+        "video": "videos/c0.mp4",
+        "dias": 535,
+        "hook": "Olá!",
+        "copy": "Olá! \nCom apenas R$ 29,90, você garante:\n✅ 4 horas de conteúdo 100% prático\n✅ Certificado incluso\n✅ Uso de Inteligência Artificial para adaptar com rapidez e qualidade\n✅ Materiais e ferramentas para aplicar na sua sala de aula no dia seguinte!\n\n💡 Tudo com suporte e linguagem acessível, pensado por quem vive a inclusão na prática!"
+      },
+      {
+        "i": 2,
+        "video": "videos/c2.mp4",
+        "dias": 483,
+        "hook": "📣 PROFESSORES, ATENÇÃO!",
+        "copy": "📣 PROFESSORES, ATENÇÃO!\n\nVocê já passou horas tentando adaptar avaliações e atividades para seus alunos com Autismo, TDAH, Deficiência Intelectual e outros perfis de aprendizagem?\n✍️ Entre imprimir provas, simplificar enunciados, criar versões acessíveis e pensar em estratégias diferenciadas... o seu tempo vai embora, e o cansaço bate antes mesmo da correção.\nNós entendemos essa realidade.\nE é por isso que trouxemos a solução que vai revolucionar sua rotina!\n💡 Com o poder da Inteligência Artificial, agora você pode gerar avaliações adaptadas, atividades personalizadas e planos inclusivos em poucos minutos, com qualidade, sensibilidade e alinhamento à BNCC.\n📲 Entre no grupo abaixo e garanta seu acesso antecipado ao nosso lançamento exclusivo!\n👉 https://chat.whatsapp.com/EFtrjka45IJ3UsaJJ8sBy9?mode=r_t\n🎁 E tem mais:\nAo entrar, você ganha 3 bônus imperdíveis, incluindo uma AULA INAUGURAL AO VIVO, com interação direta com o professor, para aprender a aplicar tudo isso na prática!\n⏳ Vagas limitadas.\nSeja protagonista de uma educação mais inclusiva, sem se sobrecarregar!"
+      },
+      {
+        "i": 3,
+        "video": "videos/c3.mp4",
+        "dias": 478,
+        "hook": "Você quer apresentar seu trabalho, publicar nos anais com ISSN e DOI e ainda conquistar certificados válidos em todo o Brasil?",
+        "copy": "Você quer apresentar seu trabalho, publicar nos anais com ISSN e DOI e ainda conquistar certificados válidos em todo o Brasil?\nO CINEP – Congresso Interdisciplinar de Ensino e Pesquisa está com inscrições abertas! 🧠✨\n\n🟢 Submeta seu resumo, participe de palestras e oficinas com grandes especialistas e publique com credibilidade.\n\n💥 Garanta sua vaga agora e aproveite o desconto especial para os primeiros inscritos!\n🔗 Acesse: https://ime.events/cinep\n📌 Não fique de fora dessa oportunidade única!"
+      }
+    ]
+  },
+  "conceitos": [
+    {
+      "i": 0,
+      "dias": 535,
+      "variacoes": 2,
+      "formato": "VIDEO",
+      "hook": "Olá!",
+      "cta": "Learn more",
+      "landing": "https://api.whatsapp.com/send",
+      "dominio": "api.whatsapp.com",
+      "copy": "Olá! \nCom apenas R$ 29,90, você garante:\n✅ 4 horas de conteúdo 100% prático\n✅ Certificado incluso\n✅ Uso de Inteligência Artificial para adaptar com rapidez e qualidade\n✅ Materiais e ferramentas para aplicar na sua sala de aula no dia seguinte!\n\n💡 Tudo com suporte e linguagem acessível, pensado por quem vive a inclusão na prática!",
+      "ad_url": "https://www.facebook.com/ads/library?id=24108634292090120",
+      "thumb": "thumbs/c0.jpg",
+      "imagem": "",
+      "video": "videos/c0.mp4"
+    },
+    {
+      "i": 1,
+      "dias": 521,
+      "variacoes": 1,
+      "formato": "CAROUSEL",
+      "hook": "Frases simples que mudam o dia de um aluno com deficiência.",
+      "cta": "Visit Instagram profile",
+      "landing": "http://instagram.com/profjeiciane",
+      "dominio": "instagram.com",
+      "copy": "Frases simples que mudam o dia de um aluno com deficiência.\nNa escola, cada palavra pode construir ou derrubar pontes.\nVamos escolher sempre as que acolhem 💛\nQual dessas você já disse hoje?\n\n📌 Salve e envie pra quem precisa lembrar disso todos os dias!\n\n#inclusaonaescola #educaçãocomamor #aee #professorinspirador #escolaparatodos #pedagogiadoafeto #educaçãoinclusiva #educareamar #frasesquetransformam #capacidades #professoresdobrasil #falaprofessor",
+      "ad_url": "https://www.facebook.com/ads/library?id=2963204540517221",
+      "thumb": "thumbs/c1.jpg",
+      "imagem": "",
+      "video": ""
+    },
+    {
+      "i": 2,
+      "dias": 483,
+      "variacoes": 2,
+      "formato": "VIDEO",
+      "hook": "📣 PROFESSORES, ATENÇÃO!",
+      "cta": "Send WhatsApp message",
+      "landing": "https://api.whatsapp.com/send",
+      "dominio": "api.whatsapp.com",
+      "copy": "📣 PROFESSORES, ATENÇÃO!\n\nVocê já passou horas tentando adaptar avaliações e atividades para seus alunos com Autismo, TDAH, Deficiência Intelectual e outros perfis de aprendizagem?\n✍️ Entre imprimir provas, simplificar enunciados, criar versões acessíveis e pensar em estratégias diferenciadas... o seu tempo vai embora, e o cansaço bate antes mesmo da correção.\nNós entendemos essa realidade.\nE é por isso que trouxemos a solução que vai revolucionar sua rotina!\n💡 Com o poder da Inteligência Artificial, agora você pode gerar avaliações adaptadas, atividades personalizadas e planos inclusivos em poucos minutos, com qualidade, sensibilidade e alinhamento à BNCC.\n📲 Entre no grupo abaixo e garanta seu acesso antecipado ao nosso lançamento exclusivo!\n👉 https://chat.whatsapp.com/EFtrjka45IJ3UsaJJ8sBy9?mode=r_t\n🎁 E tem mais:\nAo entrar, você ganha 3 bônus imperdíveis, incluindo uma AULA INAUGURAL AO VIVO, com interação direta com o professor, para aprender a aplicar tudo isso na prática!\n⏳ Vagas limitadas.\nSeja protagonista de uma educação mais inclusiva, sem se sobrecarregar!",
+      "ad_url": "https://www.facebook.com/ads/library?id=1330293428454898",
+      "thumb": "thumbs/c2.jpg",
+      "imagem": "",
+      "video": "videos/c2.mp4"
+    },
+    {
+      "i": 3,
+      "dias": 478,
+      "variacoes": 1,
+      "formato": "VIDEO",
+      "hook": "Você quer apresentar seu trabalho, publicar nos anais com ISSN e DOI e ainda conquistar certificados válidos em todo o Brasil?",
+      "cta": "Learn more",
+      "landing": "https://ime.events/cinep",
+      "dominio": "ime.events",
+      "copy": "Você quer apresentar seu trabalho, publicar nos anais com ISSN e DOI e ainda conquistar certificados válidos em todo o Brasil?\nO CINEP – Congresso Interdisciplinar de Ensino e Pesquisa está com inscrições abertas! 🧠✨\n\n🟢 Submeta seu resumo, participe de palestras e oficinas com grandes especialistas e publique com credibilidade.\n\n💥 Garanta sua vaga agora e aproveite o desconto especial para os primeiros inscritos!\n🔗 Acesse: https://ime.events/cinep\n📌 Não fique de fora dessa oportunidade única!",
+      "ad_url": "https://www.facebook.com/ads/library?id=1423825482259057",
+      "thumb": "thumbs/c3.jpg",
+      "imagem": "",
+      "video": "videos/c3.mp4"
+    }
+  ]
+}

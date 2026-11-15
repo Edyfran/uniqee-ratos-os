@@ -1,0 +1,29 @@
+{
+  "resumo_oferta": "Vende uma formação curta de 4 horas por R$ 29,90, com certificado, sobre usar IA (ChatGPT) para adaptar avaliações e atividades para alunos com deficiência, autismo e TDAH. Também vende a Imersão ChatGPT e Canva na Prática, ao vivo no Google Meet. A conversão acontece pelo WhatsApp e pelo Instagram, e os anúncios campeões rodam há mais de 480 dias.",
+  "promessas": [
+    "Adaptar provas e atividades para alunos com deficiência em pouco tempo",
+    "4 horas de conteúdo prático com certificado por R$ 29,90",
+    "Material para aplicar na sala de aula no dia seguinte",
+    "Dominar ChatGPT e Canva em dois dias ao vivo"
+  ],
+  "angulos": [
+    "Educação inclusiva (AEE, autismo, TDAH, deficiência intelectual)",
+    "Cansaço e falta de tempo do professor",
+    "Certificado como benefício para a carreira",
+    "Comentário com palavra-chave (EU QUERO) para puxar conversa",
+    "Vagas limitadas"
+  ],
+  "publico": "Professoras e professores da educação básica, principalmente quem atende alunos com deficiência ou trabalha no AEE, com orçamento baixo e que valorizam certificado.",
+  "analise_video": [
+    {"titulo": "Você, professor, que quer adaptar avaliações para alunos com deficiência...", "dias": 535, "leitura": "Vídeo de 15 segundos que na prática é uma arte parada com uma animação sutil (o EU QUERO é sublinhado). O texto grande faz a pergunta, a professora sorrindo aponta para o CTA, e o ícone de acessibilidade e o logo do ChatGPT dizem o assunto num olhar. Roda há quase um ano e meio: é a prova de que nesse nicho a dor bem nomeada vale mais que a produção."},
+    {"titulo": "PROFESSORES, ATENÇÃO!", "dias": 483, "leitura": "Vídeo de 43 segundos que abre com uma cena feita com IA: uma professora exausta diante de pilhas de provas, e uma colega chega com a solução no celular. Depois entra uma arte da Imersão ChatGPT e Canva ao vivo, com certificado e materiais. A estrutura é problema encenado, alívio e oferta, e o primeiro quadro já mostra a dor sem precisar de som."},
+    {"titulo": "Convite para o congresso CINEP", "dias": 478, "leitura": "Vídeo de 13 segundos com uma apresentadora falando direto para a câmera, sorridente, num cenário com luz rosa. É um anúncio de evento acadêmico (publicar resumo com ISSN e DOI), mostrando que a página também monetiza o desejo do professor por certificado e currículo. A energia da fala segura, mas o tema foge de IA."}
+  ],
+  "ideias_pra_voce": [
+    "Educação inclusiva com IA é um ângulo validado há mais de um ano: vale um conteúdo ou produto teu sobre adaptar atividades com IA para alunos com deficiência",
+    "Teste o CTA de comentário com palavra-chave e a resposta automática no direct, que reduz o atrito para quem não clica em link",
+    "Encene a dor (o professor corrigindo de madrugada) nos primeiros segundos, mesmo com imagem gerada por IA",
+    "Ofereça certificado de horas: para o professor da educação básica isso pesa tanto quanto o conteúdo",
+    "Um formato ao vivo e curto (imersão de 2 dias) funciona como porta de entrada barata"
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "meta": {
+    "label": "Pierre Lucena",
+    "page_id": "100712501734336",
+    "pais": null,
+    "status": "ACTIVE",
+    "data": "2026-11-11",
+    "total_ativos": 1,
+    "conceitos": 1,
+    "paginas_lidas": 1,
+    "creditos_restantes": 88,
+    "top3_video": [
+      {
+        "i": 0,
+        "video": "videos/c0.mp4",
+        "dias": 1,
+        "hook": "Sou professor da UFPE e preparei um manual para mostrar como utilizo o ChatGPT e o Claude no meu trabalho.",
+        "copy": "Sou professor da UFPE e preparei um manual para mostrar como utilizo o ChatGPT e o Claude no meu trabalho.\n\nSão exemplos reais das minhas aulas de Finanças e Estatística, com orientações práticas para preparar apresentações, avaliações e materiais didáticos.\n\n**Manual Prático de IA para Professores Universitários.**\n\nInclui aulas online de apoio.\n\nPreço de lançamento: **R$ 47**.\n\nConheça o e-book e comece a aplicar IA nas suas aulas."
+      }
+    ]
+  },
+  "conceitos": [
+    {
+      "i": 0,
+      "dias": 1,
+      "variacoes": 1,
+      "formato": "VIDEO",
+      "hook": "Sou professor da UFPE e preparei um manual para mostrar como utilizo o ChatGPT e o Claude no meu trabalho.",
+      "cta": "Shop now",
+      "landing": "https://pay.hotmart.com/F108207911R?offDiscount=LANCAMENTO47&src=meta_video_amplo&utm_source=meta&utm_medium=paid&utm_campaign=ia_professores_video_nov26&utm_content=video_captions_1512",
+      "dominio": "pay.hotmart.com",
+      "copy": "Sou professor da UFPE e preparei um manual para mostrar como utilizo o ChatGPT e o Claude no meu trabalho.\n\nSão exemplos reais das minhas aulas de Finanças e Estatística, com orientações práticas para preparar apresentações, avaliações e materiais didáticos.\n\n**Manual Prático de IA para Professores Universitários.**\n\nInclui aulas online de apoio.\n\nPreço de lançamento: **R$ 47**.\n\nConheça o e-book e comece a aplicar IA nas suas aulas.",
+      "ad_url": "https://www.facebook.com/ads/library?id=1339097141578622",
+      "thumb": "thumbs/c0.jpg",
+      "imagem": "",
+      "video": "videos/c0.mp4"
+    }
+  ]
+}

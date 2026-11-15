@@ -1,0 +1,28 @@
+{
+  "resumo_oferta": "Vende uma única oferta, a Pós-Graduação em Gestão, Negócios e IA, reconhecida pelo MEC, 100% online, com 360 horas, 18 meses e professores executivos de mercado. Os 63 anúncios ativos repetem a mesma copy e variam o criativo: há cerca de 40 conceitos, quase todos com 58 a 63 dias no ar, o que indica uma campanha grande lançada de uma vez e testando muitos vídeos. Não é focada em professores; apareceu na busca por citar professores e IA.",
+  "promessas": [
+    "Pós reconhecida pelo MEC",
+    "Aprender com executivos C-Level",
+    "IA aplicada à gestão e à tomada de decisão",
+    "100% online, com aulas ao vivo e gravadas"
+  ],
+  "angulos": [
+    "Crescimento na carreira e liderança",
+    "Credencial formal (MEC, carga horária)",
+    "Juntar gestão de pessoas, negócios e IA numa formação só",
+    "Autoridade do corpo docente"
+  ],
+  "publico": "Profissionais de gestão, comercial e liderança que querem um título de pós com o selo de IA para crescer na carreira.",
+  "analise_video": [
+    {"titulo": "Pós-Graduação Gestão, Negócios & IA (apresentadora no sofá)", "dias": 63, "leitura": "Vídeo de 33 segundos com uma apresentadora num ambiente sofisticado. O título PÓS-GRADUAÇÃO GESTÃO NEGÓCIOS & IA aparece em letras grandes nos primeiros 3 segundos, depois o site no celular, o selo do MEC com 360 horas, 18 meses e 10 módulos, cena de aluno no notebook e o fechamento Toque em Saiba Mais. Estrutura de prova formal mais do que de dor."},
+    {"titulo": "Pós-Graduação Gestão, Negócios & IA (apresentadora com notebook)", "dias": 63, "leitura": "Vídeo de 35 segundos que abre com a apresentadora segurando o notebook com a página dos professores. Entram animações ilustradas (CRESCER, JÁ ESTÁ) para quebrar o ritmo e telas da plataforma de aulas. Mostrar o rosto dos professores e a plataforma por dentro responde à dúvida de quem compra curso online: o que eu vou receber."},
+    {"titulo": "Gestão de pessoas, negócios e inteligência artificial", "dias": 63, "leitura": "Vídeo de 52 segundos com uma apresentadora numa mesa de escritório, legendas em caixa alta palavra por palavra (GESTÃO DE PESSOAS, GESTÃO DE NEGÓCIOS, E INTELIGÊNCIA ARTIFICIAL). O hook é a lista das três frentes e a frase se você quer crescer hoje. Depois troca de cenário com a logo da Tetra e cenas de tablet. Legenda dinâmica segura quem assiste sem som."}
+  ],
+  "ideias_pra_voce": [
+    "Se tiver um curso com certificação, mostre carga horária, duração e módulos em números grandes na tela",
+    "Mostre a plataforma e o material por dentro no vídeo, para responder ao que o aluno vai receber",
+    "Grave várias versões do mesmo roteiro em cenários diferentes e deixe o Meta escolher a melhor, como a Tetra fez com cerca de 40 vídeos",
+    "Use legenda em caixa alta, palavra a palavra, para quem assiste sem som",
+    "Há espaço vazio: nenhuma pós grande fala direto com o professor sobre IA na sala de aula"
+  ]
+}

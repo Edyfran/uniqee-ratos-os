@@ -1,0 +1,29 @@
+{
+  "resumo_oferta": "Vende guias em PDF de R$ 37, pagamento único, com prompts prontos e um Projeto para configurar o Claude, cada um para uma profissão: professores, advogados, médicos, nutricionistas, contadores, fisioterapeutas, corretores e salões. Os 54 anúncios entraram no ar há 1 ou 2 dias: é um teste em massa de nichos com o mesmo molde de criativo. A marca por trás é o @andredamas.ads, que também anuncia o próprio perfil com conteúdo gratuito.",
+  "promessas": [
+    "Professor: a semana planejada numa conversa, com rubrica, pré-correção e atividade adaptada",
+    "17 prompts prontos, 5 competências e 7 dias de plano",
+    "A IA prepara, a decisão e a assinatura continuam do profissional",
+    "Usar IA dentro das regras de cada conselho (CFM, CRECI, OAB)"
+  ],
+  "angulos": [
+    "Um nicho por anúncio, chamando a profissão pelo nome",
+    "Medo do erro da IA (jurisprudência inventada, multa, paciente exposto)",
+    "Número concreto de prompts e páginas",
+    "Preço único e baixo no próprio criativo",
+    "Responsabilidade do profissional preservada"
+  ],
+  "publico": "Profissionais liberais e professores que já ouviram falar de IA mas têm medo de errar ou não sabem por onde começar, e compram por impulso um material barato e específico da área.",
+  "analise_video": [
+    {"titulo": "17 PROMPTS PARA PROFESSORES (criativo estático)", "dias": 2, "leitura": "LD não usa vídeo: são imagens no mesmo molde escuro com laranja. Selo GUIA COMPLETO, a profissão em destaque, um título com número (17 PROMPTS PARA PROFESSORES), três chips de prova (prompts, competências, dias de plano), mockups das páginas do PDF e uma faixa laranja com Quero o guia e R$ 37. Tudo o que o comprador precisa decidir está na imagem."},
+    {"titulo": "JURISPRUDÊNCIA QUE NÃO EXISTE JÁ VIROU MULTA (advogado)", "dias": 1, "leitura": "Variação que troca o número pelo medo: cita uma decisão do TST que condenou advogado por usar jurisprudência inventada, com fonte e data. O produto aparece como a proteção contra esse risco. Mostra que o mesmo molde aceita um gancho de notícia real."},
+    {"titulo": "18 PROMPTS PARA MÉDICOS", "dias": 1, "leitura": "Mesmo molde do criativo de professores, trocando a profissão e a norma do conselho (Res. 2.336 do CFM). Confirma a estratégia de escala: um template, várias profissões, deixando o Meta mostrar qual nicho converte."}
+  ],
+  "ideias_pra_voce": [
+    "Monte um template de criativo único e troque só o público (professor de ensino médio, técnico, universitário, coordenador) para testar qual responde melhor",
+    "Ponha um número concreto no título (quantidade de prompts, de páginas, de dias) e o preço no próprio criativo",
+    "Use uma notícia real de erro com IA na educação (plágio, correção injusta) como gancho de medo, com fonte",
+    "Reforce que a IA prepara e o professor decide: diminui a resistência de quem tem medo de perder autonomia",
+    "Ofereça um Projeto pronto do Claude ou um GPT configurado junto com os prompts: o comprador recebe algo que já funciona"
+  ]
+}
