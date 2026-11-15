@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Camisas Doomsday · Uniqee</title>
+<meta name="description" content="Oito estampas da Uniqee pra estreia de Vingadores: Doomsday. Feitas sob encomenda, R$ 69,90. Peça até 09/12 pra receber antes da estreia.">
+<meta property="og:title" content="Camisas Doomsday · Uniqee">
+<meta property="og:description" content="Vá à estreia vestindo o lado do Destino. Oito estampas, R$ 69,90, pedidos até 09/12.">
+<meta property="og:image" content="img/duas-armaduras.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Radio+Canada+Big:wght@400;500;700&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#06090a; --bg2:#0c1311; --card:#111a17; --linha:rgba(243,237,227,.12);
+    --verde:#8be04e; --verde-esc:#1f6b35; --texto:#f3ede3; --cinza:#aeb7be; --tinta:#07130a;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--texto);font-family:'Radio Canada Big',system-ui,sans-serif;font-size:18px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  img{display:block;max-width:100%}
+  a{color:inherit}
+  .wrap{max-width:1160px;margin:0 auto;padding:0 20px}
+  .tag{display:inline-block;font-size:13px;letter-spacing:5px;text-transform:uppercase;color:var(--verde);font-weight:500}
+  h1,h2,h3{font-weight:700;line-height:1;letter-spacing:-1px;text-transform:uppercase}
+  h2{font-size:clamp(34px,5vw,58px);margin:12px 0 18px}
+  h2 em,h1 em{font-style:normal;color:var(--verde)}
+  .lead{color:var(--cinza);font-size:clamp(17px,2vw,20px);max-width:640px}
+  section{padding:88px 0}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;background:var(--verde);color:var(--tinta);font-weight:700;font-size:18px;text-transform:uppercase;letter-spacing:1px;text-decoration:none;padding:18px 30px;border-radius:12px;box-shadow:0 0 0 0 rgba(139,224,78,.5);transition:transform .15s,box-shadow .2s}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 10px 40px -8px rgba(139,224,78,.6)}
+  .btn.sec{background:transparent;color:var(--texto);border:2px solid var(--linha)}
+  .btn.sec:hover{border-color:var(--verde);box-shadow:none}
+
+  /* topo */
+  header{position:absolute;top:0;left:0;right:0;z-index:5}
+  header .wrap{display:flex;justify-content:space-between;align-items:center;height:76px}
+  .marca{font-size:14px;letter-spacing:5px;text-transform:uppercase;color:var(--cinza);text-decoration:none}
+  .marca b{color:var(--texto)}
+
+  /* hero */
+  .hero{position:relative;min-height:100vh;display:flex;align-items:center;overflow:hidden;padding:110px 0 70px}
+  .hero::before{content:"";position:absolute;inset:0;background:
+     radial-gradient(60% 60% at 75% 45%,rgba(139,224,78,.16),transparent 70%),
+     repeating-linear-gradient(135deg,rgba(139,224,78,.035) 0 2px,transparent 2px 40px)}
+  .hero .wrap{position:relative;display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center}
+  .selo{display:inline-block;background:var(--verde);color:var(--tinta);font-weight:700;font-size:14px;letter-spacing:4px;text-transform:uppercase;padding:9px 16px}
+  .hero h1{font-size:clamp(44px,7vw,92px);margin:22px 0 22px}
+  .hero .lead{margin-bottom:30px}
+  .preco{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin-bottom:22px}
+  .preco b{font-size:44px;line-height:1;white-space:nowrap}
+  .preco span{color:var(--cinza);font-size:16px}
+  .acoes{display:flex;flex-wrap:wrap;gap:14px}
+  .hero-img{position:relative}
+  .hero-img img{border-radius:24px;box-shadow:0 40px 90px -30px rgba(0,0,0,.9),0 0 0 1px var(--linha)}
+  .hero-img .flutua{position:absolute;left:-28px;bottom:28px;background:rgba(6,9,10,.9);border:1px solid var(--linha);border-radius:16px;padding:14px 18px;backdrop-filter:blur(6px)}
+  .flutua small{display:block;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--cinza)}
+  .flutua strong{font-size:22px}
+
+  /* contagem */
+  .contagem{background:var(--verde);color:var(--tinta)}
+  .contagem .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px;padding-top:26px;padding-bottom:26px}
+  .contagem p{font-size:20px;font-weight:500;max-width:520px}
+  .relogio{display:flex;gap:10px}
+  .relogio div{background:var(--tinta);color:var(--verde);border-radius:10px;min-width:78px;text-align:center;padding:10px 8px}
+  .relogio b{display:block;font-size:34px;line-height:1}
+  .relogio small{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--cinza)}
+
+  /* garantias */
+  .faixa{border-bottom:1px solid var(--linha)}
+  .faixa .wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+  .faixa div{padding:30px 22px;border-left:1px solid var(--linha)}
+  .faixa div:first-child{border-left:0}
+  .faixa b{display:block;font-size:19px;margin-bottom:4px}
+  .faixa span{color:var(--cinza);font-size:15px}
+
+  /* coleção */
+  .filtros{display:flex;flex-wrap:wrap;gap:10px;margin:30px 0 34px}
+  .filtros button{font:inherit;font-size:15px;background:transparent;color:var(--cinza);border:1px solid var(--linha);border-radius:999px;padding:9px 18px;cursor:pointer}
+  .filtros button.on{background:var(--texto);color:var(--bg);border-color:var(--texto)}
+  .grade{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+  .card{background:var(--card);border:1px solid var(--linha);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;transition:transform .2s,border-color .2s}
+  .card:hover{transform:translateY(-4px);border-color:rgba(139,224,78,.4)}
+  .card .foto{position:relative;aspect-ratio:1;overflow:hidden;background:#1a2320}
+  .card .foto img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
+  .card:hover .foto img{transform:scale(1.04)}
+  .rotulo{position:absolute;top:12px;left:12px;background:var(--verde);color:var(--tinta);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:5px 9px;border-radius:6px}
+  .card .info{padding:18px 18px 20px;display:flex;flex-direction:column;flex:1}
+  .card h3{font-size:22px;letter-spacing:-.5px;margin-bottom:8px}
+  .card p{color:var(--cinza);font-size:15px;line-height:1.45;flex:1}
+  .cor{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--cinza);margin:14px 0}
+  .cor i{width:14px;height:14px;border-radius:50%;border:2px solid rgba(243,237,227,.4)}
+  .card .btn{padding:13px 16px;font-size:15px;width:100%}
+  .card[hidden]{display:none}
+
+  /* destaques */
+  .duplo{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  .bloco{border-radius:24px;overflow:hidden;background:var(--card);border:1px solid var(--linha);display:flex;flex-direction:column}
+  .bloco .img{height:340px;overflow:hidden;background:#d9dcdf}
+  .bloco .img img{width:100%;height:100%;object-fit:cover;object-position:center 30%}
+  .bloco .txt{padding:30px 32px 34px;display:flex;flex-direction:column;align-items:flex-start;flex:1}
+  .bloco h3{font-size:clamp(26px,3vw,36px);margin:10px 0 12px}
+  .bloco p{color:var(--cinza);margin-bottom:24px;max-width:480px;flex:1}
+  .bloco.sousa .img{background:radial-gradient(60% 70% at 50% 50%,rgba(139,224,78,.2),transparent 70%),#0a100e;padding:22px}
+  .bloco.sousa .img img{object-fit:contain}
+  .manuscrito{font-family:'Caveat',cursive;color:var(--verde);font-size:28px;text-transform:none;letter-spacing:0}
+
+  /* como pedir */
+  .passos{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:40px}
+  .passo{background:var(--bg2);border:1px solid var(--linha);border-radius:20px;padding:30px}
+  .passo b{font-size:56px;color:var(--verde);line-height:1}
+  .passo h3{font-size:22px;margin:14px 0 8px;letter-spacing:-.3px}
+  .passo p{color:var(--cinza);font-size:16px}
+  .tamanhos{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:34px;color:var(--cinza)}
+  .tamanhos span{display:inline-grid;place-items:center;width:56px;height:56px;border:2px solid var(--linha);border-radius:12px;color:var(--texto);font-weight:700;font-size:18px}
+
+  /* faq */
+  .faq{max-width:820px}
+  details{border-bottom:1px solid var(--linha);padding:22px 0}
+  summary{cursor:pointer;font-size:20px;font-weight:500;list-style:none;display:flex;justify-content:space-between;gap:20px}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"+";color:var(--verde);font-size:28px;line-height:1}
+  details[open] summary::after{content:"–"}
+  details p{color:var(--cinza);margin-top:12px;max-width:720px}
+
+  /* final */
+  .final{text-align:center;background:radial-gradient(50% 70% at 50% 40%,rgba(139,224,78,.18),transparent 70%)}
+  .final h2{font-size:clamp(40px,6.5vw,84px)}
+  .final .lead{margin:0 auto 32px}
+  footer{border-top:1px solid var(--linha);padding:40px 0 110px;color:var(--cinza);font-size:14px}
+  footer .wrap{display:flex;flex-wrap:wrap;gap:24px;align-items:center;justify-content:space-between}
+  footer img{width:120px;border-radius:12px;background:var(--cinza)}
+  footer p{max-width:620px}
+
+  /* barra fixa no celular */
+  .barra-fixa{display:none}
+
+  @media (max-width:960px){
+    .hero .wrap{grid-template-columns:1fr}
+    .hero-img{max-width:520px}
+    .hero-img .flutua{left:12px;bottom:12px}
+    .faixa .wrap{grid-template-columns:1fr 1fr}
+    .faixa div:nth-child(3){border-left:0}
+    .faixa div{border-top:1px solid var(--linha)}
+    .grade{grid-template-columns:1fr 1fr}
+    .duplo,.passos{grid-template-columns:1fr}
+  }
+  @media (max-width:560px){
+    body{font-size:17px}
+    header .marca+.marca{display:none}
+    .marca{font-size:12px;letter-spacing:4px}
+    .hero{min-height:auto}
+    section{padding:64px 0}
+    .grade{gap:12px}
+    .card .info{padding:14px}
+    .card h3{font-size:18px}
+    .card p{display:none}
+    .relogio div{min-width:64px}
+    .relogio b{font-size:28px}
+    .bloco .img{height:280px}
+    .barra-fixa{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(6,9,10,.94);border-top:1px solid var(--linha);padding:12px 16px;gap:12px;align-items:center;backdrop-filter:blur(8px)}
+    .barra-fixa div{flex:1;line-height:1.2}
+    .barra-fixa small{display:block;color:var(--cinza);font-size:12px}
+    .barra-fixa b{font-size:20px}
+    .barra-fixa .btn{padding:14px 18px;font-size:15px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="marca" href="#topo"><b>Uniqee</b> · Personalizados</a>
+    <a class="marca" href="#colecao">Ver estampas</a>
+  </div>
+</header>
+
+<!-- 1. Desejo -->
+<section class="hero" id="topo">
+  <div class="wrap">
+    <div>
+      <span class="selo">Pedidos abertos · estreia 17/12</span>
+      <h1>Vá à estreia vestindo o lado do <em>Destino</em></h1>
+      <p class="lead">Oito estampas criadas pela Uniqee pra quem vai estar na sala de cinema no dia de Vingadores: Doomsday. Ou pra presentear aquela pessoa que não perde um filme da Marvel.</p>
+      <div class="preco"><b>R$ 69,90</b><span>cada camiseta · tamanhos P ao GG</span></div>
+      <div class="acoes">
+        <a class="btn js-comprar" href="#">Quero a minha</a>
+        <a class="btn sec" href="#colecao">Ver as 8 estampas</a>
+      </div>
+    </div>
+    <div class="hero-img">
+      <img src="img/duas-armaduras.jpg" alt="Camiseta preta com a estampa Duas Armaduras" width="900" height="900">
+      <div class="flutua"><small>Peça até</small><strong>09 de dezembro</strong></div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. Urgência real -->
+<div class="contagem">
+  <div class="wrap">
+    <p><b>Pra receber antes da estreia, o pedido fecha em 09/12.</b> Cada camiseta é feita sob encomenda e leva até 5 dias úteis.</p>
+    <div class="relogio" aria-label="Tempo até o fim dos pedidos">
+      <div><b id="d">--</b><small>dias</small></div>
+      <div><b id="h">--</b><small>horas</small></div>
+      <div><b id="m">--</b><small>min</small></div>
+    </div>
+  </div>
+</div>
+
+<!-- 3. Informação rápida -->
+<div class="faixa">
+  <div class="wrap">
+    <div><b>Feita sob encomenda</b><span>Produzida pra você, depois do pedido.</span></div>
+    <div><b>Estampa em DTF</b><span>Cores vivas e detalhe fino na camiseta.</span></div>
+    <div><b>Pronta em até 5 dias úteis</b><span>A gente avisa quando ficar pronta.</span></div>
+    <div><b>50% de entrada no Pix</b><span>O restante, na entrega ou retirada.</span></div>
+  </div>
+</div>
+
+<!-- 4. Coleção -->
+<section id="colecao">
+  <div class="wrap">
+    <span class="tag">A coleção</span>
+    <h2>Escolha a <em>sua</em> estampa</h2>
+    <p class="lead">Do vilão em destaque à piada que só o fã entende. Todas por R$ 69,90.</p>
+
+    <div class="filtros" role="tablist">
+      <button class="on" data-f="todas">Todas (8)</button>
+      <button data-f="destino">Doutor Destino</button>
+      <button data-f="fa">Pra quem é fã</button>
+      <button data-f="especial">Personalizada e Sousa</button>
+    </div>
+
+    <div class="grade">
+      <article class="card" data-g="destino">
+        <div class="foto"><img src="img/doutor-destino.jpg" alt="Estampa Doutor Destino" loading="lazy"></div>
+        <div class="info">
+          <h3>Doutor Destino</h3>
+          <p>O vilão que dá nome ao filme, com o raio verde atravessando a estampa.</p>
+          <div class="cor"><i style="background:#0b0b0b"></i>Camiseta preta</div>
+          <a class="btn js-comprar" data-estampa="doutor-destino" href="#">Escolher esta</a>
+        </div>
+      </article>
+      <article class="card" data-g="destino">
+        <div class="foto"><img src="img/duas-armaduras.jpg" alt="Estampa Duas Armaduras" loading="lazy"></div>
+        <div class="info">
+          <h3>Duas Armaduras</h3>
+          <p>Metade Destino, metade Homem de Ferro, na mesma figura.</p>
+          <div class="cor"><i style="background:#0b0b0b"></i>Camiseta preta</div>
+          <a class="btn js-comprar" data-estampa="duas-armaduras" href="#">Escolher esta</a>
+        </div>
+      </article>
+      <article class="card" data-g="destino">
+        <div class="foto"><img src="img/o-elmo.jpg" alt="Estampa O Elmo" loading="lazy"></div>
+        <div class="info">
+          <h3>O Elmo</h3>
+          <p>O Destino com o capacete do Homem de Ferro nas mãos. Cara de pôster de cinema.</p>
+          <div class="cor"><i style="background:#0b0b0b"></i>Camiseta preta</div>
+          <a class="btn js-comprar" data-estampa="o-elmo" href="#">Escolher esta</a>
+        </div>
+      </article>
+      <article class="card" data-g="destino">
+        <div class="foto"><img src="img/logo-doomsday.jpg" alt="Estampa Logo Doomsday" loading="lazy"></div>
+        <div class="info">
+          <h3>Logo Doomsday</h3>
+          <p>O título do filme em verde metálico. A mais discreta, pra usar muito depois da estreia.</p>
+          <div class="cor"><i style="background:#0b0b0b"></i>Camiseta preta</div>
+          <a class="btn js-comprar" data-estampa="logo-doomsday" href="#">Escolher esta</a>
+        </div>
+      </article>
+      <article class="card" data-g="fa">
+        <div class="foto"><img src="img/latveria.jpg" alt="Estampa Visite a Latvéria em camiseta verde musgo" loading="lazy"><span class="rotulo">Nova</span></div>
+        <div class="info">
+          <h3>Visite a Latvéria</h3>
+          <p>O cartão-postal do reino do Destino. Só quem conhece o vilão entende a piada.</p>
+          <div class="cor"><i style="background:#3b4a26"></i>Camiseta verde musgo</div>
+          <a class="btn js-comprar" data-estampa="visite-a-latveria" href="#">Escolher esta</a>
+        </div>
+      </article>
+      <article class="card" data-g="fa">
+        <div class="foto"><img src="img/rivais.jpg" alt="Estampa Destino não tem rivais" loading="lazy"><span class="rotulo">Nova</span></div>
+        <div class="info">
+          <h3>Destino não tem rivais</h3>
+          <p>Aço rebitado e raio verde, em letra de título de cinema.</p>
+          <div class="cor"><i style="background:#0b0b0b"></i>Camiseta preta</div>
+          <a class="btn js-comprar" data-estampa="destino-nao-tem-rivais" href="#">Escolher esta</a>
+        </div>
+      </article>
+      <article class="card" data-g="especial fa">
+        <div class="foto"><img src="img/ingresso.jpg" alt="Estampa Ingresso Dia do Juízo" loading="lazy"><span class="rotulo">Personalizada</span></div>
+        <div class="info">
+          <h3>Ingresso Dia do Juízo</h3>
+          <p>O ingresso da estreia, com a sala, a fileira e a poltrona da sua sessão.</p>
+          <div class="cor"><i style="background:#0b0b0b"></i>Camiseta preta</div>
+          <a class="btn js-comprar" data-estampa="ingresso-dia-do-juizo" href="#">Escolher esta</a>
+        </div>
+      </article>
+      <article class="card" data-g="especial">
+        <div class="foto"><img src="img/trex-sousa.jpg" alt="Estampa T-Rex Doomsday, edição Sousa" loading="lazy"><span class="rotulo">Edição Sousa</span></div>
+        <div class="info">
+          <h3>T-Rex Doomsday</h3>
+          <p>O Destino e o Homem de Ferro num dinossauro só, da cidade dos dinossauros.</p>
+          <div class="cor"><i style="background:#0b0b0b"></i>Camiseta preta</div>
+          <a class="btn js-comprar" data-estampa="trex-doomsday-sousa" href="#">Escolher esta</a>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- 5. Os dois diferenciais -->
+<section style="padding-top:0">
+  <div class="wrap duplo">
+    <div class="bloco">
+      <div class="img"><img src="img/ingresso.jpg" alt="Camiseta preta com o Ingresso Dia do Juízo" loading="lazy"></div>
+      <div class="txt">
+        <span class="tag">Vai em grupo?</span>
+        <h3>Cada um com a sua poltrona na camisa</h3>
+        <p>No Ingresso Dia do Juízo, a gente coloca a sala, a fileira e a poltrona de cada pessoa do grupo. Fica a lembrança da sessão, e a foto na porta do cinema fica outra coisa.</p>
+        <a class="btn js-comprar" data-estampa="ingresso-dia-do-juizo" href="#">Montar a do meu grupo</a>
+      </div>
+    </div>
+    <div class="bloco sousa">
+      <div class="img"><img src="img/trex-estampa.webp" alt="Estampa do T-Rex meio Homem de Ferro, meio Doutor Destino" loading="lazy"></div>
+      <div class="txt">
+        <span class="tag">Edição Sousa</span>
+        <h3>Feita na cidade dos dinossauros</h3>
+        <p>O T-Rex Doomsday leva "Sousa · Cidade dos Dinossauros" embaixo do título. <span class="manuscrito">uma estampa que só podia nascer aqui.</span></p>
+        <a class="btn js-comprar" data-estampa="trex-doomsday-sousa" href="#">Quero a edição Sousa</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6. Como comprar -->
+<section id="como-pedir" style="background:var(--bg2)">
+  <div class="wrap">
+    <span class="tag">Como pedir</span>
+    <h2>Três passos até a <em>sua</em></h2>
+    <div class="passos">
+      <div class="passo"><b>1</b><h3>Escolha a estampa e o tamanho</h3><p>Toque em "Escolher esta" na estampa que você quer e diga o tamanho, do P ao GG.</p></div>
+      <div class="passo"><b>2</b><h3>Pague 50% de entrada no Pix</h3><p>O pedido entra na produção com a entrada. O restante, você paga na entrega ou na retirada.</p></div>
+      <div class="passo"><b>3</b><h3>Receba em até 5 dias úteis</h3><p>A gente avisa quando a camiseta ficar pronta. Entrega sem taxa ou retirada, a combinar.</p></div>
+    </div>
+    <div class="tamanhos"><span>P</span><span>M</span><span>G</span><span>GG</span> Ficou em dúvida no tamanho? A gente ajuda no direct.</div>
+  </div>
+</section>
+
+<!-- 7. Objeções -->
+<section>
+  <div class="wrap faq">
+    <span class="tag">Dúvidas</span>
+    <h2>Antes de você <em>pedir</em></h2>
+    <details><summary>Até quando posso pedir pra receber antes da estreia?</summary><p>Até 09 de dezembro. Como cada camiseta leva até 5 dias úteis pra ficar pronta, esse é o último dia pra ela chegar antes de 17 de dezembro.</p></details>
+    <details><summary>Como funciona o pagamento?</summary><p>Você paga 50% de entrada no Pix pra o pedido entrar na produção. O restante é pago na entrega ou na retirada.</p></details>
+    <details><summary>Qual tamanho escolher?</summary><p>Trabalhamos do P ao GG. Se você tiver dúvida, chame a gente no direct antes de fechar que ajudamos a escolher.</p></details>
+    <details><summary>Como é a estampa?</summary><p>A estampa é aplicada em DTF, com cores vivas e boa definição nos detalhes. Ela fica no peito, num tamanho de frente inteira.</p></details>
+    <details><summary>Posso dar de presente?</summary><p>Pode, e é uma das melhores formas de usar essa coleção. Se for presente, avise no pedido que a gente cuida pra ela chegar pronta pra entregar.</p></details>
+    <details><summary>Fazem pra grupo?</summary><p>Fazemos. No Ingresso Dia do Juízo dá pra pôr a sala, a fileira e a poltrona de cada pessoa. Pra várias camisetas, chame a gente no direct.</p></details>
+  </div>
+</section>
+
+<!-- 8. Fechamento -->
+<section class="final">
+  <div class="wrap">
+    <span class="tag">Estreia em 17 de dezembro</span>
+    <h2>O dia da estreia<br>pede a <em>camisa certa</em></h2>
+    <p class="lead">Escolha a estampa hoje e chegue ao cinema do jeito que o dia pede. Pedidos até 09/12.</p>
+    <a class="btn js-comprar" href="#">Quero a minha por R$ 69,90</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <img src="img/logo-uniqee.png" alt="Uniqee Personalizados" width="120" height="120" loading="lazy">
+    <p>Uniqee Personalizados · presentes com significado. Estampas criadas por fãs, pra fãs: produto não oficial, sem vínculo com a Marvel ou a Disney.</p>
+  </div>
+</footer>
+
+<div class="barra-fixa">
+  <div><small>Camiseta Doomsday</small><b>R$ 69,90</b></div>
+  <a class="btn js-comprar" href="#">Quero a minha</a>
+</div>
+
+<script>
+  // Coloque aqui o link de compra quando ele existir (ex.: https://sualoja.com/doomsday).
+  // Enquanto estiver vazio, os botões levam pra seção "Como pedir".
+  const LINK_COMPRA = "";
+
+  document.querySelectorAll(".js-comprar").forEach(a => {
+    const estampa = a.dataset.estampa;
+    if (LINK_COMPRA) {
+      const url = new URL(LINK_COMPRA);
+      if (estampa) url.searchParams.set("estampa", estampa);
+      a.href = url.toString();
+      a.target = "_blank"; a.rel = "noopener";
+    } else {
+      a.href = "#como-pedir";
+    }
+  });
+
+  // filtros da coleção
+  const botoes = document.querySelectorAll(".filtros button");
+  botoes.forEach(b => b.addEventListener("click", () => {
+    botoes.forEach(x => x.classList.toggle("on", x === b));
+    document.querySelectorAll(".card").forEach(c => {
+      c.hidden = b.dataset.f !== "todas" && !c.dataset.g.split(" ").includes(b.dataset.f);
+    });
+  }));
+
+  // contagem até o fim dos pedidos (09/12/2026, 23:59, horário de Brasília)
+  const fim = new Date("2026-12-09T23:59:00-03:00").getTime();
+  const pad = n => String(n).padStart(2, "0");
+  function tic() {
+    const r = Math.max(0, fim - Date.now());
+    document.getElementById("d").textContent = Math.floor(r / 864e5);
+    document.getElementById("h").textContent = pad(Math.floor(r / 36e5) % 24);
+    document.getElementById("m").textContent = pad(Math.floor(r / 6e4) % 60);
+  }
+  tic(); setInterval(tic, 30000);
+</script>
+</body>
+</html>
