@@ -68,10 +68,13 @@ window.Provador = (function () {
 
   function montar(raiz, { tipo, produto, aoAdicionar }) {
     const T = TIPOS[tipo];
-    const A = T.area;
+    // os lados com tamanho próprio (costas da camiseta) vêm do produto: [{ id, nome, w, h, preco }]
+    const tamanhosCostas = produto.costas || [];
+    let A = T.area;
     const brl = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     const opcoesProduto = produto.opcoes || [];
     const ehCamisa = tipo === 'camiseta';
+    const lados = T.lados.filter(l => l !== 'costas' || (produto.costas || []).length);
 
     raiz.innerHTML = `
       <div class="prov-grade">
@@ -80,7 +83,7 @@ window.Provador = (function () {
             <div class="prov-vista prov-3d" data-v="3d" hidden><div class="carregando">Preparando a caneca…</div></div>
             <canvas class="prov-vista" data-v="camisa" hidden></canvas>
             <div class="prov-vista prov-azulejo" data-v="azulejo" hidden><div class="placa"><canvas></canvas><div class="suporte"><i></i><i></i></div></div></div>
-            ${T.lados.length > 1 ? `<div class="lados" role="tablist">${T.lados.map(l => `<button role="tab" data-lado="${l}" aria-selected="${l === 'frente'}">${NOME_LADO[l]}</button>`).join('')}</div>` : ''}
+            ${lados.length > 1 ? `<div class="lados" role="tablist">${lados.map(l => `<button role="tab" data-lado="${l}" aria-selected="${l === 'frente'}">${NOME_LADO[l]}</button>`).join('')}</div>` : ''}
             ${T.dica ? `<p class="dica">${T.dica}</p>` : ''}
           </div>
           ${ehCamisa ? '<div class="miniaturas" data-c="miniaturas"></div>' : ''}
@@ -88,20 +91,22 @@ window.Provador = (function () {
         <div class="prov-painel">
           ${ehCamisa ? `<div class="prov-passo prov-cabeca">
             <h1>${produto.nome}</h1>
-            <div class="preco"><b>${brl(produto.preco)}</b><small>no Pix</small></div>
+            <div class="preco"><b data-c="preco">${brl(produto.preco)}</b><small>no Pix</small></div>
+            <div class="preco-detalhe" data-c="precoDetalhe" hidden></div>
             <div class="rotulo-peq">COR <span data-c="nomeCor"></span></div>
             <div class="cores-chip" data-c="coresPeca"></div>
             ${opcoesProduto.map((o, i) => `<div class="rotulo-peq">${o.nome.toUpperCase()}</div><div class="opcoes-lista" data-opcao="${i}">${o.valores.map(v => `<button class="opcao" data-v="${v}" aria-pressed="false">${v}</button>`).join('')}</div>`).join('')}
           </div>` : ''}
           <div class="prov-passo">
             <h2><span>1</span> Sua foto${ehCamisa ? ` <em class="lado-atual" data-c="ladoAtual">na frente</em>` : ''}</h2>
+            ${tamanhosCostas.length ? `<div class="tam-costas" data-c="tamCostas" hidden><span class="rot">Tamanho da estampa nas costas</span>${tamanhosCostas.map((t, i) => `<label class="radio-card"><input type="radio" name="tamCostas" value="${t.id}" ${i === 0 ? 'checked' : ''}><span class="t"><b>${t.nome}</b><small>até ${t.w} x ${t.h} cm · ${t.dica}</small></span><span class="v">+ ${brl(t.preco)}</span></label>`).join('')}</div>` : ''}
             <div class="linha">
               <label class="botao rose enviar"><input type="file" data-c="arquivo" accept="image/*">${ICONE_ENVIAR} Enviar foto</label>
               <button class="botao leve" data-c="exemplo">Usar foto de exemplo</button>
             </div>
             <div class="qualidade" data-c="qualidade" role="status"><i></i><span></span></div>
             <div class="editor-caixa"><canvas class="prov-editor" data-c="editor" aria-label="Área de impressão"></canvas></div>
-            <p class="medida">Área de impressão: ${String(A.w).replace('.', ',')} x ${String(A.h).replace('.', ',')} cm. Arraste pra posicionar; com dois dedos, aumenta e gira.</p>
+            <p class="medida" data-c="medida"></p>
             <div class="ajustes" data-c="ajustes" hidden>
               <label class="ajuste">Tamanho <input type="range" data-c="zoom" min="0.3" max="3" step="0.01" value="1"></label>
               <label class="ajuste">Girar <input type="range" data-c="giro" min="-180" max="180" step="1" value="0"></label>
@@ -147,8 +152,10 @@ window.Provador = (function () {
     ({ caneca: vista3d, camiseta: vc, azulejo: vAz })[tipo].hidden = false;
 
     // cada lado da peça tem a sua arte; cor, tamanho e quantidade são da peça
-    const novaArte = () => ({ foto: null, fx: 0, fy: 0, fs: 1, fr: 0, texto: '', fonte: 'Caveat', corTexto: '#5e5045', tam: T.texto.tam, tx: 0, ty: A.h * T.texto.y });
-    const artes = Object.fromEntries(T.lados.map(l => [l, novaArte()]));
+    const novaArte = (area, ty) => ({ area, foto: null, fx: 0, fy: 0, fs: 1, fr: 0, texto: '', fonte: 'Caveat', corTexto: '#5e5045', tam: T.texto.tam, tx: 0, ty: area.h * ty });
+    const artes = Object.fromEntries(lados.map(l => [l, l === 'costas' && tamanhosCostas.length
+      ? { ...novaArte(tamanhosCostas[0], 0), tamanho: tamanhosCostas[0] }
+      : novaArte(T.area, T.texto.y)]));
     let lado = 'frente', st = artes.frente;
     const peca = { cor: T.corPadrao, opcoes: {} };
     const temArte = (a) => !!(a.foto || a.texto.trim());
@@ -158,11 +165,11 @@ window.Provador = (function () {
     const larg = (img) => img.naturalWidth || img.width;
     const alt = (img) => img.naturalHeight || img.height;
     function medidaFoto(a = st) {
-      const f = a.foto, cover = Math.max(A.w / f.nw, A.h / f.nh);
+      const f = a.foto, Ar = a.area, cover = Math.max(Ar.w / f.nw, Ar.h / f.nh);
       return { w: f.nw * cover * a.fs, h: f.nh * cover * a.fs, cmPorPx: cover * a.fs };
     }
     function desenharEstampa(ctx, ox, oy, k, { fundo = true, full = false, arte = st } = {}) {
-      const a = arte;
+      const a = arte, A = a.area;
       ctx.save();
       ctx.beginPath(); ctx.rect(ox, oy, A.w * k, A.h * k); ctx.clip();
       if (fundo && T.fundo) { ctx.fillStyle = peca.cor; ctx.fillRect(ox, oy, A.w * k, A.h * k); }
@@ -367,7 +374,7 @@ window.Provador = (function () {
       if (temArte(arte)) {
         g.globalCompositeOperation = 'source-atop';
         const k = F.k * s;
-        desenharEstampa(g, F.cx * s - A.w * k / 2, F.topo * s, k, { fundo: false, arte });
+        desenharEstampa(g, F.cx * s - arte.area.w * k / 2, F.topo * s, k, { fundo: false, arte });
       }
       // 3. as dobras escurecem tudo (tecido e estampa) e 4. o brilho volta nas partes altas
       g.globalCompositeOperation = 'multiply';
@@ -437,7 +444,7 @@ window.Provador = (function () {
         if (desmontado) return;
         desenharEditor();
         if (tipo === 'caneca') tres && tres.atualizar();
-        else if (ehCamisa) { desenharCamisa(); desenharMiniaturas(); }
+        else if (ehCamisa) { desenharCamisa(); desenharMiniaturas(); atualizarPreco(); }
         else desenharAzulejo();
         atualizarQualidade();
       });
@@ -473,8 +480,25 @@ window.Provador = (function () {
         cb.appendChild(b);
       }
     }
+    // preço: a camisa mais a estampa das costas, se o cliente fez uma
+    function precoUnitario() {
+      const c = artes.costas;
+      return produto.preco + (c && c.tamanho && temArte(c) ? c.tamanho.preco : 0);
+    }
+    function atualizarPreco() {
+      const el = q('preco'); if (!el) return;
+      el.textContent = brl(precoUnitario());
+      const det = q('precoDetalhe'), c = artes.costas;
+      const extra = c && c.tamanho && temArte(c);
+      det.hidden = !extra;
+      if (extra) det.textContent = `Camisa ${brl(produto.preco)} + costas ${c.tamanho.nome.toLowerCase()} ${brl(c.tamanho.preco)}`;
+    }
     // os controles mostram sempre a arte do lado que está aberto
     function sincronizarControles() {
+      A = st.area;
+      q('medida').textContent = `Área de impressão: ${String(A.w).replace('.', ',')} x ${String(A.h).replace('.', ',')} cm. Arraste pra posicionar; com dois dedos, aumenta e gira.`;
+      const tc = q('tamCostas'); if (tc) tc.hidden = lado !== 'costas';
+      medirEditor();
       q('texto').value = st.texto;
       q('tamTexto').value = st.tam;
       q('zoom').value = st.fs; q('giro').value = st.fr;
@@ -483,6 +507,13 @@ window.Provador = (function () {
       raiz.querySelectorAll('[data-lado]').forEach(b => b.setAttribute('aria-selected', b.dataset.lado === lado));
       montarTexto();
     }
+    raiz.querySelectorAll('[name=tamCostas]').forEach(r => r.onchange = () => {
+      const c = artes.costas, t = tamanhosCostas.find(x => x.id === r.value);
+      c.tamanho = t; c.area = t;
+      // o texto e a foto continuam no meio; só precisam caber na área nova
+      c.ty = Math.max(-t.h / 2 + c.tam / 2, Math.min(t.h / 2 - c.tam / 2, c.ty));
+      sincronizarControles(); atualizar();
+    });
     raiz.querySelectorAll('[data-lado]').forEach(b => b.onclick = () => {
       lado = b.dataset.lado; st = artes[lado]; alvo = null;
       sincronizarControles(); atualizar();
@@ -593,9 +624,9 @@ window.Provador = (function () {
     }
     q('adicionar').onclick = () => {
       const falta = [];
-      if (!T.lados.some(l => temArte(artes[l]))) falta.push('envie uma foto ou escreva um texto');
+      if (!lados.some(l => temArte(artes[l]))) falta.push('envie uma foto ou escreva um texto');
       for (const o of opcoesProduto) if (!peca.opcoes[o.nome]) falta.push(`escolha o ${o.nome.toLowerCase()}`);
-      if (T.lados.some(l => artes[l].foto) && !q('termo').checked) falta.push('confirme que pode usar a imagem');
+      if (lados.some(l => artes[l].foto) && !q('termo').checked) falta.push('confirme que pode usar a imagem');
       if (ehCamisa && !fotos) falta.push('espere a camiseta carregar');
       const fm = q('falta');
       if (falta.length) { fm.hidden = false; fm.textContent = 'Falta pouco: ' + falta.join(', ') + '.'; return; }
@@ -604,15 +635,19 @@ window.Provador = (function () {
       const corNome = T.cores.find(c => c[1] === peca.cor)?.[0];
       const detalhes = [`${T.rotuloCor}: ${corNome}`];
       for (const o of opcoesProduto) detalhes.push(`${o.nome}: ${peca.opcoes[o.nome]}`);
-      for (const l of T.lados) if (temArte(artes[l])) detalhes.push((T.lados.length > 1 ? NOME_LADO[l] + ': ' : 'Arte: ') + descreverArte(artes[l]));
+      for (const l of lados) if (temArte(artes[l])) {
+        const t = artes[l].tamanho;
+        detalhes.push((lados.length > 1 ? NOME_LADO[l] + (t ? ` (${t.nome.toLowerCase()}, + ${brl(t.preco)})` : '') + ': ' : 'Arte: ') + descreverArte(artes[l]));
+      }
       aoAdicionar({
+        preco: precoUnitario(),
         qtd: Math.max(1, Math.min(99, +qtd.value || 1)),
         opcoes: { ...peca.opcoes, [T.rotuloCor]: corNome },
         detalhes, mockup: miniatura(origem, 360, ehCamisa ? '#0d0d0f' : '#f6efe8'),
         // Na versão final, a foto original e o arquivo de impressão de cada lado sobem pro servidor com o pedido.
-        arquivosImpressao: () => Object.fromEntries(T.lados.filter(l => temArte(artes[l])).map(l => {
+        arquivosImpressao: () => Object.fromEntries(lados.filter(l => temArte(artes[l])).map(l => {
           const kp = 300 / 2.54, c = document.createElement('canvas');
-          c.width = Math.round(A.w * kp); c.height = Math.round(A.h * kp);
+          c.width = Math.round(artes[l].area.w * kp); c.height = Math.round(artes[l].area.h * kp);
           desenharEstampa(c.getContext('2d'), 0, 0, kp, { full: true, arte: artes[l] });
           return [l, c];
         })),

@@ -444,7 +444,7 @@
     provadorAtivo = window.Provador.montar($('#provador'), {
       tipo: p.provador, produto: p,
       aoAdicionar: (d) => {
-        adicionar({ id: p.id, nome: p.nome, img: p.img, preco: p.preco, qtd: d.qtd, opcoes: d.opcoes, detalhes: d.detalhes, mockup: d.mockup });
+        adicionar({ id: p.id, nome: p.nome, img: p.img, preco: d.preco ?? p.preco, qtd: d.qtd, opcoes: d.opcoes, detalhes: d.detalhes, mockup: d.mockup });
         avisar('Presente no carrinho, do jeitinho que você montou.', 'Ver carrinho', abrirGaveta);
       },
     });

@@ -39,6 +39,9 @@ dos dados dele (pedido ao suporte, LGPD).
   número de 11 dígitos (tamanho de CPF). Decisão do Edyfran: por enquanto a loja nova fica no nome
   dele (pessoa física); a conversa com contador ou advogado continua pendente.
 
+- **Costas da camiseta (2026-11-15):** pequena até 28 x 10 cm por + R$ 15,00; grande até 28 x 35 cm por
+  + R$ 25,00. Filme DTF 30 x 100 cm a R$ 40. Camisa branca pode ser sublimada ou DTF, conforme o tecido.
+
 ## Etapas
 0. Preparação · 1. Provador (caneca e camiseta) · 2. Visual da loja · 3. Compra funcionando ·
 4. Painel · 5. Migração e ensaio · 6. Virada do domínio (de preferência depois do Natal, em janeiro).

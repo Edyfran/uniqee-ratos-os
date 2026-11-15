@@ -6,7 +6,6 @@ O provador agora mora dentro da loja (`loja/js/provador.js`); a pasta `provador/
 Próximo passo: o Edyfran navegar pela loja e listar os ajustes.
 
 ## Pendências
-- [ ] Estampa nas costas da camiseta: cobra a mais? Hoje o provador deixa estampar frente e costas pelo mesmo preço.
 - [ ] Confirmar as cores da camisa de poliéster e a técnica (sublimação só vale em tecido claro; nas escuras, DTF).
 - [ ] Edyfran navegar pela loja inteira e listar os ajustes (textos, fotos, ordem, opções).
 - [ ] Revisar com contador ou advogado os textos de trocas, privacidade e termos (estão como rascunho).
@@ -23,6 +22,7 @@ Próximo passo: o Edyfran navegar pela loja e listar os ajustes.
 - [ ] Trocar a camiseta desenhada por foto real da peça lisa.
 
 ## Feito
+- 2026-11-15: costas da camiseta com preço: pequena (28 x 10 cm) + R$ 15,00 e grande (28 x 35 cm) + R$ 25,00. Conta: filme DTF 30 x 100 cm a R$ 40 (R$ 0,40 por cm de altura), custo R$ 4 e R$ 14. Decidido pelo Edyfran.
 - 2026-11-15: provador da camiseta no estilo da página de produto da Montink: foto realista (gerada pelo ChatGPT, originais em `base-camiseta/`) tingida na cor escolhida, fundo preto, frente e costas com arte própria, miniaturas por cor, botões de cor com nome, tamanhos em caixa.
 - 2026-11-15: estrutura completa da loja: início, presentes com busca e filtros, página de produto (opções, texto, frete), provador integrado (caneca 3D, azulejo, camiseta) com carrinho, gaveta do carrinho, finalizar (dados, CEP pelo ViaCEP, frete simulado, Pix e cartão simulados), página do pedido com andamento, acompanhar pedido, orçamento em 6 passos com mensagem pro WhatsApp, páginas sobre, como comprar, trocas, privacidade e termos. Testado de ponta a ponta dentro da moldura da Ratoeira.
 - 2026-11-15: catálogo da loja atual salvo em `migracao/` (21 produtos, preços, opções, fotos).

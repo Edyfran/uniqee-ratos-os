@@ -24,7 +24,12 @@ window.UNIQEE = (function () {
     { id: 'camisa-poliester', nome: 'Camisa personalizada 100% poliéster', img: 'camisa-poliester.jpeg', preco: 45.00, cat: 'camisetas',
       momentos: ['aniversario'], provador: 'camiseta', peso: 0.25,
       opcoes: [{ nome: 'Tamanho', valores: ['P', 'M', 'G', 'GG'] }],
-      desc: 'Camisa em poliéster com a sua estampa na frente, em várias cores. Boa pra aniversário, evento, time e família.' },
+      // estampa nas costas (decidido em 2026-11-15): filme DTF a R$ 0,40 por cm de altura
+      costas: [
+        { id: 'pequena', nome: 'Pequena', w: 28, h: 10, preco: 15, dica: 'nome, número, frase ou logo' },
+        { id: 'grande', nome: 'Grande', w: 28, h: 35, preco: 25, dica: 'foto ou arte cheia' },
+      ],
+      desc: 'Camisa em poliéster com a sua estampa na frente, em várias cores. Boa pra aniversário, evento, time e família.\n\nQuer estampar as costas também? Costas pequena (nome, número, frase) por mais R$ 15,00, ou grande (foto ou arte cheia) por mais R$ 25,00.' },
     { id: 'azulejo-natal', nome: 'Azulejo perolado de Natal 15x15', img: 'azulejo-natal.webp', preco: 59.55, cat: 'azulejos',
       momentos: ['natal', 'fe'], colecao: 'fe', etiqueta: 'Natal', peso: 0.7,
       desc: 'Azulejo perolado com a Sagrada Família em tons dourados. Um presente pra deixar o Natal à vista o ano inteiro.' },
