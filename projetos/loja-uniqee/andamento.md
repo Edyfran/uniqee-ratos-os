@@ -1,10 +1,14 @@
 # Andamento · Loja Uniqee
 
 ## Onde está (2026-11-15)
-Provador da caneca (3D) e da camiseta (desenhada) pronto em `provador/index.html`, testado no navegador. Provador testado e aprovado no aparelho do Edyfran. Vitrine v1 pronta em `loja/index.html`. Próximo passo: revisão da vitrine pelo Edyfran.
+Estrutura completa da loja (lado do cliente) pronta em `loja/index.html`, com pagamento e frete simulados.
+O provador agora mora dentro da loja (`loja/js/provador.js`); a pasta `provador/` é a versão 1 avulsa.
+Próximo passo: o Edyfran navegar pela loja e listar os ajustes.
 
 ## Pendências
-- [ ] Etapa 2: Edyfran revisar a vitrine (`loja/index.html`): textos, fotos, momentos.
+- [ ] Edyfran navegar pela loja inteira e listar os ajustes (textos, fotos, ordem, opções).
+- [ ] Revisar com contador ou advogado os textos de trocas, privacidade e termos (estão como rascunho).
+- [ ] Confirmar opções dos produtos (tamanhos da camisa, acabamento da caneca, cores) que não deu pra ler do Brinderoz.
 - [ ] Azulejo 15x15 está R$ 30,00 no Brinderoz e R$ 35,00 no contexto da empresa (2026-11-12): qual vale?
 - [ ] Decidir se as estampas com personagem ou pessoa famosa (Armaduras do Cosmos, Dança dos Dragões, Doutor Destino, Luan Santana) entram na loja nova.
 - [ ] Ver com contador ou advogado como vender online sem CNPJ e sendo servidor público (quem fica como titular, que dado aparece no site).
@@ -17,6 +21,7 @@ Provador da caneca (3D) e da camiseta (desenhada) pronto em `provador/index.html
 - [ ] Trocar a camiseta desenhada por foto real da peça lisa.
 
 ## Feito
+- 2026-11-15: estrutura completa da loja: início, presentes com busca e filtros, página de produto (opções, texto, frete), provador integrado (caneca 3D, azulejo, camiseta) com carrinho, gaveta do carrinho, finalizar (dados, CEP pelo ViaCEP, frete simulado, Pix e cartão simulados), página do pedido com andamento, acompanhar pedido, orçamento em 6 passos com mensagem pro WhatsApp, páginas sobre, como comprar, trocas, privacidade e termos. Testado de ponta a ponta dentro da moldura da Ratoeira.
 - 2026-11-15: catálogo da loja atual salvo em `migracao/` (21 produtos, preços, opções, fotos).
 - 2026-11-15: vitrine v1 em `loja/index.html` (momentos, presentes com filtro, provador, azulejo RA, coleções, como funciona, orçamento, perguntas).
 - 2026-11-15: provador com a paleta da loja atual; foto lida sem blob (funciona na moldura da Ratoeira).
