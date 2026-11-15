@@ -87,7 +87,7 @@ window.Provador = (function () {
             ${lados.length > 1 ? `<div class="lados" role="tablist">${lados.map(l => `<button role="tab" data-lado="${l}" aria-selected="${l === 'frente'}">${NOME_LADO[l]}</button>`).join('')}</div>` : ''}
             ${T.dica ? `<p class="dica">${T.dica}</p>` : ''}
           </div>
-          ${ehCamisa ? '<div class="miniaturas" data-c="miniaturas"></div>' : ''}
+          ${ehCamisa && (produto.cores || T.cores).length > 1 ? '<div class="miniaturas" data-c="miniaturas"></div>' : ''}
         </div>
         <div class="prov-painel">
           ${ehCamisa ? `<div class="prov-passo prov-cabeca">
@@ -138,7 +138,7 @@ window.Provador = (function () {
               <span class="rot" style="margin:0">Quantidade</span>
               <div class="qtd"><button data-c="menos" aria-label="Menos">−</button><input data-c="qtd" type="number" min="1" max="99" value="1" aria-label="Quantidade"><button data-c="mais" aria-label="Mais">+</button></div>
             </div>
-            <label class="check"><input type="checkbox" data-c="termo"><span>A imagem é minha ou tenho autorização pra usar. Fotos com personagem ou marca de terceiros não podem ser impressas.</span></label>
+            <label class="check"><input type="checkbox" data-c="termo"><span>A imagem é minha ou tenho autorização pra usar. A Uniqee pode recusar imagens que desrespeitem direitos de terceiros.</span></label>
             <p class="erro-msg" data-c="falta" hidden></p>
             <button class="botao rose cheio-largo" data-c="adicionar">Adicionar ao carrinho</button>
           </div>
@@ -158,7 +158,9 @@ window.Provador = (function () {
       ? { ...novaArte(tamanhosCostas[0], 0), tamanho: tamanhosCostas[0] }
       : novaArte(T.area, T.texto.y)]));
     let lado = 'frente', st = artes.frente;
-    const peca = { cor: T.corPadrao, opcoes: {} };
+    // o produto pode limitar as cores (ex.: camisa de poliéster só branca)
+    const CORES = produto.cores || T.cores;
+    const peca = { cor: CORES.some(c => c[1] === T.corPadrao) ? T.corPadrao : CORES[0][1], opcoes: {} };
     const temArte = (a) => !!(a.foto || a.texto.trim());
 
     // ---------- desenho da estampa ----------
@@ -400,14 +402,14 @@ window.Provador = (function () {
       palco.style.background = fundo; palco.style.borderColor = claro ? '#d9cfc1' : fundo;
       palco.classList.toggle('claro', claro);
     }
-    const fundoDaCor = (hex) => (T.cores.find(c => c[1] === hex) || [])[2] || '#111214';
+    const fundoDaCor = (hex) => (CORES.find(c => c[1] === hex) || [])[2] || '#111214';
     let timerMinis = null;
     function desenharMiniaturas() {
       clearTimeout(timerMinis);
       timerMinis = setTimeout(() => {
         const box = q('miniaturas'); if (!box || !fotos) return;
         if (!box.children.length) {
-          box.innerHTML = T.cores.map(([nome, hex]) => `<button class="mini" data-cor="${hex}" title="${nome}" aria-label="${nome}"><canvas></canvas><span>${nome}</span></button>`).join('');
+          box.innerHTML = CORES.map(([nome, hex]) => `<button class="mini" data-cor="${hex}" title="${nome}" aria-label="${nome}"><canvas></canvas><span>${nome}</span></button>`).join('');
           box.querySelectorAll('.mini').forEach(b => b.onclick = () => { peca.cor = b.dataset.cor; montarCores(); atualizar(); });
         }
         box.querySelectorAll('.mini').forEach(b => {
@@ -461,14 +463,14 @@ window.Provador = (function () {
     // ---------- controles ----------
     function montarCores() {
       const box = q('coresPeca'); box.innerHTML = '';
-      for (const [nome, hex] of T.cores) {
+      for (const [nome, hex] of CORES) {
         const b = document.createElement('button');
         b.className = 'cor-chip'; b.innerHTML = `<i style="background:${hex}"></i>${nome}`;
         b.setAttribute('aria-pressed', peca.cor === hex);
         b.onclick = () => { peca.cor = hex; montarCores(); atualizar(); };
         box.appendChild(b);
       }
-      const nc = q('nomeCor'); if (nc) nc.textContent = '· ' + (T.cores.find(c => c[1] === peca.cor)?.[0] || '');
+      const nc = q('nomeCor'); if (nc) nc.textContent = '· ' + (CORES.find(c => c[1] === peca.cor)?.[0] || '');
     }
     function montarTexto() {
       const fb = q('fontes'); fb.innerHTML = '';
@@ -640,7 +642,7 @@ window.Provador = (function () {
       if (falta.length) { fm.hidden = false; fm.textContent = 'Falta pouco: ' + falta.join(', ') + '.'; return; }
       fm.hidden = true;
       const origem = tipo === 'caneca' ? tres.foto() : ehCamisa ? mockupCamisa() : mockupAzulejo();
-      const corNome = T.cores.find(c => c[1] === peca.cor)?.[0];
+      const corNome = CORES.find(c => c[1] === peca.cor)?.[0];
       const detalhes = [`${T.rotuloCor}: ${corNome}`];
       for (const o of opcoesProduto) detalhes.push(`${o.nome}: ${peca.opcoes[o.nome]}`);
       for (const l of lados) if (temArte(artes[l])) {

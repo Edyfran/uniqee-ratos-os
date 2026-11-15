@@ -13,8 +13,8 @@ brasão da pegada (`conteudo/artes/brasao-pegada-sousa*`) e as 3 do Destino (`co
 Reels do presépio dourado (Natal) pronto pra postar; legendas em `conteudo/legendas/2026-11-12-presepio-dourado.md`.
 Orçamento do mini porta joias pra parceiro pronto pra mandar: `atendimento/orcamentos/2026-11-11-porta-joias-parceiro.pdf`.
 Reels do azulejo com realidade aumentada pronto pra gerar e montar: `conteudo/roteiros/2026-11-09-reels-azulejo-realidade-aumentada.md`.
-Loja própria em `projetos/loja-uniqee/`: estrutura do cliente pronta; falta aplicar no código o azulejo a R$ 35,
-a camisa de poliéster só branca e as 4 camisetas com personagem. O resto das pendências mora no `andamento.md` do projeto.
+Loja própria em `projetos/loja-uniqee/`: estrutura do cliente pronta, com as decisões de 2026-11-15 aplicadas.
+Pendências da loja no `andamento.md` do projeto.
 
 ## Pendências
 - Ligar a pasta do PreçoArte ao sistema: `/novo-projeto link C:\Users\medei\OneDrive\Documentos\Edyfran\precificacao-desktop`. (2026-11-08)

@@ -247,10 +247,11 @@
 
     <section><div class="miolo">
       <h2 class="titulo">Coleções</h2>
-      <p class="sub">Estampas da casa, criadas aqui pela Uniqee.</p>
+      <p class="sub">Pra cada jeito de ser, uma coleção.</p>
       <div class="colecoes">
         <a class="colecao" href="${zapUrl('Olá! Quero saber da coleção Sousa, Cidade dos Dinossauros.')}" target="_blank" rel="noopener"><img src="img/colecao-sousa.png" alt="Camisa verde com o brasão da pegada de dinossauro"><div><b>Sousa, Cidade dos Dinossauros</b><span>A pegada mais famosa do sertão, pra vestir com orgulho.</span></div></a>
         <a class="colecao" href="#/presentes?colecao=fe"><img src="img/kit-tradicao.webp" alt="Kit de azulejos religiosos à luz de velas"><div><b>Fé e devoção</b><span>Presentes que acompanham a oração de cada dia.</span></div></a>
+        <a class="colecao" href="#/presentes?colecao=geek"><img src="img/camiseta-armaduras-cosmos.webp" alt="Camiseta com arte de anime"><div><b>Geek</b><span>Animes, filmes e séries, pra vestir o que você ama.</span></div></a>
         <a class="colecao gospel" href="${zapUrl('Olá! Quero saber da linha gospel streetwear.')}" target="_blank" rel="noopener"><img src="img/colecao-gospel.png" alt="Camiseta preta com a estampa Jesus Reina"><div><b>&gt; gospel_streetwear</b><span>Fé em linha de código. Oversized, preta, urbana.</span></div></a>
       </div>
     </div></section>
@@ -303,7 +304,7 @@
       <details><summary>Como eu mando a foto?</summary><p>No provador do site, na hora de personalizar, ou pelo WhatsApp depois da compra. Quanto maior a foto, melhor fica a impressão.</p></details>
       <details><summary>Vou ver a arte antes de ficar pronta?</summary><p>Sim. Antes de produzir, a gente manda a arte pra você aprovar.</p></details>
       <details><summary>Quais são as formas de pagamento?</summary><p>Pix e cartão de crédito, pelo Mercado Pago.</p></details>
-      <details><summary>Posso usar qualquer imagem?</summary><p>A imagem precisa ser sua ou você precisa ter autorização pra usar. Personagens e marcas de terceiros não podem ser impressos.</p></details>
+      <details><summary>Posso usar qualquer imagem?</summary><p>A imagem precisa ser sua ou você precisa ter autorização pra usar. A gente pode recusar imagens que desrespeitem direitos de terceiros.</p></details>
     </div>`;
   }
 
@@ -814,7 +815,7 @@
       <h2>Armazenamento no navegador</h2><p>O site guarda no seu próprio navegador o carrinho e os dados do último pedido, pra você não precisar digitar de novo. Não usamos cookies de propaganda.</p>
       <h2>Seus direitos</h2><p>Você pode pedir pra ver, corrigir ou apagar seus dados a qualquer momento, pelo WhatsApp ${CONFIG.zapVisivel}.</p>`],
     termos: ['Termos de uso', `${REVISAR}
-      <h2>Imagens enviadas</h2><p>Ao enviar uma foto ou arte, você confirma que ela é sua ou que tem autorização pra usar. A Uniqee não imprime personagens, marcas ou imagens de terceiros sem licença, e pode recusar um pedido nesse caso, com devolução do valor.</p>
+      <h2>Imagens enviadas</h2><p>Ao enviar uma foto ou arte, você confirma que ela é sua ou que tem autorização pra usar. A Uniqee pode recusar um pedido com imagem que desrespeite direitos de terceiros, com devolução do valor.</p>
       <h2>Cores e aparência</h2><p>O provador mostra uma simulação. As cores impressas podem variar um pouco em relação à tela do celular ou do computador.</p>
       <h2>Prazos</h2><p>O prazo de produção conta a partir da confirmação do pagamento e da aprovação da arte. O prazo de entrega é o informado pela transportadora.</p>
       <h2>Preços</h2><p>Os preços podem mudar sem aviso, mas o pedido já pago vale pelo preço da compra.</p>`],

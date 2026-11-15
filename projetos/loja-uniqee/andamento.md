@@ -3,11 +3,9 @@
 ## Onde está (2026-11-15)
 Estrutura completa da loja (lado do cliente) pronta em `loja/index.html`, com pagamento e frete simulados.
 Provador integrado (`loja/js/provador.js`): caneca 3D, azulejo e camiseta no estilo Montink; a pasta `provador/` é a versão 1 avulsa.
-Próximo passo: aplicar no código as decisões de 2026-11-15 (azulejo, camisa branca, 4 camisetas) e o Edyfran revisar a loja.
+Próximo passo: o Edyfran revisar a loja e listar os ajustes.
 
 ## Pendências
-- [ ] Aplicar no código: azulejo 15x15 a R$ 35,00; camisa de poliéster só branca (foto nova em `loja/img/camisa-poliester-branca.jpg`); as 4 camisetas com personagem (fotos já em `loja/img/camiseta-*.webp`) e a coleção Geek.
-- [ ] Ajustar FAQ e termos, que hoje dizem que personagem não pode ser impresso.
 - [ ] Aviso de pouco contraste na estampa: oferecido, sem resposta.
 - [ ] Edyfran navegar pela loja inteira e listar os ajustes (textos, fotos, ordem, opções).
 - [ ] Revisar com contador ou advogado os textos de trocas, privacidade e termos (estão como rascunho).
@@ -20,6 +18,7 @@ Próximo passo: aplicar no código as decisões de 2026-11-15 (azulejo, camisa b
 - [ ] Decidir se o custo vem do PreçoArte digitado à mão ou importado.
 
 ## Feito
+- 2026-11-15: decisões aplicadas no código: azulejo 15x15 a R$ 35,00; camisa de poliéster só branca (foto nova, sem miniaturas de cor); 4 camisetas com personagem ou pessoa famosa e a coleção Geek; FAQ, termos e aceite do provador sem a frase de que personagem não pode ser impresso.
 - 2026-11-15: costas da camiseta com preço: pequena (28 x 10 cm) + R$ 15,00 e grande (28 x 35 cm) + R$ 25,00. Conta: filme DTF 30 x 100 cm a R$ 40 (R$ 0,40 por cm de altura), custo R$ 4 e R$ 14. Decidido pelo Edyfran.
 - 2026-11-15: provador da camiseta no estilo da página de produto da Montink: foto realista (gerada pelo ChatGPT, originais em `base-camiseta/`) tingida na cor escolhida, fundo preto, frente e costas com arte própria, miniaturas por cor, botões de cor com nome, tamanhos em caixa.
 - 2026-11-15: estrutura completa da loja: início, presentes com busca e filtros, página de produto (opções, texto, frete), provador integrado (caneca 3D, azulejo, camiseta) com carrinho, gaveta do carrinho, finalizar (dados, CEP pelo ViaCEP, frete simulado, Pix e cartão simulados), página do pedido com andamento, acompanhar pedido, orçamento em 6 passos com mensagem pro WhatsApp, páginas sobre, como comprar, trocas, privacidade e termos. Testado de ponta a ponta dentro da moldura da Ratoeira.

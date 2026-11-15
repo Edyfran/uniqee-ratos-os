@@ -18,18 +18,19 @@ window.UNIQEE = (function () {
     { id: 'caneca-personalizada', nome: 'Caneca personalizada com foto', img: 'caneca-personalizada.webp', preco: 23.00, cat: 'canecas',
       momentos: ['maes', 'aniversario', 'amor', 'natal'], etiqueta: 'Mais pedida', provador: 'caneca', peso: 0.45,
       desc: 'Caneca branca de porcelana com a sua foto e o nome de quem vai receber.\n\nNo provador você envia a foto, escreve a frase, escolhe a cor do fundo e gira a caneca pra ver como fica antes de pedir.' },
-    { id: 'azulejo-15', nome: 'Azulejo personalizado 15x15', img: 'azulejo-15.webp', preco: 30.00, cat: 'azulejos',
+    { id: 'azulejo-15', nome: 'Azulejo personalizado 15x15', img: 'azulejo-15.webp', preco: 35.00, cat: 'azulejos',
       momentos: ['aniversario', 'amor', 'maes', 'avos', 'natal'], provador: 'azulejo', peso: 0.6,
       desc: 'Azulejo 15x15 com a foto, a frase ou a arte que você quiser.\n\nMonte no provador e veja como ele fica antes de pedir.' },
-    { id: 'camisa-poliester', nome: 'Camisa personalizada 100% poliéster', img: 'camisa-poliester.jpeg', preco: 45.00, cat: 'camisetas',
+    { id: 'camisa-poliester', nome: 'Camisa personalizada 100% poliéster', img: 'camisa-poliester-branca.jpg', preco: 45.00, cat: 'camisetas',
       momentos: ['aniversario'], provador: 'camiseta', peso: 0.25,
       opcoes: [{ nome: 'Tamanho', valores: ['P', 'M', 'G', 'GG'] }],
+      cores: [['Branca', '#f4f4f2', '#111214']], // só branca (2026-11-15)
       // estampa nas costas (decidido em 2026-11-15): filme DTF a R$ 0,40 por cm de altura
       costas: [
         { id: 'pequena', nome: 'Pequena', w: 28, h: 10, preco: 15, dica: 'nome, número, frase ou logo' },
         { id: 'grande', nome: 'Grande', w: 28, h: 35, preco: 25, dica: 'foto ou arte cheia' },
       ],
-      desc: 'Camisa em poliéster com a sua estampa na frente, em várias cores. Boa pra aniversário, evento, time e família.\n\nQuer estampar as costas também? Costas pequena (nome, número, frase) por mais R$ 15,00, ou grande (foto ou arte cheia) por mais R$ 25,00.' },
+      desc: 'Camisa branca em poliéster com a sua estampa na frente. Boa pra aniversário, evento, time e família.\n\nQuer estampar as costas também? Costas pequena (nome, número, frase) por mais R$ 15,00, ou grande (foto ou arte cheia) por mais R$ 25,00.' },
     { id: 'azulejo-natal', nome: 'Azulejo perolado de Natal 15x15', img: 'azulejo-natal.webp', preco: 59.55, cat: 'azulejos',
       momentos: ['natal', 'fe'], colecao: 'fe', etiqueta: 'Natal', peso: 0.7,
       desc: 'Azulejo perolado com a Sagrada Família em tons dourados. Um presente pra deixar o Natal à vista o ano inteiro.' },
@@ -75,9 +76,25 @@ window.UNIQEE = (function () {
     { id: 'kit-tradicao', nome: 'Kit Tradição, 212 anos do Milagre Eucarístico de Sousa', img: 'kit-tradicao.webp', preco: 120.00, cat: 'kits',
       momentos: ['fe'], colecao: 'fe', etiqueta: 'Sousa', peso: 1.3,
       desc: 'Dois azulejos 15x15 em homenagem aos 212 anos do Milagre Eucarístico da cidade de Sousa-PB.' },
+    // camisetas com personagem ou pessoa famosa: entram na loja (decidido em 2026-11-15)
+    { id: 'camiseta-doutor-destino', nome: 'Camiseta Doutor Destino, preta', img: 'camiseta-doutor-destino.webp', preco: 63.15, cat: 'camisetas',
+      momentos: ['aniversario'], colecao: 'geek', etiqueta: 'Lançamento', peso: 0.3,
+      opcoes: [{ nome: 'Tamanho', valores: ['P', 'M', 'G'] }],
+      desc: 'Camiseta preta com estampa inspirada em Avengers: Doomsday, o novo filme dos Vingadores, com o Doutor Destino como grande vilão. A arte tem cores vivas que se destacam no tecido escuro. Boa pra usar no dia a dia, ir ao cinema na estreia ou presentear aquele fã que você conhece bem.\n\n96% algodão e 4% elastano, 220 g, toque macio, costura reforçada e acabamento ombro a ombro.' },
+    { id: 'camiseta-armaduras-cosmos', nome: 'Camiseta Armaduras do Cosmos', img: 'camiseta-armaduras-cosmos.webp', preco: 69.90, cat: 'camisetas',
+      momentos: ['aniversario'], colecao: 'geek', peso: 0.3,
+      opcoes: [{ nome: 'Tamanho', valores: ['P', 'M', 'G', 'GG'] }],
+      desc: 'Pra quem cresceu acompanhando batalhas épicas e a energia dos animes clássicos que atravessam gerações. Arte exclusiva inspirada no universo dos guerreiros cósmicos, com cores intensas que falam de força, coragem e lealdade.\n\n100% algodão, tamanho real e estampa em DTF de alta qualidade.' },
+    { id: 'camiseta-danca-dragoes', nome: 'Camiseta Dança dos Dragões', img: 'camiseta-danca-dragoes.webp', preco: 69.90, cat: 'camisetas',
+      momentos: ['aniversario'], colecao: 'geek', peso: 0.3,
+      opcoes: [{ nome: 'Tamanho', valores: ['P', 'M', 'G', 'GG'] }],
+      desc: 'Camiseta preta com a arte da Dança dos Dragões, pra fã de House of the Dragon.' },
+    { id: 'camiseta-luan-santana', nome: 'Camiseta Luan Santana, Coleção Sousa 2026', img: 'camiseta-luan-santana.webp', preco: 59.90, cat: 'camisetas',
+      momentos: ['aniversario'], etiqueta: 'Sousa 2026', peso: 0.3,
+      opcoes: [{ nome: 'Tamanho', valores: ['P', 'M', 'G', 'GG'] }],
+      desc: 'Camiseta da coleção exclusiva Sousa 2026, pra quem vai ao show do Luan Santana.' },
   ];
-  // Não entram na vitrine (personagem, marca ou pessoa famosa): Armaduras do Cosmos, Dança dos Dragões,
-  // Doutor Destino, Luan Santana. Ficam fora também os insumos pra sublimação (azulejo 4,5 com ímã).
+  // Fica fora da vitrine o insumo pra sublimação (azulejo 4,5 com ímã), que é de revenda.
 
   const MOMENTOS = [
     { id: 'natal', nome: 'Natal', dica: '', icone: '<path d="M12 3l3 5h-2l3 5h-2l3 5H7l3-5H8l3-5H9z"/><path d="M12 18v3"/>' },
@@ -93,6 +110,7 @@ window.UNIQEE = (function () {
 
   const COLECOES = {
     fe: 'Fé e devoção',
+    geek: 'Geek: animes, filmes e séries',
   };
 
   return { CONFIG, PRODUTOS, MOMENTOS, CATEGORIAS, COLECOES };

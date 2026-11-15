@@ -178,7 +178,8 @@ header.cab nav a:hover, header.cab nav a[aria-current="page"] { color: var(--ros
 
 /* coleções */
 .colecoes { display: grid; gap: 14px; }
-@media (min-width: 760px) { .colecoes { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 760px) { .colecoes { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1080px) { .colecoes { grid-template-columns: repeat(4, 1fr); } }
 .colecao { border-radius: 22px; overflow: hidden; position: relative; min-height: 300px; display: flex; flex-direction: column; justify-content: flex-end; text-decoration: none; color: #fff; isolation: isolate; }
 .colecao img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; transition: transform .4s; }
 .colecao:hover img { transform: scale(1.04); }
