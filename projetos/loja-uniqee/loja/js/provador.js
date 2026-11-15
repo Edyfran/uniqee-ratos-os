@@ -66,6 +66,10 @@ window.Provador = (function () {
     return camisaPronta;
   }
   const luminancia = (hex) => { const n = parseInt(hex.slice(1), 16); return ((n >> 16) * .299 + ((n >> 8) & 255) * .587 + (n & 255) * .114) / 255; };
+  // contraste entre duas cores pela conta do WCAG (1 = iguais, 21 = preto no branco)
+  const linear = (v) => { v /= 255; return v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; };
+  const luz = (r, g, b) => .2126 * linear(r) + .7152 * linear(g) + .0722 * linear(b);
+  const contraste = (l1, l2) => (Math.max(l1, l2) + .05) / (Math.min(l1, l2) + .05);
 
   function montar(raiz, { tipo, produto, aoAdicionar }) {
     const T = TIPOS[tipo];
@@ -106,6 +110,7 @@ window.Provador = (function () {
               <button class="botao leve" data-c="exemplo">Usar foto de exemplo</button>
             </div>
             <div class="qualidade" data-c="qualidade" role="status"><i></i><span></span></div>
+            <div class="qualidade" data-c="contraste" role="status"><i></i><span></span></div>
             <div class="editor-caixa"><canvas class="prov-editor" data-c="editor" aria-label="Área de impressão"></canvas></div>
             <p class="medida" data-c="medida"></p>
             <div class="ajustes" data-c="ajustes" hidden>
@@ -445,6 +450,44 @@ window.Provador = (function () {
       else avisar('A foto é pequena pra esse tamanho e pode sair borrada. Diminua a foto ou envie uma maior.', 'ruim');
     }
 
+    // ---------- contraste da arte com a cor da peça ----------
+    // Lê a arte numa miniatura: a foto contra a cor da peça e o texto contra o que está embaixo dele.
+    const RES_CONTRASTE = 120;
+    function pixelsDaArte(arte) {
+      const A = st.area, k = RES_CONTRASTE / Math.max(A.w, A.h);
+      const c = document.createElement('canvas');
+      c.width = Math.round(A.w * k); c.height = Math.round(A.h * k);
+      desenharEstampa(c.getContext('2d'), 0, 0, k, { fundo: false, arte });
+      return c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+    }
+    function atualizarContraste() {
+      const el = q('contraste');
+      if (!temArte(st)) { el.className = 'qualidade'; return; }
+      const n = parseInt(peca.cor.slice(1), 16), lPeca = luz(n >> 16, (n >> 8) & 255, n & 255);
+      const nomePeca = ehCamisa ? 'da camisa' : tipo === 'caneca' ? 'do fundo da caneca' : 'do fundo do azulejo';
+      let foto, texto;
+      try {
+        foto = st.foto ? pixelsDaArte({ ...st, texto: '' }) : null;
+        texto = st.texto.trim() ? pixelsDaArte({ ...st, foto: null }) : null;
+      } catch { el.className = 'qualidade'; return; }
+      let fotoTotal = 0, fotoFraca = 0, textoTotal = 0, textoFraco = 0;
+      const len = (foto || texto).length;
+      for (let i = 0; i < len; i += 4) {
+        const temFoto = foto && foto[i + 3] > 128;
+        const lFundo = temFoto ? luz(foto[i], foto[i + 1], foto[i + 2]) : lPeca;
+        if (temFoto) { fotoTotal++; if (contraste(lFundo, lPeca) < 1.4) fotoFraca++; }
+        if (texto && texto[i + 3] > 128) {
+          textoTotal++;
+          if (contraste(luz(texto[i], texto[i + 1], texto[i + 2]), lFundo) < 1.6) textoFraco++;
+        }
+      }
+      const msgs = [];
+      if (textoTotal && textoFraco / textoTotal > .5) msgs.push('O texto está com cor parecida com o que fica atrás dele e pode sumir. Experimente outra cor de texto.');
+      if (fotoTotal > 20 && fotoFraca / fotoTotal > .7) msgs.push(`Boa parte da imagem tem cor parecida com a ${nomePeca} e pode ficar difícil de ver. ${CORES.length > 1 ? `Experimente outra cor${ehCamisa ? ' de camisa' : ' de fundo'}.` : 'Experimente uma imagem com cores mais fortes.'}`);
+      if (!msgs.length) { el.className = 'qualidade'; return; }
+      el.className = 'qualidade on boa'; el.querySelector('span').textContent = msgs.join(' ');
+    }
+
     let quadro = false;
     function atualizar() {
       if (quadro) return;
@@ -457,6 +500,7 @@ window.Provador = (function () {
         else if (ehCamisa) { desenharCamisa(); desenharMiniaturas(); atualizarPreco(); }
         else desenharAzulejo();
         atualizarQualidade();
+        atualizarContraste();
       });
     }
 

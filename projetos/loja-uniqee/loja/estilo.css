@@ -357,7 +357,7 @@ footer.rod .base { border-top: 1px solid rgba(255,255,255,.08); text-align: cent
 /* ---------- provador ---------- */
 .prov-grade { display: grid; gap: 16px; }
 .prov-grade > * { min-width: 0; }
-@media (min-width: 900px) { .prov-grade { grid-template-columns: 1.1fr 1fr; align-items: start; } .prov-grade > .prov-palco { position: sticky; top: 90px; } }
+@media (min-width: 900px) { .prov-grade { grid-template-columns: 1.1fr 1fr; align-items: start; } .prov-grade > :first-child { position: sticky; top: 90px; } }
 .prov-palco { background: radial-gradient(120% 90% at 50% 20%, var(--rose-claro) 0%, var(--creme-2) 100%); border: 1px solid var(--linha); border-radius: var(--raio); overflow: hidden; position: relative; }
 .prov-vista { width: 100%; aspect-ratio: 1 / 1; max-height: 70vh; display: block; }
 .prov-3d { cursor: grab; touch-action: none; }

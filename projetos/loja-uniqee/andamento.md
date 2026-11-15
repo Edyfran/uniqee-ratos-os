@@ -6,7 +6,6 @@ Provador integrado (`loja/js/provador.js`): caneca 3D, azulejo e camiseta no est
 Próximo passo: o Edyfran revisar a loja e listar os ajustes.
 
 ## Pendências
-- [ ] Aviso de pouco contraste na estampa: oferecido, sem resposta.
 - [ ] Edyfran navegar pela loja inteira e listar os ajustes (textos, fotos, ordem, opções).
 - [ ] Revisar com contador ou advogado os textos de trocas, privacidade e termos (estão como rascunho).
 - [ ] Confirmar opções dos produtos (tamanhos da camisa, acabamento da caneca, cores) que não deu pra ler do Brinderoz.
@@ -18,6 +17,7 @@ Próximo passo: o Edyfran revisar a loja e listar os ajustes.
 - [ ] Decidir se o custo vem do PreçoArte digitado à mão ou importado.
 
 ## Feito
+- 2026-11-15: aviso de pouco contraste no provador (texto com cor parecida com o que está atrás; imagem com cor parecida com a da peça). Corrigida a foto da peça que não ficava parada ao rolar o provador no computador.
 - 2026-11-15: decisões aplicadas no código: azulejo 15x15 a R$ 35,00; camisa de poliéster só branca (foto nova, sem miniaturas de cor); 4 camisetas com personagem ou pessoa famosa e a coleção Geek; FAQ, termos e aceite do provador sem a frase de que personagem não pode ser impresso.
 - 2026-11-15: costas da camiseta com preço: pequena (28 x 10 cm) + R$ 15,00 e grande (28 x 35 cm) + R$ 25,00. Conta: filme DTF 30 x 100 cm a R$ 40 (R$ 0,40 por cm de altura), custo R$ 4 e R$ 14. Decidido pelo Edyfran.
 - 2026-11-15: provador da camiseta no estilo da página de produto da Montink: foto realista (gerada pelo ChatGPT, originais em `base-camiseta/`) tingida na cor escolhida, fundo preto, frente e costas com arte própria, miniaturas por cor, botões de cor com nome, tamanhos em caixa.
