@@ -17,6 +17,6 @@ venda e a gestão do dia a dia (pedidos, clientes, orçamentos, produção, esto
 
 ## Regras deste projeto
 - O nome e o rosto do Edyfran nunca aparecem na loja (servidor público). Fala-se como "a Uniqee".
-- Estampas com personagem licenciado (Marvel e afins) não entram na vitrine.
+- Peças com personagem ou pessoa famosa entram na loja (decidido em 2026-11-15).
 - A loja roda fora da Ratoeira (Cloudflare), porque precisa ficar no ar o tempo todo. O código mora aqui.
 - Preço ao cliente sai do PreçoArte; não inventar valor.

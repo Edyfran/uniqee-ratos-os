@@ -6,16 +6,15 @@
 > Pendência que sai desta lista sai com motivo (feito, virou projeto, mandaram soltar), nunca em silêncio.
 
 ## Onde paramos
-Reels do azulejo presépio dourado (Natal) pronto pra postar, com a versão final editada pelo Edyfran;
-legendas do Instagram, do status e resposta do direct em `conteudo/legendas/2026-11-12-presepio-dourado.md`.
-Orçamento do mini porta joias pra parceiro pronto pra mandar (R$ 22,00, mínimo 10):
-`atendimento/orcamentos/2026-11-11-porta-joias-parceiro.pdf`.
-Reels do azulejo com realidade aumentada pronto pra gerar no Gemini e montar no CapCut:
-`conteudo/roteiros/2026-11-09-reels-azulejo-realidade-aumentada.md`.
-Plano de formatura da Uniqee (09 a 15/11/2026) pronto pra gravar e postar:
-`conteudo/roteiros/2026-11-09-uniqee-semana.md`. As skills /pedido, /divulgar-precoarte, /orcamento
-e /ajustar-arte estão prontas e ainda não foram usadas num caso real.
-Fábrica de Conteúdo com IA instalada, com a marca da Uniqee aplicada (`projetos/fabrica-de-conteudo/`).
+Carrossel Doomsday com 10 slides pronto pra postar em 16/11/2026 (PNGs em
+`conteudo/carrosseis/doomsday-pedidos/instagram/`, legenda no `carousel-text.md`).
+Estampas novas pra camisa, todas com upscale pra DTF: T-Rex Doomsday Sousa (`conteudo/artes/trex-doomsday-sousa-*`),
+brasão da pegada (`conteudo/artes/brasao-pegada-sousa*`) e as 3 do Destino (`conteudo/artes/destino/`).
+Reels do presépio dourado (Natal) pronto pra postar; legendas em `conteudo/legendas/2026-11-12-presepio-dourado.md`.
+Orçamento do mini porta joias pra parceiro pronto pra mandar: `atendimento/orcamentos/2026-11-11-porta-joias-parceiro.pdf`.
+Reels do azulejo com realidade aumentada pronto pra gerar e montar: `conteudo/roteiros/2026-11-09-reels-azulejo-realidade-aumentada.md`.
+Loja própria em `projetos/loja-uniqee/`: estrutura do cliente pronta; falta aplicar no código o azulejo a R$ 35,
+a camisa de poliéster só branca e as 4 camisetas com personagem. O resto das pendências mora no `andamento.md` do projeto.
 
 ## Pendências
 - Ligar a pasta do PreçoArte ao sistema: `/novo-projeto link C:\Users\medei\OneDrive\Documentos\Edyfran\precificacao-desktop`. (2026-11-08)
@@ -30,8 +29,12 @@ Fábrica de Conteúdo com IA instalada, com a marca da Uniqee aplicada (`projeto
 - Testar o DTF UV no couro sintético do porta joias antes da primeira venda. (2026-11-11)
 - Confirmar as cores e as medidas do kit de porta joias da Shopee. (2026-11-11)
 - Decidir se o porta joias entra no catálogo de revenda. (2026-11-11)
+- Limpar a borda semitransparente do T-Rex Doomsday antes de mandar pro DTF. (2026-11-15)
+- Moletom do T-Rex: "Sousa · Cidade dos Dinossauros" aparece duas vezes nas costas; decidir a troca. (2026-11-15)
+- Montar o arquivo de impressão do texto dourado da camisa do brasão. (2026-11-15)
 
 ## Quente agora
+- Carrossel Doomsday: postar seg 16/11/2026, responder quem comentar DOOM. Estreia 17/12; pedidos até 09/12.
 - Reels do presépio dourado: postar e responder os números nos comentários (Natal).
-- Semana da formatura: Reels seg 09/11, carrossel qua 11/11, Stories qui 12/11, Reels sáb 14/11.
 - Reels do azulejo com realidade aumentada (dia de postar a definir).
+- Loja própria: revisar a loja e listar ajustes.
