@@ -675,31 +675,58 @@ function montarTexto() {
 function carregarImagem(src) {
   return new Promise((ok, erro) => { const i = new Image(); i.onload = () => ok(i); i.onerror = erro; i.src = src; });
 }
+function lerComoDataUrl(arquivo) {
+  return new Promise((ok, erro) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = erro; r.readAsDataURL(arquivo); });
+}
+// Lê a foto sem endereço blob: (a moldura da Ratoeira e alguns celulares bloqueiam);
+// primeiro decodifica direto, depois tenta pelo conteúdo do arquivo.
+async function abrirArquivo(arquivo) {
+  if (window.createImageBitmap) {
+    try { return await createImageBitmap(arquivo, { imageOrientation: 'from-image' }); } catch {}
+    try { return await createImageBitmap(arquivo); } catch {}
+  }
+  return carregarImagem(await lerComoDataUrl(arquivo));
+}
+const larg = (img) => img.naturalWidth || img.width;
+const alt = (img) => img.naturalHeight || img.height;
 function reduzida(img, max = 1800) {
-  const s = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+  const s = Math.min(1, max / Math.max(larg(img), alt(img)));
   if (s === 1) return img;
   const c = document.createElement('canvas');
-  c.width = Math.round(img.naturalWidth * s); c.height = Math.round(img.naturalHeight * s);
+  c.width = Math.round(larg(img) * s); c.height = Math.round(alt(img) * s);
   const g = c.getContext('2d'); g.imageSmoothingQuality = 'high';
   g.drawImage(img, 0, 0, c.width, c.height);
   return c;
 }
-async function usarFoto(src, nome) {
-  try {
-    const img = await carregarImagem(src);
-    st.foto = { full: img, prev: reduzida(img), nw: img.naturalWidth, nh: img.naturalHeight, nome };
-    st.fx = 0; st.fy = 0; st.fs = 1; st.fr = 0; alvo = 'foto';
-    $('zoom').value = 1; $('giro').value = 0;
-    $('ajustes').hidden = false;
-    atualizar();
-  } catch {
-    alert('Não consegui abrir essa imagem. Tente outra foto, em JPG ou PNG.');
-  }
+function avisar(msg) {
+  const q = $('qualidade');
+  q.className = 'qualidade on ruim';
+  q.querySelector('span').textContent = msg;
 }
-$('arquivo').addEventListener('change', (e) => {
+function usarImagem(img, nome) {
+  st.foto = { full: img, prev: reduzida(img), nw: larg(img), nh: alt(img), nome };
+  st.fx = 0; st.fy = 0; st.fs = 1; st.fr = 0; alvo = 'foto';
+  $('zoom').value = 1; $('giro').value = 0;
+  $('ajustes').hidden = false;
+  atualizar();
+}
+async function usarFoto(src, nome) {
+  usarImagem(await carregarImagem(src), nome);
+}
+$('arquivo').addEventListener('change', async (e) => {
   const f = e.target.files[0];
-  if (f) usarFoto(URL.createObjectURL(f), f.name);
   e.target.value = '';
+  if (!f) return;
+  const q = $('qualidade');
+  q.className = 'qualidade on boa'; q.querySelector('span').textContent = 'Abrindo a foto…';
+  try {
+    usarImagem(await abrirArquivo(f), f.name);
+  } catch {
+    const heic = /\.(heic|heif)$/i.test(f.name) || /hei[cf]/i.test(f.type);
+    avisar(heic
+      ? 'Essa foto está no formato HEIC, que o navegador não abre. No celular, compartilhe a foto como JPG ou tire um print dela e envie de novo.'
+      : 'Não consegui abrir essa imagem. Tente outra foto, em JPG ou PNG.');
+  }
 });
 $('exemplo').onclick = () => usarFoto(fotoExemplo(), 'exemplo.png');
 function fotoExemplo() {
