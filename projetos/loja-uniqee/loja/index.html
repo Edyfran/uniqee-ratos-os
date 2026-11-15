@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Uniqee Personalizados</title>
+<meta name="description" content="Presentes personalizados que contam histórias. Canecas, azulejos, camisetas, squeezes e kits feitos em Sousa-PB, com envio pra todo o Brasil.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Radio+Canada+Big:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* paleta da loja atual (uniqeepersonalizados.shop, 2026-11-15) */
+    --creme: #f3ebe2;
+    --creme-2: #ece0d4;
+    --papel: #ffffff;
+    --tinta: #0f172a;
+    --tinta-2: #64748b;
+    --noite: #0b1220;
+    --noite-2: #1e293b;
+    --cinza: #aeb7be;
+    --rose: #c57e84;
+    --rose-2: #a9646b;
+    --rose-claro: #fdf0e9;
+    --marrom: #5e5045;
+    --petroleo: #457981;
+    --preco: #0d9488;
+    --linha: #e6dccf;
+    --raio: 20px;
+    --sombra: 0 1px 2px rgba(15,23,42,.05), 0 10px 30px rgba(94,80,69,.08);
+    --largura: 1180px;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { scroll-behavior: smooth; }
+  html, body { margin: 0; }
+  body {
+    background: var(--creme); color: var(--tinta);
+    font-family: "Radio Canada Big", system-ui, sans-serif; font-size: 16px; line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; }
+  button { font: inherit; color: inherit; }
+  .miolo { max-width: var(--largura); margin: 0 auto; padding: 0 16px; }
+  .mao { font-family: "Caveat", cursive; font-weight: 700; color: var(--rose); }
+  h2.titulo { font-size: clamp(26px, 4.5vw, 36px); line-height: 1.15; margin: 0 0 6px; color: var(--marrom); letter-spacing: -.01em; }
+  .sub { color: var(--tinta-2); margin: 0 0 22px; max-width: 40em; }
+  section { padding: 44px 0; }
+
+  .botao {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    border-radius: 999px; padding: 12px 22px; font-weight: 600; text-decoration: none; cursor: pointer;
+    border: 1.5px solid transparent; transition: background .15s, border-color .15s, color .15s;
+  }
+  .botao.rose { background: var(--rose); color: #fff; }
+  .botao.rose:hover { background: var(--rose-2); }
+  .botao.contorno { border-color: var(--marrom); color: var(--marrom); background: transparent; }
+  .botao.contorno:hover { background: var(--marrom); color: #fff; }
+  .botao.noite { background: var(--noite); color: #fff; }
+  .botao.noite:hover { background: var(--noite-2); }
+  .botao.zap { background: var(--petroleo); color: #fff; }
+  .botao.zap:hover { background: #35646a; }
+  .botao svg { width: 18px; height: 18px; flex: none; }
+  a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px solid var(--rose); outline-offset: 3px; }
+
+  /* topo */
+  .faixa-topo { background: var(--cinza); color: var(--noite); font-size: 13px; font-weight: 500; }
+  .faixa-topo .miolo { display: flex; justify-content: center; gap: 18px; padding-top: 7px; padding-bottom: 7px; flex-wrap: wrap; text-align: center; }
+  .faixa-topo a { font-weight: 600; }
+  header.cab { background: var(--creme); position: sticky; top: 0; z-index: 20; border-bottom: 1px solid var(--linha); }
+  header.cab .miolo { display: flex; align-items: center; gap: 16px; height: 72px; }
+  header.cab .logo img { width: 52px; height: 52px; border-radius: 12px; }
+  header.cab nav { display: flex; gap: 22px; margin-left: 12px; }
+  header.cab nav a { text-decoration: none; font-weight: 500; color: var(--marrom); font-size: 15px; }
+  header.cab nav a:hover { color: var(--rose-2); }
+  .cab-acoes { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+  .icone { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; border: none; background: transparent; cursor: pointer; position: relative; color: var(--marrom); text-decoration: none; }
+  .icone:hover { background: var(--creme-2); }
+  .icone svg { width: 22px; height: 22px; }
+  .icone .bolinha { position: absolute; top: 4px; right: 3px; min-width: 18px; height: 18px; border-radius: 9px; background: var(--rose); color: #fff; font-size: 11px; font-weight: 700; display: grid; place-items: center; padding: 0 4px; }
+  @media (max-width: 820px) { header.cab nav { display: none; } }
+
+  /* abertura */
+  .abertura { padding: 36px 0 28px; background: linear-gradient(180deg, var(--rose-claro), var(--creme)); }
+  .abertura .miolo { display: grid; gap: 28px; align-items: center; }
+  @media (min-width: 900px) { .abertura .miolo { grid-template-columns: 1fr 1.05fr; } }
+  .abertura h1 { font-size: clamp(38px, 7vw, 62px); line-height: 1.02; margin: 0 0 14px; color: var(--marrom); letter-spacing: -.02em; }
+  .abertura h1 .mao { display: block; font-size: 1.18em; line-height: .95; letter-spacing: 0; }
+  .abertura p { font-size: 18px; color: var(--marrom); opacity: .85; margin: 0 0 24px; max-width: 30em; }
+  .abertura .acoes { display: flex; gap: 10px; flex-wrap: wrap; }
+  .selos { display: flex; gap: 18px; margin-top: 26px; flex-wrap: wrap; }
+  .selos div { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--marrom); }
+  .selos svg { width: 22px; height: 22px; color: var(--rose); flex: none; }
+
+  .mural { position: relative; aspect-ratio: 1.15 / 1; max-width: 560px; width: 100%; justify-self: center; }
+  .mural::before { content: ""; position: absolute; inset: 8% 6% 4% 14%; border-radius: 50%; background: radial-gradient(circle, rgba(197,126,132,.35), rgba(197,126,132,0) 70%); }
+  .polaroide { position: absolute; background: #fff; padding: 10px 10px 34px; border-radius: 6px; box-shadow: 0 14px 36px rgba(94,80,69,.22); }
+  .polaroide img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 3px; }
+  .polaroide span { position: absolute; left: 0; right: 0; bottom: 5px; text-align: center; font-family: "Caveat", cursive; font-size: 22px; color: var(--marrom); }
+  .p1 { width: 50%; left: 2%; top: 10%; transform: rotate(-6deg); z-index: 2; }
+  .p2 { width: 46%; right: 2%; top: 0; transform: rotate(5deg); }
+  .p3 { width: 42%; right: 14%; bottom: 0; transform: rotate(-2deg); z-index: 3; }
+
+  /* momentos */
+  .momentos { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(150px, 1fr); gap: 12px; overflow-x: auto; padding: 4px 2px 12px; scroll-snap-type: x mandatory; }
+  .momento {
+    scroll-snap-align: start; text-align: left; border: 1.5px solid var(--linha); background: var(--papel); border-radius: 18px; padding: 16px; cursor: pointer;
+    display: flex; flex-direction: column; gap: 6px; min-height: 128px; transition: border-color .15s, transform .15s;
+  }
+  .momento:hover { border-color: var(--rose); transform: translateY(-2px); }
+  .momento[aria-pressed="true"] { border-color: var(--rose); background: var(--rose-claro); }
+  .momento .emo { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--rose-claro); color: var(--rose-2); }
+  .momento .emo svg { width: 22px; height: 22px; }
+  .momento b { font-size: 17px; color: var(--marrom); }
+  .momento small { color: var(--tinta-2); font-size: 13px; line-height: 1.3; }
+  .momento.destaque { background: var(--marrom); border-color: var(--marrom); color: #fff; }
+  .momento.destaque b, .momento.destaque small { color: #fff; }
+  .momento.destaque small { opacity: .8; }
+  .momento.destaque .emo { background: rgba(255,255,255,.15); color: #fff; }
+  .momento.destaque[aria-pressed="true"] { outline: 3px solid var(--rose); outline-offset: 2px; }
+
+  /* vitrine */
+  .filtros { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 20px; align-items: center; }
+  .filtro { border: 1.5px solid var(--linha); background: var(--papel); border-radius: 999px; padding: 8px 16px; cursor: pointer; font-weight: 500; font-size: 15px; color: var(--marrom); }
+  .filtro[aria-pressed="true"] { background: var(--noite); border-color: var(--noite); color: #fff; }
+  .filtro-ativo { font-size: 14px; color: var(--tinta-2); margin-left: auto; }
+  .filtro-ativo button { border: none; background: none; color: var(--rose-2); font-weight: 600; cursor: pointer; padding: 4px; }
+  .produtos { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(220px, 44vw), 1fr)); gap: 14px; }
+  @media (max-width: 480px) { .produtos { grid-template-columns: 1fr 1fr; gap: 10px; } }
+  .card { background: var(--papel); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; box-shadow: var(--sombra); cursor: pointer; border: 1px solid transparent; transition: transform .15s, border-color .15s; text-align: left; padding: 0; }
+  .card:hover { transform: translateY(-3px); border-color: var(--linha); }
+  .card .foto { position: relative; background: #f6f2ec; }
+  .card .foto img { width: 100%; aspect-ratio: 1; object-fit: cover; }
+  .card .etiqueta { position: absolute; top: 10px; left: 10px; background: var(--rose); color: #fff; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; }
+  .card .info { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+  .card .nome { font-weight: 500; font-size: 15px; line-height: 1.3; color: var(--tinta); }
+  .card .preco { margin-top: auto; padding-top: 6px; }
+  .card .preco small { display: block; font-size: 12px; color: var(--tinta-2); }
+  .card .preco b { color: var(--preco); font-size: 19px; }
+  .card .preco em { font-style: normal; font-size: 12px; color: var(--tinta-2); margin-left: 4px; }
+  .card .acao { margin-top: 8px; font-size: 14px; font-weight: 600; color: var(--rose-2); display: flex; align-items: center; gap: 6px; }
+  .vazio { grid-column: 1 / -1; text-align: center; padding: 36px 16px; color: var(--tinta-2); background: var(--papel); border-radius: 18px; }
+
+  /* personalize */
+  .personalize { background: var(--marrom); color: #fff; border-radius: 28px; overflow: hidden; display: grid; }
+  @media (min-width: 860px) { .personalize { grid-template-columns: 1.1fr 1fr; } }
+  .personalize .texto { padding: 34px 28px; }
+  .personalize h2 { color: #fff; }
+  .personalize .sub { color: rgba(255,255,255,.8); }
+  .personalize ol { list-style: none; padding: 0; margin: 0 0 24px; display: grid; gap: 12px; }
+  .personalize li { display: flex; gap: 12px; align-items: flex-start; }
+  .personalize li b { width: 30px; height: 30px; border-radius: 50%; background: var(--rose); display: grid; place-items: center; flex: none; font-size: 14px; }
+  .personalize .cena { background: radial-gradient(circle at 50% 45%, #f7e3dc, #d9b7ad); display: grid; place-items: center; padding: 28px; min-height: 280px; }
+  .tela { width: min(260px, 70%); background: #fff; border-radius: 28px; padding: 12px; box-shadow: 0 20px 50px rgba(0,0,0,.25); border: 6px solid var(--noite); }
+  .tela .caneca-mini { aspect-ratio: 1; border-radius: 16px; background: var(--rose-claro); display: grid; place-items: center; }
+  .tela .caneca-mini svg { width: 70%; }
+  .tela .barra { height: 10px; border-radius: 5px; background: var(--creme-2); margin-top: 10px; }
+  .tela .barra.c { width: 60%; background: var(--rose); }
+
+  /* realidade aumentada */
+  .ra { display: grid; gap: 24px; align-items: center; }
+  @media (min-width: 860px) { .ra { grid-template-columns: 1fr 1fr; } }
+  .ra-passos { display: grid; gap: 12px; }
+  .ra-passo { background: var(--papel); border-radius: 18px; padding: 16px 18px; display: flex; gap: 14px; align-items: center; box-shadow: var(--sombra); }
+  .ra-passo .n { font-family: "Caveat", cursive; font-size: 40px; line-height: 1; color: var(--rose); width: 34px; text-align: center; flex: none; }
+  .ra-passo b { display: block; color: var(--marrom); }
+  .ra-passo span { color: var(--tinta-2); font-size: 15px; }
+  .ra-novo { display: inline-block; background: var(--noite); color: #fff; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; margin-bottom: 10px; letter-spacing: .02em; }
+
+  /* coleções */
+  .colecoes { display: grid; gap: 14px; }
+  @media (min-width: 760px) { .colecoes { grid-template-columns: repeat(3, 1fr); } }
+  .colecao { border-radius: 22px; overflow: hidden; position: relative; min-height: 300px; display: flex; flex-direction: column; justify-content: flex-end; text-decoration: none; color: #fff; isolation: isolate; cursor: pointer; border: none; padding: 0; text-align: left; }
+  .colecao img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; transition: transform .4s; }
+  .colecao:hover img { transform: scale(1.04); }
+  .colecao::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(0,0,0,0) 35%, rgba(11,18,32,.85)); }
+  .colecao div { padding: 20px; }
+  .colecao b { font-size: 22px; display: block; line-height: 1.2; }
+  .colecao span { font-size: 14px; opacity: .85; }
+  .colecao.gospel { background: #0b0b0d; }
+  .colecao.gospel img { object-fit: contain; transform: scale(1.15); }
+  .colecao.gospel:hover img { transform: scale(1.2); }
+  .colecao.gospel b { font-family: ui-monospace, "SFMono-Regular", Menlo, monospace; letter-spacing: .02em; }
+
+  /* como funciona */
+  .passos { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+  .passo { background: var(--papel); border-radius: 18px; padding: 20px; box-shadow: var(--sombra); }
+  .passo .ic { width: 46px; height: 46px; border-radius: 14px; background: var(--rose-claro); color: var(--rose-2); display: grid; place-items: center; margin-bottom: 12px; }
+  .passo .ic svg { width: 24px; height: 24px; }
+  .passo b { display: block; color: var(--marrom); font-size: 17px; margin-bottom: 4px; }
+  .passo p { margin: 0; color: var(--tinta-2); font-size: 15px; }
+
+  /* orçamento */
+  .orcamento { background: var(--papel); border-radius: 28px; padding: 30px 26px; display: grid; gap: 18px; align-items: center; box-shadow: var(--sombra); border: 1.5px dashed var(--rose); }
+  @media (min-width: 860px) { .orcamento { grid-template-columns: 1.4fr 1fr; padding: 36px 40px; } }
+  .orcamento ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; color: var(--marrom); }
+  .orcamento li { display: flex; gap: 10px; align-items: center; }
+  .orcamento li svg { width: 18px; height: 18px; color: var(--preco); flex: none; }
+
+  /* perguntas */
+  .perguntas { display: grid; gap: 10px; max-width: 820px; }
+  details { background: var(--papel); border-radius: 16px; padding: 0 18px; box-shadow: var(--sombra); }
+  summary { cursor: pointer; padding: 16px 0; font-weight: 600; color: var(--marrom); list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; color: var(--rose); font-size: 22px; line-height: 1; }
+  details[open] summary::after { content: "–"; }
+  details p { margin: 0 0 16px; color: var(--tinta-2); }
+
+  /* rodapé */
+  footer { background: var(--noite); color: #cbd5e1; margin-top: 30px; }
+  footer .miolo { display: grid; gap: 28px; padding-top: 40px; padding-bottom: 28px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+  footer img { width: 64px; height: 64px; border-radius: 14px; margin-bottom: 12px; }
+  footer h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--cinza); margin: 0 0 12px; }
+  footer ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: 15px; }
+  footer a { text-decoration: none; }
+  footer a:hover { color: #fff; }
+  footer .base { border-top: 1px solid rgba(255,255,255,.08); text-align: center; font-size: 13px; padding: 16px; color: #94a3b8; }
+
+  /* botão flutuante */
+  .zap-fixo { position: fixed; right: 16px; bottom: 16px; z-index: 30; box-shadow: 0 10px 30px rgba(11,18,32,.3); }
+  @media (max-width: 520px) { .zap-fixo .rot { display: none; } .zap-fixo { padding: 14px; } }
+
+  /* janela do produto */
+  dialog { border: none; padding: 0; border-radius: 24px; width: min(880px, calc(100% - 24px)); max-height: calc(100% - 24px); background: var(--papel); color: var(--tinta); box-shadow: 0 30px 80px rgba(11,18,32,.35); }
+  dialog::backdrop { background: rgba(11,18,32,.5); }
+  .prod { display: grid; }
+  @media (min-width: 760px) { .prod { grid-template-columns: 1fr 1fr; } }
+  .prod .foto { background: #f6f2ec; }
+  .prod .foto img { width: 100%; height: 100%; object-fit: cover; aspect-ratio: 1; }
+  .prod .dados { padding: 24px; display: flex; flex-direction: column; gap: 12px; position: relative; }
+  .prod h3 { margin: 0; font-size: 24px; line-height: 1.2; color: var(--marrom); padding-right: 40px; }
+  .prod .preco b { color: var(--preco); font-size: 28px; }
+  .prod .preco small { color: var(--tinta-2); display: block; font-size: 14px; }
+  .prod .desc { color: var(--tinta-2); font-size: 15px; margin: 0; white-space: pre-line; max-height: 9.5em; overflow: auto; }
+  .prod .garantias { display: grid; gap: 6px; font-size: 14px; color: var(--marrom); background: var(--rose-claro); padding: 12px 14px; border-radius: 14px; }
+  .prod .acoes { display: grid; gap: 8px; margin-top: auto; }
+  .prod .fechar { position: absolute; top: 14px; right: 14px; }
+  .aviso-teste { font-size: 13px; color: var(--tinta-2); text-align: center; margin: 0; }
+</style>
+</head>
+<body>
+
+<div class="faixa-topo"><div class="miolo">
+  <span>Enviamos pra todo o Brasil</span>
+  <span>Produção em até 5 dias úteis</span>
+  <a href="#" data-zap="Olá! Vim pelo site da Uniqee e queria tirar uma dúvida.">Fale no WhatsApp</a>
+</div></div>
+
+<header class="cab"><div class="miolo">
+  <a class="logo" href="#topo" aria-label="Uniqee Personalizados, início"><img src="img/logo-uniqee.png" alt="Uniqee Personalizados"></a>
+  <nav aria-label="Seções">
+    <a href="#momentos">Momentos</a>
+    <a href="#presentes">Presentes</a>
+    <a href="#personalize">Personalize</a>
+    <a href="#como-funciona">Como funciona</a>
+  </nav>
+  <div class="cab-acoes">
+    <a class="icone" href="#presentes" aria-label="Procurar presentes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></a>
+    <button class="icone" aria-label="Carrinho" title="O carrinho chega na próxima etapa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 13H7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg><span class="bolinha">0</span></button>
+  </div>
+</div></header>
+
+<main id="topo">
+  <div class="abertura"><div class="miolo">
+    <div>
+      <h1>Presentes que <span class="mao">contam histórias.</span></h1>
+      <p>A gente transforma o momento de vocês num presente pra guardar. Com foto, com nome, com aquela frase que só vocês entendem.</p>
+      <div class="acoes">
+        <a class="botao rose" href="#momentos">Escolher um presente</a>
+        <a class="botao contorno" href="../provador/index.html">Personalizar agora</a>
+      </div>
+      <div class="selos">
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>Feito com carinho em Sousa-PB</div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 12h18M12 8c-2-4-6-4-6-1.5S10 8 12 8zm0 0c2-4 6-4 6-1.5S14 8 12 8z"/></svg>Embalagem pra presentear</div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>Envio pra todo o Brasil</div>
+      </div>
+    </div>
+    <div class="mural" aria-hidden="true">
+      <div class="polaroide p2"><img src="img/kit-canecas-avos.webp" alt=""><span>pros avós</span></div>
+      <div class="polaroide p1"><img src="img/kit-avos-almofada.webp" alt=""><span>amor de família</span></div>
+      <div class="polaroide p3"><img src="img/caneca-personalizada.webp" alt=""><span>com a sua foto</span></div>
+    </div>
+  </div></div>
+
+  <section id="momentos"><div class="miolo">
+    <h2 class="titulo">Pra qual momento?</h2>
+    <p class="sub">Escolha a ocasião e a gente mostra os presentes que combinam.</p>
+    <div class="momentos" id="listaMomentos"></div>
+  </div></section>
+
+  <section id="presentes" style="padding-top:8px"><div class="miolo">
+    <h2 class="titulo">Nossos presentes</h2>
+    <p class="sub">Todos feitos aqui, peça por peça. Toque num presente pra ver os detalhes.</p>
+    <div class="filtros" id="filtros"></div>
+    <div class="produtos" id="produtos"></div>
+  </div></section>
+
+  <section id="personalize"><div class="miolo">
+    <div class="personalize">
+      <div class="texto">
+        <h2 class="titulo">Veja como fica <span class="mao" style="color:#f4c7c2">antes</span> de pedir</h2>
+        <p class="sub">No nosso provador você monta o presente do seu jeito e vê na hora como ele vai chegar.</p>
+        <ol>
+          <li><b>1</b><span>Escolha a peça: caneca ou camiseta, e logo mais azulejo e squeeze.</span></li>
+          <li><b>2</b><span>Envie a foto e escreva o nome ou a frase.</span></li>
+          <li><b>3</b><span>Gire a caneca, confira cada detalhe e aprove.</span></li>
+        </ol>
+        <a class="botao rose" href="../provador/index.html">Abrir o provador</a>
+      </div>
+      <div class="cena" aria-hidden="true">
+        <div class="tela">
+          <div class="caneca-mini">
+            <svg viewBox="0 0 120 100" fill="none"><rect x="20" y="16" width="62" height="70" rx="8" fill="#fff" stroke="#5e5045" stroke-width="3"/><path d="M82 32h8a14 14 0 0 1 0 28h-8" stroke="#5e5045" stroke-width="3"/><rect x="28" y="28" width="46" height="34" rx="4" fill="#c57e84" opacity=".35"/><path d="M51 52s-9-5.5-9-11a5 5 0 0 1 9-3 5 5 0 0 1 9 3c0 5.5-9 11-9 11z" fill="#c57e84"/><text x="51" y="76" text-anchor="middle" font-family="Caveat" font-size="11" fill="#5e5045">pra sempre</text></svg>
+          </div>
+          <div class="barra c"></div><div class="barra"></div>
+        </div>
+      </div>
+    </div>
+  </div></section>
+
+  <section id="realidade-aumentada"><div class="miolo ra">
+    <div>
+      <span class="ra-novo">NOVIDADE</span>
+      <h2 class="titulo">O azulejo que <span class="mao">toca um vídeo</span></h2>
+      <p class="sub">Grave uma mensagem, uma dança, um parabéns. O azulejo vai com uma tag especial e, quando a pessoa aponta o celular, o vídeo de vocês aparece em cima da foto. Um presente que fala.</p>
+      <a class="botao rose" href="#" data-zap="Olá! Quero saber do azulejo com realidade aumentada, o que toca vídeo.">Quero o meu</a>
+    </div>
+    <div class="ra-passos">
+      <div class="ra-passo"><span class="n">1</span><div><b>Você manda a foto e o vídeo</b><span>Pelo WhatsApp, do jeito que gravou.</span></div></div>
+      <div class="ra-passo"><span class="n">2</span><div><b>A gente faz o azulejo e a tag</b><span>Tudo pronto pra presentear.</span></div></div>
+      <div class="ra-passo"><span class="n">3</span><div><b>A pessoa aponta o celular</b><span>E o vídeo toca em cima do azulejo.</span></div></div>
+    </div>
+  </div></section>
+
+  <section id="colecoes"><div class="miolo">
+    <h2 class="titulo">Coleções</h2>
+    <p class="sub">Estampas da casa, criadas aqui pela Uniqee.</p>
+    <div class="colecoes">
+      <button class="colecao" data-colecao="sousa"><img src="img/colecao-sousa.png" alt="Camisa verde com o brasão da pegada de dinossauro"><div><b>Sousa, Cidade dos Dinossauros</b><span>A pegada mais famosa do sertão, pra vestir com orgulho.</span></div></button>
+      <button class="colecao" data-colecao="fe"><img src="img/kit-tradicao.webp" alt="Kit de azulejos religiosos à luz de velas"><div><b>Fé e devoção</b><span>Presentes que acompanham a oração de cada dia.</span></div></button>
+      <button class="colecao gospel" data-colecao="gospel"><img src="img/colecao-gospel.png" alt="Camiseta preta com a estampa Jesus Reina"><div><b>&gt; gospel_streetwear</b><span>Fé em linha de código. Oversized, preta, urbana.</span></div></button>
+    </div>
+  </div></section>
+
+  <section id="como-funciona"><div class="miolo">
+    <h2 class="titulo">Como funciona</h2>
+    <p class="sub">Do pedido até a porta da sua casa, a gente acompanha você.</p>
+    <div class="passos">
+      <div class="passo"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></div><b>Escolha o presente</b><p>Pela ocasião, pela pessoa ou pela peça.</p></div>
+      <div class="passo"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 8"/></svg></div><b>Conte a história</b><p>Envie a foto, o nome e a frase. Pode ser no provador ou no WhatsApp.</p></div>
+      <div class="passo"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div><b>Aprove a arte</b><p>Você vê como vai ficar antes de a gente produzir.</p></div>
+      <div class="passo"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg></div><b>Receba em casa</b><p>Produção em até 5 dias úteis, mais o prazo do frete.</p></div>
+    </div>
+  </div></section>
+
+  <section id="orcamento" style="padding-top:8px"><div class="miolo">
+    <div class="orcamento">
+      <div>
+        <h2 class="titulo">Precisa de um orçamento especial?</h2>
+        <p class="sub" style="margin-bottom:14px">Lembrancinha de festa, brinde de empresa, kit de formatura ou uma peça que não está aqui. Conta pra gente o que você imagina.</p>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Preço menor a partir de 11 unidades</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Arte criada pra sua ocasião</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Resposta rápida pelo WhatsApp</li>
+        </ul>
+      </div>
+      <div style="display:grid;gap:10px">
+        <a class="botao zap" href="#" data-zap="Olá! Queria um orçamento especial. A ocasião é: ... Quantidade: ... Pra quando preciso: ...">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .1-1.3c0-.1-.2-.2-.4-.3z"/></svg>
+          Pedir orçamento no WhatsApp
+        </a>
+        <p class="aviso-teste">Mais adiante, o orçamento também vai poder ser montado aqui, em passos.</p>
+      </div>
+    </div>
+  </div></section>
+
+  <section id="perguntas"><div class="miolo">
+    <h2 class="titulo">Perguntas frequentes</h2>
+    <p class="sub">Se a sua dúvida não estiver aqui, chame a gente no WhatsApp.</p>
+    <div class="perguntas">
+      <details><summary>Qual é o prazo de produção?</summary><p>Até 5 dias úteis, contados a partir da confirmação do pagamento. O prazo do frete é somado a ele.</p></details>
+      <details><summary>Vocês entregam pra todo o Brasil?</summary><p>Sim. O frete é calculado pelo seu CEP na hora da compra. Em Sousa, a entrega ou a retirada é combinada com a gente, sem taxa.</p></details>
+      <details><summary>Como eu mando a foto?</summary><p>Pelo provador do site, na hora de personalizar, ou pelo WhatsApp depois da compra. Quanto maior a foto, melhor fica a impressão.</p></details>
+      <details><summary>Vou ver a arte antes de ficar pronta?</summary><p>Sim. Antes de produzir, a gente manda a arte pra você aprovar.</p></details>
+      <details><summary>Quais são as formas de pagamento?</summary><p>Pix e cartão de crédito, com parcelamento.</p></details>
+      <details><summary>Posso usar qualquer imagem?</summary><p>A imagem precisa ser sua ou você precisa ter autorização pra usar. Personagens e marcas de terceiros não podem ser impressos.</p></details>
+    </div>
+  </div></section>
+</main>
+
+<footer>
+  <div class="miolo">
+    <div>
+      <img src="img/logo-uniqee.png" alt="Uniqee Personalizados">
+      <p style="margin:0;font-size:15px;max-width:22em">A Uniqee transforma momentos em presentes personalizados que tocam o coração.</p>
+    </div>
+    <div>
+      <h3>Presentes</h3>
+      <ul>
+        <li><a href="#presentes" data-cat="canecas">Canecas</a></li>
+        <li><a href="#presentes" data-cat="azulejos">Azulejos</a></li>
+        <li><a href="#presentes" data-cat="camisetas">Camisetas</a></li>
+        <li><a href="#presentes" data-cat="kits">Kits</a></li>
+      </ul>
+    </div>
+    <div>
+      <h3>Ajuda</h3>
+      <ul>
+        <li><a href="#como-funciona">Como funciona</a></li>
+        <li><a href="#perguntas">Perguntas frequentes</a></li>
+        <li><a href="#">Trocas e devoluções</a></li>
+        <li><a href="#">Política de privacidade</a></li>
+      </ul>
+    </div>
+    <div>
+      <h3>Fale com a gente</h3>
+      <ul>
+        <li><a href="#" data-zap="Olá! Vim pelo site da Uniqee.">WhatsApp (83) 99102-0063</a></li>
+        <li><a href="https://instagram.com/uniqeepersonalizados" target="_blank" rel="noopener">Instagram @uniqeepersonalizados</a></li>
+        <li>Sousa, Paraíba</li>
+      </ul>
+    </div>
+  </div>
+  <div class="base">© <span id="ano"></span> Uniqee Personalizados · Pix e cartão de crédito</div>
+</footer>
+
+<a class="botao zap zap-fixo" href="#" data-zap="Olá! Vim pelo site da Uniqee e queria tirar uma dúvida." aria-label="Falar no WhatsApp">
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .1-1.3c0-.1-.2-.2-.4-.3z"/></svg>
+  <span class="rot">Orçamento rápido</span>
+</a>
+
+<dialog id="janela">
+  <div class="prod">
+    <div class="foto"><img id="jFoto" alt=""></div>
+    <div class="dados">
+      <button class="icone fechar" id="jFechar" aria-label="Fechar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      <h3 id="jNome"></h3>
+      <div class="preco" id="jPreco"></div>
+      <p class="desc" id="jDesc"></p>
+      <div class="garantias">
+        <span>Produção em até 5 dias úteis</span>
+        <span>Envio pra todo o Brasil, frete pelo CEP</span>
+        <span>Você aprova a arte antes de produzir</span>
+      </div>
+      <div class="acoes" id="jAcoes"></div>
+      <p class="aviso-teste">Versão de teste: o carrinho e o pagamento chegam na próxima etapa.</p>
+    </div>
+  </div>
+</dialog>
+
+<script>
+const ZAP = '5583991020063';
+const PROVADOR = '../provador/index.html';
+
+// Preços e textos vindos da loja atual (Brinderoz), lidos em 2026-11-15.
+// momentos: natal, avos, maes, professores, fe, aniversario, amor, sousa
+const PRODUTOS = [
+  { id: 'azulejo-natal', nome: 'Azulejo perolado de Natal 15x15', img: 'azulejo-natal.webp', preco: 59.55, cat: 'azulejos', momentos: ['natal', 'fe'], colecao: 'fe', etiqueta: 'Natal',
+    desc: 'Azulejo perolado com a Sagrada Família em tons dourados. Um presente pra deixar o Natal à vista o ano inteiro.' },
+  { id: 'azulejo-15', nome: 'Azulejo personalizado 15x15', img: 'azulejo-15.webp', preco: 30.00, cat: 'azulejos', momentos: ['aniversario', 'amor', 'maes', 'avos', 'natal'], personalizavel: true,
+    desc: 'Azulejo 15x15 com a foto, a frase ou a arte que você quiser.' },
+  { id: 'azulejo-relogio', nome: 'Azulejo relógio 20x20 com suporte', img: 'azulejo-relogio.jpg', preco: 50.00, cat: 'azulejos', momentos: ['aniversario', 'avos', 'maes'], personalizavel: true,
+    desc: 'Relógio de azulejo 20x20 com a imagem que você escolher. Um presente que marca as horas e a lembrança.' },
+  { id: 'caneca-personalizada', nome: 'Caneca personalizada com foto', img: 'caneca-personalizada.webp', preco: 23.00, cat: 'canecas', momentos: ['maes', 'aniversario', 'amor', 'natal'], personalizavel: true, etiqueta: 'Mais pedida',
+    desc: 'Caneca branca de porcelana com a sua foto e o nome de quem vai receber. Escolha o acabamento na hora de pedir.' },
+  { id: 'caneca-liturgia', nome: 'Caneca Orai sem Cessar com QR Code da liturgia do dia', img: 'caneca-liturgia.webp', preco: 39.90, cat: 'canecas', momentos: ['fe', 'natal'], colecao: 'fe',
+    desc: 'Caneca com QR Code que abre a liturgia do dia em texto e áudio. Pra começar a manhã com a Palavra.' },
+  { id: 'caneca-professores', nome: 'Caneca Dia dos Professores, corujinha', img: 'caneca-professores.jpg', preco: 25.00, cat: 'canecas', momentos: ['professores'],
+    desc: 'Caneca com a corujinha "Meu professor é o melhor". Presente carinhoso pra homenagear quem ensina.' },
+  { id: 'caneca-album', nome: 'Caneca Meu Álbum Mágico com QR Code', img: 'caneca-album.webp', preco: 30.00, cat: 'canecas', momentos: ['aniversario', 'amor'], personalizavel: true,
+    desc: 'A pessoa escaneia o QR Code da caneca e abre um álbum de figurinhas digital com as fotos de vocês.' },
+  { id: 'squeeze', nome: 'Squeeze de alumínio com foto', img: 'squeeze.webp', preco: 50.00, cat: 'squeezes', momentos: ['aniversario', 'professores'], personalizavel: true,
+    desc: 'Squeeze de alumínio personalizado com a foto do cliente. Não é térmico.' },
+  { id: 'camisa-poliester', nome: 'Camisa personalizada 100% poliéster', img: 'camisa-poliester.jpeg', preco: 45.00, cat: 'camisetas', momentos: ['aniversario'], personalizavel: true,
+    desc: 'Camisa em poliéster com a sua estampa. Várias cores e tamanhos. Ótima pra aniversário, evento e time.' },
+  { id: 'kit-avos-caixa', nome: 'Kit Dia dos Avós na caixa', img: 'kit-avos-caixa.webp', preco: 57.90, cat: 'kits', momentos: ['avos'], personalizavel: true, etiqueta: 'Kit',
+    desc: 'Caixa de presente com almofada e azulejo personalizados com a foto dos avós.' },
+  { id: 'kit-avos-almofada', nome: 'Kit Dia dos Avós, almofada e caneca', img: 'kit-avos-almofada.webp', preco: 52.67, cat: 'kits', momentos: ['avos'], personalizavel: true, etiqueta: 'Kit',
+    desc: 'Almofada e caneca com a foto da família, prontas pra presentear vovó e vovô.' },
+  { id: 'kit-canecas-avos', nome: 'Kit canecas Vovó e Vovô', img: 'kit-canecas-avos.webp', preco: 38.90, cat: 'kits', momentos: ['avos'], personalizavel: true, etiqueta: 'Kit',
+    desc: 'Duas canecas personalizadas com foto, embaladas com laço e cartão.' },
+  { id: 'kit-mulheres', nome: 'Kit caneca e azulejo decorativo', img: 'kit-mulheres.webp', preco: 50.00, cat: 'kits', momentos: ['maes', 'amor'], personalizavel: true, etiqueta: 'Kit',
+    desc: 'Caneca e azulejo decorativo personalizados, combinando entre si.' },
+  { id: 'kit-caneca-azulejo', nome: 'Kit caneca e azulejo 15x15 personalizados', img: 'kit-caneca-azulejo.png', preco: 42.50, cat: 'kits', momentos: ['natal', 'aniversario', 'maes', 'avos'], personalizavel: true, etiqueta: 'Kit',
+    desc: 'Caneca e azulejo 15x15 com a mesma foto ou arte. Um presente completo.' },
+  { id: 'kit-tradicao', nome: 'Kit Tradição, 212 anos do Milagre Eucarístico de Sousa', img: 'kit-tradicao.webp', preco: 120.00, cat: 'kits', momentos: ['fe', 'sousa'], colecao: 'fe', etiqueta: 'Sousa',
+    desc: 'Dois azulejos 15x15 em homenagem aos 212 anos do Milagre Eucarístico da cidade de Sousa-PB.' },
+];
+// Não entram na vitrine (personagem, marca ou pessoa famosa): Armaduras do Cosmos, Dança dos Dragões,
+// Doutor Destino, Luan Santana. Ficam fora também os insumos pra sublimação (azulejo 4,5 com ímã).
+
+const MOMENTOS = [
+  { id: 'natal', nome: 'Natal', dica: '', icone: '<path d="M12 3l3 5h-2l3 5h-2l3 5H7l3-5H8l3-5H9z"/><path d="M12 18v3"/>' },
+  { id: 'avos', nome: 'Avós', dica: 'Pra quem cuidou de todo mundo', icone: '<circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M3 20c0-3 2.5-5 5-5s5 2 5 5M11 20c0-3 2.5-5 5-5s5 2 5 5"/>' },
+  { id: 'maes', nome: 'Mães e mulheres', dica: 'Carinho que fica na estante', icone: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>' },
+  { id: 'aniversario', nome: 'Aniversário', dica: 'Um presente com a cara da pessoa', icone: '<path d="M4 21h16v-8H4zM12 13V8M12 8c-1.5 0-2-1.5-1-3l1-2 1 2c1 1.5.5 3-1 3z"/><path d="M4 17c2 1 4-1 4-1s2 2 4 0 4 0 4 0 2 1 4-1"/>' },
+  { id: 'amor', nome: 'Pro amor', dica: 'Namoro, casamento, bodas', icone: '<path d="M9 18s-5-3.1-5-7a3 3 0 0 1 5-2 3 3 0 0 1 5 2c0 3.9-5 7-5 7z"/><path d="M15 15s4-2.4 4-5.6a2.4 2.4 0 0 0-4-1.6"/>' },
+  { id: 'professores', nome: 'Professores', dica: 'Pra quem ensina com carinho', icone: '<path d="M3 8l9-4 9 4-9 4z"/><path d="M7 10v5c0 1.5 2.5 3 5 3s5-1.5 5-3v-5"/>' },
+  { id: 'fe', nome: 'Fé', dica: 'Presentes pra oração de cada dia', icone: '<path d="M12 3v18M7 8h10"/>' },
+];
+
+const $ = (s, el = document) => el.querySelector(s);
+const brl = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+const zapUrl = (msg) => `https://wa.me/${ZAP}?text=${encodeURIComponent(msg)}`;
+const filtro = { momento: null, cat: 'todos', colecao: null };
+
+function diasProNatal() {
+  const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+  let natal = new Date(hoje.getFullYear(), 11, 25);
+  if (hoje > natal) natal = new Date(hoje.getFullYear() + 1, 11, 25);
+  return Math.round((natal - hoje) / 86400000);
+}
+
+function montarMomentos() {
+  const box = $('#listaMomentos');
+  const d = diasProNatal();
+  // a data mais próxima vem primeiro e em destaque (por enquanto, o Natal até 25/12)
+  box.innerHTML = MOMENTOS.map(m => {
+    const destaque = m.id === 'natal' && d <= 60;
+    const dica = m.id === 'natal' ? (d === 0 ? 'É hoje!' : `Faltam ${d} dias. Peça com antecedência.`) : m.dica;
+    return `<button class="momento${destaque ? ' destaque' : ''}" data-momento="${m.id}" aria-pressed="${filtro.momento === m.id}">
+      <span class="emo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${m.icone}</svg></span>
+      <b>${m.nome}</b><small>${dica}</small></button>`;
+  }).join('');
+  box.querySelectorAll('.momento').forEach(b => b.onclick = () => {
+    filtro.momento = filtro.momento === b.dataset.momento ? null : b.dataset.momento;
+    filtro.colecao = null;
+    montarMomentos(); montarProdutos();
+    if (filtro.momento) $('#presentes').scrollIntoView({ behavior: 'smooth' });
+  });
+}
+
+const CATS = [['todos', 'Todos'], ['canecas', 'Canecas'], ['azulejos', 'Azulejos'], ['kits', 'Kits'], ['camisetas', 'Camisetas'], ['squeezes', 'Squeezes']];
+function montarFiltros() {
+  const ativo = filtro.momento ? MOMENTOS.find(m => m.id === filtro.momento).nome
+    : filtro.colecao ? { fe: 'Fé e devoção', sousa: 'Sousa', gospel: 'Gospel streetwear' }[filtro.colecao] : null;
+  $('#filtros').innerHTML = CATS.map(([id, nome]) => `<button class="filtro" data-cat="${id}" aria-pressed="${filtro.cat === id}">${nome}</button>`).join('')
+    + (ativo ? `<span class="filtro-ativo">Mostrando: <b>${ativo}</b> <button id="limpar">limpar</button></span>` : '');
+  $('#filtros').querySelectorAll('.filtro').forEach(b => b.onclick = () => { filtro.cat = b.dataset.cat; montarProdutos(); });
+  const l = $('#limpar'); if (l) l.onclick = () => { filtro.momento = null; filtro.colecao = null; montarMomentos(); montarProdutos(); };
+}
+
+function montarProdutos() {
+  montarFiltros();
+  const lista = PRODUTOS.filter(p =>
+    (filtro.cat === 'todos' || p.cat === filtro.cat) &&
+    (!filtro.momento || p.momentos.includes(filtro.momento)) &&
+    (!filtro.colecao || p.colecao === filtro.colecao || p.momentos.includes(filtro.colecao)));
+  const box = $('#produtos');
+  if (!lista.length) {
+    box.innerHTML = `<div class="vazio">Ainda não temos peça pronta pra essa combinação.<br>Mas a gente cria: <a href="${zapUrl('Olá! Procurei no site e não achei o que queria. Estou pensando em...')}" target="_blank" rel="noopener" style="color:var(--rose-2);font-weight:600">fale com a gente no WhatsApp</a>.</div>`;
+    return;
+  }
+  box.innerHTML = lista.map(p => `
+    <button class="card" data-id="${p.id}">
+      <div class="foto"><img src="img/${p.img}" alt="${p.nome}" loading="lazy">${p.etiqueta ? `<span class="etiqueta">${p.etiqueta}</span>` : ''}</div>
+      <div class="info">
+        <span class="nome">${p.nome}</span>
+        <span class="preco">${p.personalizavel ? '<small>a partir de</small>' : ''}<b>${brl(p.preco)}</b><em>no Pix</em></span>
+        <span class="acao">${p.personalizavel ? 'Personalizar' : 'Ver detalhes'} <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </div>
+    </button>`).join('');
+  box.querySelectorAll('.card').forEach(c => c.onclick = () => abrirProduto(c.dataset.id));
+}
+
+function abrirProduto(id) {
+  const p = PRODUTOS.find(x => x.id === id);
+  $('#jFoto').src = 'img/' + p.img; $('#jFoto').alt = p.nome;
+  $('#jNome').textContent = p.nome;
+  const parcela = p.preco >= 40 ? ` ou 2x de ${brl(p.preco / 2)} no cartão` : '';
+  $('#jPreco').innerHTML = `${p.personalizavel ? '<small>a partir de</small>' : ''}<b>${brl(p.preco)}</b><small>no Pix${parcela}</small>`;
+  $('#jDesc').textContent = p.desc;
+  const pode = ['caneca-personalizada', 'camisa-poliester'].includes(p.id);
+  $('#jAcoes').innerHTML =
+    (pode ? `<a class="botao rose" href="${PROVADOR}">Personalizar e ver como fica</a>` : `<button class="botao rose" disabled style="opacity:.55;cursor:not-allowed">Adicionar ao carrinho</button>`) +
+    `<a class="botao zap" href="${zapUrl(`Olá! Tenho interesse no produto "${p.nome}" (${brl(p.preco)}) que vi no site.`)}" target="_blank" rel="noopener">Pedir pelo WhatsApp</a>`;
+  $('#janela').showModal();
+}
+$('#jFechar').onclick = () => $('#janela').close();
+$('#janela').addEventListener('click', (e) => { if (e.target.id === 'janela') e.target.close(); });
+
+document.querySelectorAll('[data-zap]').forEach(a => { a.href = zapUrl(a.dataset.zap); a.target = '_blank'; a.rel = 'noopener'; });
+document.querySelectorAll('footer [data-cat]').forEach(a => a.addEventListener('click', () => { filtro.cat = a.dataset.cat; filtro.momento = null; filtro.colecao = null; montarMomentos(); montarProdutos(); }));
+document.querySelectorAll('[data-colecao]').forEach(b => b.onclick = () => {
+  const c = b.dataset.colecao;
+  if (c === 'fe') { filtro.colecao = 'fe'; filtro.momento = null; filtro.cat = 'todos'; montarMomentos(); montarProdutos(); $('#presentes').scrollIntoView({ behavior: 'smooth' }); }
+  else window.open(zapUrl(c === 'sousa' ? 'Olá! Quero saber da coleção Sousa, Cidade dos Dinossauros.' : 'Olá! Quero saber da linha gospel streetwear.'), '_blank', 'noopener');
+});
+$('#ano').textContent = new Date().getFullYear();
+montarMomentos();
+montarProdutos();
+</script>
+</body>
+</html>

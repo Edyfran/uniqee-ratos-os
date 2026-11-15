@@ -32,6 +32,13 @@ dos dados dele (pedido ao suporte, LGPD).
   Clientes com datas que importam (lembrete de recompra), orçamento com PDF e link de aprovação e
   pagamento, quadro de produção (Arte, Aprovação, Impressão, Acabamento, Embalado, Enviado).
 
+- **Cores da loja (2026-11-15):** a loja nova usa a paleta da loja atual (rosé #c57e84, marrom café
+  #5e5045, creme #f3ebe2, cinza-azulado #aeb7be, petróleo #457981, azul-noite #0b1220, verde-água
+  #0d9488 nos preços). O guia da marca da raiz não muda: continua valendo pras outras peças.
+- **Sem CNPJ (2026-11-15):** a Uniqee não tem CNPJ. A loja atual mostra no rodapé, como "CNPJ", um
+  número de 11 dígitos (tamanho de CPF). Decisão do Edyfran: por enquanto a loja nova fica no nome
+  dele (pessoa física); a conversa com contador ou advogado continua pendente.
+
 ## Etapas
 0. Preparação · 1. Provador (caneca e camiseta) · 2. Visual da loja · 3. Compra funcionando ·
 4. Painel · 5. Migração e ensaio · 6. Virada do domínio (de preferência depois do Natal, em janeiro).
