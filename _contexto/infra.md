@@ -8,6 +8,7 @@
 | o quê | onde mora (serviço) | endereço | quem acessa e como | observações |
 |---|---|---|---|---|
 | Loja da Uniqee | plataforma Brinderoz | uniqeepersonalizados.shop | Edyfran, pelo painel do Brinderoz | imagens servidas por bdz.brinderozerp.com.br |
+| Loja própria da Uniqee (teste) | Publicados da Ratoeira (Docker com o servidor da loja), pasta `playground/uniqee-loja/` na raiz da área | apps.srv2142624.hstgr.cloud/uniqee-loja/ (painel em /painel/) | quem tem login na Ratoeira; senha do painel no `.env` da pasta | provisório até ir pra Cloudflare do Edyfran (2026-11-16) |
 | Domínio do PreçoArte | Hostinger (registro) | precoarte.com.br | Edyfran, conta Hostinger | DNS apontado pra Cloudflare |
 | DNS e página do PreçoArte | Cloudflare (Worker "precoarte") | precoarte.com.br e www | Edyfran, conta Cloudflare | a internet de casa não alcança os IPs da zona; conferir pelo endereço workers.dev |
 | Serviço de chaves do PreçoArte | Cloudflare Worker | rotas /ativar, /admin/nova, /admin/painel | Edyfran, pelo painel /admin com senha | recebe webhook da Kiwify e manda email pelo Resend |
