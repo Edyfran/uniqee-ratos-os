@@ -1,0 +1,4 @@
+.env
+worker/wrangler.toml
+worker/.wrangler/
+node_modules/
