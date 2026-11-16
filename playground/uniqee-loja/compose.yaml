@@ -1,0 +1,13 @@
+services:
+  web:
+    build:
+      context: ../../projetos/loja-uniqee
+      dockerfile: ../../playground/uniqee-loja/Dockerfile
+    ports: ["127.0.0.1:20140:3000"]
+    labels: {ratoeira.play: "uniqee-loja"}
+    env_file: .env
+    volumes: ["dados:/dados"]
+    mem_limit: 1g
+    restart: unless-stopped
+volumes:
+  dados:
