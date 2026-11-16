@@ -1,7 +1,7 @@
 // Loja Uniqee: páginas, carrinho, finalização, pedido e orçamento.
 // Pagamento (Mercado Pago) e frete (Melhor Envio) estão simulados até as contas serem ligadas.
 (function () {
-  const { CONFIG, PRODUTOS, MOMENTOS, CATEGORIAS, COLECOES } = window.UNIQEE;
+  const { CONFIG, PRODUTOS, MOMENTOS, CATEGORIAS, COLECOES, etapasDo } = window.UNIQEE;
   const app = document.getElementById('app');
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -9,6 +9,27 @@
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const zapUrl = (msg) => `https://wa.me/${CONFIG.zap}?text=${encodeURIComponent(msg)}`;
   const produto = (id) => PRODUTOS.find(p => p.id === id);
+  // foto do produto: as da loja ficam em img/; as cadastradas pelo painel vêm do servidor
+  const foto = (img) => /^(\/|https?:|data:)/.test(img || '') ? img : 'img/' + img;
+
+  // ---------- servidor (Cloudflare). Sem ele, como na prévia da Ratoeira, a loja usa js/dados.js ----------
+  let servidor = false;
+  async function api(caminho, opcoes = {}) {
+    const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), opcoes.espera || 8000);
+    try {
+      const r = await fetch(caminho, { ...opcoes, signal: ctl.signal, headers: opcoes.body ? { 'content-type': 'application/json' } : {} });
+      const dados = await r.json().catch(() => null);
+      return { ok: r.ok && !!dados, status: r.status, dados };
+    } catch { return { ok: false, status: 0, dados: null }; }
+    finally { clearTimeout(t); }
+  }
+  async function carregarCatalogo() {
+    if (window.origin === 'null' || location.protocol === 'file:') return; // prévia sem servidor
+    const r = await api('/api/produtos', { espera: 4000 });
+    if (!r.ok || !Array.isArray(r.dados) || !r.dados.length) return;
+    servidor = true;
+    PRODUTOS.splice(0, PRODUTOS.length, ...r.dados);
+  }
   const ICON = {
     zap: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .1-1.3c0-.1-.2-.2-.4-.3z"/></svg>',
     seta: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
@@ -114,7 +135,7 @@
     } else {
       box.innerHTML = carrinho.map(i => `
         <div class="item-car" data-chave="${i.chave}">
-          <img src="${i.mockup || 'img/' + i.img}" alt="">
+          <img src="${i.mockup || foto(i.img)}" alt="">
           <div>
             <div class="nome">${esc(i.nome)}</div>
             ${i.detalhes?.length ? `<div class="det">${i.detalhes.map(esc).join('<br>')}</div>` : ''}
@@ -142,7 +163,7 @@
   // ---------- pedaços de página ----------
   function cardProduto(p) {
     return `<a class="card" href="#/produto/${p.id}">
-      <div class="foto"><img src="img/${p.img}" alt="${esc(p.nome)}" loading="lazy">${p.etiqueta ? `<span class="etiqueta">${p.etiqueta}</span>` : ''}</div>
+      <div class="foto"><img src="${foto(p.img)}" alt="${esc(p.nome)}" loading="lazy">${p.etiqueta ? `<span class="etiqueta">${p.etiqueta}</span>` : ''}</div>
       <div class="info">
         <span class="nome">${esc(p.nome)}</span>
         <span class="preco"><b>${brl(p.preco)}</b><em>no Pix</em></span>
@@ -344,7 +365,7 @@
     app.innerHTML = `<div class="pagina"><div class="miolo">
       ${migalha(`<a href="#/presentes?cat=${p.cat}">${CATEGORIAS.find(c => c[0] === p.cat)[1]}</a>`, esc(p.nome))}
       <div class="produto">
-        <div class="galeria"><div class="principal"><img src="img/${p.img}" alt="${esc(p.nome)}">${p.etiqueta ? `<span class="etiqueta">${p.etiqueta}</span>` : ''}</div></div>
+        <div class="galeria"><div class="principal"><img src="${foto(p.img)}" alt="${esc(p.nome)}">${p.etiqueta ? `<span class="etiqueta">${p.etiqueta}</span>` : ''}</div></div>
         <div>
           <h1>${esc(p.nome)}</h1>
           <div class="preco-grande"><b>${brl(p.preco)}</b><small>no Pix · ${parcelamento(p.preco)}</small></div>
@@ -442,7 +463,7 @@
       <h1 class="titulo">O que você quer <span class="mao">personalizar?</span></h1>
       <p class="sub">Escolha a peça, envie a sua foto ou a sua arte e veja como fica antes de pedir.</p>
       <div class="produtos escolher-peca">${pecas.map(p => `<a class="card" href="#/personalizar/${p.id}">
-        <div class="foto"><img src="img/${p.img}" alt="${esc(p.nome)}" loading="lazy"></div>
+        <div class="foto"><img src="${foto(p.img)}" alt="${esc(p.nome)}" loading="lazy"></div>
         <div class="info">
           <span class="nome"><b>${NOME[p.provador]}</b></span>
           <span class="dica">${DICA[p.provador]}</span>
@@ -523,7 +544,7 @@
         </div>
         <aside class="caixa resumo-lateral">
           <h2>Resumo</h2>
-          ${carrinho.map(i => `<div class="item-mini"><img src="${i.mockup || 'img/' + i.img}" alt=""><span>${i.qtd}x ${esc(i.nome)}</span><b>${brl(i.preco * i.qtd)}</b></div>`).join('')}
+          ${carrinho.map(i => `<div class="item-mini"><img src="${i.mockup || foto(i.img)}" alt=""><span>${i.qtd}x ${esc(i.nome)}</span><b>${brl(i.preco * i.qtd)}</b></div>`).join('')}
           <div class="contas">
             <div><span>Produtos</span><span>${brl(subtotal())}</span></div>
             <div><span>Frete</span><span id="rFrete">informe o CEP</span></div>
@@ -576,8 +597,9 @@
     f.cep.addEventListener('input', () => { if (f.cep.value.replace(/\D/g, '').length === 8) buscarCep(); });
     if (salvo.cep) buscarCep();
 
-    f.onsubmit = (e) => {
+    f.onsubmit = async (e) => {
       e.preventDefault();
+      if ($('#bFinalizar').disabled) return;
       const erros = [];
       $$('.campo', f).forEach(c => c.classList.remove('invalido'));
       const marcar = (campo, msg) => { campo.classList.add('invalido'); erros.push(msg); };
@@ -603,6 +625,13 @@
         subtotal: subtotal(), total: subtotal() + frete.valor,
         etapa: f.pag.value === 'cartao' ? 1 : 0,
       };
+      if (servidor) {
+        const b = $('#bFinalizar'); b.disabled = true; b.textContent = 'Enviando o pedido…';
+        const r = await api('/api/pedidos', { method: 'POST', body: JSON.stringify(pedido), espera: 30000 });
+        b.disabled = false; b.textContent = 'Finalizar pedido';
+        if (!r.ok) { ef.hidden = false; ef.textContent = r.dados?.erro || 'Não consegui enviar o pedido. Confira a internet e tente de novo.'; return; }
+        Object.assign(pedido, r.dados, { online: true });
+      }
       const pedidos = guarda.ler('uniqee-pedidos', {});
       pedidos[pedido.codigo] = pedido;
       guarda.gravar('uniqee-pedidos', pedidos);
@@ -622,16 +651,6 @@
   }
 
   // pedido
-  const ETAPAS = [
-    ['Pedido recebido', 'Aguardando o pagamento.'],
-    ['Pagamento aprovado', 'A gente já recebeu. Obrigado!'],
-    ['Arte em criação', 'Estamos montando a arte do seu presente.'],
-    ['Arte aprovada', 'Você aprovou, e agora é com a gente.'],
-    ['Em produção', 'Seu presente está sendo feito.'],
-    ['Enviado', 'Já está a caminho.'],
-    ['Entregue', 'Chegou! Esperamos que emocione.'],
-  ];
-  const ETAPAS_RETIRADA = ETAPAS.slice(0, 5).concat([['Pronto pra retirar', 'Combine com a gente pelo WhatsApp.'], ['Entregue', 'Chegou! Esperamos que emocione.']]);
   function qrFalso(texto) {
     // desenho de QR só pra simulação; na versão final o QR vem do Mercado Pago
     let h = 0; for (const c of texto) h = (h * 31 + c.charCodeAt(0)) >>> 0;
@@ -643,14 +662,22 @@
     }
     return `<svg viewBox="-1 -1 ${n + 2} ${n + 2}" width="130" height="130" shape-rendering="crispEdges"><g fill="#0b1220">${cel.join('')}</g>${olho(0, 0)}${olho(n - 7, 0)}${olho(0, n - 7)}</svg>`;
   }
-  paginas.pedido = (q, codigo) => {
+  paginas.pedido = async (q, codigo) => {
     const pedidos = guarda.ler('uniqee-pedidos', {});
-    const p = pedidos[codigo];
+    let p = pedidos[codigo];
+    const email = q.email || p?.cliente.email;
+    if (servidor && email && (!p || p.online)) {
+      const hash = location.hash;
+      app.innerHTML = `<div class="pagina"><div class="miolo"><div class="vazio">Buscando o pedido…</div></div></div>`;
+      const r = await api(`/api/pedidos/${encodeURIComponent(codigo)}?email=${encodeURIComponent(email)}`);
+      if (location.hash !== hash) return;
+      if (r.ok) { p = pedidos[codigo] = { ...r.dados, online: true }; guarda.gravar('uniqee-pedidos', pedidos); }
+    }
     if (!p) {
       app.innerHTML = `<div class="pagina"><div class="miolo">${migalha('Pedido')}<div class="vazio">Não encontrei o pedido ${esc(codigo)} neste aparelho.<br><br><a href="#/acompanhar">Acompanhar por código e e-mail</a></div></div></div>`;
       return;
     }
-    const etapas = ['retirada', 'entrega-sousa'].includes(p.frete.id) ? ETAPAS_RETIRADA : ETAPAS;
+    const etapas = etapasDo(p);
     const precisaFotos = p.itens.some(i => (i.detalhes || []).some(d => /WhatsApp/.test(d)));
     const pixCodigo = `00020126580014BR.GOV.BCB.PIX0136simulacao-uniqee-${p.codigo}5204000053039865406${p.total.toFixed(2)}5802BR`;
     const primeiroNome = p.cliente.nome.split(' ')[0];
@@ -681,11 +708,11 @@
         <div class="caixa">
           <h2>Andamento</h2>
           <ol class="linha-tempo">${etapas.map(([t, d], i) => `<li class="${i < p.etapa ? 'feito' : i === p.etapa ? 'atual' : ''}"><span class="bola">${i < p.etapa ? ICON.ok.replace('<svg', '<svg width="14" height="14"') : ''}</span><div><b>${t}</b>${i === p.etapa ? `<small>${d}</small>` : ''}</div></li>`).join('')}</ol>
-          ${p.etapa > 0 && p.etapa < etapas.length - 1 ? `<p class="nota simulacao" style="margin:4px 0 0">Simulação: <button class="botao leve" id="avancar" style="padding:0">avançar pra próxima etapa</button>. Na loja de verdade, quem avança é a Uniqee, pelo painel.</p>` : ''}
+          ${!p.online && p.etapa > 0 && p.etapa < etapas.length - 1 ? `<p class="nota simulacao" style="margin:4px 0 0">Simulação: <button class="botao leve" id="avancar" style="padding:0">avançar pra próxima etapa</button>. Na loja de verdade, quem avança é a Uniqee, pelo painel.</p>` : ''}
         </div>
         <div class="caixa resumo-lateral">
           <h2>Itens</h2>
-          ${p.itens.map(i => `<div class="item-mini"><img src="${i.mockup || 'img/' + i.img}" alt=""><span>${i.qtd}x ${esc(i.nome)}${i.detalhes?.length ? `<br><small style="color:var(--tinta-2)">${i.detalhes.map(esc).join(' · ')}</small>` : ''}</span><b>${brl(i.preco * i.qtd)}</b></div>`).join('')}
+          ${p.itens.map(i => `<div class="item-mini"><img src="${i.mockup || foto(i.img)}" alt=""><span>${i.qtd}x ${esc(i.nome)}${i.detalhes?.length ? `<br><small style="color:var(--tinta-2)">${i.detalhes.map(esc).join(' · ')}</small>` : ''}</span><b>${brl(i.preco * i.qtd)}</b></div>`).join('')}
           <div class="contas">
             <div><span>Produtos</span><span>${brl(p.subtotal)}</span></div>
             <div><span>${esc(p.frete.nome)}</span><span>${p.frete.valor ? brl(p.frete.valor) : 'Grátis'}</span></div>
@@ -697,11 +724,15 @@
       </div>
     </div></div>`;
     const salvar = () => { pedidos[p.codigo] = p; guarda.gravar('uniqee-pedidos', pedidos); paginas.pedido(q, codigo); };
+    const simularNoServidor = async () => {
+      const r = await api(`/api/pedidos/${encodeURIComponent(p.codigo)}/simular-pagamento?email=${encodeURIComponent(p.cliente.email)}`, { method: 'POST' });
+      if (r.ok) { Object.assign(p, r.dados); salvar(); } else avisar('Não consegui falar com a loja. Tente de novo.');
+    };
     $('#copiarPix')?.addEventListener('click', async () => {
       try { await navigator.clipboard.writeText(pixCodigo); avisar('Código copiado.'); }
       catch { const r = document.createRange(); r.selectNodeContents($('#pixCod')); getSelection().removeAllRanges(); getSelection().addRange(r); avisar('Selecionei o código: é só copiar.'); }
     });
-    $('#simularPago')?.addEventListener('click', () => { p.etapa = 1; salvar(); });
+    $('#simularPago')?.addEventListener('click', () => { if (p.online) simularNoServidor(); else { p.etapa = 1; salvar(); } });
     $('#avancar')?.addEventListener('click', () => { p.etapa++; salvar(); });
   };
 
@@ -717,11 +748,12 @@
         <button class="botao rose cheio-largo">Ver andamento</button>
       </form>
     </div></div>`;
-    $('#fAcomp').onsubmit = (e) => {
+    $('#fAcomp').onsubmit = async (e) => {
       e.preventDefault();
       const cod = e.target.cod.value.trim().toUpperCase(), email = e.target.email.value.trim().toLowerCase();
       const p = guarda.ler('uniqee-pedidos', {})[cod];
-      if (p && p.cliente.email.toLowerCase() === email) location.hash = '#/pedido/' + cod;
+      if (servidor && (await api(`/api/pedidos/${encodeURIComponent(cod)}?email=${encodeURIComponent(email)}`)).ok) location.hash = `#/pedido/${cod}?email=${encodeURIComponent(email)}`;
+      else if (p && p.cliente.email.toLowerCase() === email) location.hash = '#/pedido/' + cod;
       else { $('#eAcomp').hidden = false; $('#eAcomp').textContent = 'Não achei esse pedido com esse e-mail. Confira os dados ou chame a gente no WhatsApp.'; }
     };
   };
@@ -885,5 +917,5 @@
   $$('[data-zap]').forEach(a => { a.href = zapUrl(a.dataset.zap); a.target = '_blank'; a.rel = 'noopener'; });
   $('#ano').textContent = new Date().getFullYear();
   desenharGaveta();
-  rota();
+  carregarCatalogo().finally(rota);
 })();

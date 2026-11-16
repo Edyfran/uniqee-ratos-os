@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0b1220">
+<title>Painel · Uniqee</title>
+<link rel="icon" href="../img/logo-uniqee.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Radio+Canada+Big:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../estilo.css">
+<link rel="stylesheet" href="painel.css">
+</head>
+<body>
+
+<header class="pn-topo" id="topo" hidden>
+  <div class="pn-miolo">
+    <a class="pn-marca" href="#/pedidos"><img src="../img/logo-uniqee.png" alt=""><span>Painel</span></a>
+    <nav class="pn-abas" aria-label="Seções">
+      <a href="#/pedidos" data-aba="pedidos">Pedidos</a>
+      <a href="#/produtos" data-aba="produtos">Produtos</a>
+    </nav>
+    <div class="pn-acoes">
+      <a class="pn-link" href="../" target="_blank" rel="noopener">Ver loja</a>
+      <button class="pn-link" id="sair">Sair</button>
+    </div>
+  </div>
+</header>
+
+<main id="app" class="pn-miolo"></main>
+<div class="pn-toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="../js/dados.js"></script>
+<script src="painel.js"></script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+.wrangler/
+.dev.vars
+semente.sql
+# a raiz ignora tudo que não está na lista dela; estes dois precisam subir
+!schema.sql
+!semente.mjs

@@ -116,5 +116,19 @@ window.UNIQEE = (function () {
     gospel: { nome: '> gospel_streetwear', desc: 'Fé em linha de código. Oversized, preta, urbana.', img: 'colecao-gospel.png', alt: 'Camiseta preta com a estampa Jesus Reina', classe: 'gospel' },
   };
 
-  return { CONFIG, PRODUTOS, MOMENTOS, CATEGORIAS, COLECOES };
+  // etapas do pedido: o cliente vê na página do pedido, a Uniqee avança pelo painel
+  const ETAPAS = [
+    ['Pedido recebido', 'Aguardando o pagamento.'],
+    ['Pagamento aprovado', 'A gente já recebeu. Obrigado!'],
+    ['Arte em criação', 'Estamos montando a arte do seu presente.'],
+    ['Arte aprovada', 'Você aprovou, e agora é com a gente.'],
+    ['Em produção', 'Seu presente está sendo feito.'],
+    ['Enviado', 'Já está a caminho.'],
+    ['Entregue', 'Chegou! Esperamos que emocione.'],
+  ];
+  const ETAPAS_RETIRADA = ETAPAS.slice(0, 5).concat([['Pronto pra retirar', 'Combine com a gente pelo WhatsApp.'], ['Entregue', 'Chegou! Esperamos que emocione.']]);
+  // retirada e entrega em Sousa não passam pelos Correios
+  const etapasDo = (pedido) => ['retirada', 'entrega-sousa'].includes(pedido.frete?.id) ? ETAPAS_RETIRADA : ETAPAS;
+
+  return { CONFIG, PRODUTOS, MOMENTOS, CATEGORIAS, COLECOES, ETAPAS, etapasDo };
 })();

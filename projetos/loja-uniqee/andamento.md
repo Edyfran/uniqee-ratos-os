@@ -1,11 +1,14 @@
 # Andamento · Loja Uniqee
 
-## Onde está (2026-11-15)
-Estrutura completa da loja (lado do cliente) pronta em `loja/index.html`, com pagamento e frete simulados.
-Provador integrado (`loja/js/provador.js`): caneca 3D, azulejo e camiseta no estilo Montink; a pasta `provador/` é a versão 1 avulsa.
-Próximo passo: o Edyfran revisar a loja e listar os ajustes.
+## Onde está (2026-11-16)
+Loja (lado do cliente) pronta em `loja/index.html`, com pagamento e frete simulados.
+Painel de gestão, primeira parte, em `loja/painel/`: entrar com senha, pedidos (lista, detalhe com mockups, avançar etapa, anotações) e produtos (cadastrar com foto, editar, esconder, apagar).
+Servidor em `servidor/` (Cloudflare Worker + banco D1 + arquivos R2): a loja lê os produtos e grava os pedidos nele; sem servidor (prévia da Ratoeira), a loja usa `loja/js/dados.js`.
+Rodar aqui na VPS: `cd servidor && npm run banco` (primeira vez) e `npm run dev` (abre em 127.0.0.1:8787; senha do painel no `.dev.vars`, fora do git). Prints do painel em `prints/`.
+Próximo passo: o Edyfran ver o painel e dizer o que falta; depois, clientes, orçamentos e financeiro no painel, e a compra de verdade (etapa 3).
 
 ## Pendências
+- [ ] Modelos das coleções Sousa (brasão da pegada, T-Rex Doomsday) e Gospel: nome, foto, preço e tamanhos de cada camisa. A Gospel está vazia e mostra "modelos chegando".
 - [ ] Edyfran navegar pela loja inteira e listar os ajustes (textos, fotos, ordem, opções).
 - [ ] Revisar com contador ou advogado os textos de trocas, privacidade e termos (estão como rascunho).
 - [ ] Confirmar opções dos produtos (tamanhos da camisa, acabamento da caneca, cores) que não deu pra ler do Brinderoz.
@@ -14,9 +17,13 @@ Próximo passo: o Edyfran revisar a loja e listar os ajustes.
 - [ ] Criar conta de vendedor no Melhor Envio e conferir se o Mercado Pago está liberado pra receber.
 - [ ] Fotos das peças lisas (ou gerar).
 - [ ] Prints das telas do Brinderoz que o Edyfran usa e pedido de exportação dos dados.
+- [ ] Painel: entrada por Face ID (passkey) no lugar da senha; clientes, orçamentos com PDF, estoque e financeiro.
+- [ ] Ver o painel funcionando: precisa de um link de teste (publicar só com o ok do Edyfran) ou da conta da Cloudflare.
 - [ ] Decidir se o custo vem do PreçoArte digitado à mão ou importado.
 
 ## Feito
+- 2026-11-16: servidor da loja (Worker + D1 + R2) e painel, primeira parte: entrada com senha, pedidos com etapa que o cliente vê, produtos com foto e "como se vende" (pronto, provador, WhatsApp). Testado de ponta a ponta: compra na loja, pedido no painel, etapa avançada aparece pro cliente, produto novo aparece na coleção, escondido some.
+- 2026-11-15: todo card de coleção abre a página da coleção com os modelos (antes, Sousa e Gospel iam pro WhatsApp); Luan Santana entrou na coleção Sousa. Botão "Quero personalizar o meu" (abertura, menu Personalize e produtos prontos) leva à escolha da peça (caneca, azulejo, camisa) e daí ao provador.
 - 2026-11-15: aviso de pouco contraste no provador (texto com cor parecida com o que está atrás; imagem com cor parecida com a da peça). Corrigida a foto da peça que não ficava parada ao rolar o provador no computador.
 - 2026-11-15: decisões aplicadas no código: azulejo 15x15 a R$ 35,00; camisa de poliéster só branca (foto nova, sem miniaturas de cor); 4 camisetas com personagem ou pessoa famosa e a coleção Geek; FAQ, termos e aceite do provador sem a frase de que personagem não pode ser impresso.
 - 2026-11-15: costas da camiseta com preço: pequena (28 x 10 cm) + R$ 15,00 e grande (28 x 35 cm) + R$ 25,00. Conta: filme DTF 30 x 100 cm a R$ 40 (R$ 0,40 por cm de altura), custo R$ 4 e R$ 14. Decidido pelo Edyfran.

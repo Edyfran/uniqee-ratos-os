@@ -1,0 +1,13 @@
+{
+  "name": "uniqee-loja",
+  "version": "1.0.0",
+  "description": "Servidor da loja Uniqee (Cloudflare Worker + D1 + R2)",
+  "scripts": {
+    "dev": "wrangler dev --ip 127.0.0.1 --port 8787",
+    "banco": "wrangler d1 execute uniqee-loja --local --file=schema.sql && node semente.mjs && wrangler d1 execute uniqee-loja --local --file=semente.sql"
+  },
+  "devDependencies": {
+    "wrangler": "^4.162.0"
+  },
+  "private": true
+}
