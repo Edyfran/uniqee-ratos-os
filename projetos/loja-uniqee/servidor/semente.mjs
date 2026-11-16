@@ -9,7 +9,9 @@ const { PRODUTOS } = contexto.window.UNIQEE;
 
 const texto = (s) => `'${String(s).replace(/'/g, "''")}'`;
 const agora = new Date().toISOString();
+// só na primeira vez: produto apagado no painel não volta quando o servidor reinicia
 const linhas = PRODUTOS.map(({ id, ...dados }, i) =>
-  `INSERT OR IGNORE INTO produtos (id, dados, ativo, ordem, atualizado) VALUES (${texto(id)}, ${texto(JSON.stringify(dados))}, 1, ${i + 1}, ${texto(agora)});`);
+  `INSERT OR IGNORE INTO produtos (id, dados, ativo, ordem, atualizado) SELECT ${texto(id)}, ${texto(JSON.stringify(dados))}, 1, ${i + 1}, ${texto(agora)} WHERE NOT EXISTS (SELECT 1 FROM semeado);`);
+linhas.push(`INSERT INTO semeado (quando) SELECT ${texto(agora)} WHERE NOT EXISTS (SELECT 1 FROM semeado);`);
 writeFileSync(new URL('./semente.sql', import.meta.url), linhas.join('\n') + '\n');
-console.log(`${linhas.length} produtos em semente.sql`);
+console.log(`${PRODUTOS.length} produtos em semente.sql`);

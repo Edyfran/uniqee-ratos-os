@@ -19,3 +19,6 @@ CREATE TABLE IF NOT EXISTS pedidos (
   atualizado TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS pedidos_criado ON pedidos (criado DESC);
+
+-- marca que os produtos iniciais (semente.mjs) já entraram: depois disso, quem manda é o painel
+CREATE TABLE IF NOT EXISTS semeado (quando TEXT NOT NULL);

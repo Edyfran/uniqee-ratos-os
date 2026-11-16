@@ -5,6 +5,7 @@ Loja (lado do cliente) pronta em `loja/index.html`, com pagamento e frete simula
 Painel de gestão, primeira parte, em `loja/painel/`: entrar com senha, pedidos (lista, detalhe com mockups, avançar etapa, anotações) e produtos (cadastrar com foto, editar, esconder, apagar).
 Servidor em `servidor/` (Cloudflare Worker + banco D1 + arquivos R2): a loja lê os produtos e grava os pedidos nele; sem servidor (prévia da Ratoeira), a loja usa `loja/js/dados.js`.
 Rodar aqui na VPS: `cd servidor && npm run banco` (primeira vez) e `npm run dev` (abre em 127.0.0.1:8787; senha do painel no `.dev.vars`, fora do git). Prints do painel em `prints/`.
+Link de teste (só com login da Ratoeira): https://apps.srv2142624.hstgr.cloud/uniqee-loja/ e o painel em `/uniqee-loja/painel/`. Roda no Docker a partir de `../../playground/uniqee-loja/` (pasta de publicados da área, fora deste repositório); senha do painel no `.env` de lá. Depois de mexer no código: `sudo docker compose -p play-uniqee-loja up -d --build` naquela pasta.
 Próximo passo: o Edyfran ver o painel e dizer o que falta; depois, clientes, orçamentos e financeiro no painel, e a compra de verdade (etapa 3).
 
 ## Pendências
@@ -18,7 +19,7 @@ Próximo passo: o Edyfran ver o painel e dizer o que falta; depois, clientes, or
 - [ ] Fotos das peças lisas (ou gerar).
 - [ ] Prints das telas do Brinderoz que o Edyfran usa e pedido de exportação dos dados.
 - [ ] Painel: entrada por Face ID (passkey) no lugar da senha; clientes, orçamentos com PDF, estoque e financeiro.
-- [ ] Ver o painel funcionando: precisa de um link de teste (publicar só com o ok do Edyfran) ou da conta da Cloudflare.
+- [ ] Levar a loja pra conta da Cloudflare do Edyfran (o link de teste é provisório).
 - [ ] Decidir se o custo vem do PreçoArte digitado à mão ou importado.
 
 ## Feito

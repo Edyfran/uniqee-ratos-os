@@ -37,7 +37,7 @@ async function guardarDataUrl(env, prefixo, dataUrl) {
   const bytes = Uint8Array.from(atob(m[2]), c => c.charCodeAt(0));
   const chave = `${prefixo}-${aleatorio()}.${EXTENSOES[m[1]]}`;
   await env.ARQUIVOS.put(chave, bytes, { httpMetadata: { contentType: m[1] } });
-  return '/api/arquivos/' + chave;
+  return 'api/arquivos/' + chave;
 }
 
 // ---------- produtos ----------
@@ -155,7 +155,7 @@ async function rotasPainel(req, env, url, partes) {
     if (bytes.byteLength > 8 * 1024 * 1024) return erro('A foto passou de 8 MB. Envie uma menor.');
     const chave = `produtos/${aleatorio()}.${EXTENSOES[tipo]}`;
     await env.ARQUIVOS.put(chave, bytes, { httpMetadata: { contentType: tipo } });
-    return json({ img: '/api/arquivos/' + chave });
+    return json({ img: 'api/arquivos/' + chave });
   }
 
   if (recurso === 'pedidos') {
@@ -188,7 +188,16 @@ async function rotasPainel(req, env, url, partes) {
 export default {
   async fetch(req, env) {
     const url = new URL(req.url);
-    const partes = url.pathname.split('/'); // ['', 'api', ...]
+    // atrás de um proxy (link de teste da Ratoeira) o endereço chega com um caminho na frente, ex.: /uniqee-loja/
+    const prefixo = (req.headers.get('x-forwarded-prefix') || '').replace(/\/$/, '');
+    let caminho = url.pathname;
+    if (prefixo && caminho === prefixo) return new Response(null, { status: 301, headers: { location: prefixo + '/' + url.search } });
+    if (prefixo && caminho.startsWith(prefixo + '/')) caminho = caminho.slice(prefixo.length);
+    if (!caminho.startsWith('/api/')) {
+      const sem = new URL(url); sem.pathname = caminho;
+      return env.ASSETS.fetch(new Request(sem, req));
+    }
+    const partes = caminho.split('/'); // ['', 'api', ...]
     try {
       if (partes[2] === 'admin') return await rotasPainel(req, env, url, partes);
 

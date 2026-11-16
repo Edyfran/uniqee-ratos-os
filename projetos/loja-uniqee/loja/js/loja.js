@@ -9,8 +9,8 @@
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const zapUrl = (msg) => `https://wa.me/${CONFIG.zap}?text=${encodeURIComponent(msg)}`;
   const produto = (id) => PRODUTOS.find(p => p.id === id);
-  // foto do produto: as da loja ficam em img/; as cadastradas pelo painel vêm do servidor
-  const foto = (img) => /^(\/|https?:|data:)/.test(img || '') ? img : 'img/' + img;
+  // foto do produto: as da loja ficam em img/; as cadastradas pelo painel vêm do servidor (api/arquivos/...)
+  const foto = (img) => /^(\/|https?:|data:|api\/)/.test(img || '') ? img : 'img/' + img;
 
   // ---------- servidor (Cloudflare). Sem ele, como na prévia da Ratoeira, a loja usa js/dados.js ----------
   let servidor = false;
@@ -25,7 +25,7 @@
   }
   async function carregarCatalogo() {
     if (window.origin === 'null' || location.protocol === 'file:') return; // prévia sem servidor
-    const r = await api('/api/produtos', { espera: 4000 });
+    const r = await api('api/produtos', { espera: 4000 });
     if (!r.ok || !Array.isArray(r.dados) || !r.dados.length) return;
     servidor = true;
     PRODUTOS.splice(0, PRODUTOS.length, ...r.dados);
@@ -627,7 +627,7 @@
       };
       if (servidor) {
         const b = $('#bFinalizar'); b.disabled = true; b.textContent = 'Enviando o pedido…';
-        const r = await api('/api/pedidos', { method: 'POST', body: JSON.stringify(pedido), espera: 30000 });
+        const r = await api('api/pedidos', { method: 'POST', body: JSON.stringify(pedido), espera: 30000 });
         b.disabled = false; b.textContent = 'Finalizar pedido';
         if (!r.ok) { ef.hidden = false; ef.textContent = r.dados?.erro || 'Não consegui enviar o pedido. Confira a internet e tente de novo.'; return; }
         Object.assign(pedido, r.dados, { online: true });
@@ -669,7 +669,7 @@
     if (servidor && email && (!p || p.online)) {
       const hash = location.hash;
       app.innerHTML = `<div class="pagina"><div class="miolo"><div class="vazio">Buscando o pedido…</div></div></div>`;
-      const r = await api(`/api/pedidos/${encodeURIComponent(codigo)}?email=${encodeURIComponent(email)}`);
+      const r = await api(`api/pedidos/${encodeURIComponent(codigo)}?email=${encodeURIComponent(email)}`);
       if (location.hash !== hash) return;
       if (r.ok) { p = pedidos[codigo] = { ...r.dados, online: true }; guarda.gravar('uniqee-pedidos', pedidos); }
     }
@@ -725,7 +725,7 @@
     </div></div>`;
     const salvar = () => { pedidos[p.codigo] = p; guarda.gravar('uniqee-pedidos', pedidos); paginas.pedido(q, codigo); };
     const simularNoServidor = async () => {
-      const r = await api(`/api/pedidos/${encodeURIComponent(p.codigo)}/simular-pagamento?email=${encodeURIComponent(p.cliente.email)}`, { method: 'POST' });
+      const r = await api(`api/pedidos/${encodeURIComponent(p.codigo)}/simular-pagamento?email=${encodeURIComponent(p.cliente.email)}`, { method: 'POST' });
       if (r.ok) { Object.assign(p, r.dados); salvar(); } else avisar('Não consegui falar com a loja. Tente de novo.');
     };
     $('#copiarPix')?.addEventListener('click', async () => {
@@ -752,7 +752,7 @@
       e.preventDefault();
       const cod = e.target.cod.value.trim().toUpperCase(), email = e.target.email.value.trim().toLowerCase();
       const p = guarda.ler('uniqee-pedidos', {})[cod];
-      if (servidor && (await api(`/api/pedidos/${encodeURIComponent(cod)}?email=${encodeURIComponent(email)}`)).ok) location.hash = `#/pedido/${cod}?email=${encodeURIComponent(email)}`;
+      if (servidor && (await api(`api/pedidos/${encodeURIComponent(cod)}?email=${encodeURIComponent(email)}`)).ok) location.hash = `#/pedido/${cod}?email=${encodeURIComponent(email)}`;
       else if (p && p.cliente.email.toLowerCase() === email) location.hash = '#/pedido/' + cod;
       else { $('#eAcomp').hidden = false; $('#eAcomp').textContent = 'Não achei esse pedido com esse e-mail. Confira os dados ou chame a gente no WhatsApp.'; }
     };

@@ -7,7 +7,7 @@
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
   const brl = (v) => (+v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const foto = (img) => /^(\/|https?:|data:)/.test(img || '') ? img : '../img/' + img;
+  const foto = (img) => /^(\/|https?:|data:)/.test(img || '') ? img : /^api\//.test(img || '') ? '../' + img : '../img/' + img;
   const data = (iso, hora = true) => new Date(iso).toLocaleString('pt-BR', hora ? { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' } : { day: '2-digit', month: '2-digit', year: 'numeric' });
   const TIPOS_PROVADOR = [['caneca', 'Caneca (3D)'], ['azulejo', 'Azulejo'], ['camiseta', 'Camiseta']];
 
@@ -20,7 +20,7 @@
     const ehArquivo = corpo instanceof Blob;
     let r;
     try {
-      r = await fetch('/api/admin/' + caminho, {
+      r = await fetch('../api/admin/' + caminho, {
         method: opcoes.metodo || (corpo ? 'POST' : 'GET'), credentials: 'same-origin',
         headers: ehArquivo ? { 'content-type': corpo.type } : { 'content-type': 'application/json' },
         body: corpo === undefined ? undefined : ehArquivo ? corpo : JSON.stringify(corpo),
@@ -247,7 +247,7 @@
         const r = await api('foto', { corpo: await prepararFoto(arq) });
         img = r.img;
         caixa.querySelector('span').remove();
-        caixa.insertAdjacentHTML('afterbegin', `<img src="${esc(img)}" alt="">`);
+        caixa.insertAdjacentHTML('afterbegin', `<img src="${esc(foto(img))}" alt="">`);
       } catch (err) {
         caixa.querySelector('span').textContent = err.message === 'sessao' ? '' : err.message;
         if (img) caixa.insertAdjacentHTML('afterbegin', `<img src="${esc(foto(img))}" alt="">`);
