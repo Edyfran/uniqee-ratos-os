@@ -35,3 +35,4 @@ atendimento e orçamentos no WhatsApp · desenvolvimento do PreçoArte
 - **Preço ao cliente final (2026-11-12):** azulejo 15 x 15 cm R$ 35,00 · 20 x 20 cm R$ 45,00.
 - **Sousa-PB:** a Uniqee é de Sousa, a cidade dos dinossauros. Estampa com a cidade (pegada, Vale dos Dinossauros) vende ali; pro Brasil todo, o tema dinossauro entra como presente personalizado. (2026-11-15)
 - **Não tem CNPJ:** a Uniqee vende como pessoa física. A camisa de poliéster é só branca; camisa branca vai em sublimação ou DTF, conforme o tecido. Filme DTF 30 x 100 cm a R$ 40,00. (2026-11-15)
+- **Camiseta Doomsday ao cliente final (2026-11-16):** R$ 69,90, tamanhos P, M, G e GG.

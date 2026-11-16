@@ -6,8 +6,8 @@
 > Pendência que sai desta lista sai com motivo (feito, virou projeto, mandaram soltar), nunca em silêncio.
 
 ## Onde paramos
-Carrossel Doomsday com 10 slides pronto pra postar em 16/11/2026 (PNGs em
-`conteudo/carrosseis/doomsday-pedidos/instagram/`, legenda no `carousel-text.md`).
+Carrossel Doomsday com 10 slides agendado pra 16/11/2026 às 16h30 pelo app Conteúdo (peça 14).
+Landing page das camisetas Doomsday em `playground/camisas-doomsday/` (8 estampas, R$ 69,90), esperando o link de compra.
 Estampas novas pra camisa, todas com upscale pra DTF: T-Rex Doomsday Sousa (`conteudo/artes/trex-doomsday-sousa-*`),
 brasão da pegada (`conteudo/artes/brasao-pegada-sousa*`) e as 3 do Destino (`conteudo/artes/destino/`).
 Reels do presépio dourado (Natal) pronto pra postar; legendas em `conteudo/legendas/2026-11-12-presepio-dourado.md`.
@@ -32,9 +32,12 @@ https://apps.srv2142624.hstgr.cloud/uniqee-loja/ (painel em /painel/). Pendênci
 - Limpar a borda semitransparente do T-Rex Doomsday antes de mandar pro DTF. (2026-11-15)
 - Moletom do T-Rex: "Sousa · Cidade dos Dinossauros" aparece duas vezes nas costas; decidir a troca. (2026-11-15)
 - Montar o arquivo de impressão do texto dourado da camisa do brasão. (2026-11-15)
+- Pôr o link de compra na landing das camisetas (`LINK_COMPRA`). (2026-11-16)
+- Publicar a landing pela raiz da área (`/srv/ratoeira/areas/trabalho/playground/`); dentro deste sistema o link dá 404. (2026-11-16)
+- Decidir o dia do Reels do amigo secreto (o calendário marcava 16/11, junto com o carrossel). (2026-11-16)
 
 ## Quente agora
-- Carrossel Doomsday: postar seg 16/11/2026, responder quem comentar DOOM. Estreia 17/12; pedidos até 09/12.
+- Carrossel Doomsday: sai seg 16/11/2026 às 16h30; conferir no perfil e responder quem comentar DOOM. Estreia 17/12; pedidos até 09/12.
 - Reels do presépio dourado: postar e responder os números nos comentários (Natal).
 - Reels do azulejo com realidade aumentada (dia de postar a definir).
 - Loja própria: usar o link de teste e dizer os ajustes; próximo no painel: orçamentos com PDF, estoque e financeiro.

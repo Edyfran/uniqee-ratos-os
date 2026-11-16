@@ -12,7 +12,7 @@
 | WhatsApp | atendimento e orçamento com cliente | só você, na mão (dá pra ligar via WhatsApp Cloud API ou Z-API) | não ligada | 2026-11-08 |
 | Canva | artes e posts da Uniqee (tem brand kit da Uniqee) | MCP (conector do claude.ai) | ligada | 2026-11-08 |
 | Metricool | métricas e agendamento de posts | MCP (conector do claude.ai) | ligada, mas sem o Instagram conectado | 2026-11-08 |
-| Instagram | divulgação da Uniqee e do PreçoArte | Instagram Graph API (app claudecode-edy, usuário do sistema dm-automacao; chave `INSTAGRAM_TOKEN` nas chaves do app Conteúdo da Ratoeira, que lê os posts e números a cada hora) | ligada (leitura; publicar ainda não) | 2026-11-12 |
+| Instagram | divulgação da Uniqee e do PreçoArte | Instagram Graph API (app claudecode-edy, usuário do sistema dm-automacao; chave `INSTAGRAM_TOKEN` nas chaves do app Conteúdo da Ratoeira, que lê os posts e números a cada hora) | ligada: leitura e publicação pelo publicador do app Conteúdo (post entra como peça, depois preparar e confirmar) | 2026-11-16 |
 | ManyChat | resposta automática no Instagram ("comente PREÇO") | só você, na mão | não ligada | 2026-11-08 |
 | Kiwify | checkout do PreçoArte | webhook pro serviço de chaves na Cloudflare; o agente não alcança direto | não ligada | 2026-11-08 |
 | Mercado Pago | link de pagamento pra venda manual no WhatsApp | só você, na mão | não ligada | 2026-11-08 |
