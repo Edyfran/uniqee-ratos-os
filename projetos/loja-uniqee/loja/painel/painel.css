@@ -41,6 +41,18 @@ main.pn-miolo { padding-top: 20px; padding-bottom: 64px; }
 .pn-linha .fim { text-align: right; flex: none; }
 .pn-linha .fim b { color: var(--preco); display: block; }
 .pn-linha.oculto { opacity: .55; }
+.pn-inicial { width: 44px; height: 44px; border-radius: 50%; background: var(--rose-claro); color: var(--rose-2); display: grid; place-items: center; font-weight: 700; font-size: 18px; flex: none; }
+.pn-linha .fim small { display: block; }
+.pn-data { display: flex; gap: 12px; align-items: center; }
+.pn-data .dia { width: 48px; flex: none; text-align: center; background: var(--rose-claro); color: var(--rose-2); border-radius: 12px; padding: 4px 0; font-size: 12px; line-height: 1.2; text-transform: uppercase; }
+.pn-data .dia b { display: block; font-size: 20px; }
+.pn-data .meio { flex: 1; min-width: 0; text-decoration: none; color: inherit; }
+.pn-data .meio b, .pn-data .meio small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pn-data .meio small { color: var(--tinta-2); }
+.pn-data .botao { padding: 8px 14px; font-size: 14px; }
+.pn-opcao.pn-datas { grid-template-columns: 1fr 96px auto; }
+.pn-endereco { background: none; box-shadow: none; padding: 0; border-radius: 0; margin: 0 0 6px; }
+.pn-endereco summary { padding: 4px 0 10px; font-size: 14px; font-weight: 500; }
 
 .pn-etapa { display: inline-block; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: var(--rose-claro); color: var(--rose-2); white-space: nowrap; }
 .pn-etapa.e0 { background: #fdf3dc; color: #6b4e0c; }

@@ -1,4 +1,4 @@
-// Painel da Uniqee: pedidos (ver e avançar a etapa) e produtos (cadastrar, editar, esconder).
+// Painel da Uniqee: pedidos (ver e avançar a etapa), clientes (cadastro e datas que importam) e produtos.
 // Fala com a API do servidor em /api/admin; a sessão fica num cookie que o servidor cria ao entrar.
 (function () {
   const { MOMENTOS, CATEGORIAS, COLECOES, etapasDo } = window.UNIQEE;
@@ -10,6 +10,9 @@
   const foto = (img) => /^(\/|https?:|data:)/.test(img || '') ? img : /^api\//.test(img || '') ? '../' + img : '../img/' + img;
   const data = (iso, hora = true) => new Date(iso).toLocaleString('pt-BR', hora ? { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' } : { day: '2-digit', month: '2-digit', year: 'numeric' });
   const TIPOS_PROVADOR = [['caneca', 'Caneca (3D)'], ['azulejo', 'Azulejo'], ['camiseta', 'Camiseta']];
+  // link do WhatsApp com mensagem pronta; o número pode vir com ou sem o 55
+  const linkZap = (numero, msg) => { const n = String(numero || '').replace(/\D/g, '').replace(/^55(?=\d{10,11}$)/, ''); return n ? `https://wa.me/55${n}?text=${encodeURIComponent(msg)}` : ''; };
+  const primeiroNome = (nome) => String(nome || '').trim().split(/\s+/)[0];
 
   const toast = $('#toast');
   let tToast;
@@ -94,7 +97,7 @@
     try { p = await api('pedidos/' + encodeURIComponent(codigo)); } catch (e) { app.innerHTML = `<a class="pn-volta" href="#/pedidos">← Pedidos</a><div class="pn-vazio">${esc(e.message)}</div>`; return; }
     const etapas = etapasDo(p);
     const quando = Object.fromEntries((p.historico || []).map(h => [h.etapa, h.quando]));
-    const zap = String(p.cliente.zap || '').replace(/\D/g, '');
+    const zap = linkZap(p.cliente.zap, `Olá, ${primeiroNome(p.cliente.nome)}! Aqui é da Uniqee, sobre o pedido ${p.codigo}.`);
     const e = p.endereco || {};
     const ultima = p.etapa >= etapas.length - 1;
     app.innerHTML = `<a class="pn-volta" href="#/pedidos">← Pedidos</a>
@@ -121,7 +124,10 @@
             ${p.obs ? `<div><span>Recado do cliente:</span> ${esc(p.obs)}</div>` : ''}
             <div><span>Feito em:</span> ${data(p.data)}</div>
           </div>
-          ${zap ? `<a class="botao zap" style="margin-top:14px" href="https://wa.me/55${zap.replace(/^55(?=\d{10,11}$)/, '')}?text=${encodeURIComponent(`Olá, ${p.cliente.nome.split(' ')[0]}! Aqui é da Uniqee, sobre o pedido ${p.codigo}.`)}" target="_blank" rel="noopener">Chamar no WhatsApp</a>` : ''}
+          <div class="linha" style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+            ${zap ? `<a class="botao zap" href="${zap}" target="_blank" rel="noopener">Chamar no WhatsApp</a>` : ''}
+            ${p.clienteId ? `<a class="botao contorno" href="#/cliente/${p.clienteId}">Ficha do cliente</a>` : ''}
+          </div>
           </div>
         </div>
         <div style="display:grid;gap:14px">
@@ -144,6 +150,139 @@
     $('#avancar')?.addEventListener('click', () => mudar({ etapa: p.etapa + 1 }, `Pedido em: ${etapas[p.etapa + 1][0]}.`));
     $('#voltar')?.addEventListener('click', () => mudar({ etapa: p.etapa - 1 }, `Pedido voltou pra: ${etapas[p.etapa - 1][0]}.`));
     $('#salvarNotas').onclick = () => mudar({ notas: $('#notas').value }, 'Anotação salva.');
+  }
+
+  // ---------- clientes ----------
+  const ORIGENS = ['Loja', 'WhatsApp', 'Instagram', 'Indicação', 'Feira ou evento', 'Outro'];
+  let buscaClientes = '';
+  // próxima vez que o dia/mês cai, a partir de hoje
+  function proximaData(dia) {
+    const [d, m] = dia.split('/').map(Number);
+    const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+    let alvo = new Date(hoje.getFullYear(), m - 1, d);
+    if (alvo < hoje) alvo = new Date(hoje.getFullYear() + 1, m - 1, d);
+    return { quando: alvo, dias: Math.round((alvo - hoje) / 86400000) };
+  }
+  const emDias = (n) => n === 0 ? 'hoje' : n === 1 ? 'amanhã' : `em ${n} dias`;
+  const nomeData = (d) => [d.ocasiao, d.quem].filter(Boolean).join(' ');
+  const minuscula = (t) => t ? t[0].toLowerCase() + t.slice(1) : t;
+  const msgLembrete = (c, d) => `Olá, ${primeiroNome(c.nome)}! Aqui é da Uniqee. Passando pra lembrar que está chegando uma data especial: ${minuscula(nomeData(d)) || 'a data que você nos contou'}, em ${d.dia}. Se quiser preparar um presente personalizado, é só responder esta mensagem que a gente ajuda você a montar.`;
+
+  async function telaClientes() {
+    app.innerHTML = `<div class="pn-titulo"><h1>Clientes</h1></div><div class="pn-vazio">Carregando…</div>`;
+    let lista;
+    try { lista = await api('clientes'); } catch (e) { return falhou(e); }
+    const proximas = lista.flatMap(c => (c.datas || []).map(d => ({ c, d, ...proximaData(d.dia) }))).filter(x => x.dias <= 30).sort((a, b) => a.dias - b.dias);
+    const norm = (t) => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    app.innerHTML = `<div class="pn-titulo"><h1>Clientes</h1><span class="pn-selo">${lista.length}</span><a class="botao rose" href="#/cliente/novo">+ Novo cliente</a></div>
+      ${proximas.length ? `<div class="caixa" style="margin-bottom:14px"><h2>Datas nos próximos 30 dias</h2><div class="pn-lista">${proximas.map(({ c, d, dias }) => `
+        <div class="pn-data"><span class="dia"><b>${d.dia.slice(0, 2)}</b>${['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'][+d.dia.slice(3) - 1]}</span>
+          <a class="meio" href="#/cliente/${c.id}"><b>${esc(nomeData(d) || 'Data especial')}</b><small>${esc(c.nome)} · ${emDias(dias)}</small></a>
+          ${c.zap ? `<a class="botao zap" href="${linkZap(c.zap, msgLembrete(c, d))}" target="_blank" rel="noopener">Lembrar</a>` : ''}</div>`).join('')}</div></div>` : ''}
+      <input class="campo" id="busca" placeholder="Procurar por nome, WhatsApp, e-mail ou cidade" value="${esc(buscaClientes)}" style="margin-bottom:12px">
+      <div class="pn-lista" id="listaClientes"></div>`;
+    const desenhar = () => {
+      const t = norm(buscaClientes), tn = buscaClientes.replace(/\D/g, '');
+      const vistos = lista.filter(c => !t || norm(`${c.nome} ${c.email} ${c.endereco?.cidade}`).includes(t) || (tn.length >= 3 && c.zap.includes(tn)));
+      $('#listaClientes').innerHTML = vistos.length ? vistos.map(c => `<a class="pn-linha" href="#/cliente/${c.id}">
+        <span class="pn-inicial">${esc(primeiroNome(c.nome).slice(0, 1).toUpperCase())}</span>
+        <span class="meio"><b>${esc(c.nome)}</b><small>${[c.zap && formatarZap(c.zap), c.endereco?.cidade && `${c.endereco.cidade}/${c.endereco.uf}`].filter(Boolean).map(esc).join(' · ') || esc(c.email)}</small></span>
+        <span class="fim">${c.pedidos ? `<b>${brl(c.gasto)}</b><small style="color:var(--tinta-2);font-size:12px">${c.pedidos} pedido${c.pedidos > 1 ? 's' : ''}</small>` : `<span class="pn-selo">${esc(c.origem || 'Sem pedido')}</span>`}</span>
+      </a>`).join('') : `<div class="pn-vazio">${lista.length ? 'Ninguém com essa busca.' : 'Nenhum cliente ainda. Quem compra na loja entra aqui sozinho.'}</div>`;
+    };
+    $('#busca').oninput = (e) => { buscaClientes = e.target.value; desenhar(); };
+    desenhar();
+  }
+  const formatarZap = (z) => z.length === 11 ? `(${z.slice(0, 2)}) ${z.slice(2, 7)}-${z.slice(7)}` : z.length === 10 ? `(${z.slice(0, 2)}) ${z.slice(2, 6)}-${z.slice(6)}` : z;
+
+  async function telaCliente(id) {
+    const novo = id === 'novo';
+    let c = { nome: '', zap: '', email: '', cpf: '', origem: 'WhatsApp', endereco: {}, datas: [], notas: '', pedidos: [] };
+    if (!novo) {
+      app.innerHTML = `<div class="pn-vazio">Carregando…</div>`;
+      try { c = await api('clientes/' + encodeURIComponent(id)); }
+      catch (e) { app.innerHTML = `<a class="pn-volta" href="#/clientes">← Clientes</a><div class="pn-vazio">${esc(e.message)}</div>`; return; }
+    }
+    const e = c.endereco || {};
+    const pagos = c.pedidos.filter(p => p.etapa > 0);
+    const campo = (nome, rot, valor, extra = '') => `<div class="grupo"><label class="rot" for="${nome}">${rot}</label><input class="campo" id="${nome}" name="${nome}" value="${esc(valor)}" ${extra}></div>`;
+    const linhaData = (d = {}) => `<div class="pn-opcao pn-datas"><input class="campo" data-d="ocasiao" placeholder="Ex.: Aniversário da mãe" aria-label="Que data é" value="${esc(nomeData(d))}"><input class="campo" data-d="dia" placeholder="dia/mês" aria-label="Dia e mês" inputmode="numeric" maxlength="5" value="${esc(d.dia)}"><button type="button" class="botao leve" data-tirar aria-label="Tirar data">✕</button></div>`;
+    app.innerHTML = `<a class="pn-volta" href="#/clientes">← Clientes</a>
+      <div class="pn-titulo"><h1>${novo ? 'Novo cliente' : esc(c.nome)}</h1>${!novo && c.origem ? `<span class="pn-selo">${esc(c.origem)}</span>` : ''}</div>
+      <div class="pn-grade">
+        <form class="caixa" id="fCli" novalidate>
+          ${campo('nome', 'Nome', c.nome, 'autocomplete="off"')}
+          <div class="pn-duas">
+            ${campo('zap', 'WhatsApp com DDD', c.zap ? formatarZap(c.zap) : '', 'inputmode="tel"')}
+            ${campo('email', 'E-mail', c.email, 'type="email"')}
+            ${campo('cpf', 'CPF <small>opcional</small>', c.cpf, 'inputmode="numeric"')}
+            <div class="grupo"><label class="rot" for="origem">Como chegou</label><select class="campo" id="origem" name="origem">${ORIGENS.map(o => `<option ${c.origem === o ? 'selected' : ''}>${o}</option>`).join('')}</select></div>
+          </div>
+          <div class="grupo"><span class="rot">Datas que importam <small>a gente lembra 30 dias antes</small></span>
+            <div id="datas">${(c.datas.length ? c.datas : novo ? [{}] : []).map(linhaData).join('')}</div>
+            <button type="button" class="botao leve" id="maisData" style="padding:4px 0">+ Adicionar data</button></div>
+          <details class="pn-endereco" ${e.rua || e.cidade ? 'open' : ''}><summary class="rot" style="cursor:pointer">Endereço</summary>
+            <div class="pn-duas" style="margin-top:8px">
+              ${campo('cep', 'CEP', e.cep, 'inputmode="numeric"')}${campo('cidade', 'Cidade', e.cidade)}
+              ${campo('rua', 'Rua', e.rua)}${campo('numero', 'Número', e.numero)}
+              ${campo('bairro', 'Bairro', e.bairro)}${campo('uf', 'UF', e.uf, 'maxlength="2"')}
+            </div>${campo('complemento', 'Complemento', e.complemento)}
+          </details>
+          <div class="grupo"><label class="rot" for="notas">Anotações <small>gosto, tamanho, quem indicou…</small></label><textarea class="campo" id="notas" name="notas">${esc(c.notas)}</textarea></div>
+          <div class="pn-rodape">
+            <button class="botao rose">${novo ? 'Cadastrar cliente' : 'Salvar'}</button>
+            <p class="pn-erro" id="eCli" hidden></p>
+            ${novo ? '' : '<button type="button" class="botao perigo direita" id="bApagar">Apagar</button>'}
+          </div>
+        </form>
+        ${novo ? '' : `<div style="display:grid;gap:14px">
+          <div class="caixa"><h2>Pedidos</h2>
+            ${pagos.length ? `<p style="margin:0 0 10px">${pagos.length} pedido${pagos.length > 1 ? 's' : ''} · <b style="color:var(--preco)">${brl(pagos.reduce((s, p) => s + p.total, 0))}</b></p>` : ''}
+            <div class="pn-lista">${c.pedidos.length ? c.pedidos.map(p => `<a class="pn-linha" href="#/pedido/${p.codigo}"><span class="meio"><b>${esc(p.codigo)}</b><small>${data(p.criado, false)}</small></span><span class="fim"><b>${brl(p.total)}</b><span class="pn-etapa ${p.etapa === 0 ? 'e0' : ''}">${etapaNome({ frete: {} }, p.etapa)}</span></span></a>`).join('') : '<p class="sub" style="margin:0">Nenhum pedido pela loja ainda.</p>'}</div>
+          </div>
+          ${c.zap ? `<a class="botao zap" href="${linkZap(c.zap, `Olá, ${primeiroNome(c.nome)}! Aqui é da Uniqee.`)}" target="_blank" rel="noopener">Chamar no WhatsApp</a>` : ''}
+        </div>`}
+      </div>`;
+    const f = $('#fCli');
+    $('#maisData').onclick = () => $('#datas').insertAdjacentHTML('beforeend', linhaData());
+    $('#datas').onclick = (ev) => { if (ev.target.closest('[data-tirar]')) ev.target.closest('.pn-opcao').remove(); };
+    // 2512 vira 25/12 enquanto digita
+    $('#datas').oninput = (ev) => {
+      const i = ev.target; if (i.dataset.d !== 'dia') return;
+      const n = i.value.replace(/\D/g, '').slice(0, 4); i.value = n.length > 2 ? n.slice(0, 2) + '/' + n.slice(2) : n;
+    };
+    f.cep.addEventListener('input', async () => {
+      const cep = f.cep.value.replace(/\D/g, ''); if (cep.length !== 8) return;
+      try {
+        const r = await (await fetch(`https://viacep.com.br/ws/${cep}/json/`)).json();
+        if (r.erro) return;
+        for (const [k, v] of [['rua', r.logradouro], ['bairro', r.bairro], ['cidade', r.localidade], ['uf', r.uf]]) if (v && !f[k].value) f[k].value = v;
+      } catch {}
+    });
+    f.onsubmit = async (ev) => {
+      ev.preventDefault();
+      const dados = {
+        nome: f.nome.value, zap: f.zap.value, email: f.email.value, cpf: f.cpf.value, origem: f.origem.value, notas: f.notas.value,
+        endereco: Object.fromEntries(['rua', 'numero', 'complemento', 'bairro', 'cidade', 'uf', 'cep'].map(k => [k, f[k].value])),
+        datas: $$('.pn-datas').map(l => Object.fromEntries($$('[data-d]', l).map(i => [i.dataset.d, i.value]))),
+      };
+      const b = f.querySelector('button.rose'); b.disabled = true;
+      try {
+        const salvo = await api('clientes/' + (novo ? 'novo' : encodeURIComponent(id)), { metodo: 'PUT', corpo: dados });
+        avisar(novo ? 'Cliente cadastrado.' : 'Cliente salvo.');
+        if (novo) location.hash = '#/cliente/' + salvo.id; else telaCliente(id);
+      } catch (err) { if (err.message !== 'sessao') { $('#eCli').hidden = false; $('#eCli').textContent = err.message; } }
+      finally { b.disabled = false; }
+    };
+    $('#bApagar')?.addEventListener('click', async function () {
+      if (!this.classList.contains('confirma')) {
+        this.classList.add('confirma'); this.textContent = 'Toque de novo pra apagar';
+        setTimeout(() => { this.classList.remove('confirma'); this.textContent = 'Apagar'; }, 4000);
+        return;
+      }
+      try { await api('clientes/' + encodeURIComponent(id), { metodo: 'DELETE' }); avisar('Cliente apagado. Os pedidos dele continuam.'); location.hash = '#/clientes'; }
+      catch (err) { falhou(err); }
+    });
   }
 
   // ---------- produtos ----------
@@ -308,11 +447,13 @@
     const [p0, p1] = (location.hash.slice(1) || '/pedidos').split('/').filter(Boolean).map(decodeURIComponent);
     try { await api('eu'); } catch (e) { if (e.message !== 'sessao') app.innerHTML = `<div class="pn-vazio">${esc(e.message)}</div>`; return; }
     $('#topo').hidden = false;
-    const aba = p0 === 'produto' || p0 === 'produtos' ? 'produtos' : 'pedidos';
+    const aba = { produto: 'produtos', produtos: 'produtos', cliente: 'clientes', clientes: 'clientes' }[p0] || 'pedidos';
     $$('[data-aba]').forEach(a => { if (a.dataset.aba === aba) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
     window.scrollTo(0, 0);
     if (p0 === 'pedido' && p1) telaPedido(p1);
     else if (p0 === 'produtos') telaProdutos();
+    else if (p0 === 'clientes') telaClientes();
+    else if (p0 === 'cliente' && p1) telaCliente(p1);
     else if (p0 === 'produto' && p1) telaProduto(p1);
     else telaPedidos();
   }

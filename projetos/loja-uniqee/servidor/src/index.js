@@ -106,8 +106,67 @@ async function criarPedido(req, env) {
   // simulação: cartão sai aprovado na hora; o Pix espera o botão "simular pagamento"
   if (pedido.pagamento === 'cartao') { pedido.etapa = ETAPA_PAGO; pedido.historico.push({ etapa: ETAPA_PAGO, quando: data }); }
   await gravarPedido(env, pedido, true);
+  await vincularCliente(env, pedido).catch(e => console.error('cliente', e));
   return json(visaoCliente(pedido), 201);
 }
+
+// ---------- clientes ----------
+const soNumeros = (s) => String(s || '').replace(/\D/g, '');
+// WhatsApp guardado sem o 55, pra o mesmo número bater com ou sem ele
+const zapChave = (s) => { const n = soNumeros(s); return n.length > 11 && n.startsWith('55') ? n.slice(2) : n; };
+const lerCliente = (l) => ({ ...JSON.parse(l.dados), id: l.id, nome: l.nome, email: l.email || '', zap: l.zap || '', criado: l.criado });
+async function acharCliente(env, email, zap, menosId = '') {
+  email = String(email || '').trim().toLowerCase(); zap = zapChave(zap);
+  for (const [campo, valor] of [['email', email], ['zap', zap]]) {
+    if (!valor) continue;
+    const l = await env.DB.prepare(`SELECT * FROM clientes WHERE ${campo} = ? AND id != ?`).bind(valor, menosId).first();
+    if (l) return lerCliente(l);
+  }
+  return null;
+}
+async function gravarCliente(env, c, novo) {
+  const { id, nome, email, zap, criado, pedidos, ...dados } = c;
+  const sql = novo
+    ? 'INSERT INTO clientes (id, nome, email, zap, dados, criado, atualizado) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)'
+    : 'UPDATE clientes SET nome = ?2, email = ?3, zap = ?4, dados = ?5, atualizado = ?7 WHERE id = ?1';
+  await env.DB.prepare(sql).bind(id, nome, email ? email.toLowerCase() : null, zapChave(zap) || null, JSON.stringify(dados), criado || agora(), agora()).run();
+}
+// quem compra na loja entra (ou se atualiza) sozinho; o que foi anotado no painel não se perde
+async function vincularCliente(env, pedido) {
+  const c = pedido.cliente;
+  const existe = await acharCliente(env, c.email, c.zap);
+  const base = existe || { id: aleatorio(8), nome: c.nome, origem: 'Loja', datas: [], notas: '', criado: pedido.data };
+  await gravarCliente(env, {
+    ...base, email: base.email || c.email, zap: base.zap || c.zap,
+    cpf: c.cpf || base.cpf || '', endereco: pedido.endereco?.rua ? pedido.endereco : base.endereco,
+  }, !existe);
+}
+const DIA = /^(0[1-9]|[12]\d|3[01])\/(0[1-9]|1[0-2])$/;
+function limparCliente(b) {
+  const nome = String(b.nome || '').trim();
+  if (!nome) throw new Error('Falta o nome do cliente.');
+  const email = String(b.email || '').trim().toLowerCase();
+  if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new Error('O e-mail não parece certo.');
+  const zap = zapChave(b.zap);
+  if (zap && zap.length < 10) throw new Error('O WhatsApp precisa do DDD.');
+  if (!email && !zap) throw new Error('Informe o WhatsApp ou o e-mail.');
+  const datas = (Array.isArray(b.datas) ? b.datas : []).map(d => ({ ocasiao: String(d.ocasiao || '').trim().slice(0, 60), quem: String(d.quem || '').trim().slice(0, 60), dia: String(d.dia || '').trim() }))
+    .filter(d => d.ocasiao || d.dia);
+  const ruim = datas.find(d => !DIA.test(d.dia));
+  if (ruim) throw new Error(`A data "${ruim.dia || ruim.ocasiao}" precisa ser dia/mês, ex.: 25/12.`);
+  const e = b.endereco || {};
+  return {
+    nome, email, zap, cpf: String(b.cpf || '').trim(), origem: String(b.origem || '').trim(), notas: String(b.notas || '').slice(0, 4000),
+    endereco: Object.fromEntries(['rua', 'numero', 'complemento', 'bairro', 'cidade', 'uf', 'cep'].map(k => [k, String(e[k] || '').trim()])),
+    datas,
+  };
+}
+// pedidos de cada cliente, juntando pelo e-mail ou pelo WhatsApp
+async function resumoPedidos(env) {
+  const { results } = await env.DB.prepare('SELECT codigo, criado, email, etapa, total, json_extract(dados, \'$.cliente.zap\') zap FROM pedidos ORDER BY criado DESC').all();
+  return results.map(r => ({ ...r, zap: zapChave(r.zap) }));
+}
+const dosPedidos = (c, pedidos) => pedidos.filter(p => (c.email && p.email === c.email) || (c.zap && p.zap === c.zap));
 
 // ---------- painel ----------
 async function rotasPainel(req, env, url, partes) {
@@ -158,6 +217,44 @@ async function rotasPainel(req, env, url, partes) {
     return json({ img: 'api/arquivos/' + chave });
   }
 
+  if (recurso === 'clientes') {
+    if (!id && metodo === 'GET') {
+      // pedido feito antes do cadastro existir também vira cliente
+      const { results: soltos } = await env.DB.prepare('SELECT dados FROM pedidos p WHERE NOT EXISTS (SELECT 1 FROM clientes c WHERE c.email = p.email)').all();
+      for (const l of soltos) await vincularCliente(env, JSON.parse(l.dados));
+      const pedidos = await resumoPedidos(env);
+      const { results } = await env.DB.prepare('SELECT * FROM clientes ORDER BY nome COLLATE NOCASE').all();
+      return json(results.map(lerCliente).map(c => {
+        const ps = dosPedidos(c, pedidos).filter(p => p.etapa > 0);
+        return { ...c, pedidos: ps.length, gasto: ps.reduce((s, p) => s + p.total, 0), ultimo: ps[0]?.criado || null };
+      }));
+    }
+    if (id && metodo === 'PUT') {
+      const b = await req.json().catch(() => null);
+      if (!b) return erro('Dados inválidos.');
+      let dados;
+      try { dados = limparCliente(b); } catch (e) { return erro(e.message); }
+      const novo = id === 'novo';
+      const antigo = novo ? null : await env.DB.prepare('SELECT * FROM clientes WHERE id = ?').bind(id).first();
+      if (!novo && !antigo) return erro('Cliente não encontrado.', 404);
+      const repetido = await acharCliente(env, dados.email, dados.zap, novo ? '' : id);
+      if (repetido) return erro(`Esse WhatsApp ou e-mail já é de ${repetido.nome}.`);
+      const c = { ...(antigo ? lerCliente(antigo) : {}), ...dados, id: novo ? aleatorio(8) : id };
+      await gravarCliente(env, c, novo);
+      return json(c);
+    }
+    const linha = id && await env.DB.prepare('SELECT * FROM clientes WHERE id = ?').bind(id).first();
+    if (!linha) return erro('Cliente não encontrado.', 404);
+    if (metodo === 'GET') {
+      const c = lerCliente(linha);
+      return json({ ...c, pedidos: dosPedidos(c, await resumoPedidos(env)) });
+    }
+    if (metodo === 'DELETE') {
+      await env.DB.prepare('DELETE FROM clientes WHERE id = ?').bind(id).run();
+      return json({ ok: true });
+    }
+  }
+
   if (recurso === 'pedidos') {
     if (!id && metodo === 'GET') {
       const { results } = await env.DB.prepare('SELECT codigo, criado, etapa, total, dados FROM pedidos ORDER BY criado DESC LIMIT 300').all();
@@ -169,7 +266,7 @@ async function rotasPainel(req, env, url, partes) {
     }
     const p = id && await lerPedido(env, id);
     if (!p) return erro('Pedido não encontrado.', 404);
-    if (metodo === 'GET') return json(p);
+    if (metodo === 'GET') return json({ ...p, clienteId: (await acharCliente(env, p.cliente.email, p.cliente.zap))?.id || null });
     if (metodo === 'PATCH') {
       const b = await req.json().catch(() => ({}));
       if (Number.isInteger(b.etapa) && b.etapa !== p.etapa) {
@@ -195,7 +292,11 @@ export default {
     if (prefixo && caminho.startsWith(prefixo + '/')) caminho = caminho.slice(prefixo.length);
     if (!caminho.startsWith('/api/')) {
       const sem = new URL(url); sem.pathname = caminho;
-      return env.ASSETS.fetch(new Request(sem, req));
+      const r = await env.ASSETS.fetch(new Request(sem, req));
+      // redirecionamento dos arquivos (ex.: /painel → /painel/) volta com o caminho da frente
+      const destino = r.headers.get('location');
+      if (prefixo && destino?.startsWith('/')) { const nr = new Response(r.body, r); nr.headers.set('location', prefixo + destino); return nr; }
+      return r;
     }
     const partes = caminho.split('/'); // ['', 'api', ...]
     try {

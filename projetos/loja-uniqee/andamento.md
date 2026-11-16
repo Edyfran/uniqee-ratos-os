@@ -2,11 +2,11 @@
 
 ## Onde está (2026-11-16)
 Loja (lado do cliente) pronta em `loja/index.html`, com pagamento e frete simulados.
-Painel de gestão, primeira parte, em `loja/painel/`: entrar com senha, pedidos (lista, detalhe com mockups, avançar etapa, anotações) e produtos (cadastrar com foto, editar, esconder, apagar).
+Painel de gestão em `loja/painel/`: entrar com senha, pedidos (lista, detalhe com mockups, avançar etapa, anotações), clientes (ficha, datas que importam com lembrete pelo WhatsApp, pedidos de cada um) e produtos (cadastrar com foto, editar, esconder, apagar).
 Servidor em `servidor/` (Cloudflare Worker + banco D1 + arquivos R2): a loja lê os produtos e grava os pedidos nele; sem servidor (prévia da Ratoeira), a loja usa `loja/js/dados.js`.
 Rodar aqui na VPS: `cd servidor && npm run banco` (primeira vez) e `npm run dev` (abre em 127.0.0.1:8787; senha do painel no `.dev.vars`, fora do git). Prints do painel em `prints/`.
 Link de teste (só com login da Ratoeira): https://apps.srv2142624.hstgr.cloud/uniqee-loja/ e o painel em `/uniqee-loja/painel/`. Roda no Docker a partir de `../../playground/uniqee-loja/` (pasta de publicados da área, fora deste repositório); senha do painel no `.env` de lá. Depois de mexer no código: `sudo docker compose -p play-uniqee-loja up -d --build` naquela pasta.
-Próximo passo: o Edyfran ver o painel e dizer o que falta; depois, clientes, orçamentos e financeiro no painel, e a compra de verdade (etapa 3).
+Próximo passo: o Edyfran ver o painel e dizer o que falta; depois, orçamentos, estoque e financeiro no painel, e a compra de verdade (etapa 3).
 
 ## Pendências
 - [ ] Modelos das coleções Sousa (brasão da pegada, T-Rex Doomsday) e Gospel: nome, foto, preço e tamanhos de cada camisa. A Gospel está vazia e mostra "modelos chegando".
@@ -18,11 +18,12 @@ Próximo passo: o Edyfran ver o painel e dizer o que falta; depois, clientes, or
 - [ ] Criar conta de vendedor no Melhor Envio e conferir se o Mercado Pago está liberado pra receber.
 - [ ] Fotos das peças lisas (ou gerar).
 - [ ] Prints das telas do Brinderoz que o Edyfran usa e pedido de exportação dos dados.
-- [ ] Painel: entrada por Face ID (passkey) no lugar da senha; clientes, orçamentos com PDF, estoque e financeiro.
+- [ ] Painel: entrada por Face ID (passkey) no lugar da senha; orçamentos com PDF, estoque e financeiro.
 - [ ] Levar a loja pra conta da Cloudflare do Edyfran (o link de teste é provisório).
 - [ ] Decidir se o custo vem do PreçoArte digitado à mão ou importado.
 
 ## Feito
+- 2026-11-16: clientes no painel. Quem compra na loja entra sozinho (pelo e-mail ou WhatsApp); cliente do WhatsApp se cadastra à mão. Ficha com contato, CPF, como chegou, endereço (CEP pelo ViaCEP), anotações e datas que importam; a lista mostra as datas dos próximos 30 dias com botão "Lembrar" (mensagem pronta no WhatsApp). Pedido leva à ficha do cliente. Link de teste atualizado.
 - 2026-11-16: servidor da loja (Worker + D1 + R2) e painel, primeira parte: entrada com senha, pedidos com etapa que o cliente vê, produtos com foto e "como se vende" (pronto, provador, WhatsApp). Testado de ponta a ponta: compra na loja, pedido no painel, etapa avançada aparece pro cliente, produto novo aparece na coleção, escondido some.
 - 2026-11-15: todo card de coleção abre a página da coleção com os modelos (antes, Sousa e Gospel iam pro WhatsApp); Luan Santana entrou na coleção Sousa. Botão "Quero personalizar o meu" (abertura, menu Personalize e produtos prontos) leva à escolha da peça (caneca, azulejo, camisa) e daí ao provador.
 - 2026-11-15: aviso de pouco contraste no provador (texto com cor parecida com o que está atrás; imagem com cor parecida com a da peça). Corrigida a foto da peça que não ficava parada ao rolar o provador no computador.
