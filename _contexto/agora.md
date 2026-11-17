@@ -35,6 +35,8 @@ https://apps.srv2142624.hstgr.cloud/uniqee-loja/ (painel em /painel/). Pendênci
 - Pôr o link de compra na landing das camisetas (`LINK_COMPRA`). (2026-11-16)
 - Publicar a landing pela raiz da área (`/srv/ratoeira/areas/trabalho/playground/`); dentro deste sistema o link dá 404. (2026-11-16)
 - Decidir o dia do Reels do amigo secreto (o calendário marcava 16/11, junto com o carrossel). (2026-11-16)
+- Trocar a conta do Claude pela do Teams: subir as skills de `migracao-conta-teams/skills/` e religar os conectores (Gmail, Drive, Canva, Kittl, Notion, Metricool e os demais). (2026-11-17)
+- Decidir como registrar os pedidos do Janailson que chegam pelo WhatsApp. A sugestão é encaminhar o print e confirmar com ele no WhatsApp. (2026-11-17)
 
 ## Quente agora
 - Carrossel Doomsday: sai seg 16/11/2026 às 16h30; conferir no perfil e responder quem comentar DOOM. Estreia 17/12; pedidos até 09/12.
